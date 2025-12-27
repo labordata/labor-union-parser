@@ -1,0 +1,30 @@
+[project]
+name = "labor-union-parser"
+version = "0.1.0"
+description = "Extract affiliation and local designation from labor union names"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+dependencies = [
+    "torch>=2.0",
+    "click>=8.0",
+]
+
+[project.scripts]
+labor-union-parser = "labor_union_parser.cli:main"
+
+[project.optional-dependencies]
+train = [
+    "numpy",
+    "tqdm",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+labor_union_parser = ["weights/*.pt"]
