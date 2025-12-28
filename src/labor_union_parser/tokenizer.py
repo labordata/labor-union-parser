@@ -8,13 +8,19 @@ MAX_TOKEN_LEN = 80
 
 def tokenize(text: str) -> list[str]:
     """
-    Tokenize text into words, individual digits, and spaces.
+    Tokenize text into words, whole numbers (with leading zeros stripped), and spaces.
 
     Examples:
         >>> tokenize("SEIU Local 1199")
-        ['seiu', ' ', 'local', ' ', '1', '1', '9', '9']
+        ['seiu', ' ', 'local', ' ', '1199']
+        >>> tokenize("USW-4-9")
+        ['usw', '-', '4', '-', '9']
+        >>> tokenize("USW-00318")
+        ['usw', '-', '318']
     """
-    return re.findall(r"[a-zA-Z]+|\d|\s+|[^\s\w]", text.lower())
+    tokens = re.findall(r"[a-zA-Z]+|\d+|\s+|[^\s\w]", text.lower())
+    # Strip leading zeros from numbers (but keep at least one digit)
+    return [t.lstrip("0") or "0" if t.isdigit() else t for t in tokens]
 
 
 def build_token_vocab(examples: list[dict]) -> dict[str, int]:
@@ -40,3 +46,10 @@ def text_to_token_ids(
     tokens = tokenize(text)
     ids = [token_to_idx.get(t, token_to_idx["<UNK>"]) for t in tokens[:max_len]]
     return ids + [token_to_idx["<PAD>"]] * (max_len - len(ids))
+
+
+def text_to_is_number(text: str, max_len: int = MAX_TOKEN_LEN) -> list[int]:
+    """Create is_number mask (1 if token is all digits, 0 otherwise)."""
+    tokens = tokenize(text)
+    mask = [1 if t.isdigit() else 0 for t in tokens[:max_len]]
+    return mask + [0] * (max_len - len(mask))

@@ -23,15 +23,16 @@ from tqdm import tqdm
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from labor_union_parser.model import (
-    BIOCRFBiLSTMExtractor,
-    create_bio_labels,
-    extract_desig_from_bio,
+    UnionNameExtractor,
+    create_desig_label,
+    extract_desig_from_pred,
 )
 from labor_union_parser.tokenizer import (
     tokenize,
     build_token_vocab,
     build_aff_vocab,
     text_to_token_ids,
+    text_to_is_number,
     MAX_TOKEN_LEN,
 )
 
@@ -40,6 +41,13 @@ SCRIPT_DIR = Path(__file__).parent
 DATA_PATH = SCRIPT_DIR / "data" / "labeled_data.csv"
 WEIGHTS_PATH = (
     SCRIPT_DIR.parent / "src" / "labor_union_parser" / "weights" / "bilstm_bio_crf.pt"
+)
+PRETRAINED_PATH = (
+    SCRIPT_DIR.parent
+    / "src"
+    / "labor_union_parser"
+    / "weights"
+    / "pretrained_embeddings.pt"
 )
 
 # Training config
@@ -79,8 +87,8 @@ def load_data(csv_path: Path) -> tuple[list[dict], list[dict], list[dict]]:
 
 def collate_batch(batch, token_to_idx, aff_to_idx, max_token_len):
     """Collate a batch of examples for training."""
-    token_ids, token_masks = [], []
-    aff_labels, bio_labels = [], []
+    token_ids, token_masks, is_number = [], [], []
+    aff_labels, desig_labels = [], []
     texts, true_desigs = [], []
 
     for ex in batch:
@@ -92,15 +100,17 @@ def collate_batch(batch, token_to_idx, aff_to_idx, max_token_len):
         seq_len = min(len(tokens), max_token_len)
         token_ids.append(text_to_token_ids(text, token_to_idx, max_token_len))
         token_masks.append([1.0] * seq_len + [0.0] * (max_token_len - seq_len))
+        is_number.append(text_to_is_number(text, max_token_len))
 
         aff_labels.append(aff_to_idx.get(ex["aff_abbr"], 0))
-        bio_labels.append(create_bio_labels(text, ex["desig_num"], max_token_len))
+        desig_labels.append(create_desig_label(text, ex["desig_num"], max_token_len))
 
     return {
         "token_ids": torch.tensor(token_ids, dtype=torch.long),
         "token_mask": torch.tensor(token_masks, dtype=torch.float),
+        "is_number": torch.tensor(is_number, dtype=torch.long),
         "aff_labels": torch.tensor(aff_labels, dtype=torch.long),
-        "bio_labels": torch.tensor(bio_labels, dtype=torch.long),
+        "desig_labels": torch.tensor(desig_labels, dtype=torch.long),
         "texts": texts,
         "true_desigs": true_desigs,
     }
@@ -118,20 +128,20 @@ def evaluate(model, examples, token_to_idx, aff_to_idx, idx_to_aff, device):
             )
             token_ids = batch["token_ids"].to(device)
             token_mask = batch["token_mask"].to(device)
+            is_number = batch["is_number"].to(device)
             aff_labels = batch["aff_labels"].to(device)
 
-            results = model(token_ids, token_mask)
+            results = model(token_ids, token_mask, is_number=is_number)
             aff_preds = results["aff_idx"].cpu().numpy()
-            bio_preds = results["bio_preds"].cpu().numpy()
-            token_masks_np = token_mask.cpu().numpy()
+            desig_preds = results["desig_pred"].cpu().numpy()
             aff_labels_np = aff_labels.cpu().numpy()
 
             for j in range(len(batch["texts"])):
                 if aff_preds[j] == aff_labels_np[j]:
                     aff_correct += 1
 
-                pred_desig = extract_desig_from_bio(
-                    batch["texts"][j], bio_preds[j], token_masks_np[j]
+                pred_desig = extract_desig_from_pred(
+                    batch["texts"][j], int(desig_preds[j])
                 )
 
                 true_desig = batch["true_desigs"][j]
@@ -171,13 +181,31 @@ def main():
     print(f"{len(token_to_idx)} tokens, {len(aff_to_idx)} affiliations")
 
     # Create model
-    model = BIOCRFBiLSTMExtractor(
+    model = UnionNameExtractor(
         token_vocab_size=len(token_to_idx),
         num_affs=len(aff_to_idx),
         token_embed_dim=TOKEN_EMBED_DIM,
         hidden_dim=HIDDEN_DIM,
         aff_embed_dim=AFF_EMBED_DIM,
     )
+
+    # Load pretrained embeddings if available
+    if PRETRAINED_PATH.exists():
+        print(f"\nLoading pretrained embeddings from {PRETRAINED_PATH}")
+        pretrained = torch.load(PRETRAINED_PATH, map_location="cpu", weights_only=False)
+        pretrained_vocab = pretrained["vocab"]
+        pretrained_embed = pretrained["embeddings"]
+
+        # Copy pretrained embeddings for tokens that exist in both vocabs
+        with torch.no_grad():
+            matched = 0
+            for token, idx in token_to_idx.items():
+                if token in pretrained_vocab:
+                    pretrained_idx = pretrained_vocab[token]
+                    model.token_embed.weight[idx] = pretrained_embed[pretrained_idx]
+                    matched += 1
+        print(f"  Initialized {matched}/{len(token_to_idx)} tokens from pretrained")
+
     model.to(DEVICE)
     print(f"\n{sum(p.numel() for p in model.parameters()):,} parameters")
 
@@ -204,11 +232,12 @@ def main():
             )
             token_ids = batch["token_ids"].to(DEVICE)
             token_mask = batch["token_mask"].to(DEVICE)
+            is_number = batch["is_number"].to(DEVICE)
             aff_labels = batch["aff_labels"].to(DEVICE)
-            bio_labels = batch["bio_labels"].to(DEVICE)
+            desig_labels = batch["desig_labels"].to(DEVICE)
 
             optimizer.zero_grad()
-            results = model(token_ids, token_mask, aff_labels, bio_labels)
+            results = model(token_ids, token_mask, is_number, aff_labels, desig_labels)
             loss = results["total_loss"]
 
             loss.backward()

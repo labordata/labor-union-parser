@@ -5,8 +5,8 @@ from typing import Optional
 
 import torch
 
-from .model import BIOCRFBiLSTMExtractor, extract_desig_from_bio
-from .tokenizer import tokenize, text_to_token_ids, MAX_TOKEN_LEN
+from .model import UnionNameExtractor, extract_desig_from_pred
+from .tokenizer import tokenize, text_to_token_ids, text_to_is_number, MAX_TOKEN_LEN
 
 from tqdm import tqdm
 
@@ -44,7 +44,7 @@ class Extractor:
         self.aff_to_idx = checkpoint["aff_to_idx"]
         self.idx_to_aff = checkpoint["idx_to_aff"]
 
-        self.model = BIOCRFBiLSTMExtractor(
+        self.model = UnionNameExtractor(
             token_vocab_size=len(self.token_to_idx),
             num_affs=len(self.aff_to_idx),
         )
@@ -77,18 +77,22 @@ class Extractor:
             dtype=torch.float,
             device=self.device,
         )
+        is_number = torch.tensor(
+            [text_to_is_number(text, MAX_TOKEN_LEN)],
+            dtype=torch.long,
+            device=self.device,
+        )
 
         # Run inference
         with torch.no_grad():
-            results = self.model(token_ids, token_mask)
+            results = self.model(token_ids, token_mask, is_number=is_number)
 
         # Extract predictions
         aff_idx = int(results["aff_idx"][0].item())
         affiliation = self.idx_to_aff.get(aff_idx, "")
 
-        bio_preds = results["bio_preds"][0].cpu().numpy()
-        mask = token_mask[0].cpu().numpy()
-        designation = extract_desig_from_bio(text, bio_preds, mask)
+        desig_pred = int(results["desig_pred"][0].item())
+        designation = extract_desig_from_pred(text, desig_pred)
 
         return {
             "affiliation": affiliation,
@@ -111,6 +115,7 @@ class Extractor:
         # Prepare batch
         token_ids_list = []
         token_masks_list = []
+        is_number_list = []
 
         for text in texts:
             tokens = tokenize(text)
@@ -119,25 +124,26 @@ class Extractor:
                 text_to_token_ids(text, self.token_to_idx, MAX_TOKEN_LEN)
             )
             token_masks_list.append([1.0] * seq_len + [0.0] * (MAX_TOKEN_LEN - seq_len))
+            is_number_list.append(text_to_is_number(text, MAX_TOKEN_LEN))
 
         token_ids = torch.tensor(token_ids_list, dtype=torch.long, device=self.device)
         token_mask = torch.tensor(
             token_masks_list, dtype=torch.float, device=self.device
         )
+        is_number = torch.tensor(is_number_list, dtype=torch.long, device=self.device)
 
         # Run inference
         with torch.no_grad():
-            results = self.model(token_ids, token_mask)
+            results = self.model(token_ids, token_mask, is_number=is_number)
 
         # Extract predictions
         aff_indices = results["aff_idx"].cpu().numpy()
-        bio_preds = results["bio_preds"].cpu().numpy()
-        masks = token_mask.cpu().numpy()
+        desig_preds = results["desig_pred"].cpu().numpy()
 
         outputs = []
         for i, text in enumerate(texts):
             affiliation = self.idx_to_aff.get(int(aff_indices[i]), "")
-            designation = extract_desig_from_bio(text, bio_preds[i], masks[i])
+            designation = extract_desig_from_pred(text, int(desig_preds[i]))
             outputs.append(
                 {
                     "affiliation": affiliation,

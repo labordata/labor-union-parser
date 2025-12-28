@@ -1,111 +1,19 @@
-"""BiLSTM-CRF model for union name extraction."""
+"""BiLSTM model for union name extraction with pointer-based designation selection."""
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from .tokenizer import tokenize, MAX_TOKEN_LEN
 
-# BIO tags
-O_TAG = 0
-B_TAG = 1
-I_TAG = 2
-NUM_TAGS = 3
 
-
-class CRFLayer(nn.Module):
-    """Conditional Random Field layer for sequence labeling."""
-
-    def __init__(self, num_tags: int):
-        super().__init__()
-        self.num_tags = num_tags
-        self.transitions = nn.Parameter(torch.randn(num_tags, num_tags))
-        self.start_transitions = nn.Parameter(torch.randn(num_tags))
-        self.end_transitions = nn.Parameter(torch.randn(num_tags))
-        self._init_transitions()
-
-    def _init_transitions(self):
-        with torch.no_grad():
-            self.transitions[O_TAG, I_TAG] = -10.0
-            self.transitions[B_TAG, B_TAG] = -2.0
-            self.start_transitions[I_TAG] = -10.0
-
-    def forward(self, emissions, tags, mask):
-        log_likelihood = self._compute_log_likelihood(emissions, tags, mask)
-        return -log_likelihood.mean()
-
-    def _compute_log_likelihood(self, emissions, tags, mask):
-        gold_score = self._score_sequence(emissions, tags, mask)
-        forward_score = self._compute_partition(emissions, mask)
-        return gold_score - forward_score
-
-    def _score_sequence(self, emissions, tags, mask):
-        batch_size, seq_len, _ = emissions.shape
-        score = self.start_transitions[tags[:, 0]]
-        score = score + emissions[:, 0].gather(1, tags[:, 0:1]).squeeze(1)
-
-        for i in range(1, seq_len):
-            valid = mask[:, i]
-            trans_score = self.transitions[tags[:, i - 1], tags[:, i]]
-            emit_score = emissions[:, i].gather(1, tags[:, i : i + 1]).squeeze(1)
-            score = score + (trans_score + emit_score) * valid
-
-        seq_lens = mask.sum(dim=1).long()
-        last_tags = tags.gather(1, (seq_lens - 1).unsqueeze(1)).squeeze(1)
-        score = score + self.end_transitions[last_tags]
-        return score
-
-    def _compute_partition(self, emissions, mask):
-        batch_size, seq_len, num_tags = emissions.shape
-        score = self.start_transitions + emissions[:, 0]
-
-        for i in range(1, seq_len):
-            valid = mask[:, i].unsqueeze(1)
-            broadcast_score = score.unsqueeze(2)
-            broadcast_emissions = emissions[:, i].unsqueeze(1)
-            next_score = (
-                broadcast_score + self.transitions.unsqueeze(0) + broadcast_emissions
-            )
-            next_score = torch.logsumexp(next_score, dim=1)
-            score = torch.where(valid.bool(), next_score, score)
-
-        score = score + self.end_transitions
-        return torch.logsumexp(score, dim=1)
-
-    def decode(self, emissions, mask):
-        """Viterbi decoding to find best tag sequence."""
-        batch_size, seq_len, num_tags = emissions.shape
-        score = self.start_transitions + emissions[:, 0]
-        backpointers = []
-
-        for i in range(1, seq_len):
-            broadcast_score = score.unsqueeze(2)
-            broadcast_emissions = emissions[:, i].unsqueeze(1)
-            next_score = (
-                broadcast_score + self.transitions.unsqueeze(0) + broadcast_emissions
-            )
-            best_prev_score, best_prev_tag = next_score.max(dim=1)
-            backpointers.append(best_prev_tag)
-            valid = mask[:, i].unsqueeze(1).bool()
-            score = torch.where(valid, best_prev_score, score)
-
-        score = score + self.end_transitions
-        _, best_last_tag = score.max(dim=1)
-
-        best_tags = [best_last_tag]
-        for bp in reversed(backpointers):
-            best_last_tag = bp.gather(1, best_last_tag.unsqueeze(1)).squeeze(1)
-            best_tags.append(best_last_tag)
-
-        best_tags.reverse()
-        return torch.stack(best_tags, dim=1)
-
-
-class BIOCRFBiLSTMExtractor(nn.Module):
+class UnionNameExtractor(nn.Module):
     """
-    BiLSTM extractor with:
-    - Token conv + max pool for affiliation classification
-    - Token BiLSTM + CRF for BIO tagging (designation extraction)
-    - Token embeddings shared between conv and BiLSTM
+    Self-attention + BiLSTM extractor with:
+    - Self-attention for token context (shared)
+    - Set attention pooling for affiliation classification
+    - BiLSTM + pointer selection for designation (picks which number token)
+    - is_number feature to help identify number tokens (even rare/unseen ones)
     """
 
     def __init__(
@@ -115,6 +23,8 @@ class BIOCRFBiLSTMExtractor(nn.Module):
         token_embed_dim: int = 64,
         hidden_dim: int = 512,
         aff_embed_dim: int = 64,
+        num_attn_heads: int = 4,
+        num_feature_dim: int = 16,
     ):
         super().__init__()
 
@@ -123,47 +33,86 @@ class BIOCRFBiLSTMExtractor(nn.Module):
         )
         self.aff_embed = nn.Embedding(num_affs, aff_embed_dim)
 
-        # Token conv for affiliation classification
-        self.token_conv = nn.Sequential(
-            nn.Conv1d(token_embed_dim, hidden_dim, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.Conv1d(hidden_dim, hidden_dim, kernel_size=3, padding=1),
-            nn.ReLU(),
+        # Learned embedding for "is_number" feature (2 classes: not number, is number)
+        self.num_feature_embed = nn.Embedding(2, num_feature_dim)
+
+        # Combined embedding dimension
+        combined_dim = token_embed_dim + num_feature_dim
+
+        # Self-attention: tokens attend to each other
+        self.self_attn = nn.MultiheadAttention(
+            combined_dim, num_heads=num_attn_heads, batch_first=True
         )
+        self.attn_norm = nn.LayerNorm(combined_dim)
 
-        self.aff_classifier = nn.Linear(hidden_dim, num_affs)
+        # Set attention for affiliation classification (order-invariant pooling)
+        self.aff_attn = nn.Linear(combined_dim, 1)
+        self.aff_classifier = nn.Linear(combined_dim, num_affs)
 
-        # BiLSTM for BIO tagging
+        # BiLSTM for designation selection
         self.lstm = nn.LSTM(
-            token_embed_dim,
+            combined_dim,
             hidden_dim,
             num_layers=1,
             bidirectional=True,
             batch_first=True,
         )
 
-        # Emission layer (feeds into CRF)
-        self.emission = nn.Linear(hidden_dim * 2 + aff_embed_dim, NUM_TAGS)
+        # Designation pointer: scores each position
+        self.desig_scorer = nn.Linear(hidden_dim * 2 + aff_embed_dim, 1)
 
-        # CRF layer
-        self.crf = CRFLayer(NUM_TAGS)
+        # Learned null score for "no designation" (index 0)
+        self.null_score = nn.Parameter(torch.zeros(1))
 
         self.num_affs = num_affs
 
-    def forward(self, token_ids, token_mask, aff_labels=None, bio_labels=None):
+    def forward(
+        self, token_ids, token_mask, is_number=None, aff_labels=None, desig_labels=None
+    ):
+        """
+        Forward pass.
+
+        Args:
+            token_ids: [batch, seq_len] token indices
+            token_mask: [batch, seq_len] 1 for valid tokens, 0 for padding
+            is_number: [batch, seq_len] 1 if token is a number, 0 otherwise
+            aff_labels: [batch] affiliation indices (for training)
+            desig_labels: [batch] designation position (0 = no desig, 1+ = token index + 1)
+
+        Returns:
+            Dictionary with predictions and optionally losses
+        """
         batch_size, seq_len = token_ids.shape
 
-        # Token embeddings (shared between conv and BiLSTM)
+        # Token embeddings
         token_emb = self.token_embed(token_ids)
 
-        # Affiliation classification via token conv + max pool
-        conv_in = token_emb.transpose(1, 2)
-        conv_out = self.token_conv(conv_in)
-        aff_features = conv_out.max(dim=2)[0]
-        aff_logits = self.aff_classifier(aff_features)
+        # Add is_number feature embedding
+        if is_number is None:
+            is_number = torch.zeros(
+                batch_size, seq_len, dtype=torch.long, device=token_ids.device
+            )
+        num_feature_emb = self.num_feature_embed(is_number)
+        token_emb = torch.cat([token_emb, num_feature_emb], dim=-1)
+
+        # Self-attention: tokens attend to each other to build context
+        key_padding_mask = token_mask == 0
+        attn_out, _ = self.self_attn(
+            token_emb, token_emb, token_emb, key_padding_mask=key_padding_mask
+        )
+        token_emb_ctx = self.attn_norm(token_emb + attn_out)  # residual connection
+
+        # Affiliation classification via set attention pooling
+        attn_scores = self.aff_attn(token_emb_ctx).squeeze(-1)  # [batch, seq]
+        attn_scores = attn_scores.masked_fill(token_mask == 0, float("-inf"))
+        attn_weights = torch.softmax(attn_scores, dim=1).unsqueeze(
+            -1
+        )  # [batch, seq, 1]
+        pooled = (attn_weights * token_emb_ctx).sum(dim=1)  # [batch, embed_dim]
+        aff_logits = self.aff_classifier(pooled)
         aff_idx = aff_logits.argmax(dim=1)
 
-        # Get affiliation embedding for BIO gating
+        # Get affiliation embedding for designation scoring
         if aff_labels is not None:
             aff_emb = self.aff_embed(aff_labels)
         else:
@@ -171,92 +120,88 @@ class BIOCRFBiLSTMExtractor(nn.Module):
 
         aff_emb_broadcast = aff_emb.unsqueeze(1).expand(-1, seq_len, -1)
 
-        # BiLSTM for BIO
-        lstm_out, _ = self.lstm(token_emb)
+        # BiLSTM for designation selection
+        lstm_out, _ = self.lstm(token_emb_ctx)
         lstm_with_aff = torch.cat([lstm_out, aff_emb_broadcast], dim=-1)
 
-        # Emission scores for CRF
-        emissions = self.emission(lstm_with_aff)
+        # Score each position for designation
+        position_scores = self.desig_scorer(lstm_with_aff).squeeze(-1)  # [batch, seq]
 
-        # Decode best sequence
-        bio_preds = self.crf.decode(emissions, token_mask)
+        # Mask: only number tokens can be designation, also mask padding
+        valid_desig_mask = (is_number == 1) & (token_mask == 1)
+        position_scores = position_scores.masked_fill(~valid_desig_mask, float("-inf"))
+
+        # Prepend null score (index 0 = no designation)
+        null_scores = self.null_score.expand(batch_size, 1)  # [batch, 1]
+        desig_scores = torch.cat(
+            [null_scores, position_scores], dim=1
+        )  # [batch, 1 + seq]
+
+        # Prediction: argmax over [null, pos0, pos1, ...]
+        desig_pred = desig_scores.argmax(
+            dim=1
+        )  # [batch] - 0 means no desig, 1+ means position
 
         results = {
             "aff_logits": aff_logits,
             "aff_idx": aff_idx,
-            "emissions": emissions,
-            "bio_preds": bio_preds,
+            "desig_scores": desig_scores,
+            "desig_pred": desig_pred,
         }
 
-        if bio_labels is not None and aff_labels is not None:
-            crf_loss = self.crf(emissions, bio_labels, token_mask)
-            aff_loss = nn.functional.cross_entropy(aff_logits, aff_labels)
-            results["crf_loss"] = crf_loss
+        if desig_labels is not None and aff_labels is not None:
+            desig_loss = F.cross_entropy(desig_scores, desig_labels)
+            aff_loss = F.cross_entropy(aff_logits, aff_labels)
+            results["desig_loss"] = desig_loss
             results["aff_loss"] = aff_loss
-            results["total_loss"] = aff_loss + crf_loss
+            results["total_loss"] = aff_loss + desig_loss
 
         return results
 
 
-def create_bio_labels(
-    text: str, desig_num: str, max_len: int = MAX_TOKEN_LEN
-) -> list[int]:
-    """Create BIO labels at token level for training."""
-    tokens = tokenize(text)
-    labels = [O_TAG] * min(len(tokens), max_len)
+def create_desig_label(text: str, desig_num: str, max_len: int = MAX_TOKEN_LEN) -> int:
+    """Create designation label (position index) for training.
 
+    Returns:
+        0 if no designation, otherwise token_position + 1
+    """
     if not desig_num or desig_num == "N/A":
-        return (labels + [O_TAG] * (max_len - len(labels)))[:max_len]
+        return 0
 
-    desig_str = str(desig_num).lstrip("0") or "0"
-    desig_digits = list(desig_str)
-
-    # Find the last occurrence of digit sequence
-    best_start = None
-    for i in range(len(tokens)):
-        if i + len(desig_digits) <= len(tokens):
-            match = True
-            for j, digit in enumerate(desig_digits):
-                if tokens[i + j] != digit:
-                    match = False
-                    break
-            if match:
-                best_start = i
-
-    if best_start is not None and best_start < max_len:
-        labels[best_start] = B_TAG
-        for i in range(best_start + 1, min(best_start + len(desig_digits), max_len)):
-            labels[i] = I_TAG
-
-    return (labels + [O_TAG] * (max_len - len(labels)))[:max_len]
-
-
-def extract_desig_from_bio(text: str, bio_preds, mask) -> str:
-    """Extract designation number from BIO predictions at token level."""
     tokens = tokenize(text)
-    digits = []
-    in_span = False
+    desig_str = str(desig_num).lstrip("0") or "0"
 
-    for i, (pred, m) in enumerate(zip(bio_preds, mask)):
-        if i >= len(tokens):
-            break
-        if m == 0:
-            break
+    # Find the last occurrence of the designation number as a token
+    best_idx = None
+    for i, token in enumerate(tokens[:max_len]):
+        if token == desig_str:
+            best_idx = i
 
-        pred = int(pred)
-        token = tokens[i]
+    if best_idx is not None:
+        return best_idx + 1  # +1 because 0 is reserved for "no designation"
 
-        if pred == B_TAG:
-            digits = [token] if token.isdigit() else []
-            in_span = True
-        elif pred == I_TAG and in_span:
-            if token.isdigit():
-                digits.append(token)
-        else:
-            if in_span:
-                break
+    return 0  # Not found
 
-    result = "".join(digits)
-    if result:
-        result = result.lstrip("0") or "0"
-    return result
+
+def extract_desig_from_pred(text: str, desig_pred: int) -> str:
+    """Extract designation number from pointer prediction.
+
+    Args:
+        text: Original text
+        desig_pred: Predicted index (0 = no desig, 1+ = token position + 1)
+
+    Returns:
+        Designation string, or empty string if none
+    """
+    if desig_pred == 0:
+        return ""
+
+    tokens = tokenize(text)
+    token_idx = desig_pred - 1  # Convert back to 0-indexed
+
+    if token_idx < len(tokens):
+        token = tokens[token_idx]
+        if token.isdigit():
+            return token
+
+    return ""
