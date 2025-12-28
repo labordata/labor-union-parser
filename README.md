@@ -54,6 +54,21 @@ results = extractor.extract_batch([
 #  {'affiliation': 'UAW', 'designation': '600'}]
 ```
 
+For large datasets, use `extract_all` which yields results as a generator:
+
+```python
+from labor_union_parser import Extractor
+
+extractor = Extractor()
+
+# Process large list with progress bar
+for result in extractor.extract_all(union_names, show_progress=True):
+    print(result)
+
+# Adjust batch size for memory/speed tradeoff
+results = list(extractor.extract_all(union_names, batch_size=512))
+```
+
 ## Training
 
 Training data is in `training/data/labeled_data.csv` with columns:

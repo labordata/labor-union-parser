@@ -19,7 +19,7 @@ def tokenize(text: str) -> list[str]:
 
 def build_token_vocab(examples: list[dict]) -> dict[str, int]:
     """Build token vocabulary from training examples."""
-    tokens = {tokenize(ex["text"]) for ex in examples}
+    tokens = {t for ex in examples for t in tokenize(ex["text"])}
     token_list = ["<PAD>", "<UNK>"] + sorted(tokens)
     return {t: i for i, t in enumerate(token_list)}
 

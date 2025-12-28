@@ -192,11 +192,12 @@ def main():
         train_shuffled = [train_examples[i] for i in perm]
 
         total_loss = num_batches = 0
-        pbar = tqdm(range(0, len(train_shuffled), BATCH_SIZE), desc=f"Epoch {epoch+1}")
+        pbar = tqdm(total=len(train_shuffled), desc=f"Epoch {epoch+1}")
 
-        for i in pbar:
+        for i in range(0, len(train_shuffled), BATCH_SIZE):
+            batch_data = train_shuffled[i : i + BATCH_SIZE]
             batch = collate_batch(
-                train_shuffled[i : i + BATCH_SIZE],
+                batch_data,
                 token_to_idx,
                 aff_to_idx,
                 MAX_TOKEN_LEN,
@@ -216,7 +217,10 @@ def main():
 
             total_loss += loss.item()
             num_batches += 1
+            pbar.update(len(batch_data))
             pbar.set_postfix({"loss": f"{loss.item():.3f}"})
+
+        pbar.close()
 
         val_metrics = evaluate(
             model, val_examples, token_to_idx, aff_to_idx, idx_to_aff, DEVICE

@@ -8,6 +8,8 @@ import torch
 from .model import BIOCRFBiLSTMExtractor, extract_desig_from_bio
 from .tokenizer import tokenize, text_to_token_ids, MAX_TOKEN_LEN
 
+from tqdm import tqdm
+
 
 class Extractor:
     """
@@ -145,9 +147,40 @@ class Extractor:
 
         return outputs
 
+    def extract_all(
+        self, texts: list[str], batch_size: int = 256, show_progress: bool = False
+    ):
+        """
+        Extract affiliation and designation from a large list of union names.
 
-# Module-level instance for convenience function
-_default_extractor: Optional[Extractor] = None
+        Generator that yields results as they are processed, enabling
+        memory-efficient processing of large datasets.
+
+        Args:
+            texts: List of union name strings
+            batch_size: Number of texts to process at once (default: 256)
+            show_progress: If True, show tqdm progress bar
+
+        Yields:
+            Dictionaries with 'affiliation' and 'designation' keys.
+
+        Example:
+            >>> extractor = Extractor()
+            >>> for result in extractor.extract_all(texts, show_progress=True):
+            ...     print(result)
+        """
+        total = len(texts)
+        pbar = tqdm(total=total, desc="Extracting") if show_progress else None
+
+        for i in range(0, total, batch_size):
+            batch = texts[i : i + batch_size]
+            results = self.extract_batch(batch)
+            if pbar:
+                pbar.update(len(batch))
+            yield from results
+
+        if pbar:
+            pbar.close()
 
 
 def extract(text: str) -> dict:
@@ -168,7 +201,4 @@ def extract(text: str) -> dict:
         >>> extract("Teamsters Local 705")
         {'affiliation': 'IBT', 'designation': '705'}
     """
-    global _default_extractor
-    if _default_extractor is None:
-        _default_extractor = Extractor()
-    return _default_extractor.extract(text)
+    return Extractor().extract(text)
