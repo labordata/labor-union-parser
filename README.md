@@ -87,7 +87,7 @@ python training/train.py
 The training script will:
 1. Load data from `training/data/labeled_data.csv`
 2. Train for 10 epochs with early stopping based on validation performance
-3. Save the best model to `src/labor_union_parser/weights/bilstm_bio_crf.pt`
+3. Save the best model to `src/labor_union_parser/weights/char_cnn.pt`
 
 ### Training Data Statistics
 
@@ -99,70 +99,89 @@ The training script will:
 
 ## Model Architecture
 
-The model uses a multi-task BiLSTM-CRF architecture with shared token embeddings:
+The model uses a CharCNN architecture with pointer-based designation selection:
 
 ```
 Input: "SEIU Local 1199"
          │
          ▼
-┌─────────────────────┐
-│  Token Embedding    │  (64-dim, shared)
-│  [seiu, local, 1, 1, 9, 9]
-└─────────────────────┘
+┌─────────────────────────────┐
+│  Tokenizer                  │
+│  ["SEIU", " ", "Local", " ", "1199"]
+│  token_type: [word, space, word, space, number]
+└─────────────────────────────┘
          │
     ┌────┴────┐
     ▼         ▼
-┌───────┐  ┌──────────┐
-│ Conv  │  │ BiLSTM   │
-│ + Pool│  │ (512-dim)│
-└───┬───┘  └────┬─────┘
-    │           │
-    ▼           ▼
-┌───────┐  ┌──────────────────┐
-│ Aff   │  │ Concat with      │
-│ Class │  │ Aff Embedding    │
-└───┬───┘  └────────┬─────────┘
-    │               │
-    │               ▼
-    │      ┌──────────────┐
-    │      │ CRF Layer    │
-    │      │ (BIO tagging)│
-    │      └──────┬───────┘
-    │             │
+┌──────────┐  ┌──────────┐
+│ CharCNN  │  │ Special  │
+│ (words)  │  │ Embed    │
+└────┬─────┘  └────┬─────┘
+     └─────┬───────┘
+           ▼
+┌─────────────────────────────┐
+│  Token Embeddings (64-dim)  │
+│  + is_number feature (16-dim)│
+└─────────────────────────────┘
+           │
+           ▼
+┌─────────────────────────────┐
+│  Self-Attention (4 heads)   │
+└─────────────────────────────┘
+           │
+    ┌──────┴──────┐
     ▼             ▼
-Affiliation   Designation
-  "SEIU"        "1199"
+┌─────────┐  ┌──────────────┐
+│ Set     │  │ BiLSTM       │
+│ Attn    │  │ (512-dim)    │
+│ Pooling │  └──────┬───────┘
+└────┬────┘         │
+     │              ▼
+     │     ┌───────────────────┐
+     │     │ + Aff Embedding   │
+     │     │ Pointer Selection │
+     │     └─────────┬─────────┘
+     ▼               ▼
+Affiliation     Designation
+  "SEIU"          "1199"
 ```
 
 ### Components
 
-**Token Embedding (shared)**
-- Vocabulary: ~2,500 tokens (words, individual digits, punctuation)
-- Embedding dimension: 64
+**Character CNN (for word tokens)**
+- Character embedding: 16-dim
+- Multi-scale 1D convolutions (kernel sizes 2, 3, 4, 5)
+- Max pooling → 64-dim token embedding
+- Typo-robust: handles misspellings gracefully
 
-**Affiliation Classification Branch**
-- 2-layer 1D convolution (kernel size 3)
-- Global max pooling
+**Special Token Embedding (for non-words)**
+- Lookup table for numbers, punctuation, spaces
+- 64-dim embeddings
+
+**Token Features**
+- `is_number`: Binary feature indicating numeric tokens
+- Combined with token embedding via learned 16-dim feature embedding
+
+**Self-Attention**
+- Multi-head attention (4 heads) over token sequence
+- Allows tokens to attend to each other for context
+
+**Affiliation Classification**
+- Set attention pooling: learned weighted sum of token representations
 - Linear classifier → affiliation label
 
-**Designation Extraction Branch**
-- Bidirectional LSTM (512 hidden units)
-- Concatenated with affiliation embedding (64-dim) for gating
-- Linear emission layer → BIO tag logits
-- CRF layer for sequence decoding
-
-**BIO Tagging Scheme**
-- `O`: Outside designation span
-- `B`: Beginning of designation (first digit)
-- `I`: Inside designation (subsequent digits)
-
-The CRF layer enforces valid tag sequences (e.g., I cannot follow O).
+**Designation Selection (Pointer Network)**
+- BiLSTM processes contextualized token embeddings
+- Concatenates with predicted affiliation embedding
+- Scores each numeric token position
+- Includes learnable "null" score for no designation
+- Selects highest-scoring number token
 
 ### Model Statistics
 
-- Parameters: ~14M
-- Inference: CPU (no GPU required)
-- Model file: 14MB
+- Parameters: ~2.5M
+- Inference: CPU or MPS (Apple Silicon)
+- Model file: ~10MB
 
 ### Performance
 

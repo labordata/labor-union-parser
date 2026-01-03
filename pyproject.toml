@@ -28,4 +28,4 @@ build-backend = "setuptools.build_meta"
 where = ["src"]
 
 [tool.setuptools.package-data]
-labor_union_parser = ["weights/*.pt"]
+labor_union_parser = ["weights/*.pt", "weights/*.json"]

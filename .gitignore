@@ -1,0 +1,12 @@
+*.egg-info
+*.lock
+*~
+__pycache__
+\#*
+attic/
+all_union_names.csv
+claude.md
+nlrb_union_names.csv
+opdr.db
+FMCS union name crosswalk - Crosswalk.csv
+discrepancies.csv
