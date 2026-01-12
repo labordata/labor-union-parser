@@ -1,10 +1,5 @@
 """Tests for tokenizer period handling."""
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-
 from labor_union_parser.char_cnn import tokenize_to_chars
 
 

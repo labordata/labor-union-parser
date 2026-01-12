@@ -10,7 +10,7 @@ Given an input like `"SEIU Local 1199"`, the parser returns:
 ## Installation
 
 ```bash
-pip install -e .
+pip install labor-union-parser
 ```
 
 ## Usage
@@ -27,7 +27,7 @@ print(result)
 #  'affiliation_unrecognized': False, 'designation': '1199', 'aff_score': 0.997}
 ```
 
-For batch processing:
+For batch processing, use `extract_batch` which processes texts in parallel for better throughput:
 
 ```python
 from labor_union_parser import Extractor
@@ -38,22 +38,32 @@ results = extractor.extract_batch([
     "Teamsters Local 705",
     "UAW Local 600",
 ])
+# Returns list of result dicts, one per input text
 ```
 
-For large datasets, use `extract_all` which yields results as a generator:
+The `batch_size` parameter controls how many texts are processed at once (default: 256). Larger batches are faster but use more memory:
 
 ```python
+# Process 512 texts at a time
+results = extractor.extract_batch(texts, batch_size=512)
+```
+
+For very large datasets, combine `extract_batch` with `itertools.batched` to process in chunks and avoid loading everything into memory:
+
+```python
+import itertools
 from labor_union_parser import Extractor
 
 extractor = Extractor()
 
-# Process large list with progress bar
-for result in extractor.extract_all(union_names, show_progress=True):
-    print(result)
-
-# Adjust batch size for memory/speed tradeoff
-results = list(extractor.extract_all(union_names, batch_size=512))
+# Stream through a large file, processing 1000 at a time
+with open("union_names.txt") as f:
+    for chunk in itertools.batched(f, 1000):
+        texts = [line.strip() for line in chunk]
+        for result in extractor.extract_batch(texts):
+            print(result["affiliation"], result["designation"])
 ```
+
 
 ### Filing Number Lookup
 
@@ -100,11 +110,10 @@ To retrain the model:
 
 ```bash
 pip install -e ".[train]"  # Install training dependencies
-cd training
-python train.py              # Train all stages
-python train.py --stage 1    # Train only union detector
-python train.py --stage 2    # Train only affiliation classifier
-python train.py --stage 3    # Train only designation extractor
+python -m training.train              # Train all stages
+python -m training.train --stage 1    # Train only union detector
+python -m training.train --stage 2    # Train only affiliation classifier
+python -m training.train --stage 3    # Train only designation extractor
 ```
 
 ## Model Architecture
@@ -113,102 +122,103 @@ The model uses a three-stage contrastive extraction pipeline:
 
 ```
 Input: "SEIU Local 1199"
-         │
-         ▼
-┌─────────────────────────────┐
-│  Tokenizer                  │
-│  ["SEIU", " ", "Local", " ", "1199"]
-│  token_type: [word, space, word, space, number]
-└─────────────────────────────┘
-         │
-         ▼
-┌─────────────────────────────┐
-│  Stage 1: Union Detection   │
-│  (Contrastive)              │
-│                             │
-│  CharCNN → Projection →     │
-│  Similarity to Union        │
-│  Centroid                   │
-│                             │
-│  score=0.999 → is_union=True│
-└─────────────────────────────┘
-         │
-         ▼ (if is_union)
-┌─────────────────────────────┐
-│  Stage 2: Affiliation       │
-│  (Nearest Centroid)         │
-│                             │
-│  CharCNN → Projection →     │
-│  Distance to Affiliation    │
-│  Centroids                  │
-│                             │
-│  Nearest: SEIU (dist=0.009) │
-└─────────────────────────────┘
-         │
-         ▼
-┌─────────────────────────────┐
-│  Stage 3: Designation       │
-│  (Pointer Network)          │
-│                             │
-│  CharCNN + Transformer +    │
-│  BiLSTM + Affiliation       │
-│  Embedding → Pointer Score  │
-│                             │
-│  Points to: "1199"          │
-└─────────────────────────────┘
-         │
-         ▼
-Output: {is_union: True, affiliation: "SEIU", designation: "1199"}
+              │
+              ▼
+┌───────────────────────────────────────────────────┐
+│  Tokenizer                                        │
+│  tokens: ["SEIU", " ", "Local", " ", "1199"]      │
+│  token_type: [word, space, word, space, number]   │
+└───────────────────────────────────────────────────┘
+              │
+              ▼
+┌───────────────────────────────────────────────────┐
+│  CharCNN (shared across stages)                   │
+│                                                   │
+│  For each token: chars → char embeddings →        │
+│  parallel CNNs (1,2,3-grams) → max pool →         │
+│  highway layer → 64-dim token embedding           │
+│                                                   │
+│  Typo-robust: "SEIU" ≈ "SIEU" ≈ "S.E.I.U."        │
+└───────────────────────────────────────────────────┘
+              │
+              ▼
+┌───────────────────────────────────────────────────┐
+│  Stage 1: Union Detection (Contrastive)           │
+│                                                   │
+│  Token embeddings + is_number embedding →         │
+│  Cross-attention (learned query) → Projection →   │
+│  Similarity to union centroid                     │
+│                                                   │
+│  score = 0.999 → is_union = True                  │
+└───────────────────────────────────────────────────┘
+              │
+              ▼ (if is_union)
+┌───────────────────────────────────────────────────┐
+│  Stage 2: Affiliation (Nearest Centroid)          │
+│                                                   │
+│  Token embeddings + is_number embedding →         │
+│  Cross-attention (learned query) → Projection →   │
+│  Similarity to affiliation centroids              │
+│                                                   │
+│  Nearest: SEIU (score = 0.997)                    │
+└───────────────────────────────────────────────────┘
+              │
+              ▼
+┌───────────────────────────────────────────────────┐
+│  Stage 3: Designation (Pointer Network)           │
+│                                                   │
+│  Token embeddings + Transformer encoder →         │
+│  BiLSTM + affiliation embedding → pointer scores  │
+│                                                   │
+│  Points to: "1199"                                │
+└───────────────────────────────────────────────────┘
+              │
+              ▼
+Output: {is_union: True, union_score: 0.999, affiliation: "SEIU",
+         affiliation_unrecognized: False, aff_score: 0.997, designation: "1199"}
 ```
+
+### CharCNN
+
+Character-level CNN that computes token embeddings, shared across all stages.
+
+- **Character embedding**: 16-dim lookup for ~50 chars (letters, digits, punctuation)
+- **Parallel CNNs**: 1-gram (32 filters), 2-gram (64 filters), 3-gram (128 filters)
+- **Pooling**: Max-pool over character dimension → 224-dim
+- **Highway layer**: Gated transformation for non-linearity
+- **Projection**: Linear layer → 64-dim token embedding
+- **Typo-robust**: Similar spellings produce similar embeddings
 
 ### Stage 1: Union Detection
 
 Contrastive learning to distinguish union names from non-union text.
 
-- **Encoder**: CharCNN + is_number embedding + projection head
+- **Input**: CharCNN token embeddings + is_number embedding (8-dim)
+- **Cross-attention**: Learned query attends over token sequence
+- **Projection**: 2-layer MLP (72 → 128 → 64) with L2 normalization
 - **Training**: One-class contrastive loss (union examples form positive pairs)
-- **Inference**: Compute similarity to learned union centroid
-- **Threshold**: Texts with similarity ≥ 0.5 classified as unions
+- **Inference**: Cosine similarity to learned union centroid
+- **Threshold**: Similarity ≥ 0.5 → is_union = True
 
 ### Stage 2: Affiliation Classification
 
 Nearest-centroid classification in contrastive embedding space.
 
-- **Encoder**: CharCNN + is_number embedding + projection head
+- **Input**: CharCNN token embeddings + is_number embedding (8-dim)
+- **Cross-attention**: Learned query attends over token sequence
+- **Projection**: 2-layer MLP (72 → 128 → 64) with L2 normalization
 - **Training**: Supervised contrastive loss (same-affiliation = positive pairs)
-- **Inference**: Find nearest affiliation centroid
-- **Threshold**: Distance > 0.20 → affiliation_unrecognized = True
+- **Inference**: Cosine similarity to each affiliation centroid
+- **Threshold**: Best score < 0.80 → affiliation_unrecognized = True
 
 ### Stage 3: Designation Extraction
 
-Pointer network that selects the correct local number.
+Pointer network that selects the correct local number token.
 
-- **Token Embeddings**: CharCNN (words) + special embedding (numbers, punct)
+- **Input**: CharCNN token embeddings + special token embeddings (numbers, punct)
 - **Context**: Transformer encoder (3 layers, 4 heads)
 - **Selection**: BiLSTM + affiliation embedding → score each number token
-- **Output**: Highest-scoring number token, or null if no designation
-
-### Components
-
-**Character CNN (for word tokens)**
-- Character embedding: 16-dim
-- Multi-scale 1D convolutions (kernel sizes 2, 3, 4, 5)
-- Max pooling → 64-dim token embedding
-- Typo-robust: handles misspellings gracefully
-
-**Special Token Embedding (for non-words)**
-- Lookup table for numbers, punctuation, spaces
-- 64-dim embeddings
-
-**Contrastive Projection**
-- 2-layer MLP: 64+8 → 128 → 64
-- L2 normalization for cosine similarity
-
-### Model Statistics
-
-- Parameters: ~3M total across all stages
-- Inference: CPU or MPS (Apple Silicon)
-- Model files: ~15MB total
+- **Output**: Highest-scoring number token, or empty if no designation
 
 ### Performance
 

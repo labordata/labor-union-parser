@@ -5,36 +5,29 @@ Stage 2: Affiliation classification via nearest centroid (distance > threshold =
 Stage 3: Designation extraction using pointer network (with affiliation context)
 """
 
+import functools
+import json
 from pathlib import Path
-from typing import Optional
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from tqdm import tqdm
 
 from .char_cnn import (
     CharacterCNN,
-    tokenize_to_chars,
-    get_special_token_id,
     SPECIAL_TOKEN_VOCAB,
+    get_special_token_id,
+    tokenize_to_chars,
 )
-from .tokenizer import MAX_TOKEN_LEN
-
-# Lazy-loaded fnum lookup cache
-_fnum_lookup: Optional[dict] = None
+from .conf import MAX_TOKENS
 
 
+@functools.cache
 def _load_fnum_lookup() -> dict:
     """Load the fnum lookup table from package data."""
-    global _fnum_lookup
-    if _fnum_lookup is None:
-        lookup_path = Path(__file__).parent / "weights" / "fnum_lookup.json"
-        with open(lookup_path, "r") as f:
-            import json
-
-            _fnum_lookup = json.load(f)
-    return _fnum_lookup
+    lookup_path = Path(__file__).parent / "weights" / "fnum_lookup.json"
+    with open(lookup_path, "r") as f:
+        return json.load(f)
 
 
 def lookup_fnum(affiliation: str, designation: str) -> list[int]:
@@ -126,11 +119,6 @@ class CrossAttentionEncoder(nn.Module):
         if return_attention:
             return normalized, attn_weights.squeeze(1)
         return normalized
-
-
-# Aliases for backwards compatibility
-UnionEncoder = CrossAttentionEncoder
-AffiliationEncoder = CrossAttentionEncoder
 
 
 class DesignationExtractor(nn.Module):
@@ -315,26 +303,21 @@ class DesignationExtractor(nn.Module):
         return results
 
 
-def create_desig_label(text: str, desig_num: str, max_len: int = MAX_TOKEN_LEN) -> int:
+def create_desig_label(text: str, desig_num: str, max_len: int = MAX_TOKENS) -> int:
     """Create designation label for training.
 
     Returns:
         0 if no designation, otherwise token_position + 1
     """
-    if not desig_num or desig_num == "N/A" or str(desig_num) == "nan":
+    if not desig_num:
         return 0
 
     _, tokens, _, _ = tokenize_to_chars(text, max_tokens=max_len)
-    desig_str = str(desig_num).lstrip("0") or "0"
-
-    # Handle float format (e.g., "1199.0")
-    if "." in desig_str:
-        desig_str = desig_str.split(".")[0]
 
     # Find the last occurrence of the designation number
     best_idx = None
     for i, token in enumerate(tokens[:max_len]):
-        if token == desig_str:
+        if token == desig_num:
             best_idx = i
 
     if best_idx is not None:
@@ -344,7 +327,7 @@ def create_desig_label(text: str, desig_num: str, max_len: int = MAX_TOKEN_LEN) 
 
 
 def extract_desig_from_pred(
-    text: str, desig_pred: int, max_len: int = MAX_TOKEN_LEN
+    text: str, desig_pred: int, max_len: int = MAX_TOKENS
 ) -> str:
     """Extract actual designation string from model prediction.
 
@@ -387,7 +370,7 @@ class Extractor:
 
     def __init__(
         self,
-        device: Optional[str] = None,
+        device: str | None = None,
         union_threshold: float = 0.5,
         affiliation_threshold: float = 0.80,
     ):
@@ -395,14 +378,14 @@ class Extractor:
         Initialize the contrastive extractor.
 
         Args:
-            device: Device to use (default: mps if available, else cpu)
+            device: Device to use (default: best available accelerator)
             union_threshold: Similarity threshold for union detection (default: 0.5).
                 Texts with similarity >= threshold are classified as unions.
             affiliation_threshold: Similarity threshold for affiliation (default: 0.80).
                 If similarity to nearest centroid < threshold, returns None (unrecognized).
         """
         if device is None:
-            self.device = "mps" if torch.backends.mps.is_available() else "cpu"
+            self.device = torch.accelerator.current_accelerator()
         else:
             self.device = device
 
@@ -452,29 +435,23 @@ class Extractor:
 
         # Stage 3: Designation extractor (pointer network)
         desig_path = weights_dir / "designation_extractor.pt"
-        if desig_path.exists():
-            desig_checkpoint = torch.load(
-                desig_path, map_location=self.device, weights_only=False
-            )
+        desig_checkpoint = torch.load(
+            desig_path, map_location=self.device, weights_only=False
+        )
 
-            self.desig_extractor = DesignationExtractor(
-                num_affs=len(self.aff_list),
-                token_embed_dim=64,
-                hidden_dim=512,
-                aff_embed_dim=64,
-                num_attn_heads=4,
-                num_feature_dim=16,
-                char_embed_dim=16,
-                num_attn_layers=3,
-            )
-            self.desig_extractor.load_state_dict(desig_checkpoint["model_state_dict"])
-            self.desig_extractor.to(self.device)
-            self.desig_extractor.eval()
-            self._use_learned_desig = True
-        else:
-            # Fall back to regex-based extraction if model not found
-            self.desig_extractor = None
-            self._use_learned_desig = False
+        self.desig_extractor = DesignationExtractor(
+            num_affs=len(self.aff_list),
+            token_embed_dim=64,
+            hidden_dim=512,
+            aff_embed_dim=64,
+            num_attn_heads=4,
+            num_feature_dim=16,
+            char_embed_dim=16,
+            num_attn_layers=3,
+        )
+        self.desig_extractor.load_state_dict(desig_checkpoint["model_state_dict"])
+        self.desig_extractor.to(self.device)
+        self.desig_extractor.eval()
 
     def _tokenize_batch(self, texts: list[str], max_tokens: int = 40):
         """Tokenize a batch of texts."""
@@ -496,7 +473,7 @@ class Extractor:
             torch.tensor(is_number_list, dtype=torch.long, device=self.device),
         )
 
-    def _tokenize_for_desig(self, texts: list[str], max_tokens: int = MAX_TOKEN_LEN):
+    def _tokenize_for_desig(self, texts: list[str], max_tokens: int = MAX_TOKENS):
         """Tokenize for designation extractor (includes special_ids)."""
         char_ids_list = []
         token_type_list = []
@@ -629,7 +606,7 @@ class Extractor:
         # Stage 2: Affiliation classification for unions
         if union_texts:
             char_ids_aff, token_type_aff, is_number_aff = self._tokenize_batch(
-                union_texts, max_tokens=MAX_TOKEN_LEN
+                union_texts, max_tokens=MAX_TOKENS
             )
 
             with torch.no_grad():
@@ -657,30 +634,26 @@ class Extractor:
                     aff_indices_for_desig.append(pred_idx)
 
             # Stage 3: Designation extraction
-            if self._use_learned_desig:
-                desig_batch = self._tokenize_for_desig(union_texts)
-                aff_idx_tensor = torch.tensor(
-                    aff_indices_for_desig, dtype=torch.long, device=self.device
+            desig_batch = self._tokenize_for_desig(union_texts)
+            aff_idx_tensor = torch.tensor(
+                aff_indices_for_desig, dtype=torch.long, device=self.device
+            )
+
+            with torch.no_grad():
+                desig_out = self.desig_extractor(
+                    char_ids=desig_batch["char_ids"],
+                    token_mask=desig_batch["token_mask"],
+                    is_number=desig_batch["is_number"],
+                    token_type=desig_batch["token_type"],
+                    special_ids=desig_batch["special_ids"],
+                    aff_idx=aff_idx_tensor,
                 )
+                desig_preds = desig_out["desig_pred"].cpu().tolist()
 
-                with torch.no_grad():
-                    desig_out = self.desig_extractor(
-                        char_ids=desig_batch["char_ids"],
-                        token_mask=desig_batch["token_mask"],
-                        is_number=desig_batch["is_number"],
-                        token_type=desig_batch["token_type"],
-                        special_ids=desig_batch["special_ids"],
-                        aff_idx=aff_idx_tensor,
-                    )
-                    desig_preds = desig_out["desig_pred"].cpu().tolist()
-
-                designations = [
-                    extract_desig_from_pred(text, pred)
-                    for text, pred in zip(union_texts, desig_preds)
-                ]
-            else:
-                # No designation model available
-                designations = [""] * len(union_texts)
+            designations = [
+                extract_desig_from_pred(text, pred)
+                for text, pred in zip(union_texts, desig_preds)
+            ]
 
             # Build results for union texts
             for j, orig_idx in enumerate(union_indices):
@@ -694,30 +667,3 @@ class Extractor:
                 }
 
         return results
-
-    def extract_all(self, texts, batch_size: int = 256, show_progress: bool = False):
-        """
-        Extract from a large list of texts.
-
-        Generator that yields results as they are processed.
-
-        Args:
-            texts: Iterable of input texts
-            batch_size: Batch size for processing
-            show_progress: Show progress bar
-
-        Yields:
-            Result dictionaries
-        """
-        import itertools
-
-        pbar = tqdm(desc="Extracting") if show_progress else None
-
-        for batch in itertools.batched(texts, batch_size):
-            results = self.extract_batch(list(batch))
-            if pbar is not None:
-                pbar.update(len(batch))
-            yield from results
-
-        if pbar is not None:
-            pbar.close()

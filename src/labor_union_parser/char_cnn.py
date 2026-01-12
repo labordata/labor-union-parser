@@ -12,6 +12,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from .conf import MAX_CHARS_PER_TOKEN, MAX_TOKENS
 
 # Character vocabulary: lowercase letters, digits, common punctuation
 CHAR_VOCAB = {
@@ -27,8 +28,6 @@ for i, c in enumerate("0123456789"):
 # Add common punctuation and space
 for c in " -/&,.()'\"#:":
     CHAR_VOCAB[c] = len(CHAR_VOCAB)
-
-MAX_CHARS_PER_TOKEN = 20
 
 
 def chars_to_ids(token: str, max_chars: int = MAX_CHARS_PER_TOKEN) -> list[int]:
@@ -156,7 +155,7 @@ class CharacterCNN(nn.Module):
 
 
 def tokenize_to_chars(
-    text: str, max_tokens: int = 80, max_chars: int = MAX_CHARS_PER_TOKEN
+    text: str, max_tokens: int = MAX_TOKENS, max_chars: int = MAX_CHARS_PER_TOKEN
 ) -> tuple[list[list[int]], list[str], list[int], list[int]]:
     """Tokenize text and convert to character IDs.
 
