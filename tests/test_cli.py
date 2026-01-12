@@ -11,7 +11,28 @@ from labor_union_parser.cli import main
 def invoke(args, input_data):
     """Helper to invoke CLI."""
     runner = CliRunner()
-    return runner.invoke(main, args, input=input_data)
+    result = runner.invoke(main, args, input=input_data)
+    return result
+
+
+def assert_success(result):
+    """Assert CLI succeeded, showing exception/output if not."""
+    if result.exit_code != 0:
+        # Show the actual exception if there was one
+        if result.exception:
+            import traceback
+
+            exc = result.exception
+            tb = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+            raise AssertionError(
+                f"CLI failed with exit code {result.exit_code}\n\n"
+                f"Exception:\n{tb}\n\nOutput:\n{result.output}"
+            )
+        else:
+            raise AssertionError(
+                f"CLI failed with exit code {result.exit_code}\n\n"
+                f"Output:\n{result.output}"
+            )
 
 
 class TestBasicExtraction:
@@ -20,7 +41,7 @@ class TestBasicExtraction:
     def test_single_column_no_header(self):
         result = invoke(["--no-header"], "SEIU Local 1199\n")
 
-        assert result.exit_code == 0
+        assert_success(result)
         reader = csv.DictReader(io.StringIO(result.output))
         rows = list(reader)
         assert len(rows) == 1
@@ -32,7 +53,7 @@ class TestBasicExtraction:
     def test_single_column_with_header(self):
         result = invoke([], "name\nIBT 123\n")
 
-        assert result.exit_code == 0
+        assert_success(result)
         reader = csv.DictReader(io.StringIO(result.output))
         rows = list(reader)
         assert len(rows) == 1
@@ -43,7 +64,7 @@ class TestBasicExtraction:
     def test_multi_column_with_column_flag(self):
         result = invoke(["-c", "union"], "id,union\n1,UAW 42\n")
 
-        assert result.exit_code == 0
+        assert_success(result)
         reader = csv.DictReader(io.StringIO(result.output))
         rows = list(reader)
         assert len(rows) == 1
@@ -55,7 +76,7 @@ class TestBasicExtraction:
     def test_multiple_rows(self):
         result = invoke([], "text\nSEIU Local 1199\nIBT 123\nUAW 42\n")
 
-        assert result.exit_code == 0
+        assert_success(result)
         reader = csv.DictReader(io.StringIO(result.output))
         rows = list(reader)
         assert len(rows) == 3
@@ -70,7 +91,7 @@ class TestNonUnionDetection:
     def test_non_union_text(self):
         result = invoke(["--no-header"], "Random Company Inc\n")
 
-        assert result.exit_code == 0
+        assert_success(result)
         reader = csv.DictReader(io.StringIO(result.output))
         rows = list(reader)
         assert rows[0]["pred_is_union"] == "False"
@@ -111,7 +132,7 @@ class TestOutputFields:
     def test_all_prediction_fields_present(self):
         result = invoke(["--no-header"], "SEIU Local 1199\n")
 
-        assert result.exit_code == 0
+        assert_success(result)
         reader = csv.DictReader(io.StringIO(result.output))
         rows = list(reader)
         row = rows[0]
@@ -152,7 +173,7 @@ class TestPreservesInputColumns:
     def test_preserves_all_input_columns(self):
         result = invoke(["-c", "name"], "id,name,extra\n1,SEIU Local 1199,foo\n")
 
-        assert result.exit_code == 0
+        assert_success(result)
         reader = csv.DictReader(io.StringIO(result.output))
         row = next(reader)
         assert row["id"] == "1"
