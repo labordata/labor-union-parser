@@ -23,7 +23,7 @@ $(FNUM_LOOKUP): $(DB_FILE)
 
 # Train the model
 $(MODEL_WEIGHTS): training/data/labeled_data.csv
-	python training/train.py --class-weight --soft-labels --epochs 30
+	python training/train.py
 
 # Convenience targets
 download: $(DB_FILE)

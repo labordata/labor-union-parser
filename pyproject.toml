@@ -1,6 +1,6 @@
 [project]
 name = "labor-union-parser"
-version = "0.1.0"
+version = "0.2.0"
 description = "Extract affiliation and local designation from labor union names"
 readme = "README.md"
 requires-python = ">=3.12"

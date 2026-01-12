@@ -3,9 +3,12 @@
 Extract affiliation and local designation from labor union name strings.
 
 Given an input like `"SEIU Local 1199"`, the parser returns:
-- **is_union**: `True` (detected as a union)
-- **Affiliation**: `SEIU` (Service Employees International Union)
-- **Designation**: `1199` (local number)
+- `is_union`: True (detected as a union)
+- `union_score`: 0.999 (confidence score for union detection)
+- `affiliation`: SEIU (Service Employees International Union)
+- `affiliation_unrecognized`: False (True if affiliation couldn't be matched)
+- `aff_score`: 0.997 (confidence score for affiliation)
+- `designation`: 1199 (local number)
 
 ## Installation
 
