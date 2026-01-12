@@ -14,8 +14,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from .char_cnn import (
-    CharacterCNN,
     SPECIAL_TOKEN_VOCAB,
+    CharacterCNN,
     get_special_token_id,
     tokenize_to_chars,
 )

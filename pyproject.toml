@@ -23,3 +23,14 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 labor_union_parser = ["weights/*.pt", "weights/*.json"]
+
+[tool.ruff]
+line-length = 88
+exclude = ["build", "dist", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["labor_union_parser", "training"]
