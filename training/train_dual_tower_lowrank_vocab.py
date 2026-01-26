@@ -13,11 +13,9 @@ Where:
 - shared_factors is an 8x32 matrix learned globally
 """
 
-import csv
+import json
 import random
-import sqlite3
 import sys
-from collections import defaultdict
 from pathlib import Path
 
 import torch
@@ -36,7 +34,8 @@ DEVICE = (
     else torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 )
 DATA_DIR = Path(__file__).parent / "data"
-DB_PATH = Path(__file__).parent.parent / "opdr.db"
+VOCAB_PATH = DATA_DIR / "vocabularies.json"
+EXAMPLES_PATH = DATA_DIR / "training_examples.json"
 
 EMBED_DIM = 128  # Shared embedding dimension
 LATENT_DIM = 8  # Low-rank latent dimension for f_num
@@ -311,252 +310,75 @@ def normalize_designation(s: str) -> str:
     return s
 
 
-def load_training_data():
-    """Load query-record pairs for training."""
-    print("Loading training data...")
+def load_vocabularies():
+    """Load vocabulary lookups from vocabularies.json."""
+    print(f"Loading vocabularies from {VOCAB_PATH}...")
 
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
+    with open(VOCAB_PATH) as f:
+        vocab = json.load(f)
 
-    # Get all union_names
-    cur.execute(
-        """
-        SELECT DISTINCT union_name
-        FROM lm_data
-        WHERE union_name IS NOT NULL
-        ORDER BY union_name
-    """
-    )
-    union_names = [row[0] for row in cur.fetchall()]
-    union_name_to_idx = {name: i for i, name in enumerate(union_names)}
-    print(f"Found {len(union_names)} union names")
+    union_name_to_idx = vocab["union_name_to_idx"]
+    desig_name_to_idx = vocab["desig_name_to_idx"]
+    fnum_to_idx = {int(k): v for k, v in vocab["fnum_to_idx"].items()}
+    prefix_to_idx = vocab["prefix_to_idx"]
+    suffix_to_idx = vocab["suffix_to_idx"]
 
-    # Get all desig_names
-    cur.execute(
-        """
-        SELECT DISTINCT desig_name
-        FROM lm_data
-        WHERE desig_name IS NOT NULL
-        ORDER BY desig_name
-    """
-    )
-    desig_names = [row[0] for row in cur.fetchall()]
-    desig_name_to_idx = {name: i + 1 for i, name in enumerate(desig_names)}
-    print(f"Found {len(desig_names)} designation names")
+    print(f"  {len(union_name_to_idx)} union names")
+    print(f"  {len(desig_name_to_idx)} designation names")
+    print(f"  {len(fnum_to_idx)} f_nums")
+    print(f"  {len(prefix_to_idx)} prefixes")
+    print(f"  {len(suffix_to_idx)} suffixes")
 
-    # Get all f_nums
-    cur.execute(
-        """
-        SELECT DISTINCT f_num
-        FROM lm_data
-        WHERE f_num IS NOT NULL
-        ORDER BY f_num
-    """
-    )
-    fnums = [row[0] for row in cur.fetchall()]
-    fnum_to_idx = {fnum: i + 1 for i, fnum in enumerate(fnums)}
-    print(f"Found {len(fnums)} f_nums")
-
-    # Build prefix vocabulary (small, separate, learnable)
-    cur.execute(
-        "SELECT DISTINCT desiq_pre FROM lm_data WHERE desiq_pre IS NOT NULL AND desiq_pre != ''"
-    )
-    prefixes = sorted(set(normalize_designation(row[0]) for row in cur.fetchall()))
-    prefix_to_idx = {"": 0}  # empty = 0
-    for i, p in enumerate(prefixes):
-        prefix_to_idx[p] = i + 1
-    print(f"Found {len(prefixes)} unique prefixes")
-
-    # Build suffix vocabulary (small, separate, learnable)
-    cur.execute(
-        "SELECT DISTINCT desig_suf FROM lm_data WHERE desig_suf IS NOT NULL AND desig_suf != ''"
-    )
-    suffixes = sorted(set(normalize_designation(row[0]) for row in cur.fetchall()))
-    suffix_to_idx = {"": 0}  # empty = 0
-    for i, s in enumerate(suffixes):
-        suffix_to_idx[s] = i + 1
-    print(f"Found {len(suffixes)} unique suffixes")
-
-    # Build lookup: (union_name, desig_num) -> record info
-    cur.execute(
-        """
-        SELECT union_name, desig_num, desig_name, desiq_pre, desig_suf,
-               GROUP_CONCAT(DISTINCT f_num) as fnums, COUNT(*) as cnt
-        FROM lm_data
-        WHERE f_num IS NOT NULL
-          AND desig_num IS NOT NULL
-          AND union_name IS NOT NULL
-        GROUP BY union_name, desig_num, desig_name, desiq_pre, desig_suf
-        ORDER BY union_name, desig_num, cnt DESC
-    """
-    )
-
-    union_desig_info = {}
-    union_desig_fnums = {}
-    for (
-        union_name,
-        desig_num,
-        desig_name,
-        prefix,
-        suffix,
-        fnums_str,
-        cnt,
-    ) in cur.fetchall():
-        if desig_num is None:
-            continue
-        key = (union_name, int(desig_num))
-        fnum_list = fnums_str.split(",")
-        if key not in union_desig_info:
-            union_desig_info[key] = {
-                "desig_name": desig_name or "",
-                "prefix": prefix or "",
-                "suffix": suffix or "",
-                "f_num": int(fnum_list[0]),
-            }
-            union_desig_fnums[key] = set(fnum_list)
-        else:
-            union_desig_fnums[key].update(fnum_list)
-
-    conn.close()
-
-    # Build aff_abbr -> union_name mapping
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    cur.execute(
-        """
-        SELECT DISTINCT aff_abbr, union_name
-        FROM lm_data
-        WHERE aff_abbr IS NOT NULL AND union_name IS NOT NULL
-    """
-    )
-    aff_to_union_names = defaultdict(set)
-    for aff, uname in cur.fetchall():
-        aff_to_union_names[aff].add(uname)
-    conn.close()
-
-    aff_to_union_name = {}
-    for aff, unames in aff_to_union_names.items():
-        if aff != "UNAFF":
-            aff_to_union_name[aff] = list(unames)[0]
-
-    # Build f_num -> list of all record variants
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    cur.execute(
-        """
-        SELECT f_num, union_name, desig_name, desiq_pre, COALESCE(desig_num, 0), desig_suf
-        FROM lm_data WHERE f_num IS NOT NULL AND union_name IS NOT NULL
-        GROUP BY f_num, union_name, desig_name, desiq_pre, desig_num, desig_suf
-    """
-    )
-    fnum_to_records = defaultdict(list)
-    for row in cur.fetchall():
-        fnum_to_records[row[0]].append(
-            {
-                "union_name": row[1],
-                "desig_name": row[2] or "",
-                "prefix": row[3] or "",
-                "desig_num": int(row[4]),
-                "suffix": row[5] or "",
-                "f_num": row[0],
-            }
-        )
-    conn.close()
-
-    total_variants = sum(len(v) for v in fnum_to_records.values())
-    print(
-        f"Found {len(fnum_to_records)} f_nums with {total_variants} total record variants"
-    )
-
-    # Load labeled data - store f_nums, sample variants at training time
-    queries = []
-    fnums = []
-
-    with open(DATA_DIR / "labeled_data.csv") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            aff = row["aff_abbr"]
-            text = row["text"]
-
-            if aff == "UNAFF":
-                continue
-
-            # First try to get f_num from CSV
-            f_num = None
-            if row.get("f_num"):
-                try:
-                    f_num = int(float(row["f_num"]))
-                except ValueError:
-                    pass
-
-            # If no f_num in CSV, look up by (union_name, desig_num)
-            if not f_num:
-                union_name = aff_to_union_name.get(aff)
-                if union_name and row.get("desig_num"):
-                    try:
-                        desig_int = int(float(row["desig_num"]))
-                        key = (union_name, desig_int)
-                        info = union_desig_info.get(key)
-                        if info:
-                            f_num = info["f_num"]
-                    except ValueError:
-                        pass
-
-            # Store f_num (will sample variant at training time)
-            if f_num and f_num in fnum_to_records:
-                queries.append(text)
-                fnums.append(f_num)
-
-    affiliated_count = len(queries)
-    print(f"Loaded {affiliated_count} affiliated query-record pairs")
-
-    # Load UNAFF synthetic data
-    unaff_synthetic_path = DATA_DIR / "unaff_synthetic.csv"
-    if unaff_synthetic_path.exists():
-        conn = sqlite3.connect(DB_PATH)
-        cur = conn.cursor()
-        cur.execute(
-            """
-            SELECT DISTINCT union_name, COALESCE(desig_num, 0) as desig_num, f_num
-            FROM lm_data
-            WHERE aff_abbr = 'UNAFF' AND union_name IS NOT NULL AND f_num IS NOT NULL
-        """
-        )
-        unaff_fnum_lookup = {}
-        for union_name, desig_num, fnum in cur.fetchall():
-            unaff_fnum_lookup[(union_name, int(desig_num))] = fnum
-        conn.close()
-
-        with open(unaff_synthetic_path) as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                union_name = row["union_name"]
-                desig_num = int(row["desig_num"])
-                text = row["text"]
-
-                if union_name not in union_name_to_idx:
-                    continue
-
-                f_num = unaff_fnum_lookup.get((union_name, desig_num), 0)
-
-                if f_num and f_num in fnum_to_records:
-                    queries.append(text)
-                    fnums.append(f_num)
-
-        unaff_count = len(queries) - affiliated_count
-        print(f"Loaded {unaff_count} UNAFF synthetic query-record pairs")
-
-    print(f"Total: {len(queries)} query-record pairs")
     return (
-        queries,
-        fnums,
-        fnum_to_records,
         union_name_to_idx,
         desig_name_to_idx,
         fnum_to_idx,
         prefix_to_idx,
         suffix_to_idx,
-        affiliated_count,
+    )
+
+
+def load_training_examples():
+    """Load training examples from training_examples.json."""
+    print(f"Loading training examples from {EXAMPLES_PATH}...")
+
+    with open(EXAMPLES_PATH) as f:
+        all_examples = json.load(f)
+
+    # Organize examples by split, keeping records with each example
+    train_examples = []
+    val_examples = []
+    test_examples = []
+
+    # Also build fnum_to_records for evaluation (needs all record variants)
+    fnum_to_records = {}
+
+    for ex in all_examples:
+        split = ex["split"]
+        f_num = ex["f_num"]
+
+        # Store records for this f_num (may see same f_num multiple times, that's ok)
+        if f_num not in fnum_to_records:
+            fnum_to_records[f_num] = ex["records"]
+
+        if split == "train":
+            train_examples.append(ex)
+        elif split == "val":
+            val_examples.append(ex)
+        else:  # test
+            test_examples.append(ex)
+
+    total_variants = sum(len(v) for v in fnum_to_records.values())
+    print(f"  {len(fnum_to_records)} f_nums with {total_variants} record variants")
+    print(f"  Train: {len(train_examples)}")
+    print(f"  Val: {len(val_examples)}")
+    print(f"  Test: {len(test_examples)}")
+
+    return (
+        train_examples,
+        val_examples,
+        test_examples,
+        fnum_to_records,
     )
 
 
@@ -565,9 +387,7 @@ class DualTowerDataset(Dataset):
 
     def __init__(
         self,
-        queries,
-        fnums,
-        fnum_to_records,
+        examples,
         union_name_to_idx,
         desig_name_to_idx,
         fnum_to_idx,
@@ -575,9 +395,7 @@ class DualTowerDataset(Dataset):
         suffix_to_idx,
         max_tokens=40,
     ):
-        self.queries = queries
-        self.fnums = fnums
-        self.fnum_to_records = fnum_to_records
+        self.examples = examples
         self.union_name_to_idx = union_name_to_idx
         self.desig_name_to_idx = desig_name_to_idx
         self.fnum_to_idx = fnum_to_idx
@@ -586,13 +404,13 @@ class DualTowerDataset(Dataset):
         self.max_tokens = max_tokens
 
     def __len__(self):
-        return len(self.queries)
+        return len(self.examples)
 
     def __getitem__(self, idx):
-        query_text = self.queries[idx]
-        # Sample a random variant for this f_num (data augmentation)
-        fnum = self.fnums[idx]
-        record = random.choice(self.fnum_to_records[fnum])
+        ex = self.examples[idx]
+        query_text = ex["query"]
+        # Sample a random variant from this example's records (data augmentation)
+        record = random.choice(ex["records"])
 
         char_ids, _, is_number, token_type, numeric_ids = tokenize_to_chars(
             query_text, max_tokens=self.max_tokens
@@ -696,46 +514,26 @@ def train_dual_tower(
     if resume_from:
         print(f"Resuming from: {resume_from}")
 
-    # Load data
+    # Load vocabularies from JSON
     (
-        queries,
-        fnums,
-        fnum_to_records,
         union_name_to_idx,
         desig_name_to_idx,
         fnum_to_idx,
         prefix_to_idx,
         suffix_to_idx,
-        affiliated_count,
-    ) = load_training_data()
+    ) = load_vocabularies()
 
-    # Split
-    affiliated_queries = queries[:affiliated_count]
-    affiliated_fnums = fnums[:affiliated_count]
-    synthetic_queries = queries[affiliated_count:]
-    synthetic_fnums = fnums[affiliated_count:]
-
-    n_val = int(affiliated_count * 0.1)
-    indices = list(range(affiliated_count))
-    random.seed(42)
-    random.shuffle(indices)
-
-    val_queries = [affiliated_queries[i] for i in indices[:n_val]]
-    val_fnums = [affiliated_fnums[i] for i in indices[:n_val]]
-
-    train_queries = [affiliated_queries[i] for i in indices[n_val:]] + synthetic_queries
-    train_fnums = [affiliated_fnums[i] for i in indices[n_val:]] + synthetic_fnums
-
-    print(
-        f"Train: {len(train_queries)} ({len(train_queries) - len(synthetic_queries)} affiliated + {len(synthetic_queries)} synthetic)"
-    )
-    print(f"Val: {len(val_queries)} (affiliated only)")
+    # Load training examples from JSON
+    (
+        train_examples,
+        val_examples,
+        test_examples,
+        fnum_to_records,
+    ) = load_training_examples()
 
     # Create datasets
     train_dataset = DualTowerDataset(
-        train_queries,
-        train_fnums,
-        fnum_to_records,
+        train_examples,
         union_name_to_idx,
         desig_name_to_idx,
         fnum_to_idx,
@@ -743,9 +541,7 @@ def train_dual_tower(
         suffix_to_idx,
     )
     val_dataset = DualTowerDataset(
-        val_queries,
-        val_fnums,
-        fnum_to_records,
+        val_examples,
         union_name_to_idx,
         desig_name_to_idx,
         fnum_to_idx,
@@ -925,8 +721,7 @@ def train_dual_tower(
             fnum_to_idx,
             prefix_to_idx,
             suffix_to_idx,
-            val_queries,
-            val_fnums,
+            val_examples,
             fnum_to_records,
             verbose=False,
         )
@@ -956,6 +751,8 @@ def train_dual_tower(
         fnum_to_idx,
         prefix_to_idx,
         suffix_to_idx,
+        fnum_to_records,
+        test_examples,
     )
 
 
@@ -978,14 +775,17 @@ def evaluate_retrieval(
     fnum_to_idx,
     prefix_to_idx,
     suffix_to_idx,
-    queries,
-    fnums,
+    examples,
     fnum_to_records,
     batch_size=128,
     verbose=True,
 ):
     """Evaluate retrieval accuracy using f_num-level success metric."""
     model.eval()
+
+    # Extract queries and fnums from examples
+    queries = [ex["query"] for ex in examples]
+    fnums = [ex["f_num"] for ex in examples]
 
     # Build index from all record variants in fnum_to_records
     all_records = []
@@ -1059,9 +859,7 @@ def evaluate_retrieval(
     correct_top10 = 0
 
     dataset = DualTowerDataset(
-        queries,
-        fnums,
-        fnum_to_records,
+        examples,
         union_name_to_idx,
         desig_name_to_idx,
         fnum_to_idx,
@@ -1117,8 +915,6 @@ def evaluate_retrieval(
 
 
 if __name__ == "__main__":
-    import sys
-
     resume_path = None
     if len(sys.argv) > 1 and sys.argv[1] == "--resume":
         resume_path = Path(__file__).parent / "dual_tower_lowrank_vocab.pt"
@@ -1130,6 +926,8 @@ if __name__ == "__main__":
         fnum_to_idx,
         prefix_to_idx,
         suffix_to_idx,
+        fnum_to_records,
+        test_examples,
     ) = train_dual_tower(
         epochs=20,
         batch_size=128,
@@ -1139,12 +937,8 @@ if __name__ == "__main__":
         resume_from=resume_path,
     )
 
-    # Evaluate
-    queries, fnums, fnum_to_records, _, _, _, _, _, affiliated_count = (
-        load_training_data()
-    )
-    eval_queries = queries[:affiliated_count]
-    eval_fnums = fnums[:affiliated_count]
+    # Evaluate on test set
+    print("\nFinal evaluation on test set:")
     evaluate_retrieval(
         model,
         union_name_to_idx,
@@ -1152,7 +946,6 @@ if __name__ == "__main__":
         fnum_to_idx,
         prefix_to_idx,
         suffix_to_idx,
-        eval_queries,
-        eval_fnums,
+        test_examples,
         fnum_to_records,
     )
