@@ -1,0 +1,261 @@
+#!/usr/bin/env python3
+"""
+Prepare training data with FIXED train/val/test splits.
+
+This script:
+1. Loads labeled_data.csv and unaff_synthetic.csv
+2. Resolves f_num for each example
+3. Assigns a deterministic split (train/val/test) based on query hash
+4. Saves to training_examples.json with splits marked
+
+All downstream scripts (mine_negatives.py, train_*.py) should use
+the pre-assigned splits rather than re-splitting.
+"""
+
+import csv
+import hashlib
+import json
+import sqlite3
+from collections import defaultdict
+from pathlib import Path
+
+DATA_DIR = Path(__file__).parent / "data"
+DB_PATH = Path(__file__).parent.parent / "opdr.db"
+OUTPUT_PATH = DATA_DIR / "training_examples.json"
+
+
+def get_split(query: str, val_frac: float = 0.1, test_frac: float = 0.1) -> str:
+    """
+    Deterministically assign a split based on query hash.
+
+    This ensures the same query always gets the same split,
+    regardless of when or how many times the script is run.
+    """
+    h = hashlib.md5(query.encode()).hexdigest()
+    # Convert first 8 hex chars to int, normalize to [0, 1)
+    val = int(h[:8], 16) / (16**8)
+
+    if val < val_frac:
+        return "val"
+    elif val < val_frac + test_frac:
+        return "test"
+    else:
+        return "train"
+
+
+def load_lookups():
+    """Load all lookup tables from the database."""
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+
+    # Get all union_names
+    cur.execute(
+        """
+        SELECT DISTINCT union_name FROM lm_data
+        WHERE union_name IS NOT NULL ORDER BY union_name
+    """
+    )
+    union_names = [row[0] for row in cur.fetchall()]
+    union_name_to_idx = {name: i for i, name in enumerate(union_names)}
+
+    # Get all f_nums
+    cur.execute(
+        """
+        SELECT DISTINCT f_num FROM lm_data
+        WHERE f_num IS NOT NULL ORDER BY f_num
+    """
+    )
+    fnums = [row[0] for row in cur.fetchall()]
+    fnum_set = set(fnums)
+
+    # Build (union_name, desig_num) -> f_num lookup
+    cur.execute(
+        """
+        SELECT union_name, desig_num, GROUP_CONCAT(DISTINCT f_num)
+        FROM lm_data
+        WHERE f_num IS NOT NULL AND desig_num IS NOT NULL AND union_name IS NOT NULL
+        GROUP BY union_name, desig_num
+    """
+    )
+    union_desig_lookup = {}
+    for uname, dnum, fnums_str in cur.fetchall():
+        flist = fnums_str.split(",")
+        if len(flist) == 1:  # Unambiguous mapping
+            union_desig_lookup[(uname, int(dnum))] = int(flist[0])
+
+    # Build aff_abbr -> union_name lookup
+    cur.execute(
+        """
+        SELECT DISTINCT aff_abbr, union_name FROM lm_data
+        WHERE aff_abbr IS NOT NULL AND union_name IS NOT NULL
+    """
+    )
+    aff_to_name = {}
+    for aff, uname in cur.fetchall():
+        if aff != "UNAFF" and aff not in aff_to_name:
+            aff_to_name[aff] = uname
+
+    # Build UNAFF (union_name, desig_num) -> f_num lookup
+    cur.execute(
+        """
+        SELECT DISTINCT union_name, COALESCE(desig_num, 0) as desig_num, f_num
+        FROM lm_data
+        WHERE aff_abbr = 'UNAFF' AND union_name IS NOT NULL AND f_num IS NOT NULL
+    """
+    )
+    unaff_fnum_lookup = {}
+    for union_name, desig_num, fnum in cur.fetchall():
+        unaff_fnum_lookup[(union_name, int(desig_num))] = fnum
+
+    conn.close()
+
+    return (
+        union_name_to_idx,
+        fnum_set,
+        union_desig_lookup,
+        aff_to_name,
+        unaff_fnum_lookup,
+    )
+
+
+def load_labeled_data(fnum_set, union_desig_lookup, aff_to_name):
+    """Load labeled_data.csv and resolve f_nums."""
+    examples = []
+
+    with open(DATA_DIR / "labeled_data.csv") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            text = row["text"]
+            # Use train_aff if available (excludes UNK/ambiguous cases), else fallback to aff_abbr
+            aff = row.get("train_aff") or row["aff_abbr"]
+
+            # Skip UNAFF and UNK (ambiguous) cases
+            if aff in ("UNAFF", "UNK", ""):
+                continue
+
+            f_num = None
+
+            # Try explicit f_num column
+            if row.get("f_num"):
+                try:
+                    f_num = int(float(row["f_num"]))
+                except ValueError:
+                    pass
+
+            # Try (union_name, desig_num) lookup
+            if not f_num:
+                uname = aff_to_name.get(aff)
+                if uname and row.get("desig_num"):
+                    try:
+                        dnum = int(float(row["desig_num"]))
+                        f_num = union_desig_lookup.get((uname, dnum))
+                    except ValueError:
+                        pass
+
+            if f_num and f_num in fnum_set:
+                examples.append(
+                    {
+                        "query": text,
+                        "f_num": f_num,
+                        "source": "labeled",
+                        "aff_abbr": aff,
+                    }
+                )
+
+    return examples
+
+
+def load_synthetic_data(fnum_set, union_name_to_idx, unaff_fnum_lookup):
+    """Load unaff_synthetic.csv."""
+    examples = []
+
+    unaff_path = DATA_DIR / "unaff_synthetic.csv"
+    if not unaff_path.exists():
+        print("No unaff_synthetic.csv found, skipping synthetic data")
+        return examples
+
+    with open(unaff_path) as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            try:
+                union_name = row["union_name"]
+                desig_num = int(row["desig_num"])
+                text = row["text"]
+
+                if union_name not in union_name_to_idx:
+                    continue
+
+                # Get f_num from lookup
+                f_num = row.get("f_num")
+                if f_num:
+                    f_num = int(float(f_num))
+                else:
+                    f_num = unaff_fnum_lookup.get((union_name, desig_num))
+
+                if f_num and f_num in fnum_set:
+                    examples.append(
+                        {
+                            "query": text,
+                            "f_num": f_num,
+                            "source": "unaff_synthetic",
+                            "aff_abbr": "UNAFF",
+                        }
+                    )
+            except (ValueError, KeyError):
+                continue
+
+    return examples
+
+
+def main():
+    print("Loading lookups from database...")
+    union_name_to_idx, fnum_set, union_desig_lookup, aff_to_name, unaff_fnum_lookup = (
+        load_lookups()
+    )
+    print(f"  {len(union_name_to_idx)} union names")
+    print(f"  {len(fnum_set)} f_nums")
+
+    print("\nLoading labeled data...")
+    labeled = load_labeled_data(fnum_set, union_desig_lookup, aff_to_name)
+    print(f"  {len(labeled)} labeled examples")
+
+    print("\nLoading synthetic data...")
+    synthetic = load_synthetic_data(fnum_set, union_name_to_idx, unaff_fnum_lookup)
+    print(f"  {len(synthetic)} synthetic examples")
+
+    # Combine all examples
+    all_examples = labeled + synthetic
+    print(f"\nTotal: {len(all_examples)} examples")
+
+    # Assign splits based on query hash
+    print("\nAssigning splits...")
+    split_counts = defaultdict(int)
+    for ex in all_examples:
+        ex["split"] = get_split(ex["query"])
+        split_counts[ex["split"]] += 1
+
+    print(f"  Train: {split_counts['train']}")
+    print(f"  Val: {split_counts['val']}")
+    print(f"  Test: {split_counts['test']}")
+
+    # Save
+    print(f"\nSaving to {OUTPUT_PATH}...")
+    with open(OUTPUT_PATH, "w") as f:
+        json.dump(all_examples, f, indent=2)
+
+    print("Done!")
+
+    # Also print some stats by source and split
+    print("\nBreakdown by source and split:")
+    for source in ["labeled", "unaff_synthetic"]:
+        source_examples = [ex for ex in all_examples if ex["source"] == source]
+        source_splits = defaultdict(int)
+        for ex in source_examples:
+            source_splits[ex["split"]] += 1
+        print(
+            f"  {source}: train={source_splits['train']}, val={source_splits['val']}, test={source_splits['test']}"
+        )
+
+
+if __name__ == "__main__":
+    main()
