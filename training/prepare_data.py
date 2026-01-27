@@ -16,9 +16,14 @@ the pre-assigned splits rather than re-splitting.
 import csv
 import hashlib
 import json
+import re
 import sqlite3
 from collections import defaultdict
 from pathlib import Path
+
+# Pattern to extract prefix-desig_num-suffix from USW-style local numbers
+# e.g., "USW 10-06816-10" -> prefix=10, desig_num=6816, suffix=10
+PREFIX_PATTERN = re.compile(r"\b(\d{1,2})[-/](\d+)(?:[-/](\d{1,2}))?\b")
 
 DATA_DIR = Path(__file__).parent / "data"
 DB_PATH = Path(__file__).parent.parent / "opdr.db"
@@ -95,6 +100,29 @@ def load_fnum_lookups():
         if len(flist) == 1:  # Unambiguous mapping
             union_desig_lookup[(uname, int(dnum))] = int(flist[0])
 
+    # Build f_num -> set of prefixes lookup (for validation)
+    cur.execute(
+        """
+        SELECT f_num, GROUP_CONCAT(DISTINCT COALESCE(desiq_pre, ''))
+        FROM lm_data
+        WHERE f_num IS NOT NULL
+        GROUP BY f_num
+    """
+    )
+    fnum_to_prefixes = {}
+    for fnum, prefixes_str in cur.fetchall():
+        # Normalize prefixes: strip leading zeros
+        prefixes = set()
+        for p in prefixes_str.split(","):
+            if p:
+                try:
+                    prefixes.add(str(int(p)))  # "01" -> "1", "10" -> "10"
+                except ValueError:
+                    prefixes.add(p.upper())  # Non-numeric prefix
+            else:
+                prefixes.add("")  # Empty prefix
+        fnum_to_prefixes[int(fnum)] = prefixes
+
     # Build aff_abbr -> union_name lookup
     cur.execute(
         """
@@ -121,12 +149,64 @@ def load_fnum_lookups():
 
     conn.close()
 
-    return union_desig_lookup, aff_to_name, unaff_fnum_lookup
+    return (
+        union_desig_lookup,
+        aff_to_name,
+        unaff_fnum_lookup,
+        fnum_to_prefixes,
+    )
 
 
-def load_labeled_data(fnum_set, fnum_to_records, union_desig_lookup, aff_to_name):
-    """Load labeled_data.csv and resolve f_nums."""
+def extract_prefix_from_text(text, desig_num):
+    """
+    Extract prefix from text if it matches the pattern prefix-desig_num-suffix.
+
+    Returns normalized prefix (leading zeros stripped) or None if no match.
+    """
+    # First, try to find prefix-desig_num pattern where desig_num matches
+    matches = PREFIX_PATTERN.findall(text)
+    for prefix, num_str, suffix in matches:
+        try:
+            # Check if this match corresponds to our desig_num
+            num = int(num_str.lstrip("0") or "0")
+            if num == desig_num:
+                return str(int(prefix))  # Normalize: "01" -> "1"
+        except ValueError:
+            continue
+
+    # Also try pattern where desig_num comes first: desig_num-suffix-suffix
+    # e.g., "5306-02-03-04" where 5306 is desig_num
+    # This pattern should NOT trigger prefix validation since there's no prefix
+    # So we return None to skip validation
+    desig_str = str(desig_num)
+    desig_str_padded = desig_str.zfill(4)  # Also match zero-padded
+    if f"-{desig_str}-" in text or f"-{desig_str_padded}-" in text:
+        # desig_num appears after a dash but not with prefix pattern
+        return None
+    if text.startswith(f"{desig_str}-") or text.startswith(f"{desig_str_padded}-"):
+        return None
+
+    return None
+
+
+def load_labeled_data(
+    fnum_set,
+    fnum_to_records,
+    union_desig_lookup,
+    aff_to_name,
+    fnum_to_prefixes,
+):
+    """Load labeled_data.csv and resolve f_nums.
+
+    Resolution order:
+    1. Explicit f_num from CSV (set by disambiguate_by_unit_name.py)
+    2. Unambiguous (union_name, desig_num) lookup
+
+    Validation:
+    - Rejects rows where text has a prefix pattern that doesn't match the f_num's known prefixes
+    """
     examples = []
+    prefix_mismatches = 0
 
     with open(DATA_DIR / "labeled_data.csv") as f:
         reader = csv.DictReader(f)
@@ -140,6 +220,8 @@ def load_labeled_data(fnum_set, fnum_to_records, union_desig_lookup, aff_to_name
                 continue
 
             f_num = None
+            dnum = None
+            uname = aff_to_name.get(aff)
 
             # Try explicit f_num column
             if row.get("f_num"):
@@ -148,15 +230,29 @@ def load_labeled_data(fnum_set, fnum_to_records, union_desig_lookup, aff_to_name
                 except ValueError:
                     pass
 
-            # Try (union_name, desig_num) lookup
-            if not f_num:
-                uname = aff_to_name.get(aff)
-                if uname and row.get("desig_num"):
-                    try:
-                        dnum = int(float(row["desig_num"]))
-                        f_num = union_desig_lookup.get((uname, dnum))
-                    except ValueError:
-                        pass
+            # Try (union_name, desig_num) lookup for unambiguous cases
+            if not f_num and uname and row.get("desig_num"):
+                try:
+                    dnum = int(float(row["desig_num"]))
+                    f_num = union_desig_lookup.get((uname, dnum))
+                except ValueError:
+                    pass
+
+            # Parse desig_num for validation even if f_num came from CSV
+            if dnum is None and row.get("desig_num"):
+                try:
+                    dnum = int(float(row["desig_num"]))
+                except ValueError:
+                    pass
+
+            # Validate: reject if text has prefix pattern that doesn't match f_num's known prefixes
+            if f_num and dnum is not None and f_num in fnum_to_prefixes:
+                query_prefix = extract_prefix_from_text(text, dnum)
+                if query_prefix is not None:
+                    fnum_prefixes = fnum_to_prefixes[f_num]
+                    if query_prefix not in fnum_prefixes:
+                        prefix_mismatches += 1
+                        f_num = None
 
             if f_num and f_num in fnum_set and f_num in fnum_to_records:
                 examples.append(
@@ -168,6 +264,9 @@ def load_labeled_data(fnum_set, fnum_to_records, union_desig_lookup, aff_to_name
                         "records": fnum_to_records[f_num],
                     }
                 )
+
+    if prefix_mismatches:
+        print(f"  Rejected {prefix_mismatches} examples due to prefix mismatch")
 
     return examples
 
@@ -226,11 +325,20 @@ def main():
 
     # Load f_num resolution lookups from database
     print("\nLoading f_num lookups from database...")
-    union_desig_lookup, aff_to_name, unaff_fnum_lookup = load_fnum_lookups()
+    (
+        union_desig_lookup,
+        aff_to_name,
+        unaff_fnum_lookup,
+        fnum_to_prefixes,
+    ) = load_fnum_lookups()
 
     print("\nLoading labeled data...")
     labeled = load_labeled_data(
-        fnum_set, fnum_to_records, union_desig_lookup, aff_to_name
+        fnum_set,
+        fnum_to_records,
+        union_desig_lookup,
+        aff_to_name,
+        fnum_to_prefixes,
     )
     print(f"  {len(labeled)} labeled examples")
 
