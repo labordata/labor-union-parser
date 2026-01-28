@@ -7,8 +7,8 @@ MODEL_WEIGHTS = $(WEIGHTS_DIR)/char_cnn.pt
 
 all: $(MODEL_WEIGHTS)
 
-dual_tower_lowrank_vocab.pt : training/data/training_examples.json
-	python training/train_dual_tower_lowrank_vocab.py
+training/dual_task_model.pt : training/data/training_examples.json
+	python training/train_dual_task.py.py
 
 training/data/training_examples.json : training/data/unaff_synthetic.csv \
                                        training/data/labeled_data.csv \
@@ -16,7 +16,7 @@ training/data/training_examples.json : training/data/unaff_synthetic.csv \
                                        training/data/fnum_to_records.json
 	python training/prepare_data.py
 
-training/data/vocabularies.json : opdr.db
+training/data/vocabularies.json : opdr.db training/data/fnum_to_records.json
 	python training/generate_vocabularies.py
 
 training/data/fnum_to_records.json : opdr.db training/fnum_to_unit_identifier.csv
