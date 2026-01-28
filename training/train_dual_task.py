@@ -516,11 +516,12 @@ class RoPESelfAttentionLayer(nn.Module):
 
 
 class CrossAttentionLayer(nn.Module):
-    def __init__(self, embed_dim, num_heads=4, dropout=0.1):
+    def __init__(self, embed_dim, num_heads=4, dropout=0.1, attn_temperature=1.0):
         super().__init__()
         self.embed_dim = embed_dim
         self.num_heads = num_heads
         self.head_dim = embed_dim // num_heads
+        self.attn_temperature = attn_temperature
 
         self.q_proj = nn.Linear(embed_dim, embed_dim)
         self.k_proj = nn.Linear(embed_dim, embed_dim)
@@ -552,17 +553,22 @@ class CrossAttentionLayer(nn.Module):
             .transpose(1, 2)
         )
 
-        scores = torch.matmul(q, k.transpose(-2, -1)) / (self.head_dim**0.5)
-
+        # Build attention mask for SDPA
+        attn_mask = None
         if field_mask is not None:
-            scores = scores.masked_fill(
-                field_mask.unsqueeze(1).unsqueeze(2), float("-inf")
+            # field_mask: [B, K] where True = masked
+            # SDPA expects [B, num_heads, Q, K] with -inf for masked positions
+            attn_mask = (
+                field_mask.unsqueeze(1).unsqueeze(2).expand(B, self.num_heads, Q, K)
             )
+            attn_mask = torch.where(attn_mask, float("-inf"), 0.0)
 
-        attn = F.softmax(scores, dim=-1)
-        attn = self.dropout(attn)
+        # Use SDPA for numerical stability
+        dropout_p = self.dropout.p if self.training else 0.0
+        out = F.scaled_dot_product_attention(
+            q, k, v, attn_mask=attn_mask, dropout_p=dropout_p, is_causal=False
+        )
 
-        out = torch.matmul(attn, v)
         out = out.transpose(1, 2).reshape(B, Q, self.embed_dim)
         out = self.out_proj(out)
 
@@ -742,6 +748,180 @@ class DualTaskModel(nn.Module):
 
 
 # =============================================================================
+# Batch Encoding Helpers (for mining efficiency)
+# =============================================================================
+
+
+def encode_query_batch(queries, max_len=MAX_QUERY_LEN):
+    """Encode a batch of query strings into tensors."""
+    char_ids_list = []
+    is_number_list = []
+    numeric_ids_list = []
+
+    for query in queries:
+        char_ids, _, is_number, _, numeric_ids = smart_truncate_nonspace(query, max_len)
+        char_ids_list.append(char_ids)
+        is_number_list.append(is_number)
+        numeric_ids_list.append(numeric_ids)
+
+    return {
+        "char_ids": torch.tensor(char_ids_list, dtype=torch.long),
+        "is_number": torch.tensor(is_number_list, dtype=torch.long),
+        "numeric_ids": torch.tensor(numeric_ids_list, dtype=torch.long),
+    }
+
+
+def encode_record_batch(records, vocab):
+    """Encode a batch of record dicts into tensors."""
+    u_map = vocab["union_name_to_idx"]
+    d_map = vocab["desig_name_to_idx"]
+    p_map = vocab["prefix_to_idx"]
+    s_map = vocab["suffix_to_idx"]
+    uid_map = vocab["unit_id_to_idx"]
+
+    union_idx = []
+    desig_idx = []
+    prefix_idx = []
+    num_hash = []
+    num_val = []
+    suffix_idx = []
+    unit_id_idx = []
+
+    for rec in records:
+        union_idx.append(u_map.get(rec["union_name"], 0))
+        desig_idx.append(d_map.get(rec.get("desig_name", ""), 0))
+        prefix_norm = normalize_designation(rec.get("prefix", "") or "")
+        prefix_idx.append(p_map.get(prefix_norm, 0))
+        num_hash.append(
+            NUMBER_VOCAB.get(str(rec.get("desig_num", 0)), NUMBER_VOCAB["<UNK>"])
+        )
+        num_val.append(rec.get("desig_num", 0))
+        suffix_norm = normalize_designation(rec.get("suffix", "") or "")
+        suffix_idx.append(s_map.get(suffix_norm, 0))
+        unit_id_idx.append(uid_map.get(rec.get("unit_id", ""), 0))
+
+    return {
+        "union_idx": torch.tensor(union_idx, dtype=torch.long),
+        "desig_idx": torch.tensor(desig_idx, dtype=torch.long),
+        "prefix_idx": torch.tensor(prefix_idx, dtype=torch.long),
+        "num_hash": torch.tensor(num_hash, dtype=torch.long),
+        "num_val": torch.tensor(num_val, dtype=torch.long),
+        "suffix_idx": torch.tensor(suffix_idx, dtype=torch.long),
+        "unit_id_idx": torch.tensor(unit_id_idx, dtype=torch.long),
+    }
+
+
+# =============================================================================
+# Hard Negative Mining (ANCE-style)
+# =============================================================================
+
+
+def encode_all_records(model, fnum_to_records, vocab, batch_size=512):
+    """
+    Encode ALL records once at start of mining epoch.
+    No filtering - include every record variant.
+    Returns embeddings (on GPU), records list, and f_num tensor.
+    """
+    model.eval()
+    device = next(model.parameters()).device
+
+    all_records = []
+    record_fnums = []
+
+    for fnum, records in fnum_to_records.items():
+        for rec in records:
+            all_records.append(rec)
+            record_fnums.append(fnum)
+
+    all_record_embs = []
+    for i in range(0, len(all_records), batch_size):
+        batch_recs = all_records[i : i + batch_size]
+        rec_batch = encode_record_batch(batch_recs, vocab)
+        rec_batch = {k: v.to(device) for k, v in rec_batch.items()}
+
+        with torch.no_grad():
+            field_emb, _ = model.record_encoder(
+                rec_batch["union_idx"],
+                rec_batch["desig_idx"],
+                rec_batch["prefix_idx"],
+                rec_batch["num_hash"],
+                rec_batch["num_val"],
+                rec_batch["suffix_idx"],
+                rec_batch["unit_id_idx"],
+            )
+            emb = model.dual_tower.encode_record(field_emb)
+        all_record_embs.append(emb)  # Keep on GPU
+
+    all_record_embs = torch.cat(all_record_embs, dim=0)  # [M, 128] on GPU
+    record_fnums = torch.tensor(record_fnums)  # CPU is fine for indexing
+
+    return all_record_embs, all_records, record_fnums
+
+
+def mine_hard_candidates(
+    model,
+    train_examples,
+    all_record_embs,
+    all_records,
+    record_fnums,
+    vocab,
+    k=10,
+    query_batch_size=256,
+):
+    """
+    Mine top-k most similar records for all training examples.
+
+    Uses batched matrix multiplication for efficiency - encodes all queries
+    and computes all similarities in batches on GPU.
+    """
+    model.eval()
+    device = next(model.parameters()).device
+
+    # Filter to train examples only
+    train_indices = [
+        i for i, ex in enumerate(train_examples) if ex.get("split") == "train"
+    ]
+
+    # Move record embeddings to GPU if not already
+    all_record_embs = all_record_embs.to(device)  # [M, 128]
+
+    # Process queries in batches
+    for batch_start in tqdm(
+        range(0, len(train_indices), query_batch_size), desc="Mining"
+    ):
+        batch_indices = train_indices[batch_start : batch_start + query_batch_size]
+        batch_queries = [train_examples[i]["query"] for i in batch_indices]
+
+        # Encode batch of queries
+        query_batch = encode_query_batch(batch_queries)
+        query_batch = {k: v.to(device) for k, v in query_batch.items()}
+
+        with torch.no_grad():
+            token_emb, mask = model.query_encoder(
+                query_batch["char_ids"],
+                query_batch["is_number"],
+                query_batch["numeric_ids"],
+            )
+            query_embs = model.dual_tower.encode_query(token_emb, mask)  # [B, 128]
+
+            # Compute similarities: [B, M]
+            sims = torch.matmul(query_embs, all_record_embs.T)
+
+            # Get top-k for all queries at once: [B, k]
+            topk_indices = sims.topk(k, dim=1).indices  # [B, k]
+
+        # Store results
+        topk_indices = topk_indices.cpu().tolist()
+        for i, ex_idx in enumerate(batch_indices):
+            train_examples[ex_idx]["mined_candidates"] = [
+                {"f_num": record_fnums[j].item(), "record": all_records[j]}
+                for j in topk_indices[i]
+            ]
+
+    return train_examples
+
+
+# =============================================================================
 # Dataset
 # =============================================================================
 
@@ -818,6 +998,89 @@ class DualTaskDataset(Dataset):
         }
 
 
+class DualTaskDatasetWithCandidates(Dataset):
+    """
+    Training dataset that returns K+1 candidates per query (for ANCE training).
+
+    Each example provides:
+    - query tokens
+    - K+1 candidate records (1 positive + K mined candidates)
+    - f_num for each candidate (to identify positives in the loss)
+    """
+
+    def __init__(self, examples, vocab):
+        self.examples = examples
+        self.u_map = vocab["union_name_to_idx"]
+        self.d_map = vocab["desig_name_to_idx"]
+        self.p_map = vocab["prefix_to_idx"]
+        self.s_map = vocab["suffix_to_idx"]
+        self.uid_map = vocab["unit_id_to_idx"]
+
+    def __len__(self):
+        return len(self.examples)
+
+    def __getitem__(self, idx):
+        ex = self.examples[idx]
+        query = ex["query"]
+        query_fnum = ex["f_num"]
+
+        # Positive record (always first in candidate list)
+        pos_record = random.choice(ex["records"])
+
+        # Build candidate list with f_nums: [(fnum, record), ...]
+        candidates = [(query_fnum, pos_record)]  # First is always a positive
+
+        if "mined_candidates" in ex and ex["mined_candidates"]:
+            for cand_data in ex["mined_candidates"]:
+                candidates.append((cand_data["f_num"], cand_data["record"]))
+
+        # Encode query
+        char_ids, _, is_number, _, numeric_ids = smart_truncate_nonspace(
+            query, MAX_QUERY_LEN
+        )
+
+        # Encode all candidates [K+1, ...]
+        cand_fnums = []  # Track f_num for supervised contrastive loss
+        cand_union_idx = []
+        cand_desig_idx = []
+        cand_prefix_idx = []
+        cand_num_hash = []
+        cand_num_val = []
+        cand_suffix_idx = []
+        cand_unit_id_idx = []
+
+        for fnum, rec in candidates:
+            cand_fnums.append(fnum)
+            cand_union_idx.append(self.u_map.get(rec["union_name"], 0))
+            cand_desig_idx.append(self.d_map.get(rec.get("desig_name", ""), 0))
+            prefix_norm = normalize_designation(rec.get("prefix", "") or "")
+            cand_prefix_idx.append(self.p_map.get(prefix_norm, 0))
+            cand_num_hash.append(
+                NUMBER_VOCAB.get(str(rec.get("desig_num", 0)), NUMBER_VOCAB["<UNK>"])
+            )
+            cand_num_val.append(rec.get("desig_num", 0))
+            suffix_norm = normalize_designation(rec.get("suffix", "") or "")
+            cand_suffix_idx.append(self.s_map.get(suffix_norm, 0))
+            cand_unit_id_idx.append(self.uid_map.get(rec.get("unit_id", ""), 0))
+
+        return {
+            "char_ids": torch.tensor(char_ids, dtype=torch.long),
+            "is_number": torch.tensor(is_number, dtype=torch.long),
+            "numeric_ids": torch.tensor(numeric_ids, dtype=torch.long),
+            "f_num": torch.tensor(query_fnum, dtype=torch.long),  # Query's f_num
+            # Candidate records [K+1, ...]
+            "cand_fnums": torch.tensor(cand_fnums, dtype=torch.long),  # For loss
+            "cand_union_idx": torch.tensor(cand_union_idx, dtype=torch.long),
+            "cand_desig_idx": torch.tensor(cand_desig_idx, dtype=torch.long),
+            "cand_prefix_idx": torch.tensor(cand_prefix_idx, dtype=torch.long),
+            "cand_num_hash": torch.tensor(cand_num_hash, dtype=torch.long),
+            "cand_num_val": torch.tensor(cand_num_val, dtype=torch.long),
+            "cand_suffix_idx": torch.tensor(cand_suffix_idx, dtype=torch.long),
+            "cand_unit_id_idx": torch.tensor(cand_unit_id_idx, dtype=torch.long),
+            "num_candidates": torch.tensor(len(candidates), dtype=torch.long),
+        }
+
+
 # =============================================================================
 # Loss Functions
 # =============================================================================
@@ -850,7 +1113,73 @@ def supervised_contrastive_loss(similarities, fnum_ids, temperature=0.07):
     log_prob = sim_scaled - torch.log(denom)
 
     # Average log prob over all positives for each query
-    num_positives = positive_mask.sum(dim=1).float()
+    num_positives = positive_mask.sum(dim=1).float().clamp(min=1)
+    loss = -(log_prob * positive_mask.float()).sum(dim=1) / num_positives
+
+    return loss.mean()
+
+
+def supervised_contrastive_loss_asymmetric(
+    similarities, query_fnums, cand_fnums, temperature=0.07
+):
+    """
+    Supervised contrastive loss for asymmetric N queries × M candidates.
+
+    Args:
+        similarities: [N, M] similarity/score matrix
+        query_fnums: [N] f_num for each query
+        cand_fnums: [M] f_num for each candidate
+        temperature: temperature scaling
+
+    Returns:
+        Scalar loss
+    """
+    # positive_mask[i,j] = True if query i and candidate j have same f_num
+    positive_mask = query_fnums.unsqueeze(1) == cand_fnums.unsqueeze(0)  # [N, M]
+
+    # Scale and stabilize
+    sim_scaled = similarities / temperature
+    sim_scaled = sim_scaled - sim_scaled.max(dim=1, keepdim=True).values
+
+    # Softmax denominator over all candidates
+    exp_sim = torch.exp(sim_scaled)
+    denom = exp_sim.sum(dim=1, keepdim=True)
+
+    # Log probabilities
+    log_prob = sim_scaled - torch.log(denom)
+
+    # Average log prob over all positives for each query
+    num_positives = positive_mask.sum(dim=1).float().clamp(min=1)
+    loss = -(log_prob * positive_mask.float()).sum(dim=1) / num_positives
+
+    return loss.mean()
+
+
+def contrastive_loss_with_mask(similarities, positive_mask, temperature=0.07):
+    """
+    Contrastive loss where each query compares against its own candidates.
+
+    Args:
+        similarities: [N, K+1] - each query vs its own K+1 candidates
+        positive_mask: [N, K+1] - True where candidate is a positive (same f_num)
+        temperature: temperature scaling
+
+    Returns:
+        Scalar loss
+    """
+    # Scale and stabilize
+    sim_scaled = similarities / temperature
+    sim_scaled = sim_scaled - sim_scaled.max(dim=1, keepdim=True).values
+
+    # Softmax denominator over candidates
+    exp_sim = torch.exp(sim_scaled)
+    denom = exp_sim.sum(dim=1, keepdim=True)
+
+    # Log probabilities
+    log_prob = sim_scaled - torch.log(denom)
+
+    # Average log prob over all positives for each query
+    num_positives = positive_mask.sum(dim=1).float().clamp(min=1)
     loss = -(log_prob * positive_mask.float()).sum(dim=1) / num_positives
 
     return loss.mean()
@@ -864,6 +1193,52 @@ def supervised_contrastive_loss(similarities, fnum_ids, temperature=0.07):
 def collate_fn(batch):
     """Collate batch items into tensors."""
     return {k: torch.stack([item[k] for item in batch]) for k in batch[0].keys()}
+
+
+def collate_fn_with_candidates(batch):
+    """
+    Collate batch items with variable-length candidates.
+
+    Pads candidate tensors to max number of candidates in the batch.
+    Uses -1 for cand_fnums padding (will never match a real f_num).
+    """
+    max_cands = max(item["num_candidates"].item() for item in batch)
+
+    # Candidate field keys that need padding
+    cand_keys = [
+        "cand_fnums",
+        "cand_union_idx",
+        "cand_desig_idx",
+        "cand_prefix_idx",
+        "cand_num_hash",
+        "cand_num_val",
+        "cand_suffix_idx",
+        "cand_unit_id_idx",
+    ]
+
+    padded_batch = []
+    for item in batch:
+        num_cands = item["num_candidates"].item()
+        new_item = {}
+
+        for key, val in item.items():
+            if key in cand_keys:
+                if num_cands < max_cands:
+                    pad_size = max_cands - num_cands
+                    # Use -1 for cand_fnums (won't match any f_num), 0 for others
+                    pad_value = -1 if key == "cand_fnums" else 0
+                    new_item[key] = F.pad(val, (0, pad_size), value=pad_value)
+                else:
+                    new_item[key] = val
+            else:
+                new_item[key] = val
+
+        padded_batch.append(new_item)
+
+    return {
+        k: torch.stack([item[k] for item in padded_batch])
+        for k in padded_batch[0].keys()
+    }
 
 
 def evaluate(model, dataloader, device, temperature=0.07):
@@ -919,17 +1294,27 @@ def evaluate(model, dataloader, device, temperature=0.07):
 @click.option(
     "--checkpoint", type=click.Path(exists=True), help="Resume from checkpoint"
 )
+@click.option(
+    "--mine-every", default=5, help="Mine candidates every N epochs (0 to disable)"
+)
+@click.option("--mine-k", default=50, help="Number of candidates to mine per example")
+@click.option(
+    "--fresh-optimizer", is_flag=True, help="Don't load optimizer state from checkpoint"
+)
 def train_dual_task(
     epochs=40,
     batch_size=128,
     lr=1e-4,
     checkpoint=None,
+    mine_every=5,
+    mine_k=10,
+    fresh_optimizer=False,
     retrieval_weight=1.0,
     reranking_weight=1.0,
     temperature=0.07,
 ):
     """
-    Dual-task training loop with in-batch negatives for both tasks.
+    Dual-task training loop with ANCE-style hard negative mining.
 
     Both tasks share:
     - CharCNN text encoder
@@ -939,8 +1324,16 @@ def train_dual_task(
     Task-specific:
     - Retrieval: attention pooling + projection
     - Re-ranking: cross-attention + classifier
+
+    ANCE mining:
+    - Periodically (every mine_every epochs), encode all records and find
+      top-k most similar candidates for each training query
+    - Training uses N×(K+1) candidates per batch (mined + positive)
+    - Supervised contrastive loss identifies positives via f_num matching
     """
     print(f"Using device: {DEVICE}")
+    if mine_every > 0:
+        print(f"ANCE mining: every {mine_every} epochs, k={mine_k}")
 
     # Track starting epoch for resumption
     start_epoch = 0
@@ -981,6 +1374,32 @@ def train_dual_task(
     test_ex = [ex for ex in all_examples if ex["split"] == "test"]
 
     print(f"  Train: {len(train_ex)}, Val: {len(val_ex)}, Test: {len(test_ex)}")
+
+    # Build fnum_to_records mapping for mining (use all examples, deduplicated)
+    fnum_to_records = {}
+    seen_records = {}  # (fnum, record_key) -> record dict
+    for ex in all_examples:
+        fnum = ex["f_num"]
+        for rec in ex["records"]:
+            # Create hashable key from record fields
+            key = (
+                fnum,
+                rec.get("union_name", ""),
+                rec.get("desig_name", ""),
+                rec.get("prefix", ""),
+                rec.get("desig_num", 0),
+                rec.get("suffix", ""),
+                rec.get("unit_id", ""),
+            )
+            if key not in seen_records:
+                seen_records[key] = rec
+                if fnum not in fnum_to_records:
+                    fnum_to_records[fnum] = []
+                fnum_to_records[fnum].append(rec)
+    total_records = sum(len(recs) for recs in fnum_to_records.values())
+    print(
+        f"  {len(fnum_to_records)} unique f_nums, {total_records} unique records for mining"
+    )
 
     # Create datasets
     train_ds = DualTaskDataset(
@@ -1085,17 +1504,58 @@ def train_dual_task(
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
 
     # If resuming, restore optimizer/scheduler state
-    if ckpt and "optimizer_state_dict" in ckpt:
+    # Skip optimizer state when using ANCE (mine_every > 0) or --fresh-optimizer
+    # The training dynamics change significantly with ANCE, causing NaN gradients
+    skip_optimizer = fresh_optimizer or mine_every > 0
+    if ckpt and "optimizer_state_dict" in ckpt and not skip_optimizer:
         optimizer.load_state_dict(ckpt["optimizer_state_dict"])
         if "scheduler_state_dict" in ckpt:
             scheduler.load_state_dict(ckpt["scheduler_state_dict"])
         print("  Restored optimizer and scheduler state")
+    elif ckpt and skip_optimizer:
+        print("  Using fresh optimizer (ANCE mode or --fresh-optimizer)")
 
     best_val_acc = ckpt.get("best_val_acc", 0.0) if ckpt else 0.0
     step = start_epoch * len(train_loader)
 
+    # Track whether we have mined candidates
+    has_mined_candidates = False
+
     end_epoch = start_epoch + epochs
     for epoch in range(start_epoch, end_epoch):
+        # === Mining step (periodically, starting after warmup) ===
+        if mine_every > 0 and epoch > 0 and epoch % mine_every == 0:
+            print(f"\nMining hard candidates at epoch {epoch}...")
+
+            # Encode all records ONCE
+            all_record_embs, all_records, record_fnums = encode_all_records(
+                model, fnum_to_records, vocab, batch_size=512
+            )
+            print(f"  Encoded {len(all_records)} records")
+
+            # Mine for each training example
+            train_ex = mine_hard_candidates(
+                model,
+                train_ex,
+                all_record_embs,
+                all_records,
+                record_fnums,
+                vocab,
+                k=mine_k,
+            )
+            has_mined_candidates = True
+
+            # Recreate dataset and dataloader with candidates
+            train_ds = DualTaskDatasetWithCandidates(train_ex, vocab)
+            train_loader = DataLoader(
+                train_ds,
+                batch_size=batch_size,
+                shuffle=True,
+                collate_fn=collate_fn_with_candidates,
+                drop_last=True,
+            )
+            print("  Recreated dataloader with mined candidates")
+
         model.train()
         epoch_retrieval_loss = 0.0
         epoch_rerank_loss = 0.0
@@ -1107,34 +1567,130 @@ def train_dual_task(
 
             optimizer.zero_grad()
 
-            # Forward both tasks
-            retrieval_sim, rerank_scores = model.forward_dual_task(
-                batch["char_ids"],
-                batch["is_number"],
-                batch["numeric_ids"],
-                batch["union_idx"],
-                batch["desig_idx"],
-                batch["prefix_idx"],
-                batch["num_hash"],
-                batch["num_val"],
-                batch["suffix_idx"],
-                batch["unit_id_idx"],
-            )
+            # Check if batch has mined candidates
+            if has_mined_candidates and "cand_fnums" in batch:
+                # === ANCE training: each query vs its own K+1 candidates ===
+                N = batch["char_ids"].shape[0]
+                K_plus_1 = batch["cand_union_idx"].shape[1]  # candidates per query
 
-            # Supervised contrastive loss: all same-f_num pairs are positives
-            retrieval_loss = supervised_contrastive_loss(
-                retrieval_sim, batch["f_num"], temperature
-            )
+                # Query f_nums [N] and candidate f_nums [N, K+1]
+                query_fnums = batch["f_num"]  # [N]
+                cand_fnums = batch["cand_fnums"]  # [N, K+1]
 
-            # Re-ranking loss (rerank_scores are raw logits, so use temperature=1.0)
-            rerank_loss = supervised_contrastive_loss(
-                rerank_scores, batch["f_num"], temperature=1.0
-            )
+                # Encode queries [N, 128]
+                token_emb, padding_mask = model.query_encoder(
+                    batch["char_ids"], batch["is_number"], batch["numeric_ids"]
+                )
+                query_emb = model.dual_tower.encode_query(token_emb, padding_mask)
+
+                # Encode candidates [N*(K+1), ...] then reshape to [N, K+1, 128]
+                cand_union_idx = batch["cand_union_idx"].view(-1)
+                cand_desig_idx = batch["cand_desig_idx"].view(-1)
+                cand_prefix_idx = batch["cand_prefix_idx"].view(-1)
+                cand_num_hash = batch["cand_num_hash"].view(-1)
+                cand_num_val = batch["cand_num_val"].view(-1)
+                cand_suffix_idx = batch["cand_suffix_idx"].view(-1)
+                cand_unit_id_idx = batch["cand_unit_id_idx"].view(-1)
+
+                field_emb_flat, field_mask_flat = model.record_encoder(
+                    cand_union_idx,
+                    cand_desig_idx,
+                    cand_prefix_idx,
+                    cand_num_hash,
+                    cand_num_val,
+                    cand_suffix_idx,
+                    cand_unit_id_idx,
+                )
+                cand_emb_flat = model.dual_tower.encode_record(
+                    field_emb_flat
+                )  # [N*(K+1), 128]
+                cand_emb = cand_emb_flat.view(N, K_plus_1, -1)  # [N, K+1, 128]
+
+                # Compute similarities: each query vs its own candidates [N, K+1]
+                retrieval_sim = torch.einsum("nd,nkd->nk", query_emb, cand_emb)
+
+                # Contrastive loss: positive_mask[i,j] = (query_fnums[i] == cand_fnums[i,j])
+                positive_mask = query_fnums.unsqueeze(1) == cand_fnums  # [N, K+1]
+                retrieval_loss = contrastive_loss_with_mask(
+                    retrieval_sim, positive_mask, temperature
+                )
+
+                # Re-ranking: each query vs its own K+1 candidates
+                seq_len = token_emb.shape[1]
+                field_emb = field_emb_flat.view(
+                    N, K_plus_1, 6, -1
+                )  # [N, K+1, 6, embed_dim]
+                field_mask = field_mask_flat.view(N, K_plus_1, 6)  # [N, K+1, 6]
+
+                # Expand queries: [N, K+1, seq_len, embed_dim]
+                q_exp = token_emb.unsqueeze(1).expand(N, K_plus_1, seq_len, -1)
+                q_mask_exp = padding_mask.unsqueeze(1).expand(N, K_plus_1, seq_len)
+
+                # Flatten to [N*K+1, ...] for batch scoring
+                q_flat = q_exp.reshape(N * K_plus_1, seq_len, -1)
+                q_mask_flat = q_mask_exp.reshape(N * K_plus_1, seq_len)
+                r_flat = field_emb.reshape(N * K_plus_1, 6, -1)
+                r_mask_flat = field_mask.reshape(N * K_plus_1, 6)
+
+                # Score all pairs and reshape to [N, K+1]
+                scores_flat = model.cross_attention.score_pair(
+                    q_flat, q_mask_flat, r_flat, r_mask_flat
+                )
+                rerank_scores = scores_flat.view(N, K_plus_1)
+
+                rerank_loss = contrastive_loss_with_mask(
+                    rerank_scores, positive_mask, temperature=1.0
+                )
+            else:
+                # === Standard training with in-batch negatives ===
+                retrieval_sim, rerank_scores = model.forward_dual_task(
+                    batch["char_ids"],
+                    batch["is_number"],
+                    batch["numeric_ids"],
+                    batch["union_idx"],
+                    batch["desig_idx"],
+                    batch["prefix_idx"],
+                    batch["num_hash"],
+                    batch["num_val"],
+                    batch["suffix_idx"],
+                    batch["unit_id_idx"],
+                )
+
+                # Supervised contrastive loss: all same-f_num pairs are positives
+                retrieval_loss = supervised_contrastive_loss(
+                    retrieval_sim, batch["f_num"], temperature
+                )
+
+                # Re-ranking loss (rerank_scores are raw logits, so use temperature=1.0)
+                rerank_loss = supervised_contrastive_loss(
+                    rerank_scores, batch["f_num"], temperature=1.0
+                )
 
             # Combined loss
             loss = retrieval_weight * retrieval_loss + reranking_weight * rerank_loss
 
+            # Check for NaN and skip batch if detected
+            if torch.isnan(loss):
+                print(f"\nWARNING: NaN in loss at epoch {epoch}, skipping batch")
+                print(
+                    f"  retrieval_loss={retrieval_loss.item()}, rerank_loss={rerank_loss.item()}"
+                )
+                optimizer.zero_grad()
+                continue
+
             loss.backward()
+
+            # Check for NaN gradients
+            has_nan_grad = False
+            for name, param in model.named_parameters():
+                if param.grad is not None and torch.isnan(param.grad).any():
+                    print(f"\nWARNING: NaN gradient in {name}, skipping batch")
+                    has_nan_grad = True
+                    break
+            if has_nan_grad:
+                optimizer.zero_grad()
+                continue
+
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
             scheduler.step()
@@ -1153,9 +1709,12 @@ def train_dual_task(
             )
 
         # Epoch summary
-        avg_ret = epoch_retrieval_loss / epoch_batches
-        avg_rer = epoch_rerank_loss / epoch_batches
-        print(f"Epoch {epoch+1}: retrieval={avg_ret:.4f}, rerank={avg_rer:.4f}")
+        if epoch_batches > 0:
+            avg_ret = epoch_retrieval_loss / epoch_batches
+            avg_rer = epoch_rerank_loss / epoch_batches
+            print(f"Epoch {epoch+1}: retrieval={avg_ret:.4f}, rerank={avg_rer:.4f}")
+        else:
+            print(f"Epoch {epoch+1}: All batches skipped due to NaN!")
 
         # Validation
         val_metrics = evaluate(model, val_loader, DEVICE, temperature)
@@ -1181,7 +1740,7 @@ def train_dual_task(
                     "val_metrics": val_metrics,
                     "best_val_acc": best_val_acc,
                 },
-                "dual_task_model.pt",
+                "training/dual_task_model.pt",
             )
             print(f"  Saved best model (avg_acc={avg_acc:.4f})")
 
@@ -1190,7 +1749,7 @@ def train_dual_task(
 
     # Load best model and evaluate on test set
     print("\nEvaluating best model on test set...")
-    best_ckpt = torch.load("dual_task_model.pt", map_location=DEVICE)
+    best_ckpt = torch.load("training/dual_task_model.pt", map_location=DEVICE)
     model.load_state_dict(best_ckpt["model_state_dict"])
     test_metrics = evaluate(model, test_loader, DEVICE, temperature)
     print(
