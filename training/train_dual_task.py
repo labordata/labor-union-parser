@@ -353,6 +353,8 @@ class CrossAttentionHead(nn.Module):
 
     Takes shared query token embeddings and applies cross-attention to
     shared record field embeddings (which include unit_id and field types).
+
+    Uses field self-attention before cross-attention and a bigger classifier.
     """
 
     def __init__(self, embed_dim=EMBED_DIM):
@@ -363,9 +365,18 @@ class CrossAttentionHead(nn.Module):
         self.cross_attn1 = CrossAttentionLayer(embed_dim, num_heads=4)
         self.cross_attn2 = CrossAttentionLayer(embed_dim, num_heads=4)
 
+        # Field self-attention before cross-attention
+        self.field_self_attn = nn.MultiheadAttention(
+            embed_dim, num_heads=4, batch_first=True
+        )
+        self.field_norm = nn.LayerNorm(embed_dim)
+
         # Classifier
         self.classifier = nn.Sequential(
-            nn.Linear(embed_dim, embed_dim),
+            nn.Linear(embed_dim, embed_dim * 2),
+            nn.GELU(),
+            nn.Dropout(0.1),
+            nn.Linear(embed_dim * 2, embed_dim),
             nn.GELU(),
             nn.Dropout(0.1),
             nn.Linear(embed_dim, 1),
@@ -384,11 +395,17 @@ class CrossAttentionHead(nn.Module):
         Returns:
             scores: [batch]
         """
+        # Let fields interact first
+        field_enhanced, _ = self.field_self_attn(
+            field_emb, field_emb, field_emb, key_padding_mask=field_mask
+        )
+        field_emb = self.field_norm(field_emb + field_enhanced)
+
         # Cross-attention
         enhanced = self.cross_attn1(token_emb, field_emb, token_mask, field_mask)
         enhanced = self.cross_attn2(enhanced, field_emb, token_mask, field_mask)
 
-        # Pool and classify
+        # Mean pooling
         mask_expanded = (~token_mask).unsqueeze(-1).float()
         pooled = (enhanced * mask_expanded).sum(1) / mask_expanded.sum(1).clamp(min=1)
 
@@ -1474,13 +1491,15 @@ def train_dual_task(
                 elif (
                     param.shape[0] < model_state[name].shape[0]
                     and len(param.shape) == 2
+                    and param.shape[1] == model_state[name].shape[1]
                 ):
-                    # Embedding grew - copy old weights to beginning
+                    # Embedding grew - copy old weights to beginning (only if 2nd dim matches)
                     model_state[name][: param.shape[0]].copy_(param)
                     print(
                         f"  Expanded {name}: {param.shape[0]} -> {model_state[name].shape[0]}"
                     )
                 else:
+                    # Shape mismatch - skip and use random init
                     print(
                         f"  Skipped {name}: shape mismatch {param.shape} vs {model_state[name].shape}"
                     )
