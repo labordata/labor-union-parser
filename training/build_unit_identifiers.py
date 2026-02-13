@@ -2,12 +2,17 @@
 """
 Build pseudo unit identifiers for f_nums.
 
-Logic: If two f_nums share ANY representation (union_name, desig_name, desig_num, prefix, suffix),
-they should have different unit identifiers (A, B, C, etc.).
+Logic: If two f_nums share ANY representation (union_name, desig_name, desig_num,
+prefix, suffix) IN THE SAME YEAR, they should have different unit identifiers
+(A, B, C, etc.).
+
+Requiring same-year overlap avoids creating spurious conflicts between f_nums that
+changed prefixes/suffixes over time but were never actually indistinguishable in
+any single filing period.
 
 This is a graph connected components problem:
 - Nodes: f_nums
-- Edges: f_nums that share a representation
+- Edges: f_nums that share a representation in the same year
 - Component: group of f_nums that transitively share representations
 - Within each component, assign A, B, C... identifiers
 """
@@ -30,46 +35,59 @@ def normalize_designation(s):
 
 def get_fnum_representations():
     """
-    Get all unique representations for each f_num.
+    Get all unique (year, representation) pairs for each f_num,
+    plus unit_names per f_num for cross-year conflict detection.
 
     Returns:
-        dict: f_num -> set of (union_name, desig_name, desig_num, prefix, suffix) tuples
+        fnum_reprs: f_num -> set of (year, union_name, desig_name, desig_num, prefix, suffix)
+        fnum_unit_names: f_num -> set of unit_name strings
     """
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
 
-    # Get all unique representations per f_num
+    # Get all unique representations per f_num per year
     cur.execute(
         """
         SELECT
             f_num,
+            yr_covered,
             union_name,
             desig_name,
             COALESCE(desig_num, 0) as desig_num,
             desiq_pre,
-            desig_suf
+            desig_suf,
+            COALESCE(unit_name, '') as unit_name
         FROM lm_data
         WHERE f_num IS NOT NULL
           AND union_name IS NOT NULL
-        GROUP BY f_num, union_name, desig_name, desig_num, desiq_pre, desig_suf
+          AND yr_covered IS NOT NULL
+        GROUP BY f_num, yr_covered, union_name, desig_name, desig_num,
+                 desiq_pre, desig_suf, unit_name
     """
     )
 
     fnum_reprs = defaultdict(set)
+    fnum_unit_names = defaultdict(set)
 
     for row in cur.fetchall():
-        fnum, union_name, desig_name, desig_num, prefix, suffix = row
+        fnum, year, union_name, desig_name, desig_num, prefix, suffix, unit_name = row
 
         # Normalize
+        # Non-numeric prefixes are invisible to the model (mapped to 0),
+        # so treat them as empty for conflict detection.
+        prefix_norm = str(int(prefix)) if prefix and prefix.strip().isdigit() else ""
+
         repr_key = (
+            year,
             union_name,
             desig_name or "",
             int(desig_num),
-            normalize_designation(prefix or ""),
+            prefix_norm,
             normalize_designation(suffix or ""),
         )
 
         fnum_reprs[fnum].add(repr_key)
+        fnum_unit_names[fnum].add(unit_name.strip().upper())
 
     conn.close()
 
@@ -81,20 +99,25 @@ def get_fnum_representations():
         repr_counts[len(reprs)] += 1
 
     print("\nRepresentations per f_num:")
-    for count in sorted(repr_counts.keys()):
+    for count in sorted(repr_counts.keys())[:10]:
         print(f"  {count} repr(s): {repr_counts[count]} f_nums")
+    if len(repr_counts) > 10:
+        print(f"  ... and {len(repr_counts) - 10} more")
 
-    return fnum_reprs
+    return fnum_reprs, fnum_unit_names
 
 
-def build_conflict_graph(fnum_reprs):
+def build_conflict_graph(fnum_reprs, fnum_unit_names):
     """
-    Build a graph where f_nums are connected if they share any representation.
+    Build a graph where f_nums are connected if:
+    1. They share a representation in the same year, OR
+    2. They share structured fields across years but have different unit_names
+       (indicating they are genuinely different entities, not the same local re-filed).
 
     Returns:
         dict: f_num -> set of conflicting f_nums
     """
-    # First, build a reverse index: representation -> set of f_nums
+    # Build a reverse index: (year, repr) -> set of f_nums
     repr_to_fnums = defaultdict(set)
 
     for fnum, reprs in fnum_reprs.items():
@@ -107,18 +130,47 @@ def build_conflict_graph(fnum_reprs):
     }
     print(f"\nFound {len(shared_reprs)} representations shared by multiple f_nums")
 
-    # Build conflict graph
+    # Build conflict graph from same-year edges
     conflicts = defaultdict(set)
 
     for repr_key, fnums in shared_reprs.items():
-        # All f_nums with this representation conflict with each other
         fnums_list = list(fnums)
         for i, fnum1 in enumerate(fnums_list):
             for fnum2 in fnums_list[i + 1 :]:
                 conflicts[fnum1].add(fnum2)
                 conflicts[fnum2].add(fnum1)
 
-    print(f"Built conflict graph with {len(conflicts)} f_nums having conflicts")
+    same_year_count = len(conflicts)
+    print(f"Same-year conflicts: {same_year_count} f_nums")
+
+    # Also build cross-year edges for f_nums that share structured fields
+    # but have different unit_names (different entities needing disambiguation)
+    struct_to_fnums = defaultdict(set)
+    for fnum, reprs in fnum_reprs.items():
+        for repr_key in reprs:
+            # Strip year from the key
+            struct_key = repr_key[1:]  # (union, desig, num, prefix, suffix)
+            struct_to_fnums[struct_key].add(fnum)
+
+    cross_year_edges = 0
+    for struct_key, fnums in struct_to_fnums.items():
+        if len(fnums) <= 1:
+            continue
+        fnums_list = list(fnums)
+        for i, fnum1 in enumerate(fnums_list):
+            for fnum2 in fnums_list[i + 1 :]:
+                if fnum2 in conflicts.get(fnum1, set()):
+                    continue  # already connected
+                # Only add edge if unit_names differ
+                names1 = fnum_unit_names.get(fnum1, set())
+                names2 = fnum_unit_names.get(fnum2, set())
+                if names1 != names2:
+                    conflicts[fnum1].add(fnum2)
+                    conflicts[fnum2].add(fnum1)
+                    cross_year_edges += 1
+
+    print(f"Cross-year edges (different unit_names): {cross_year_edges}")
+    print(f"Total conflict graph: {len(conflicts)} f_nums")
 
     # Count conflict degrees
     conflict_degrees = defaultdict(int)
@@ -216,7 +268,12 @@ def assign_identifiers(components):
         sorted_fnums = sorted(component)
 
         for idx, fnum in enumerate(sorted_fnums):
-            identifier = get_identifier(idx)
+            if component_size == 1:
+                # Isolated f_num: no conflicts, unit_id not needed
+                # Empty string will map to padding idx and get masked
+                identifier = ""
+            else:
+                identifier = get_identifier(idx)
             fnum_to_id[fnum] = (comp_idx, identifier)
 
     print(f"\nMax identifiers needed in one component: {max_component_size}")
@@ -256,10 +313,10 @@ def main():
     print("=" * 80)
 
     # Step 1: Get all representations per f_num
-    fnum_reprs = get_fnum_representations()
+    fnum_reprs, fnum_unit_names = get_fnum_representations()
 
     # Step 2: Build conflict graph
-    conflicts = build_conflict_graph(fnum_reprs)
+    conflicts = build_conflict_graph(fnum_reprs, fnum_unit_names)
 
     # Step 3: Find connected components
     all_fnums = set(fnum_reprs.keys())

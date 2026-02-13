@@ -604,7 +604,7 @@ USW District 11-9460-03,USW,9460.0,train,542243.0
 IBT-493,IBT,493.0,train,12610.0
 USW District 4 Local 397-08,USW,397.0,train,22606.0
 DC3-2012,PAT,2012.0,train,544917.0
-Union 135,UNK,135.0,train,9836.0
+Union 135,UNK,135.0,train,
 SMART -Transportation Division Local 1705,SMART,1705.0,train,545441.0
 Workers United-1882,WU,1882.0,train,70555.0
 International Brotherhood of Electrical Workers 229,IBEW,229.0,train,36043.0
@@ -723,7 +723,7 @@ USW District 11-11-578-04,USW,578.0,train,23471.0
 CIC-2761,CJA,2761.0,test,42651.0
 USW AFL-CIO.CLC District 10 Local 3199-14,USW,3199.0,train,12807.0
 UNITED STEELWORKERS 00701-02,USW,701.0,train,
-USW-2-100,USW,100.0,train,533783.0
+USW-2-100,USW,100.0,train,
 WU Rochester Regional Jt Bd-168-39,WU,168.0,test,31829.0
 UFCW-4,UFCW,4.0,train,
 IUPAT District Council 91 460,PAT,460.0,train,4103.0
@@ -805,7 +805,7 @@ USW-387,USW,387.0,train,
 TEAMSTERS LOCAL 107 (312) 107,IBT,107.0,train,33820.0
 RWDSU/UFCW 665,RWDSU,665.0,train,14663.0
 USW-3403-25,USW,3403.0,train,27801.0
-Roberto Local Paro 1164,UNK,1164.0,train,35241.0
+Roberto Local Paro 1164,UNK,1164.0,train,
 USW District 8-14637-01,USW,14637.0,train,12047.0
 "International Longshore and Warehouse Union, Local 13, Allied Division 13, Allied Division",ILWU,13.0,train,22865.0
 AFSCME Council 5-2032,AFSCME,2032.0,train,
@@ -1407,7 +1407,7 @@ AFSCME-1721,AFSCME,1721.0,train,543473.0
 AFGE-520,AFGE,520.0,train,542627.0
 "United Automobile, Aerospace and Agricultural Implement Workers of America (UAW) 647",UAW,647.0,train,5597.0
 IBEW Local 94,IBEW,94.0,train,41429.0
-Susan Jansen 637,UNK,637.0,train,6628.0
+Susan Jansen 637,UNK,637.0,train,
 OPCMIA-692  A438,OPCM,692.0,train,530002.0
 UNITED STEELWORKERS 07198,USW,7198.0,train,65011.0
 OPEIU-2,OPEIU,2.0,train,35161.0
@@ -1529,7 +1529,7 @@ UNITED STEELWORKERS 13742,USW,13742.0,train,65637.0
 Miscellaneous Drivers Helpers Healthcare and Public Employees-610,IBT,610.0,train,12170.0
 International Assoc. of EMTs & Paramedics R7-601,NAGE,601.0,test,
 "Teamsters, Local 92 92",IBT,92.0,train,16786.0
-United Steelworkers International Union 2-482-1,USW,482.0,train,34156.0
+United Steelworkers International Union 2-482-1,USW,482.0,train,
 United Steel Workers 3199-18,USW,3199.0,train,12807.0
 IUOE 302,IUOE,302.0,train,40284.0
 USW Local 13788 District 4,USW,13788.0,train,15608.0
@@ -2173,7 +2173,7 @@ United Steelworkers 1441-01,USW,1441.0,train,69490.0
 IUOE-312,IUOE,312.0,train,39603.0
 Indiana/Kentucky/Ohio Regional Council of Carpenters 357,CJA,357.0,train,518994.0
 IUOE-474,IUOE,474.0,train,3583.0
-ge 137,UNK,137.0,train,30469.0
+ge 137,IBT,137.0,train,30469.0
 UNITE HERE-1,UNITHE,1.0,train,
 IBT-912,IBT,912.0,train,1263.0
 "Danbury Nurses, AFT CT 5047",AFT,5047.0,train,513616.0
@@ -2425,7 +2425,7 @@ CWA AFL-CIO-1040,CWA,1040.0,train,516626.0
 "Chauffeurs, Teamsters, and Helpers 175",IBT,175.0,train,1608.0
 BAC-7,BAC,7.0,train,
 UAW Local 1327,UAW,1327.0,train,50602.0
-USW Local 1-607,USW,607.0,train,69912.0
+USW Local 1-607,USW,607.0,train,
 United Steelworkers 00314-**,USW,314.0,train,
 International Brotherhood of Electrical Workers 455,IBEW,455.0,train,12158.0
 USW-8042,USW,8042.0,train,70002.0
@@ -2587,7 +2587,7 @@ PPF-353,PPF,353.0,train,45512.0
 UAW-349-05,UAW,349.0,train,20038.0
 United Steelworkers 1685,USW,1685.0,train,42920.0
 UAW-893-3,UAW,893.0,train,61856.0
-USW-7-662-04,USW,662.0,train,13858.0
+USW-7-662-04,USW,662.0,train,
 USW-2695-01,USW,2695.0,train,13769.0
 "United Union of Roofers, Waterproofers and Allied Workers Local 30",RWAW,30.0,train,32653.0
 OAPSE/AFSCME Local 4/AFL-CIO-045,AFSCME,45.0,train,
@@ -2677,7 +2677,7 @@ IBT-186,IBT,186.0,train,5693.0
 IAM District 10 DS140,IAM,140.0,train,517672.0
 International Brotherhood of Teamsters 469,IBT,469.0,train,22600.0
 "United Brotherhood of Carpenters and Joiners of America, New England Regional Council of Carpenters 51",CJA,51.0,train,32720.0
-United Steelworkers International Union 2-482,USW,482.0,train,34156.0
+United Steelworkers International Union 2-482,USW,482.0,train,
 Brotherhood Railway Carmen Division/TCU-IAM 6069,TCU/IAM,6069.0,train,513363.0
 UAW-1834,UAW,1834.0,train,71019.0
 Carpenters-270,CJA,270.0,train,544919.0
@@ -3300,7 +3300,7 @@ United Steelworkers 477,USW,477.0,train,
 IBT 90,IBT,90.0,train,26747.0
 IAMAW 2919,IAM,2919.0,train,544313.0
 IBT-19,IBT,19.0,train,67095.0
-Thurman Crider 475,UNK,475.0,train,15667.0
+Thurman Crider 475,UNK,475.0,train,
 IBT 282,IBT,282.0,train,9185.0
 United Steelworkers International Union 333M-02,USW,333.0,train,
 OPERATING ENGINEERS 101,IUOE,101.0,train,22411.0
@@ -3928,7 +3928,7 @@ USW-2002-22,USW,2002.0,train,7040.0
 Shopmen Iron Workers 501,BSOIW,501.0,train,26950.0
 BCTGM-326,BCTGMI,326.0,train,
 IAMAW-778,IAM,778.0,train,20167.0
-United Steelworkers International Union 2-666,USW,666.0,train,20984.0
+United Steelworkers International Union 2-666,USW,666.0,train,
 IAMAW District 65-1180,IAM,1180.0,train,11245.0
 IBT-600,IBT,600.0,train,26065.0
 UAW-164,UAW,164.0,train,41608.0
@@ -4221,7 +4221,7 @@ United Steelworkers International Union 1327-01,USW,1327.0,train,
 International Longshoremen's Association 2038,ILA,2038.0,train,516947.0
 USW-2632-25,USW,2632.0,train,24986.0
 Teamsters 41,IBT,41.0,train,
-USW-7-00209-11,USW,209.0,train,6709.0
+USW-7-00209-11,USW,209.0,train,
 Unite Here-737,UNITHE,737.0,train,68519.0
 USW Local 9-0590,USW,590.0,train,62015.0
 LIUNA Local 1104,LIUNA,1104.0,test,516522.0
@@ -4302,7 +4302,7 @@ IAMAW-1575,IAM,1575.0,train,26263.0
 USW Local 9923 / 9-978,USW,,train,
 "United Automobile, Aerospace & Agricultural Implement Workers of America (UAW) 838",UAW,838.0,train,2232.0
 USW-2377,USW,2377.0,train,16535.0
-USA -7-662-02,USW,662.0,train,13858.0
+USA -7-662-02,USW,662.0,train,
 USW-08031-04,USW,8031.0,train,69960.0
 SEIU Local 721 721,SEIU,721.0,train,
 USW District 4 Local 08228-77,USW,8228.0,train,71222.0
@@ -5003,7 +5003,7 @@ UNITED STEELWORKERS INTERNATIONAL UNION 2L-12,USW,12.0,train,
 IBT-630,IBT,630.0,train,34093.0
 UAW International Union 388,UAW,388.0,train,36344.0
 Joseph Waddy UFCW Local 1500,UFCW,1500.0,train,22675.0
-United Steelworkers 2-667,USW,667.0,train,2587.0
+United Steelworkers 2-667,USW,667.0,train,
 BSOIW -665,BSOIW,665.0,train,14754.0
 SEIU UHWE-1199 MD/DC Region,SEIU,1199.0,train,69557.0
 International Longshore & Warehouse Union (ILWU) 142,ILWU,142.0,train,
@@ -5127,7 +5127,7 @@ Sheet Metal Air Rail and Transportation  Workers 2,SMART,2.0,train,
 Unite Here Local 737,UNITHE,737.0,train,68519.0
 RWDSU/UFCW-530,RWDSU,530.0,train,26181.0
 TEAMSTERS UNION LOCAL 952,IBT,952.0,train,34503.0
-Workers United-50-25,WU,50.0,train,541871.0
+Workers United-50-25,WU,50.0,train,
 IAMAW-735,IAM,735.0,train,22628.0
 Transport Workers Union 241,TWU,241.0,train,45929.0
 Communications Workers of America District 7,CWA,7.0,train,12590.0
@@ -5468,7 +5468,7 @@ IATSE Local 60/115/321/412/835,IATSE,,train,
 United Steel Workers 4-2058,USW,2058.0,train,34473.0
 United Steelworkers 3403-88,USW,3403.0,train,27801.0
 Teamsters Local 317,IBT,317.0,train,48830.0
-USW 2-667,USW,667.0,train,2587.0
+USW 2-667,USW,667.0,train,
 IAMAW 1569,IAM,1569.0,train,24198.0
 Teamsters Local Union  70,IBT,70.0,train,10997.0
 USW-1017,USW,1017.0,train,
@@ -5516,10 +5516,10 @@ IBT-1149,IBT,1149.0,train,17078.0
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Worke 6967-06",USW,6967.0,train,63558.0
 New England Regional Council of Carpenters 51,CJA,51.0,train,32720.0
 CWA Local 1104,CWA,1104.0,train,
-USW-2-286,USW,286.0,train,38280.0
+USW-2-286,USW,286.0,train,
 Teamsters-896,IBT,896.0,train,30466.0
 AFM Local 6,AFM,6.0,test,46854.0
-Local 986,UNK,986.0,train,15379.0
+Local 986,UNK,986.0,train,
 International Brotherhood of Electrical Workers 160,IBEW,160.0,train,22522.0
 USW International Union 1188-02,USW,1188.0,test,33279.0
 USW - Sub-District 1-1-00243-10,USW,243.0,train,
@@ -6423,7 +6423,7 @@ IAMAW-Lodge 4,IAM,4.0,train,
 IAM&AW (Machinists Union0 S-76,IAM,76.0,train,519335.0
 "Retail, Wholesale, and Department Store Union 102",RWDSU,102.0,train,64672.0
 USW-880,USW,880.0,train,38747.0
-UNION 135,UNK,135.0,test,9836.0
+UNION 135,UNK,135.0,test,
 International Association of Machinists & Aerospace Workers Distrit Lodge 70-639,IAM,639.0,train,62534.0
 UGSOA 163,UGSOA,163.0,test,543849.0
 "International Union, UAW 2387",UAW,2387.0,train,541698.0
@@ -6562,7 +6562,7 @@ Teamsters General 137,IBT,137.0,test,30469.0
 Retail Wholesale Department Store Union 390,RWDSU,390.0,train,8309.0
 International Association of Machinist 971,IAM,971.0,train,43159.0
 AFSCME Council 5-,AFSCME,5.0,train,543153.0
-gen 137,UNK,137.0,train,30469.0
+gen 137,UNK,137.0,train,
 International Brotherhood of Electrical Workers 2327,IBEW,2327.0,test,68374.0
 UNITED STEELWORKERS 4-00406-21,USW,406.0,train,22461.0
 District Council 91 1118,PAT,1118.0,train,20708.0
@@ -6595,7 +6595,7 @@ United Steelworkers 9230-02,USW,9230.0,train,519241.0
 IBEW Local Union 949,IBEW,949.0,test,44433.0
 "Allied Crafts Union No. 1909, ILA, AFL-CIO 1909",ILA,1909.0,train,515233.0
 United Steelworkers 8183-27,USW,8183.0,train,70900.0
-Cary Eldridge 4831,UNK,4831.0,train,40528.0
+Cary Eldridge 4831,UNK,4831.0,train,
 ILA-2038,ILA,2038.0,train,516947.0
 WU NY-NJ Regional Jt Bd-25/63,WU,,train,
 IUOE District 40-3,IUOE,3.0,train,35651.0
@@ -7329,7 +7329,7 @@ IAMAW-165,IAM,165.0,train,
 Iron Workers Local 396 396,BSOIW,396.0,train,19470.0
 "IBEW Local Union 53, Maintenance 53",IBEW,53.0,train,24867.0
 USW-173,USW,173.0,train,
-USW-7-0662,USW,662.0,train,13858.0
+USW-7-0662,USW,662.0,train,
 IBEW Local 212,IBEW,212.0,train,11118.0
 PAT District 1162,PAT,1162.0,train,11300.0
 GMP-201,GMP,201.0,train,18841.0
@@ -7795,7 +7795,7 @@ IASTE 8,IATSE,8.0,train,
 USW Local 8851-97,USW,8851.0,train,512947.0
 International Brotherhood Of Teamsters 186,IBT,186.0,train,5693.0
 International Asso. of Heat & Frost Insulators & Allied Workers 90,HFIA,90.0,train,32191.0
-Workers United 50-25,WU,50.0,train,541871.0
+Workers United 50-25,WU,50.0,train,
 UAW-400,UAW,400.0,train,10321.0
 Teamsters  120,IBT,120.0,train,1526.0
 International Federation of Professional and Technical Engineers 86,PTE,86.0,train,540030.0
@@ -7919,7 +7919,7 @@ International Alliance of Theatrical Stage Employees 442,IATSE,442.0,train,26354
 CWA Local 89177,CWA,89177.0,train,540579.0
 IUOW-139,IUOE,139.0,train,35847.0
 IBEW-51,IBEW,51.0,train,11356.0
-USW-2-482-1,USW,482.0,train,34156.0
+USW-2-482-1,USW,482.0,train,
 International Brotherhood of Electrical Works 71,IBEW,71.0,train,46050.0
 USW-959,USW,959.0,train,
 IATSE-631,IATSE,631.0,train,34398.0
@@ -8266,7 +8266,7 @@ International Brotherhood of Teamsters Local No. 355 355,IBT,355.0,train,28763.0
 UGSOA Local 250,UGSOA,250.0,train,546342.0
 United Food & Commercial Workers Union  27,UFCW,27.0,train,
 Middle River Employees-1146,AFSCME,1146.0,train,540978.0
-BCTGM Local 19,BCTGMI,19.0,train,22303.0
+BCTGM Local 19,BCTGMI,19.0,train,
 USW District 11-9460-14,USW,9460.0,train,542243.0
 USW AFL-CIO CLC 9423,USW,9423.0,train,541401.0
 Plumbers & Steamfitters 33,PPF,33.0,train,26728.0
@@ -8321,7 +8321,7 @@ UNITED STEELWORKERS INTERNATIONAL UNION 6037-04,USW,6037.0,train,54626.0
 Teamsters Local Union 2,IBT,2.0,train,1364.0
 USW 8-719-**,USW,719.0,train,544234.0
 IATSE-82,IATSE,82.0,train,5003.0
-USW 7-00209-07,USW,209.0,train,6709.0
+USW 7-00209-07,USW,209.0,train,
 International Association of Machinist & Areospace Workers 759,IAM,759.0,train,29731.0
 Boilermakers 83,BBF,83.0,train,37291.0
 CWA -1122,CWA,1122.0,train,55902.0
@@ -8440,7 +8440,7 @@ Teamsters Local 781,IBT,781.0,train,16955.0
 UAW 38,UAW,38.0,train,19584.0
 ILA Local 1964,ILA,1964.0,train,68028.0
 Truck Drivers Local Union No. 299 299,IBT,299.0,train,34784.0
-O 2,UNK,2.0,train,35161.0
+O 2,UNK,2.0,train,
 "United Electrical, Radio & Machine Workers of America 275",UE,275.0,train,510290.0
 Plumbers & Steamfitters  33,PPF,33.0,train,26728.0
 Operative Plastering & Cement Masons-908,OPCM,908.0,train,33708.0
@@ -8474,7 +8474,7 @@ USW-18-4,USW,18.0,train,
 USW-2002-04,USW,2002.0,train,7040.0
 UNITE HERE  57,UNITHE,57.0,train,71089.0
 General Teamsters  174,IBT,174.0,train,7715.0
-RONNY ADAMSON 3844,UNK,3844.0,train,517438.0
+RONNY ADAMSON 3844,UNK,3844.0,train,
 Teamsters 707,IBT,707.0,train,33570.0
 "IATSE 52, 100, 600, 700, 764",IATSE,,train,
 USW 134L-20,USW,134.0,train,29886.0
@@ -9145,7 +9145,7 @@ INTERNATIONAL ASSOC. OF MACHINISTS AND AEROSPACE WORKERS 794,IAM,794.0,train,407
 USW District 9 AFL-CIO CLC-8249,USW,8249.0,train,19530.0
 INTL BROTHERHOOD OF TEAMSTERS 245,IBT,245.0,train,45585.0
 USW Local 9506-03,USW,9506.0,train,543307.0
-United Steelworkers 2-482-1,USW,482.0,train,34156.0
+United Steelworkers 2-482-1,USW,482.0,train,
 "Union of electronic, electrical, Salaried, machine, furniture workers 463",CWA,463.0,train,42141.0
 AFSCME Council 31 Local 3273,AFSCME,3273.0,train,544755.0
 USW-6063,USW,6063.0,train,55499.0
@@ -9247,7 +9247,7 @@ Teamsters-636,IBT,636.0,train,15700.0
 IAMAW-1391,IAM,1391.0,train,32749.0
 AFGE Local 1923,AFGE,1923.0,train,501092.0
 IAMAW-1580 District 65,IAM,1580.0,train,10077.0
-USW Sub-District 2 Local 7-0662,USW,662.0,train,13858.0
+USW Sub-District 2 Local 7-0662,USW,662.0,train,
 International Brotherhood of Teamsters 79,IBT,79.0,train,35477.0
 GMP-70,GMP,70.0,test,512824.0
 IUPAT AFL-CIO District Council 36 510,PAT,510.0,train,33758.0
@@ -9636,7 +9636,7 @@ CMRJB  2512,WU,2512.0,train,517695.0
 OPCMIA-90,OPCM,90.0,train,13909.0
 CWA 1101,CWA,1101.0,train,
 International Brotherhood of Electrical Workers #1837,IBEW,1837.0,train,42350.0
-United Steelworkers 7-662,USW,662.0,train,13858.0
+United Steelworkers 7-662,USW,662.0,train,
 United Steelworkers 7234-17,USW,7234.0,train,65192.0
 OPERATIVE PLASTERERS & CEMENT MASONS LOCAL 692 75,OPCM,692.0,train,530002.0
 United Electrical Radio and Machine Workers of America 155,UE,155.0,train,4178.0
@@ -10189,7 +10189,7 @@ Workers United-364,WU,364.0,train,542250.0
 "International Union, UAW 239",UAW,239.0,train,14302.0
 "Office & Professional Employees Internatoinal Union, Local 29",OPEIU,29.0,train,16408.0
 WFHNP-5040,AFT,5040.0,train,516719.0
-Scott Wilson 637,UNK,637.0,train,6628.0
+Scott Wilson 637,UNK,637.0,train,
 Insulation Association of Heat & Frost Insulators & Allied Workers 50,HFIA,50.0,train,543677.0
 CWA-7,CWA,7.0,test,12590.0
 IBT Local 439,IBT,439.0,train,14236.0
@@ -10599,14 +10599,14 @@ United Steelworkers 1035-12,USW,1035.0,test,
 SEIU Local 775 Staff Union Union,UNAFF,775.0,train,542717.0
 LIUNA-1652,LIUNA,1652.0,train,543318.0
 Teamsters-429,IBT,429.0,train,33012.0
-United Steelworkers AFL-CIO-CLC 2-380,USW,380.0,train,59524.0
+United Steelworkers AFL-CIO-CLC 2-380,USW,380.0,train,
 IBEW Local 1963,IBEW,1963.0,train,48286.0
 United Autoworkers 893-17,UAW,893.0,test,61856.0
 International Brotherhood of Electrical Workers 1634,IBEW,1634.0,train,526768.0
 USW-188S-02,USW,188.0,train,
 HFIA-81,HFIA,81.0,train,42304.0
 United Steelworkers 3403-46,USW,3403.0,train,27801.0
-USW 7-00209-11,USW,209.0,train,6709.0
+USW 7-00209-11,USW,209.0,train,
 UWA-242,UWU,242.0,train,52308.0
 TWU-241,TWU,241.0,train,45929.0
 BCTGM-492,BCTGMI,492.0,train,32748.0
@@ -11028,7 +11028,7 @@ BCTGM-9,BCTGMI,9.0,train,50749.0
 International Brotherhood of Electrical Workers 481,IBEW,481.0,train,32086.0
 SEIU/OPEU Local 503,SEIU,503.0,train,519355.0
 IBT-67,IBT,67.0,test,26592.0
-USW-7-00209-00,USW,209.0,train,6709.0
+USW-7-00209-00,USW,209.0,train,
 USW 8363**,USW,8363.0,train,505493.0
 IAMAW 964/725,IAM,,train,
 CMRJB-2822,WU,2822.0,train,544849.0
@@ -11066,7 +11066,7 @@ IFPTE  Laboratory Unit 20,PTE,20.0,train,16156.0
 IAMAW 776,IAM,776.0,train,
 ibew 2154 2154,IBEW,2154.0,train,62321.0
 IBT 92,IBT,92.0,train,16786.0
-UNITED STEELWORKERS INTERNATIONAL UNION 1-607,USW,607.0,train,69912.0
+UNITED STEELWORKERS INTERNATIONAL UNION 1-607,USW,607.0,train,
 UTCRA/LIUNA Local 12,LIUNA,12.0,train,545454.0
 UAW-282,UAW,282.0,train,20066.0
 UFT/AFT Local 2,AFT,2.0,train,
@@ -11382,7 +11382,7 @@ CMRJB 229,WU,229.0,train,41048.0
 IAMAW-23,IAM,23.0,train,24574.0
 NORTHERN CALIFORNIA DISTRICT COUNCIL OF LABORERS / LOCAL 67 67,LIUNA,67.0,train,
 ICWUC/UFCW  483-c,UFCW,483.0,train,33821.0
-USW -7-662-01,USW,662.0,train,13858.0
+USW -7-662-01,USW,662.0,train,
 IBEW 257,IBEW,257.0,train,52904.0
 LIUNA-207,LIUNA,207.0,train,50955.0
 IAMAW 688 District 9,IAM,688.0,train,28837.0
@@ -11748,7 +11748,7 @@ UAW-1571,UAW,1571.0,train,66489.0
 ILA Local 1909 1909,ILA,1909.0,train,515233.0
 IUE-CWA-84911,CWA,84911.0,train,52968.0
 USW-4-00380,USW,380.0,train,13055.0
-599-257,UNK,257.0,train,34423.0
+599-257,UNK,257.0,train,
 Akron Federation of Musicians 24,AFM,24.0,train,29154.0
 International Brotherhood of Teamsters  270,IBT,270.0,train,37852.0
 United Auto Workers 904,UAW,904.0,train,63138.0
@@ -11763,7 +11763,7 @@ LIUNA-32 & 727,LIUNA,,train,
 Painters And Allied Trades District Council 36 2345,PAT,2345.0,train,533903.0
 UAW-2333,UAW,2333.0,train,50166.0
 IBB-651,BBF,651.0,train,10126.0
-USW-7-00209-07,USW,209.0,train,6709.0
+USW-7-00209-07,USW,209.0,train,
 DEIU LOCAL 2015 2015,SEIU,2015.0,train,545348.0
 IAMAW District Lodge 66 1115,IAM,1115.0,train,40654.0
 USW -1852,USW,1852.0,train,28254.0
@@ -11824,7 +11824,7 @@ IAM District 160-289,IAM,289.0,train,19877.0
 RWDSU Local 108,RWDSU,108.0,train,22833.0
 CWA Multiple Local 1101 1103 1104 1107 1108 1109,CWA,,train,
 UA 13,PPF,13.0,train,55764.0
-Gary Pickett 254,UNK,254.0,train,35335.0
+Gary Pickett 254,UNK,254.0,train,
 Mid-Atlantic Regional Joint Board of Workers United-131-2,WU,131.0,train,
 NY-NY Regional Joint Board 7587,WU,7587.0,train,541062.0
 "IAMAW, District 37 1786",IAM,1786.0,train,62957.0
@@ -11909,7 +11909,7 @@ International Association of Machinists and Aerospace Workers District Lodge 171
 IUE-CWA 86821,CWA,86821.0,train,9044.0
 USW District 11-11-578-**,USW,578.0,train,23471.0
 United Steelworkers  9014-12,USW,9014.0,train,513623.0
-Lynne Meade 243,UNK,243.0,test,30804.0
+Lynne Meade 243,UNK,243.0,test,
 United Steelworkers AFL-CIO_CLC 1945,USW,1945.0,train,194.0
 CMRJB Local 304,WU,304.0,train,35818.0
 USW 9040-1,USW,9040.0,train,513885.0
@@ -12300,7 +12300,7 @@ IAMAW-1346,IAM,1346.0,train,36601.0
 "NABET-CWA, AFL-CIO 51025",CWA,51025.0,train,36986.0
 International Brotherhood of Teamsters 251,IBT,251.0,train,30541.0
 IBT-327,IBT,327.0,train,22830.0
-United Steelworkers 7-717,USW,717.0,train,22648.0
+United Steelworkers 7-717,USW,717.0,train,
 Unite Here  11,UNITHE,11.0,train,507066.0
 Wokrers United 2031,WU,2031.0,test,2785.0
 USW-1671,USW,1671.0,train,64737.0
@@ -12594,7 +12594,7 @@ CMRJB WU/SEIU 84,WU,84.0,train,28740.0
 UAW-4911,UAW,4911.0,train,542249.0
 USW District 8 Local 832**,USW,832.0,train,60388.0
 Ironworkers / Shopmen-516,BSOIW,516.0,test,20632.0
-United Steelworkers 7-209,USW,209.0,train,6709.0
+United Steelworkers 7-209,USW,209.0,train,
 St. Louis- Kansas City Carpenters Regional Council 1310,CJA,1310.0,train,26095.0
 "RI Council 94, AFSCME, AFL-CIO",AFSCME,94.0,train,542672.0
 International Brotherhood of Brotherhood 186,IBT,186.0,train,5693.0
@@ -13536,7 +13536,7 @@ UNITE HERE 1,UNITHE,1.0,train,
 "Theatrical Stage Employees Union Local Two, IATSE 2",IATSE,2.0,train,
 IUE-CWA 81206,CWA,81206.0,train,526939.0
 IATSE 8,IATSE,8.0,train,
-Dan DeCrotie 1205,UNK,1205.0,train,23458.0
+Dan DeCrotie 1205,UNK,1205.0,train,
 "United Steelworkers, AFL-CIO. CLC 9447-10",USW,9447.0,train,541544.0
 International Brotherhood of Teamsters-243,IBT,243.0,train,30804.0
 GCC/IBT 6-505M,PPPWU,505.0,train,64088.0
@@ -13760,7 +13760,7 @@ WU NY/NJ Regional Jt Bd-340,WU,340.0,train,
 Service Employees International Union 334,SEIU,334.0,train,19058.0
 IBT Local 627,IBT,627.0,train,45528.0
 IBT-516,IBT,516.0,train,37897.0
-Joseph Silva 30,UNK,30.0,train,5854.0
+Joseph Silva 30,UNK,30.0,train,
 GCIU/IBT-17-M,PPPWU,17.0,train,33964.0
 IAMAW 1180,IAM,1180.0,train,11245.0
 Communications Workers of America-7803,CWA,7803.0,train,41938.0
@@ -14321,7 +14321,7 @@ RWDSU/UFCW 93,RWDSU,93.0,train,22541.0
 UNITED STEELWORKERS INTERNATIONAL UNION 3610-01,USW,3610.0,train,13781.0
 CMRJB-2741,WU,2741.0,train,543688.0
 CITUI/CWA-177 & 14406,CWA,,train,
-USW Local 2-667,USW,667.0,train,2587.0
+USW Local 2-667,USW,667.0,train,
 BCTGM LOCAL UNION 111,BCTGMI,111.0,train,63644.0
 UNITED STEELWORKERS 4-00380-08,USW,380.0,train,13055.0
 Teamsters 492,IBT,492.0,train,25801.0
@@ -14574,7 +14574,7 @@ LIUNA-165,LIUNA,165.0,test,17888.0
 Internationl Association of Machinest and Aero Space Workes 1445,IAM,1445.0,train,47719.0
 IAM-1243,IAM,1243.0,train,16480.0
 USW Local 1510,USW,1510.0,train,541860.0
-USW  -7-00717,USW,717.0,train,22648.0
+USW  -7-00717,USW,717.0,train,
 USW Local 1435-01,USW,1435.0,train,46525.0
 USW AFL-CIO CLC-9447-04,USW,9447.0,train,541544.0
 AFSCME Council 31 Local 3212,AFSCME,3212.0,train,543716.0
@@ -14904,7 +14904,7 @@ International Brotherhood of Boilermakers 584,BBF,584.0,test,
 United Steelworkers 7-429,USW,429.0,train,13002.0
 Teamster 264,IBT,264.0,train,38823.0
 "International Union, Security, Police and Fire Professionals of America (SPFPA) 1111",SPFPA,1111.0,train,543338.0
-USW-1-607,USW,607.0,train,69912.0
+USW-1-607,USW,607.0,train,
 Sheet Metal Air Rail Transportation (SMART Union ) 55,SMART,55.0,train,
 USW-9-00007-01,USW,7.0,train,542074.0
 "Mid-Atlantic Regional Joint Board, Workers United-371",WU,371.0,train,
@@ -14995,7 +14995,7 @@ IBT Local 962,IBT,962.0,train,36804.0
 UNITED STEELWORKERS 00318-60,USW,318.0,train,32980.0
 Int'l Assoc. of Machinists and Aerospace Workers DL776 2340,IAM,2340.0,train,538089.0
 USW -1216-01,USW,1216.0,train,3899.0
-Local 641 641,UNK,641.0,train,21998.0
+Local 641 641,UNK,641.0,train,
 UBC-405,CJA,405.0,train,526883.0
 IAMAW 1784,IAM,1784.0,train,37470.0
 Chicago Teachers Union - Charter Division 1,AFT,1.0,train,545781.0
@@ -15298,7 +15298,7 @@ SEIU -1199,SEIU,1199.0,train,
 Painters and Allied Trades District Council 36 1991,PAT,1991.0,train,543377.0
 RWDSU/UFCW-173,RWDSU,173.0,train,512360.0
 Teamsters  760,IBT,760.0,train,43443.0
-USW-7-00209-10,USW,209.0,train,6709.0
+USW-7-00209-10,USW,209.0,train,
 AFGE-505,AFGE,505.0,train,514340.0
 IUE-CWA 81204,CWA,81204.0,train,66696.0
 USW Local 00504,USW,504.0,train,
@@ -15405,7 +15405,7 @@ Sheet Metal Workers 219,SMART,219.0,train,
 AFM-101 473,AFM,101.0,train,18820.0
 Office and Professional Employees International Union 494,OPEIU,494.0,train,509497.0
 USW District 4-15024-58,USW,15024.0,train,70272.0
-USW Local 2-286,USW,286.0,train,38280.0
+USW Local 2-286,USW,286.0,train,
 IAMAW District 8-1613,IAM,1613.0,train,60959.0
 BAC 8 Southeast,BAC,8.0,train,545009.0
 United Steelworkers 9230-05,USW,9230.0,train,519241.0
@@ -16124,7 +16124,7 @@ WAREHOUSE UNION  ILWU LOCAL 6,ILWU,6.0,train,28319.0
 District Council 82/ St Cloud & Central Minnesota Paint Agreement 386,PAT,386.0,train,47882.0
 USW-6521-10,USW,6521.0,train,61620.0
 Carpenters & Piledrivers-1846,CJA,1846.0,test,29977.0
-USW -7-662,USW,662.0,train,13858.0
+USW -7-662,USW,662.0,train,
 IBT 431,IBT,431.0,train,28816.0
 Teamsters Local 261,IBT,261.0,train,15399.0
 "Int. Ass. of Bridge, Structurual, Ornamental and Reinforcing Iron Workers, Local 473",BSOIW,473.0,train,29144.0
@@ -16185,7 +16185,7 @@ USW-8823-04,USW,8823.0,train,512887.0
 International Longshoremen's Association Local 1429,ILA,1429.0,train,2771.0
 Minnesota Newspaper and Communications Guild TNG-CWA Local 37002,CWA,37002.0,train,21764.0
 Communications Workers of America 9509,CWA,9509.0,train,18781.0
-USW 7-00209-00,USW,209.0,train,6709.0
+USW 7-00209-00,USW,209.0,train,
 Industrial and Allied Workers 101,IBT,101.0,train,67240.0
 USW District 11973 Local 4-00406-30,USW,406.0,train,22461.0
 Operative Plasterers' and Cement Masons' Int'l. Assn. 599,OPCM,599.0,train,541342.0
@@ -16346,7 +16346,7 @@ AFGE-1867,AFGE,1867.0,train,501088.0
 IUE-CWA Local 84911,CWA,84911.0,train,52968.0
 UFCW 1473,UFCW,1473.0,train,543517.0
 Iron Workers Local  495,BSOIW,495.0,train,32510.0
-United Steelworkers 7-662-02,USW,662.0,train,13858.0
+United Steelworkers 7-662-02,USW,662.0,train,
 Teamsters-107,IBT,107.0,train,33820.0
 INTERNATIONAL UNION OF OPERATING ENGINEERS 428,IUOE,428.0,train,40109.0
 Operative Plasterers & Cement Masons 143,OPCM,143.0,train,34404.0
@@ -16644,7 +16644,7 @@ International Union  UAW 1395,UAW,1395.0,train,64203.0
 Steamfitters Pipefitters Local  455,PPF,455.0,train,26741.0
 USW-2-945,USW,945.0,train,18499.0
 USW District 11-9230-05,USW,9230.0,test,519241.0
-United Steelworkers 7-662-01,USW,662.0,train,13858.0
+United Steelworkers 7-662-01,USW,662.0,train,
 USW Local 1259-07,USW,1259.0,train,19830.0
 Intgernational Union of Operating Engineers Local 18-S,IUOE,18.0,train,39040.0
 BSOIW-502,BSOIW,502.0,train,37269.0
@@ -21653,7 +21653,7 @@ Local 324 International Union of Operating Engineers,IUOE,324.0,train,19088.0
 "SERVICE EMPLOYEES INTERNATIONAL UNION, LOCAL 615, AFL-CIO",SEIU,615.0,train,542718.0
 "Wells Fargo Workers United, affiliated with Communications Workers of America",CWA,,train,
 UNITE HERE LOCAL 33,UNITHE,33.0,train,
-"SUPPORTING STAFF ASSOCIATION, SEIU, LOCAL 693, AFL-CIO",UNAFF,6.0,train,541615.0
+"SUPPORTING STAFF ASSOCIATION, SEIU, LOCAL 693, AFL-CIO",UNAFF,6.0,train,
 Laborers Local 139,LIUNA,139.0,train,19955.0
 SOUTHERN NEW YORK AMERICAN POSTAL WORKERS UNION,APWU,,train,
 "1199 SEIU, UNITED HEALTHCARE WORKERS EAST",SEIU,1199.0,train,31847.0
@@ -37828,7 +37828,7 @@ Laborers' Local Union No. 919,LIUNA,919.0,train,546944.0
 "METROPOLITAN REGIONAL COUNCIL OF CARPENTERS, SOUTHEASTERN PENNSYLVANIA, STATE OF DELAWARE, AND EASTE",CJA,,train,
 APWU 604-605,APWU,604.0,train,513126.0
 "INTERNATIONAL ASSOCIATION OF SHEET METAL, AIR, RAIL & TRANSPORTATION WORKERS, LOCAL 55",SMART,55.0,train,544142.0
-"Local 176, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial  Workers International Union (USW), AFL-CIO/CLC",USW,176.0,train,512047.0
+"Local 176, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial  Workers International Union (USW), AFL-CIO/CLC",USW,176.0,train,
 "United Steelworkers, Local 8888",USW,8888.0,train,512017.0
 "LOCAL 602, INTERNATIONAL UNION, UNITED AUTOMOBILE, AEROSPACE AND AGRICULTURAL IMPLEMENT WORKERS OF A",UAW,602.0,train,19070.0
 "United Automobile, Aerospace and Agricultural Implement Workers of America, Local 1686 (UAW)",UAW,1686.0,train,71036.0
@@ -40511,7 +40511,7 @@ USW 1066,USW,1066.0,train,
 TEAMSTERS LOCAL 722,IBT,722.0,train,33333.0
 "SHEET METAL WORKERS INTERNATIONAL UNION LOCAL 19, AFL-CIO",SMART,19.0,train,13066.0
 TEXAS CARPENTERS & MILLWRIGHTS REGIONAL COUNCIL (TCMRC)-CARPENTERS LOCAL 14,CJA,14.0,train,37905.0
-"Local 176, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union (USW), AFL-CIO-CLC",USW,176.0,train,512047.0
+"Local 176, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union (USW), AFL-CIO-CLC",USW,176.0,train,
 "United Union of Roofers, Waterproofers, and Allied Workers, Local 162",RWAW,162.0,train,52588.0
 Painters Local 913,PAT,913.0,train,50876.0
 SERVICE EMPLOYEES HEALTHCARE MINNESOTA,SEIU,,train,
@@ -47869,7 +47869,7 @@ International Association of EMTs & Paramedics (IAEP) / NAGE/ SEIU,NAGE,,train,
 "Shopman's Local Union No. 509 of the International Association of Bridge, Structural, Ornamental & Reinforcing Iron Workers",BSOIW,509.0,test,15540.0
 UFCW 8-GOLDEN STATE,UFCW,8.0,train,43536.0
 "Porter Federation of Nurses and Health Professionals, AFT Vermont",AFT,,train,
-Sheet Metal Air Rail and Transportation Workers (SMART) Local 100,SMART,100.0,train,14413.0
+Sheet Metal Air Rail and Transportation Workers (SMART) Local 100,SMART,100.0,train,
 "United Electrical, Radio, and Machine Workers of America (U.E.), Local 1077",UE,1077.0,train,545474.0
 "Communications Workers of America, Local 3404",CWA,3404.0,train,11706.0
 International Brotherhood of Boilermakers Local # D314,BBF,314.0,train,4317.0
@@ -50410,7 +50410,7 @@ Chicago and Northeast Illinois District Council of Carpenters,CJA,,train,
 United Steelworkers of America Local 310L,USW,310.0,train,15777.0
 "International Chemical Workers Union Council, UFCW Local 747-C",UFCW,747.0,train,61331.0
 International Brotherhood of Teamsters Local Union #20,IBT,20.0,train,8580.0
-"Local 176, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union (USW), AFL-CIO/CLC",USW,176.0,train,512047.0
+"Local 176, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union (USW), AFL-CIO/CLC",USW,176.0,train,
 "GCC / IBT, LOCAL 16C",PPPWU,16.0,train,18869.0
 Keystone Mountain Lake Regional Council of Carpenters Local 158,CJA,158.0,train,545456.0
 "International Association of Heat And Frost Insulators and Allied Workers, Local 24",HFIA,24.0,train,18363.0
@@ -52211,7 +52211,7 @@ International Union of Operating Engineers Local 17,IUOE,17.0,train,30561.0
 "United Steelworkers Union, Local 662L",USW,662.0,train,58375.0
 "Office and Professional Employees International Union, Local 2, AFL-CIO, CLC",OPEIU,2.0,train,35161.0
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied  & Industrial Service Worker",USW,,train,
-"The Bakery, Confectionery, Tobacco Workers and Grain Millers (BCTGM) Local 19",BCTGMI,19.0,train,22303.0
+"The Bakery, Confectionery, Tobacco Workers and Grain Millers (BCTGM) Local 19",BCTGMI,19.0,train,
 INTERNATIONAL ALLIANCE OF THEATRICAL STAGE EMPLOYEES AND MOVING PICTURE MACHINE OPERATORS LOCAL 160,IATSE,160.0,test,19993.0
 "International Association of Fire Fighters, Local I-60",IAFF,60.0,train,542990.0
 "International Brotherhood of Electrical Workers, Local 289",IBEW,289.0,train,10966.0
@@ -53164,7 +53164,7 @@ AFSCME LOCAL 140,AFSCME,140.0,train,69146.0
 "UNITED STEELWORKERS OF AMERICA, LOCAL 12014",USW,12014.0,train,16988.0
 Local 804 Teamsters,IBT,804.0,train,31841.0
 IBEW  LOCAL 359,IBEW,359.0,train,33674.0
-"International Association of Fire Fighters, Local I-61",IAFF,61.0,train,544876.0
+"International Association of Fire Fighters, Local I-61",IAFF,61.0,train,
 WASTE MATERIAL LABORERS LOCAL UNION 108,LIUNA,108.0,train,541709.0
 INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS (IBEW) LOCAL UNION NO. 1306,IBEW,1306.0,test,42261.0
 International Brotherhood of Teamsters Local Union No. 371,IBT,371.0,train,36228.0
@@ -54206,7 +54206,7 @@ United Steelworkers Local 682,USW,682.0,train,
 Painters & Allied Trades Local #77,PAT,77.0,train,41289.0
 "BAKERY, CONFECTIONERY, TOBACCO WORKERS & GRAIN MILLERS' INTERNATIONAL UNION, AFL-CIO, CLC, LOCAL 37",BCTGMI,37.0,test,21527.0
 "American Postal Workers Union, AFL-CIO (APWU), Local 2307",APWU,2307.0,train,506554.0
-"Local 176, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers Internationall Union (USW), AFL-CIO-CLC",USW,176.0,train,512047.0
+"Local 176, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers Internationall Union (USW), AFL-CIO-CLC",USW,176.0,train,
 Laborers Local 252,LIUNA,252.0,train,9352.0
 "TEAMSTER LOCAL 110, A-W IBT",IBT,110.0,train,12194.0
 UAW LOCAL 13,UAW,13.0,train,58897.0
@@ -56254,7 +56254,7 @@ UA Local 469 Plumbers and Pipe Fitters Union,PPF,469.0,train,27528.0
 "United Food and Commercial Workers International Union, CLC, (UFCW), Local 38D",UFCW,38.0,train,26645.0
 "Teamsters, Chauffeurs, Warehousemen & Helpers, Local 631, a/w IBT",IBT,631.0,train,2927.0
 UAW LOCAL 438,UAW,438.0,train,41369.0
-United Steelworkers 2-482,USW,482.0,train,34156.0
+United Steelworkers 2-482,USW,482.0,train,
 "American Postal Workers Union, Northwest Illinois Area Local 7140",APWU,7140.0,train,71479.0
 BRICKLAYERS LOCAL 1,BAC,1.0,train,545193.0
 TEAMSTERS LOCAL NO. 970,IBT,970.0,train,43880.0
@@ -61661,7 +61661,7 @@ UAW Local 685,UAW,685.0,test,19551.0
 "SEIU, LOCAL 925",SEIU,925.0,test,542272.0
 "APWU, Local 711",APWU,711.0,train,85904.0
 "Local 253, Utility Workers Union of America (UWUA), AFL-CIO",UWU,253.0,train,38948.0
-"Local 176,United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union (USW), AFL-CIO-CLC",USW,176.0,train,512047.0
+"Local 176,United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union (USW), AFL-CIO-CLC",USW,176.0,train,
 "New Jersey Nurses Union, Local 1091, CWA",CWA,1091.0,train,526819.0
 United Teachers NYSUT/AFT/AFL-CIO Local 3888,AFT,3888.0,train,517096.0
 "LOCAL 464A, UFCW",UFCW,464.0,train,2373.0
@@ -61938,7 +61938,7 @@ Teamsters Local 249 a/w International Brotherhood of Teamsters,IBT,249.0,train,2
 "Local 1972, United Automobile, Aerospace and Agricultural Implement Workers of America International Union (UAW), AFL-CIO, CLC",UAW,1972.0,test,537256.0
 "AMERICAN POSTAL WORKERS UNION, AFL-CIO (APWU), LOCAL 4",APWU,4.0,train,71576.0
 ATU Local 1535,ATU,1535.0,train,537386.0
-"UNITED STEEL, PAPER & FORESTRY, RUBBER, MFG, ENERGY, ALLIED IND. & SERVICE WKRS INT'L UNION L.7-248",USW,248.0,train,41814.0
+"UNITED STEEL, PAPER & FORESTRY, RUBBER, MFG, ENERGY, ALLIED IND. & SERVICE WKRS INT'L UNION L.7-248",USW,248.0,train,
 "TEAMSTERS LOCAL 853, A/W/ INTERNATIONAL BROTHERHOOD OF TEAMSTERS",IBT,853.0,train,20870.0
 "AMERICAN FEDERATION OF STATE, COUNTY, AND MUNICIPAL EMPLOYEES COUNCIL 31, LOCAL 2481, AFL-CIO",AFSCME,2481.0,train,542220.0
 United Union of Roofers Local 203,RWAW,203.0,train,24040.0
@@ -62843,7 +62843,7 @@ Electrical Workers Local 351,IBEW,351.0,train,537317.0
 "Rochester Regional Joint Board/Workers United, Local 1947",WU,1947.0,train,509064.0
 American Postal Workers Union Local 7043,APWU,7043.0,train,509713.0
 "Food, Industrial & Beverage Warehouse, Drivers and Clerical Employees, International Brotherhood of Teamsters Local 630",IBT,630.0,train,34093.0
-"LOCAL 176, UNITED STEEL, PAPER AND FORESTRY, RUBBER MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION",USW,176.0,train,512047.0
+"LOCAL 176, UNITED STEEL, PAPER AND FORESTRY, RUBBER MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION",USW,176.0,train,
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCAL NO 1600",IBEW,1600.0,train,509477.0
 "OPERATIVE PLASTERERS & CEMENT MASONS' INTERNATIONAL ASSOCIATION OF THE UNITED STATES AND CANADA, LOC",OPCM,,train,
 UNITED STEELWORKERS LOCAL 715,USW,715.0,train,
@@ -64379,7 +64379,7 @@ APWU #67 GKCMAL,APWU,67.0,train,72015.0
 "UNITED BROTHERHOOD OF CARPENTERS AND JOINERS OF AMERICA, LOCAL 45",CJA,45.0,train,541149.0
 INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS LOCAL UNION NO. 683,IBEW,683.0,train,47161.0
 "LOCAL 707, INTERNATIONAL BROTHERHOOD OF TEAMSTERS",IBT,707.0,train,33570.0
-BCTGM UNION LOCAL 19,BCTGMI,19.0,train,22303.0
+BCTGM UNION LOCAL 19,BCTGMI,19.0,train,
 "Teamsters, Local 984",IBT,984.0,train,37480.0
 "UTILITY WORKERS OF AMERICA, LOCAL 640",UWU,640.0,train,543416.0
 INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS LOCAL 94,IBEW,94.0,train,41429.0
@@ -65223,7 +65223,7 @@ INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS LOCAL UNION NO. 20,IBEW,20.0,tra
 "UNITED HEALTHCARE WORKERS EAST, MASSACHUSETTS DIVISION, SERVICE EMPLOYEES INTERNATIONAL, LOCAL 1199",SEIU,1199.0,test,31847.0
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Allied Industrial and Service Workers International Union, AFL-CIO/CLC",USW,,train,
 "Utility Workers Union of America, Local 544",UWU,544.0,train,514236.0
-"Local 176, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International LUnion (USW), AFL-CIO-CLC",USW,176.0,train,512047.0
+"Local 176, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International LUnion (USW), AFL-CIO-CLC",USW,176.0,train,
 "Amalgamated Transit Union, Local 1596, AFL-CIO, CLC",ATU,1596.0,train,543969.0
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCAL #204",IBEW,204.0,train,70762.0
 "INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 42",IBT,42.0,train,17606.0
@@ -68699,7 +68699,7 @@ UNITE-HERE Local 74,UNITHE,74.0,train,508538.0
 "LOCAL 201B, UNITED STEELWORKERS",USW,201.0,train,60527.0
 TEAMSTERS LOCAL UNION 25,IBT,25.0,train,33335.0
 INTERNATIONAL CHEMICAL WORKERS UNION COUNCIL OF UFCW,UFCW,,train,
-United Steelworkers Union Local 176,USW,176.0,train,512047.0
+United Steelworkers Union Local 176,USW,176.0,train,
 LOCAL UNION NO. 1087 OF THE INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS (AFL-CIO),IBEW,1087.0,test,49376.0
 AMERICAN POSTAL WORKERS UNION LOCAL 4743,APWU,4743.0,train,71612.0
 "Security, Police and Fire Professionals of America (SPFPA), Local 603",SPFPA,603.0,train,512345.0
@@ -69417,7 +69417,7 @@ United Steel Workers Local 12-1853,USW,1853.0,train,
 UNITED STEELWORKERS LOCAL 9-00790,USW,790.0,train,48845.0
 United Steelworkers Local 7-555,USW,555.0,train,9935.0
 USW Local 9-790,USW,790.0,train,48845.0
-"United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial Service Workers International Union and its Local 4-786",USW,786.0,train,541112.0
+"United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial Service Workers International Union and its Local 4-786",USW,786.0,train,
 USW LOCAL 13-669,USW,669.0,train,35261.0
 USW Local 3-1978,USW,1978.0,train,65032.0
 USW LOCAL 13-12,USW,12.0,train,
@@ -69438,7 +69438,7 @@ UNITED STEELWORKERS LOCAL 2-87,USW,87.0,train,44477.0
 "UNITED STEELWORKERS OF AMERICA, LOCAL 8-00719-2",USW,719.0,train,544234.0
 "UNITED STEELWORKERS, LOCAL 10-0086, AFL-CIO",USW,86.0,train,13042.0
 UNITED STEELWORKERS LOCAL 5-0370,USW,370.0,train,58703.0
-United Steelworkers Local 1-607,USW,607.0,train,69912.0
+United Steelworkers Local 1-607,USW,607.0,train,
 UNITED STEELWORKERS LOCAL 12-369,USW,369.0,train,506459.0
 UNITED STEEL WORKERS LOCAL 13-01533,USW,1533.0,train,511426.0
 UNITED STEEL PAPER FORESTRY RUBBER MFG ENERGY ALLIED IND SVC WORKERS INT UNION DISTRICT 1,USW,1.0,train,55306.0
@@ -69489,7 +69489,7 @@ USW 1-346 BP Group Toledo ohio,USW,346.0,train,45637.0
 STEELWORKERS LOCAL 608 and 712,USW,,train,
 "LOCAL 2-825, UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND",USW,825.0,train,521525.0
 "UNITED STEELWORKERS, LUKE LOCAL 8-676",USW,676.0,train,34293.0
-LOCAL 2-591 UNITED STEELWORKERS OF AMERICA,USW,591.0,train,22325.0
+LOCAL 2-591 UNITED STEELWORKERS OF AMERICA,USW,591.0,train,
 United Steel Workers Local 4-0018,USW,18.0,train,35790.0
 "LOCAL 2-816, USW, AFL-CIO, CLC",USW,816.0,train,
 "UNITED STEEL WORKERS, LOCAL 12-931",USW,931.0,train,507136.0
@@ -69511,7 +69511,7 @@ STEELWORKERS LOCAL 1-562,USW,562.0,train,
 "USW, LOCAL 1-0250",USW,250.0,train,8609.0
 "PAPER, ALLIED-INDUSTRIAL, CHEMICAL & ENERGY WORKERS INTERNATIONAL UNION, LOCAL 8-675 (PACE), AFL-CIO",PACE,675.0,train,
 "UNITED STEELWORKERS OF AMERICA, DISTRICT 12, SUBDISTRICT 2 AFL-CIO. CLC",USW,12.0,train,55306.0
-"UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION (USW), LOCAL 7-662",USW,662.0,train,13858.0
+"UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION (USW), LOCAL 7-662",USW,662.0,train,
 UNITED STEELWORKERS LOCAL 2-169,USW,169.0,train,69893.0
 United Steel Workers Local Union 8-490,USW,490.0,train,516992.0
 "UNITED STEEL, PAPER AND FORESTRY RUBBER, MANUFACTURING, ENERGY ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION (USW)Local 13-227",USW,227.0,train,6664.0
@@ -69536,7 +69536,7 @@ UNITED STEELWORKERS LOCAL 2-0364,USW,364.0,train,
 "UNITED STEELWORKERS, LOCAL 7-669",USW,669.0,train,30555.0
 "UNITED STEEL WORKERS, LOCAL 1-0017",USW,17.0,train,48101.0
 USW Local 4-0005,USW,5.0,train,18171.0
-USW 1-598 A/W UNITED STEELWORKERS OF AMERICA,USW,598.0,train,69646.0
+USW 1-598 A/W UNITED STEELWORKERS OF AMERICA,USW,598.0,train,
 "LOCAL 2-00987, USW, AFL-CIO",USW,987.0,train,
 "UNITED STEEL, PAPER & FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL & SERVICE WORKERS, INTERNATIONAL UNION, LOCAL 4- 5518",USW,5518.0,train,12869.0
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION, LOCAL 13-277",USW,277.0,train,37939.0
@@ -69564,7 +69564,7 @@ United Steel Workers Local 11-75,USW,75.0,train,6637.0
 United Steelworkers Union Local 13-447,USW,447.0,train,39519.0
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union, Local 1",USW,1.0,train,
 "USW, LOCAL 9-10592",USW,10592.0,train,
-"Local 2-667, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union (USW), AFL-CIO, CLC",USW,667.0,train,2587.0
+"Local 2-667, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union (USW), AFL-CIO, CLC",USW,667.0,train,
 "United Steel Workers Union, Local 11-795, AFL-CIO",USW,795.0,train,24630.0
 United Steelworkers Local 12-6,USW,6.0,train,7057.0
 "USW INT'L UNION, LOCAL 5-1329-C AND THE USW INT'L UNION",USW,1329.0,train,67576.0
@@ -69589,7 +69589,7 @@ United Steelworkers Local Union 2,USW,2.0,train,
 "UNITED STEELWORKERS OF AMERICA, DISTRICT 1, SUBDISTRICT 1",USW,1.0,train,55306.0
 "USW LOCAL UNION 8-00002 A/W UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERY, ALLIED I",USW,2.0,train,537301.0
 "United Steel, Paper, and Forestry Rubber, AFL-CIO CLC, Local 2-1130",USW,1130.0,train,16630.0
-United Steel Workers Local 2-380,USW,380.0,train,59524.0
+United Steel Workers Local 2-380,USW,380.0,train,
 USW Local 11-436,USW,436.0,train,46053.0
 "Local 2-2000, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and",USW,2000.0,train,542284.0
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION, LOCAL 8-276, AFL-CIO, CLC",USW,276.0,train,27257.0
@@ -69621,7 +69621,7 @@ DECORATORS UNION LOCAL 17 UNITED STEELWKRS OF AMERICA  UPHOLSTERY DIVISION AFL-C
 "UNITED STEEL WORKERS, LOCAL 12-591",USW,591.0,train,19853.0
 "UNITED STEELWORKERS UNION, LOCAL 11-795, AFL-CIO",USW,795.0,train,24630.0
 United Steelworkers Local 1-0967,USW,967.0,train,36919.0
-LOCAL 2-0591 UNITED STEELWORKERS OF AMERICA,USW,591.0,train,22325.0
+LOCAL 2-0591 UNITED STEELWORKERS OF AMERICA,USW,591.0,train,
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union, District 10, AFL-CIO, CLC",USW,10.0,train,
 "UNITED STEELWORKERS, LOCAL 7-807",USW,807.0,train,58996.0
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union, Local 1-716",USW,716.0,train,69530.0
@@ -69636,7 +69636,7 @@ UNITED STEELWORKERS REGION 3 DISTRICT 4,USW,4.0,train,55570.0
 "United Steelworkers, Local 4-00429",USW,429.0,train,60374.0
 USW LOCAL 1-912 A/W UNITED STEEL WORKERS INTERNATIONAL UNION,USW,912.0,train,71283.0
 "United Steel, Paper, and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers, Local 13-935",USW,935.0,train,48165.0
-United Steel Workers Local 2-482,USW,482.0,train,34156.0
+United Steel Workers Local 2-482,USW,482.0,train,
 "Local 2-2000, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union, AFL-CIO, CLC",USW,2000.0,train,542284.0
 UNITED STEELWORKERS JOF AMERICA LOCAL 9-1766,USW,1766.0,train,20287.0
 USW LOCAL 9-265,USW,265.0,train,41851.0
@@ -69646,7 +69646,7 @@ UNITED STEELWORKERS LOCAL UNION NUMBERS 13-725 AND 1226,USW,,train,
 "UNITED STEELWORKERS OF AMERICA, LOCAL UNION NO. 13-401",USW,401.0,train,46359.0
 "United Steel, Paper and Forestry, Rubber Manufacturing, Energy, Allied-Industrial and Service Workers International Union, AFL-CIO/CLC, on behalf of its Local  2-200-3",USW,200.0,train,44067.0
 "UNITED STEELWORKERS, LOCAL 24 A/W UNITED STEELWORKERS OF AMERICA",USW,24.0,train,3254.0
-United Steel Workers Local 2-20,USW,20.0,train,59193.0
+United Steel Workers Local 2-20,USW,20.0,train,
 UNITED STEELWORKERS LOCAL 9-0237,USW,237.0,train,50725.0
 USW Local 12-6,USW,6.0,train,7057.0
 "UNITED STEEL WORKERS, LOCAL 10-74",USW,74.0,train,22542.0
@@ -69729,7 +69729,7 @@ USW LOCAL 5-590-1,USW,590.0,train,62015.0
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION, LOCAL 13-208",USW,208.0,train,26601.0
 USW 7-00030,USW,30.0,test,541721.0
 "PAPER, ALLIED-INDUSTRIAL, CHEMICAL AND ENERGY WORKERS INTERNATIONAL UNION, (PACE), LOCAL 5-372",PACE,372.0,train,39760.0
-USW 2-482,USW,482.0,train,34156.0
+USW 2-482,USW,482.0,train,
 USW 2-87,USW,87.0,train,44477.0
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION, LOCAL UNION 13-423",USW,423.0,train,22524.0
 UNITED STEELWORKERS LOCAL 12-09477,USW,9477.0,train,541158.0
@@ -69772,7 +69772,7 @@ UNITED STEEL WORKERS LOCAL 4-607,USW,607.0,train,51250.0
 United Steelworkers Local 10-667,USW,667.0,train,
 United Steelworkers Local 1-346,USW,346.0,train,45637.0
 "District 2, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union (USW), AFL-CIO-CLC",USW,2.0,train,537301.0
-"LOCAL 2-591, UNITED STEELWORKERS",USW,591.0,train,22325.0
+"LOCAL 2-591, UNITED STEELWORKERS",USW,591.0,train,
 "United Steel Workers Union, Local  8-00495",USW,495.0,train,29022.0
 UNITED STEELWORKERS UNION LOCAL 2-614,USW,614.0,train,37266.0
 United Steelworkers Local 4-607,USW,607.0,train,51250.0
@@ -69791,7 +69791,7 @@ United Steelworkers (USW) Local 2-1970,USW,1970.0,train,64796.0
 USW Local Union 11-0505,USW,505.0,train,39320.0
 USW Local 2-169,USW,169.0,train,69893.0
 "UNITED STEELWORKERS INTERNATIONAL UNION, LOCAL 13-227",USW,227.0,train,6664.0
-United Steelworkers Local 7-209,USW,209.0,train,6709.0
+United Steelworkers Local 7-209,USW,209.0,train,
 "United Steelworkers Union, Local 9-566",USW,566.0,train,
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial And Service Workers International Union, Local 8-276, AFL-CIO, CLC",USW,276.0,train,27257.0
 "United Steel, Paper, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union, District 1-Sub District 3",USW,3.0,train,56857.0
@@ -69801,7 +69801,7 @@ UNITED STEELWORKERS LOCAL UNION 8-01153,USW,1153.0,test,70041.0
 "UNITED STEEL WORKERS OF AMERICA,  LOCAL 13-243 AND UNITED STEELWORKERS INTERNATIONAL UNION",USW,243.0,train,20978.0
 "UNITED STEELWORKERS ASSOCIATION, LOCAL 12-00006",USW,6.0,train,7057.0
 UNITED STEELWORKERS (USW) AFL-CIO.CLC LOCAL 2-1527-1,USW,1527.0,train,8939.0
-USW Local 7-209-00 Executive Board and Trustee's,USW,209.0,train,6709.0
+USW Local 7-209-00 Executive Board and Trustee's,USW,209.0,train,
 UNITED STEELWORKERS LOCAL 12-593,USW,593.0,train,
 "UNITED STEEL WORKERS, LOCAL 9-288",USW,288.0,train,24243.0
 UNITED STEELWORKERS OF AMERICA LOCAL 9-288,USW,288.0,train,24243.0
@@ -69844,7 +69844,7 @@ UNITED STEELWORKERS LOCAL 12-591,USW,591.0,train,19853.0
 "Local 4-575, United 'Steel', Paper and Forestry, Rubber, Manufacturing, Allied Industrial & Service Workers, AFL-CIO",USW,575.0,train,13073.0
 DIST. 2 UNITED STEELWORKERS INT'L UNION,USW,2.0,test,
 "United Steelworkers, Local 2-1822",USW,1822.0,train,60813.0
-"Local 2-667, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and",USW,667.0,train,2587.0
+"Local 2-667, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and",USW,667.0,train,
 United Steelworkers Local 9-0771,USW,771.0,train,71207.0
 "United Steelworkers, Local 13-522",USW,522.0,train,24581.0
 "United Steelworkers, District No. 13, Sub District 2",USW,13.0,train,55570.0
@@ -69927,7 +69927,7 @@ USW Local 2-727,USW,727.0,train,20155.0
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union, AFL-CIO-CLC, and USW Local 4-406",USW,406.0,train,22461.0
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union, Local 13-555",USW,555.0,train,68853.0
 STEELWORKERS LOCAL 12-00586,USW,586.0,train,
-Local 2-482 United Steelworkers,USW,482.0,train,34156.0
+Local 2-482 United Steelworkers,USW,482.0,train,
 "PACE, LOCAL 5-114",PACE,114.0,train,
 "USW, LOCAL 0-1853",USW,1853.0,train,
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union, and its Local 8-155",USW,155.0,train,14627.0
@@ -69940,7 +69940,7 @@ United Steelworkers of America District 2,USW,2.0,train,537301.0
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union, Local 8-01165",USW,1165.0,train,70737.0
 UNITED STEELWORKERS OF AMERICA DISTRICT 7 SUB DISTRICT 4,USW,7.0,train,521694.0
 "UNITED STEELWORKERS AFL-CIO, LOCAL 13-500",USW,500.0,train,
-United Steel Workers Local 7-662,USW,662.0,train,13858.0
+United Steel Workers Local 7-662,USW,662.0,train,
 UNITED STEELWORKERS LOCAL 8-00573,USW,573.0,train,51738.0
 "LOCAL 2-921, STEELWORKERS",USW,921.0,train,541651.0
 "LOCAL 11-6, GAS WORKERS UNION, USW",USW,6.0,train,32450.0
@@ -69974,7 +69974,7 @@ UNITED STEEL WORKERS LOCAL 13-12 ON BEHALF OF MARK ADAMS,USW,12.0,train,
 "PAPER, ALLIED-INDUSTRIAL, CHEMICAL AND ENERGY WORKERS INTERNATIONAL UNION, AFL-CIO (PACE), LOCAL 2-0",PACE,0.0,train,
 "USW, Local 1-00966",USW,966.0,train,513277.0
 United Steelworkers Local 11-508,USW,508.0,train,6719.0
-UNITED STEELWORKERS OF AMERICA LOCAL 2-286,USW,286.0,train,38280.0
+UNITED STEELWORKERS OF AMERICA LOCAL 2-286,USW,286.0,train,
 "United Steelworkers, Local 2-21",USW,21.0,train,540084.0
 UNITED STEELWORKERS LOCAL 2-232,USW,232.0,train,12283.0
 UNITED STEELWORKERS OF AMERICA LOCAL 8-997,USW,997.0,train,540717.0
@@ -70023,13 +70023,13 @@ STEELWORKERS LOCALS 608 AND 712,USW,,train,
 UNITED STEELWORKERS LOCAL 2-345,USW,345.0,train,59093.0
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION, DISTRICT 10, AFL-CIO, CLC",USW,10.0,train,
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION, LOCAL 1-689",USW,689.0,train,13593.0
-"USW, Local 2-20",USW,20.0,train,59193.0
+"USW, Local 2-20",USW,20.0,train,
 "United Steelworkers Union, Local 10-100",USW,100.0,test,
 "UNITED STEELWORKERS OF AMERICA, LOCAL 5-1766",USW,1766.0,train,20287.0
 United Steel Workers District 10/Unit 13836-14,USW,13836.0,test,29070.0
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION, LOCAL 13-211",USW,211.0,train,540729.0
 "UNITED STEELWORKERS OF AMERICA, LOCAL 8-00573",USW,573.0,train,51738.0
-United Steelworkers Local 7-00184,USW,184.0,train,30451.0
+United Steelworkers Local 7-00184,USW,184.0,train,
 UNITED STEEL WORKERS LOCAL 13-1533,USW,1533.0,train,511426.0
 United Steelworkers Local 2-631,USW,631.0,train,63711.0
 "United Steelworkers (USW) International Union, Local 7-517",USW,517.0,train,20962.0
@@ -70049,7 +70049,7 @@ UNITED STEEL WORKERS (USW) LOCAL 8-467,USW,467.0,train,36156.0
 United Steel Workers District 7 Local 2-0020,USW,20.0,train,59193.0
 "DISTRICT 4, UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL & SERVICE WORKERS INT'L Union",USW,4.0,train,55570.0
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied-Industrial, and Service Workers International Union, AFL-CIO-CLC, Local 10-286",USW,286.0,train,13014.0
-"LOCAL 2-410, UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND",USW,410.0,train,513990.0
+"LOCAL 2-410, UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND",USW,410.0,train,
 "United Steel, Paper and Forestry, Rubber Manufacturing, Energy, Allied-Industrial and Service Workers International Union, AFL-CIO-CLC, and USW Local 9-00265-01",USW,265.0,train,41851.0
 UNITED STEELWORKERS LOCAL UNION 4-607,USW,607.0,train,51250.0
 UNITED STEELWORKERS OF AMERICA LOCAL 13-447,USW,447.0,train,39519.0
@@ -70062,12 +70062,12 @@ United Steelworkers AFL-CIO-CLC Local 2-1527-1,USW,1527.0,train,8939.0
 UNITED STEELWORKERS LOCAL 9-990,USW,990.0,train,528263.0
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers Union, and its Local 675United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers Union, and its Local 675",USW,675.0,test,
 UNITED STEELWORKERS LOCAL 12-13,USW,13.0,train,
-"United Steel, Paper and Forestry, rubber, Manufacturing, Energy, Allied-Industrial and Service Workers International Union, AFl-CIO Local 1-598 (USW)",USW,598.0,train,69646.0
+"United Steel, Paper and Forestry, rubber, Manufacturing, Energy, Allied-Industrial and Service Workers International Union, AFl-CIO Local 1-598 (USW)",USW,598.0,train,
 United Steel Workers Local 1-0967,USW,967.0,train,36919.0
 UNITED STEEL WORKERS INTERNATIONAL UNION LOCAL 13-227,USW,227.0,train,6664.0
 USW Local 11-418,USW,418.0,train,
 USW LOCAL 13-428,USW,428.0,train,62144.0
-"UNITED STEELWORKERS OF AMERICA, LOCAL  9-984",USW,984.0,train,60905.0
+"UNITED STEELWORKERS OF AMERICA, LOCAL  9-984",USW,984.0,train,
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union, AFL-CIO, CLC, District 2, Local Union Number 125A-01",USW,125.0,train,43022.0
 "UNITED STEELWORKERS, LOCAL 7-1538",USW,1538.0,train,511401.0
 UNITED STEEL WORKERS REGION 3 DISTRICT 4,USW,4.0,train,55570.0
@@ -70105,7 +70105,7 @@ USW Local Union 8-490,USW,490.0,train,516992.0
 "REGION 1X, UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SE",USW,1.0,train,
 UNITED STEELWORKERS INTERNATIONAL UNION LOCAL 9-677,USW,677.0,train,39455.0
 United Steelworkers Local Union Numbers 13-725- and 1226,USW,,train,
-"United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied-Industrial and Service Workers International Union, AFL-CIO, CLC & Local 1-598 (USW)",USW,598.0,train,69646.0
+"United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied-Industrial and Service Workers International Union, AFL-CIO, CLC & Local 1-598 (USW)",USW,598.0,train,
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Works Intl Union Local 618-1080",USW,1080.0,train,70943.0
 "LOCAL 2-323, UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION (USW), AFL-CIO",USW,323.0,train,11987.0
 "USW, Local- 16031-28",USW,16031.0,train,10419.0
@@ -70126,7 +70126,7 @@ USW LOCAL 2-1279,USW,1279.0,train,39025.0
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS, INTERNATIONAL UNION, LOCAL 13-228",USW,228.0,train,22438.0
 United Steelworkers Local 10-1,USW,1.0,train,528666.0
 "United Steel, Paper & Forestry, Rubber, Manufacturing, Energy, Allied Industrial & Service Workers,  District 9",USW,9.0,train,
-UNITED STEELWORKERS LOCAL 7-209,USW,209.0,train,6709.0
+UNITED STEELWORKERS LOCAL 7-209,USW,209.0,train,
 USW Local Union 11-00075,USW,75.0,train,6637.0
 USW Locals 4950 and 4974,USW,,train,
 "PACE, LOCAL 5-0613",PACE,613.0,train,22680.0
@@ -70165,7 +70165,7 @@ UNITED STEELWORKERS LOCAL 2-432,USW,432.0,train,37967.0
 "LOCAL 2-389, UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION (USW), AFL-CIO",USW,389.0,train,35385.0
 USW Local 2-00224,USW,224.0,train,46622.0
 United Steel Workers Union Local 1-00626 Nitriles Group,USW,626.0,train,4034.0
-"United Steelworkers, Local 1-598",USW,598.0,train,69646.0
+"United Steelworkers, Local 1-598",USW,598.0,train,
 UNITED STEELWORKERS OF AMERICA LOCAL 5-466,USW,466.0,train,67142.0
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Allied Industrial and Service Workers International Union, Local 4-575, AFL-CIO, CLC",USW,575.0,train,13073.0
 United Steelworkers 07772-01,USW,7772.0,train,68049.0
@@ -70186,18 +70186,18 @@ United Steelworkers Local 4-575,USW,575.0,train,13073.0
 "United Steelworkers of America, Local 9-00631-01",USW,631.0,train,
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION, LOCAL 13-825",USW,825.0,train,39506.0
 UNITED STEELWORKERS OF AMERICA DISTRICT 9,USW,9.0,train,
-UNITED STEELWORKERS LOCAL 7-209 EXEUTIVE BOARD,USW,209.0,train,6709.0
+UNITED STEELWORKERS LOCAL 7-209 EXEUTIVE BOARD,USW,209.0,train,
 USW 10-234,USW,234.0,train,32954.0
 USW Local Union 11-500,USW,500.0,train,27512.0
 United Steelworkers Local 11-205,USW,205.0,train,1018.0
 Turlock Emergency Medical Services Association (TEMSA/USW Local 12-911),USW,911.0,train,
 Steelworkers District 7,USW,7.0,train,521694.0
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION, LOCAL 13-1",USW,1.0,train,34757.0
-USW Local 7-00184,USW,184.0,train,30451.0
+USW Local 7-00184,USW,184.0,train,
 UNITED STEELWORKERS LOCAL UNION 8-13061,USW,13061.0,train,1846.0
 United Steelworkers Local 10-1303,USW,1303.0,train,507174.0
 "UNITED STEELWORKERS OF AMERICA, LOCALS 1703, 1864, 1865",USW,,train,
-"United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union (USW) Local 7-662",USW,662.0,train,13858.0
+"United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union (USW) Local 7-662",USW,662.0,train,
 USW 7-932,USW,932.0,train,59581.0
 "United Steelworkers, District 9",USW,9.0,train,
 "UNITED STEELWORKERS, LOCAL 2-614",USW,614.0,train,37266.0
@@ -70229,7 +70229,7 @@ United Steelworkers Local 10-00086,USW,86.0,train,13042.0
 USW Local 17U (Decorators),USW,17.0,train,25747.0
 "United Steel Workers of America, Local 392 - District 12",USW,392.0,train,
 United Steel Workers Local 4-8228-62,USW,8228.0,train,71222.0
-United Steelworkers local 1-607,USW,607.0,train,69912.0
+United Steelworkers local 1-607,USW,607.0,train,
 USW LOCAL 5-369,USW,369.0,train,20485.0
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION, LOCAL 10-0583, AFL-CIO, CLC",USW,583.0,train,6243.0
 UNITED STEELWORKERS LOCAL 2-94,USW,94.0,train,3032.0
@@ -70259,7 +70259,7 @@ USW LOCAL 2-169,USW,169.0,train,69893.0
 UNITED STEELWORKERS LOCAL UNION 2-727,USW,727.0,train,20155.0
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial Service Workers International Union and its Local 4-397",USW,397.0,train,22606.0
 "LOCAL 6-0682, UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND",USW,682.0,train,9063.0
-"United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied-Industrial and Service Workers International Union, AFL-CIO/CLC, on behalf of its Local 1-598",USW,598.0,train,69646.0
+"United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied-Industrial and Service Workers International Union, AFL-CIO/CLC, on behalf of its Local 1-598",USW,598.0,train,
 "UNITED STEELWORKERS OF AMEIRCA, LOCAL 7-507",USW,507.0,train,3005.0
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION, LOCAL 1, UNIT 7, AFL-CIO, CLC",USW,1.0,train,
 AWPPW Local 5,WPPW,5.0,train,61703.0
@@ -70282,7 +70282,7 @@ UNITED STEELWORKERS UNION LOCAL 11-63,USW,63.0,train,540965.0
 UNITED STEELWORKERS/LOCAL UNION 7-104,USW,104.0,train,
 "United Steelworkers of America, Local 1-801",USW,801.0,train,516733.0
 "UNITED STEELWORKERS, LOCAL 2-0224",USW,224.0,train,46622.0
-USW Local 7-209,USW,209.0,train,6709.0
+USW Local 7-209,USW,209.0,train,
 "Local 206A, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union (USW), AFL-CIO/CLC",USW,206.0,train,
 USW 11-75,USW,75.0,train,6637.0
 United Steel Workers Local 7-765,USW,765.0,train,62597.0
@@ -70341,7 +70341,7 @@ FLORENCE STEELWORKERS UNION LOCAL NO. 1,USW,1.0,train,
 "PACE, LOCAL 6-210",PACE,210.0,train,
 UNITED STEEL WORKERS LOCAL 4-991,USW,991.0,train,529041.0
 UNITED STEEL WORKERS - LOCAL 8-00719-2,USW,719.0,train,544234.0
-"UNITED STEEL WORKERS, LOCAL 1-598",USW,598.0,train,69646.0
+"UNITED STEEL WORKERS, LOCAL 1-598",USW,598.0,train,
 "UNITED STEEL WORKERS OF AMERICA, LOCAL UNION 13-1",USW,1.0,train,34757.0
 "UNITED STEELWORKERS OF AMERICA, LOCAL 9-518",USW,518.0,train,517633.0
 "PAPER, ALLIED INDUSTRIAL, CHEMICAL AND ENERGY WORKERS INTERNATIONAL UNION, LOCAL 5-180, (PACE), AFL-",PACE,180.0,train,
@@ -70376,7 +70376,7 @@ UNITED STEELWORKERS OF AMERICA INTERNATIONAL UNION LOCAL 13-423,USW,423.0,train,
 "LOCAL 2-921, UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION (USW), AFL-CIO",USW,921.0,train,541651.0
 USW Local 7-876,USW,876.0,test,
 "UNITED STEEL WOREKRS OF AMERICA, LOCAL NO. 9-14597",USW,14597.0,train,26486.0
-LOCAL 2-591 UNITED STEELWORKERS,USW,591.0,train,22325.0
+LOCAL 2-591 UNITED STEELWORKERS,USW,591.0,train,
 "UNITED STEEL WORKERS, LOCAL 2-L",USW,2.0,train,27974.0
 "United Steel Workers, District 1, Local 1-346 a/w United Steel, Paper & Forestry, Rubber Manufacturing, Energy, Allied Industrial and Service Workers International Union",USW,346.0,train,45637.0
 "LOCAL 2-628, UNITED STEELWORKERS UNION",USW,628.0,train,1222.0
@@ -70434,7 +70434,7 @@ United Steelworkers Local Union 11-578,USW,578.0,train,23471.0
 "United Steelworkers International  Union, Local 90 a/w United Steel, Paper and Forestry, Rubber Manufacturing, Energy, Allied Industrial and Service Workers International Union, AFL-CIO, CLC",USW,90.0,train,
 "United Steelworkers, Local L 1013-A-17",USW,1013.0,train,
 DECORATORS LOCAL 17 USW,USW,17.0,train,
-"United Steel Workers, Local 7-00184",USW,184.0,train,30451.0
+"United Steel Workers, Local 7-00184",USW,184.0,train,
 "USW INTERNATIONAL, LOCAL 1-1510",USW,1510.0,train,541860.0
 United Steel Workers on behalf of it's Local 4-417,USW,417.0,train,30538.0
 "United Steelworkers, Local 1-220",USW,220.0,train,44738.0
@@ -70455,7 +70455,7 @@ United Steelworkers Local 12-590,USW,590.0,train,40274.0
 "UNITED STEELWORKERS OF AMERICA, LOCAL 5-984",USW,984.0,train,60905.0
 USW INTERNATIONAL UNION ON BEHALF OF ITS LOCAL 13-00208,USW,208.0,train,26601.0
 UNITED STEELWORKERS LOCAL 4-200,USW,200.0,train,543326.0
-United Steelworkers Local 2-20,USW,20.0,train,59193.0
+United Steelworkers Local 2-20,USW,20.0,train,
 USW LOCAL 13-1141,USW,1141.0,train,67541.0
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION, LOCAL 13-2001",USW,2001.0,test,59661.0
 "UNITED STEELWORKERS OF AMERICA, LOCAL 850 AND DISTRICT 9",USW,850.0,train,66787.0
@@ -70577,14 +70577,14 @@ United Steelworkers Local 7-00030,USW,30.0,train,541721.0
 "United Steel Workers International Union, Local 10-286",USW,286.0,train,13014.0
 USW 13-00656,USW,656.0,train,39938.0
 "United Steelworkers of America, Local 10-00086",USW,86.0,train,13042.0
-UNITED STEELWORKERS LOCAL 7-0354,USW,354.0,train,48013.0
+UNITED STEELWORKERS LOCAL 7-0354,USW,354.0,train,
 Steelworkers Local 12-477,USW,477.0,train,22427.0
 United Steelworkers of America Local 10-1,USW,1.0,train,528666.0
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union, AFL-CIO/CLC, Local 10-615",USW,615.0,train,69986.0
 United Steelworkers Local 9-677,USW,677.0,train,39455.0
 "UNITED STEELWORKERS, LOCAL 2-369",USW,369.0,train,58754.0
 "USW, Local 2-232, AFL-CIO",USW,232.0,train,12283.0
-"United Steelworkers, Local 2-482",USW,482.0,train,34156.0
+"United Steelworkers, Local 2-482",USW,482.0,train,
 United Steel Workers Local 2-224,USW,224.0,train,46622.0
 NALC - NATIONAL ASSOCIATION OF LETTER CARRIERS,NALC,,test,
 "National Association of Letter Carriers, Region 3",NALC,3.0,train,80880.0
@@ -79862,7 +79862,7 @@ Local 1 New York of the International Union of Bricklayers and Allied Crafts,BAC
 "SHEET METAL WORKERS' LOCAL UNION NO. 33, AKRON DISTRICT a/w INTERNATIONAL ASSOCIATION OF SHEET METAL, AIR, RAIL AND TRANSPORTATION UNION",SMART,33.0,train,546365.0
 "Sheet Metal, Air Rail and Transportation Workers International Association, Local No. 2",SMART,2.0,train,530016.0
 "LOCAL UNION NO. 7 (ZONE 3), SHEET METAL WORKERS INTERNATIONAL ASSOCIATION (SMWIA), AFL-CIO",SMART,7.0,test,
-"Sheet Metal Air Rail and Transportation Workers (SMART) Local 100 a/w International Association of Sheet Metal, Air, Rail and Transportation Workers, AFL-CIO, CLC",SMART,100.0,train,14413.0
+"Sheet Metal Air Rail and Transportation Workers (SMART) Local 100 a/w International Association of Sheet Metal, Air, Rail and Transportation Workers, AFL-CIO, CLC",SMART,100.0,train,
 Sheet Metal Workers local 2,SMART,2.0,train,
 SHEET METAL WORKERS LOCAL #19 OF PHILADELPHIA AND VICINITY,SMART,19.0,train,13066.0
 Sheet Metal Workers Union Local 5  -  SMART - SHEET METAL - AIR - RAIL- TRANSPORTATION,SMART,5.0,train,541117.0
@@ -80646,7 +80646,7 @@ UAW Region 2-B Local 12,UAW,12.0,train,7160.0
 LIUNA-1216,LIUNA,1216.0,train,25050.0
 United Steelworkers 00743,USW,743.0,train,50418.0
 "International Union of Operating Engineers, AFL CIO 501",IUOE,501.0,train,12442.0
-HPMA Local 65-699,UNK,65.0,train,16825.0
+HPMA Local 65-699,UNK,65.0,train,
 Carpenters Industrial Council-2704,CJA,2704.0,train,68270.0
 Sheet Metal Workers-214,SMART,214.0,test,17785.0
 UAW Region 2B Local 86,UAW,86.0,train,3073.0
@@ -82275,7 +82275,7 @@ UAW - ESC T&SS 2172,UAW,2172.0,train,545898.0
 General Teamsters Local Union No. 406 No. 406,IBT,406.0,train,29589.0
 Associated Musicians of Greater New York-802 AFM,AFM,802.0,train,10790.0
 Boilermakers-1240,BBF,1240.0,train,59326.0
-HPMA-65-699,UNK,65.0,train,16825.0
+HPMA-65-699,UNK,65.0,train,
 IBT-449,IBT,449.0,train,2199.0
 BCTGM Local 26,BCTGMI,26.0,train,71141.0
 BAC local 15 15,BAC,15.0,train,
@@ -85937,7 +85937,7 @@ National Staff Organization--Nevada ,NSOI,,train,
 UNITE - CHICAGO CENTER STATES JB,UNITHE,,train,
 Songwriters Guild of America,UNAFF,,train,
 AMALGAMATED UNION LOCAL 298,UNAFF,298.0,train,
-Amalgamated Local 298,UNAFF,298.0,train,
+Amalgamated Local 298,UNAFF,298.0,train,44328.0
 ILANDBOATMEN'S UNION OF THE PACIFIC ALASKA,IBU,,train,
 Inlandboatmen's Union of the Pacific,IBU,,train,
 IBU,IBU,,test,
@@ -86871,7 +86871,7 @@ MTNA - ,AFT,,train,33492.0
 MTNA - 1,AFT,1.0,train,545781.0
 MTNA - 12,AFT,12.0,train,544387.0
 MTNA - 17,AFT,17.0,train,544337.0
-MTNA - 2,AFT,2.0,train,544347.0
+MTNA - 2,AFT,2.0,train,
 MTNA - 21,AFT,21.0,train,545361.0
 MTNA - 22,AFT,22.0,train,
 MTNA - 25,AFT,25.0,train,545811.0
@@ -86887,7 +86887,7 @@ NASPSO - ,UNAFF,,train,
 NCFO - 78,UNAFF,78.0,train,
 NEFL - 630 UXO WORKERS UNION,UNAFF,630.0,train,
 NEFLPE - 630,UNAFF,630.0,train,
-NFSP - 100,UNAFF,100.0,train,514358.0
+NFSP - 100,UNAFF,100.0,train,
 NJEA - NWREA,UNAFF,,train,
 NOFF - ,UNAFF,,train,
 NSBDA - ,UNAFF,,train,
@@ -86917,7 +86917,7 @@ PATCO - ,UNAFF,,train,
 PATCO - FPD NUHHCE,UNAFF,,train,
 PBA - 816 - 1910,UNAFF,816.0,train,
 PCPSOA - ,UNAFF,,train,
-PGW - BA D ECK  610 944 8667,UNAFF,,train,
+PGW - BA D ECK  610 944 8667,SPFPA,,train,
 PICSU - ,UNAFF,,train,
 PIEU - ,UNAFF,,train,
 PMNWOH - 15286,UNAFF,15286.0,train,
@@ -87015,8 +87015,8 @@ UWNE - MULTI,UWNE,,train,
 UWNE - 318,UWNE,318.0,train,516989.0
 UWNE - 329,UWNE,329.0,train,48182.0
 UPFFC - ,UNAFF,,train,
-UPGWA - ,UNAFF,,train,
-UPGWA - 557,UNAFF,557.0,train,
+UPGWA - ,SPFPA,,train,
+UPGWA - 557,SPFPA,557.0,train,517383.0
 UPNA - LOCKPORT,UNAFF,,train,
 UPTO - ,UNAFF,,train,
 UPWU - ,UNAFF,,train,
@@ -89565,71 +89565,71 @@ GSOA - 246,UGSOA,246.0,train,
 GSOA - 218B,UGSOA,218.0,train,543799.0
 GSOA - 31,UGSOA,31.0,train,543537.0
 GSOA - 405,UGSOA,405.0,train,
-PGW - 227,UNAFF,227.0,train,
-PGW - 506,UNAFF,506.0,train,
-PGW - ,UNAFF,,train,
-PGW - 111,UNAFF,111.0,train,
-PGW - 549,UNAFF,549.0,train,
-PGW - 650,UNAFF,650.0,train,
-PGW - 602,UNAFF,602.0,train,
-PGW - 611,UNAFF,611.0,train,518090.0
-PGW - 502,UNAFF,502.0,train,
-PGW - 64,UNAFF,64.0,train,
-PGW - 4 110 114 225 250 251 299,UNAFF,,train,
-PGW - 263,UNAFF,263.0,train,
-PGW - 228,UNAFF,228.0,train,
-PGW - 723,UNAFF,723.0,train,
-PGW - 66,UNAFF,66.0,train,8565.0
-PGW - 300,UNAFF,300.0,test,
-PGW - 122 UNIT 2,UNAFF,122.0,train,
-PGW - 710,UNAFF,710.0,train,
-PGW - 110,UNAFF,110.0,train,
-PGW - 155,UNAFF,155.0,train,
-PGW - 555,UNAFF,555.0,train,
-PGW - 158,UNAFF,158.0,train,542407.0
-PGW - 400,UNAFF,400.0,train,509104.0
-PGW - 539,UNAFF,539.0,train,
-"PGW - 4, 122, 134",UNAFF,,train,
-PGW - 603,UNAFF,603.0,train,
-PGW - 218,UNAFF,218.0,train,
-PGW - 65,UNAFF,65.0,train,513386.0
-PGW - 3,UNAFF,3.0,train,
-PGW - 128,UNAFF,128.0,train,
-PGW - 125,UNAFF,125.0,test,
-PGW - 142,UNAFF,142.0,train,
-PGW - 131,UNAFF,131.0,train,541975.0
-PGW - 138,UNAFF,138.0,train,
-PGW - 129,UNAFF,129.0,train,
-PGW - 537,UNAFF,537.0,train,
-PGW - 690,UNAFF,690.0,train,
-PGW - 561,UNAFF,561.0,train,
-PGW - 562,UNAFF,562.0,train,
-PGW - 795,UNAFF,795.0,train,
-PGW - 739,UNAFF,739.0,train,
-PGW - 258,UNAFF,258.0,train,
-PGW - 116,UNAFF,116.0,train,540078.0
-PGW - 525,UNAFF,525.0,train,
-PGW - 542,UNAFF,542.0,train,
-PGW - 156,UNAFF,156.0,train,
-PGW - 529,UNAFF,529.0,train,
-PGW - 127,UNAFF,127.0,train,16423.0
-PGW - 153,UNAFF,153.0,train,
-PGW - 604,UNAFF,604.0,train,
-PGW - 100,UNAFF,100.0,train,514358.0
-PGW - 214,UNAFF,214.0,train,
-PGW - 253,UNAFF,253.0,train,
-PGW - 7,UNAFF,7.0,train,
-PGW - 888,UNAFF,888.0,train,
-PGW - 541,UNAFF,541.0,train,
-PGW - 5,UNAFF,5.0,train,
-PGW - MULTI,UNAFF,,train,
-PGW - 403,UNAFF,403.0,test,
-PGW - 67,UNAFF,67.0,train,
-PGW - 558,UNAFF,558.0,train,
-PGW - 114,UNAFF,114.0,train,
-PGW - NATL,UNAFF,,train,
-PGW - 245,UNAFF,245.0,train,
-PGW - 120,UNAFF,120.0,train,541599.0
+PGW - 227,SPFPA,227.0,train,61519.0
+PGW - 506,SPFPA,506.0,train,7196.0
+PGW - ,SPFPA,,train,
+PGW - 111,SPFPA,111.0,train,28833.0
+PGW - 549,SPFPA,549.0,train,513926.0
+PGW - 650,SPFPA,650.0,train,
+PGW - 602,SPFPA,602.0,train,60937.0
+PGW - 611,SPFPA,611.0,train,530927.0
+PGW - 502,SPFPA,502.0,train,6652.0
+PGW - 64,SPFPA,64.0,train,66138.0
+PGW - 4 110 114 225 250 251 299,SPFPA,,train,
+PGW - 263,SPFPA,263.0,train,66280.0
+PGW - 228,SPFPA,228.0,train,509584.0
+PGW - 723,SPFPA,723.0,train,65477.0
+PGW - 66,SPFPA,66.0,train,8565.0
+PGW - 300,SPFPA,300.0,test,505418.0
+PGW - 122 UNIT 2,SPFPA,122.0,train,2903.0
+PGW - 710,SPFPA,710.0,train,59862.0
+PGW - 110,SPFPA,110.0,train,2034.0
+PGW - 155,SPFPA,155.0,train,
+PGW - 555,SPFPA,555.0,train,
+PGW - 158,SPFPA,158.0,train,533868.0
+PGW - 400,SPFPA,400.0,train,33430.0
+PGW - 539,SPFPA,539.0,train,
+"PGW - 4, 122, 134",SPFPA,,train,
+PGW - 603,SPFPA,603.0,train,512345.0
+PGW - 218,SPFPA,218.0,train,512524.0
+PGW - 65,SPFPA,65.0,train,530245.0
+PGW - 3,SPFPA,3.0,train,
+PGW - 128,SPFPA,128.0,train,543048.0
+PGW - 125,SPFPA,125.0,test,13411.0
+PGW - 142,SPFPA,142.0,train,
+PGW - 131,SPFPA,131.0,train,512864.0
+PGW - 138,SPFPA,138.0,train,
+PGW - 129,SPFPA,129.0,train,530246.0
+PGW - 537,SPFPA,537.0,train,513936.0
+PGW - 690,SPFPA,690.0,train,528442.0
+PGW - 561,SPFPA,561.0,train,544249.0
+PGW - 562,SPFPA,562.0,train,544202.0
+PGW - 795,SPFPA,795.0,train,512970.0
+PGW - 739,SPFPA,739.0,train,70616.0
+PGW - 258,SPFPA,258.0,train,22384.0
+PGW - 116,SPFPA,116.0,train,3541.0
+PGW - 525,SPFPA,525.0,train,49161.0
+PGW - 542,SPFPA,542.0,train,
+PGW - 156,SPFPA,156.0,train,
+PGW - 529,SPFPA,529.0,train,531776.0
+PGW - 127,SPFPA,127.0,train,8789.0
+PGW - 153,SPFPA,153.0,train,
+PGW - 604,SPFPA,604.0,train,513910.0
+PGW - 100,SPFPA,100.0,train,514358.0
+PGW - 214,SPFPA,214.0,train,526793.0
+PGW - 253,SPFPA,253.0,train,
+PGW - 7,SPFPA,7.0,train,47933.0
+PGW - 888,SPFPA,888.0,train,540710.0
+PGW - 541,SPFPA,541.0,train,543209.0
+PGW - 5,SPFPA,5.0,train,19236.0
+PGW - MULTI,SPFPA,,train,
+PGW - 403,SPFPA,403.0,test,533794.0
+PGW - 67,SPFPA,67.0,train,65978.0
+PGW - 558,SPFPA,558.0,train,528243.0
+PGW - 114,SPFPA,114.0,train,26946.0
+PGW - NATL,SPFPA,,train,
+PGW - 245,SPFPA,245.0,train,
+PGW - 120,SPFPA,120.0,train,541599.0
 "AWPPW, ASSOCIATION OF WESTERN PULP AND PAPER WORKERS UNION AFFILIATED WITH THE UNITED BROTHERHOOD OF",WPPW,,train,
 "AWPPW, ASSOCIATION OF WESTERN PULP AND PAPER WORKERS UNION, AFFILIATED WITH THE UNITED BROTHERHOOD O",WPPW,,train,
 AFTRA - NEW YORK,SAGAFTRA,,train,

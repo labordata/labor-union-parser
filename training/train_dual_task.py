@@ -13,11 +13,14 @@ import click
 import lightning as L
 import torch
 from dataset import (
+    QueryDataset,
     QueryRecordDataset,
     QueryRecordDatasetWithCandidates,
+    encode_record_batch,
 )
 from mining import (
     ANCEMiningCallback,
+    encode_all_records,
 )
 from torch.utils.data import DataLoader
 
@@ -40,33 +43,43 @@ FNUM_TO_RECORDS_PATH = DATA_DIR / "fnum_to_records.json"
 
 def supervised_contrastive_loss(similarities, fnum_ids, temperature=0.07):
     """
-    Supervised contrastive loss: maximize the combined softmax mass on all
-    positives (same f_num).  -log(Σ_p exp(s_p) / Σ_k exp(s_k))
+    Any-positive contrastive loss (NCA/InfoNCE style).
 
-    Only requires *any* correct record to be retrievable, rather than forcing
-    every variant to be individually retrievable.
+    Sums positive probabilities in the numerator so that ANY one positive
+    ranking high satisfies the loss:
+      -log(Σ_{p∈P_i} exp(s_ip/τ) / Σ_k exp(s_ik/τ))
+
+    Identical to per-positive SupCon when |P_i|=1.
     """
     positive_mask = fnum_ids.unsqueeze(0) == fnum_ids.unsqueeze(1)
     sim_scaled = similarities / temperature
 
-    # logsumexp over positives - logsumexp over all = log(positive_mass / total)
     neg_inf = torch.finfo(sim_scaled.dtype).min
     pos_sim = sim_scaled.masked_fill(~positive_mask, neg_inf)
-    loss = -torch.logsumexp(pos_sim, dim=1) + torch.logsumexp(sim_scaled, dim=1)
+    log_numerator = torch.logsumexp(pos_sim, dim=1)
+    log_denominator = torch.logsumexp(sim_scaled, dim=1)
+    loss = -(log_numerator - log_denominator)
 
     return loss.mean()
 
 
 def contrastive_loss_with_mask(similarities, positive_mask, temperature=0.07):
     """
-    Contrastive loss for per-query candidate lists: maximize the combined
-    softmax mass on all positives.  -log(Σ_p exp(s_p) / Σ_k exp(s_k))
+    Any-positive contrastive loss for per-query candidate lists.
+
+    Sums positive probabilities in the numerator so that ANY one positive
+    ranking high satisfies the loss:
+      -log(Σ_{p∈P_i} exp(s_ip/τ) / Σ_k exp(s_ik/τ))
+
+    Identical to per-positive SupCon when |P_i|=1.
     """
     sim_scaled = similarities / temperature
 
     neg_inf = torch.finfo(sim_scaled.dtype).min
     pos_sim = sim_scaled.masked_fill(~positive_mask, neg_inf)
-    loss = -torch.logsumexp(pos_sim, dim=1) + torch.logsumexp(sim_scaled, dim=1)
+    log_numerator = torch.logsumexp(pos_sim, dim=1)
+    log_denominator = torch.logsumexp(sim_scaled, dim=1)
+    loss = -(log_numerator - log_denominator)
 
     return loss.mean()
 
@@ -145,32 +158,108 @@ class DualTaskLitBase(L.LightningModule):
         self.model = model
         self.save_hyperparameters(ignore=["model"])
 
-    def _eval_step(self, batch, prefix):
-        fnum_ids = batch["f_num"]
-        retrieval_sim, rerank_scores = self.model.forward_dual_task(
-            batch["char_ids"],
-            batch["is_number"],
-            batch["numeric_ids"],
-            batch["union_idx"],
-            batch["desig_idx"],
-            batch["prefix_idx"],
-            batch["num_hash"],
-            batch["num_val"],
-            batch["suffix_idx"],
-            batch["unit_id_idx"],
+    # ------------------------------------------------------------------
+    # Full-corpus validation: encode all records, retrieve top-k, rerank
+    # ------------------------------------------------------------------
+    VAL_K = 50
+
+    def on_validation_epoch_start(self):
+        dm = self.trainer.datamodule
+        record_embs, records, record_fnums = encode_all_records(
+            self.model, dm.fnum_to_records, dm.vocab, batch_size=512
         )
+        self._val_record_embs = record_embs.to(self.device)
+        self._val_record_fnums = record_fnums.to(self.device)
 
-        n = fnum_ids.shape[0]
-        ret_acc = (fnum_ids[retrieval_sim.argmax(1)] == fnum_ids).float().mean()
-        rer_acc = (fnum_ids[rerank_scores.argmax(1)] == fnum_ids).float().mean()
-        avg_acc = (ret_acc + rer_acc) / 2
+        # Field embeddings for cross-attention reranking
+        field_embs, field_masks = [], []
+        with torch.no_grad():
+            for i in range(0, len(records), 512):
+                rec_batch = encode_record_batch(records[i : i + 512], dm.vocab)
+                rec_batch = {k: v.to(self.device) for k, v in rec_batch.items()}
+                fe, fm = self.model.record_encoder(
+                    rec_batch["union_idx"],
+                    rec_batch["desig_idx"],
+                    rec_batch["prefix_hash"],
+                    rec_batch["num_hash"],
+                    rec_batch["num_val"],
+                    rec_batch["suffix_idx"],
+                    rec_batch["unit_id_idx"],
+                )
+                field_embs.append(fe)
+                field_masks.append(fm)
+        self._val_field_embs = torch.cat(field_embs)
+        self._val_field_masks = torch.cat(field_masks)
 
-        self.log(f"{prefix}_ret", ret_acc, batch_size=n, prog_bar=True)
+    def on_validation_epoch_end(self):
+        for attr in (
+            "_val_record_embs",
+            "_val_record_fnums",
+            "_val_field_embs",
+            "_val_field_masks",
+        ):
+            if hasattr(self, attr):
+                delattr(self, attr)
+
+    def _eval_step(self, batch, prefix):
+        f_nums = batch["f_num"].to(self.device)
+        n = f_nums.shape[0]
+
+        token_emb, padding_mask = self.model.query_encoder(
+            batch["char_ids"], batch["is_number"], batch["numeric_ids"]
+        )
+        query_embs = self.model.dual_tower.encode_query(token_emb, padding_mask)
+
+        sims = query_embs @ self._val_record_embs.T
+        topk_vals, topk_idx = sims.topk(self.VAL_K, dim=1)
+        top1_fnums = self._val_record_fnums[sims.argmax(dim=1)]
+
+        ret1_correct = (top1_fnums == f_nums).sum().item()
+        retk_correct = 0
+        acc_correct = 0
+
+        for i in range(n):
+            target = f_nums[i].item()
+            cand_idx = topk_idx[i]
+            cand_fnums = self._val_record_fnums[cand_idx]
+
+            if target not in cand_fnums.tolist():
+                continue
+            retk_correct += 1
+
+            # Cross-attention reranking
+            cand_fe = self._val_field_embs[cand_idx]
+            cand_fm = self._val_field_masks[cand_idx]
+            q_tok = token_emb[i].unsqueeze(0).expand(self.VAL_K, -1, -1)
+            q_mask = padding_mask[i].unsqueeze(0).expand(self.VAL_K, -1)
+            rerank_scores = self.model.cross_attention.score_pair(
+                q_tok, q_mask, cand_fe, cand_fm
+            )
+
+            fnum_best = {}
+            for j in range(self.VAL_K):
+                fn = cand_fnums[j].item()
+                s = rerank_scores[j].item()
+                if fn not in fnum_best or s > fnum_best[fn]:
+                    fnum_best[fn] = s
+
+            if max(fnum_best, key=fnum_best.get) == target:
+                acc_correct += 1
+
+        rer_acc = acc_correct / max(retk_correct, 1)
+        self.log(f"{prefix}_ret1", ret1_correct / n, batch_size=n, prog_bar=True)
+        self.log(f"{prefix}_ret", retk_correct / n, batch_size=n, prog_bar=True)
         self.log(f"{prefix}_rer", rer_acc, batch_size=n, prog_bar=True)
-        self.log(f"{prefix}_avg", avg_acc, batch_size=n)
+        self.log(f"{prefix}_acc", acc_correct / n, batch_size=n, prog_bar=True)
 
     def validation_step(self, batch, batch_idx):
         self._eval_step(batch, "v")
+
+    def on_test_epoch_start(self):
+        self.on_validation_epoch_start()
+
+    def on_test_epoch_end(self):
+        self.on_validation_epoch_end()
 
     def test_step(self, batch, batch_idx):
         self._eval_step(batch, "t")
@@ -216,7 +305,7 @@ class InBatchLitModule(DualTaskLitBase):
             batch["numeric_ids"],
             batch["union_idx"],
             batch["desig_idx"],
-            batch["prefix_idx"],
+            batch["prefix_hash"],
             batch["num_hash"],
             batch["num_val"],
             batch["suffix_idx"],
@@ -248,7 +337,7 @@ class ANCELitModule(DualTaskLitBase):
         field_emb_flat, field_mask_flat = self.model.record_encoder(
             batch["cand_union_idx"].reshape(-1),
             batch["cand_desig_idx"].reshape(-1),
-            batch["cand_prefix_idx"].reshape(-1),
+            batch["cand_prefix_hash"].reshape(-1),
             batch["cand_num_hash"].reshape(-1),
             batch["cand_num_val"].reshape(-1),
             batch["cand_suffix_idx"].reshape(-1),
@@ -348,7 +437,6 @@ class DualTaskDataModule(L.LightningDataModule):
             examples,
             self.vocab["union_name_to_idx"],
             self.vocab["desig_name_to_idx"],
-            self.vocab["prefix_to_idx"],
             self.vocab["suffix_to_idx"],
             self.vocab["unit_id_to_idx"],
         )
@@ -367,7 +455,7 @@ class DualTaskDataModule(L.LightningDataModule):
         )
 
     def val_dataloader(self):
-        ds = self._make_inbatch_dataset(self.val_ex)
+        ds = QueryDataset(self.val_ex)
         return DataLoader(
             ds,
             batch_size=self.batch_size,
@@ -377,7 +465,7 @@ class DualTaskDataModule(L.LightningDataModule):
         )
 
     def test_dataloader(self):
-        ds = self._make_inbatch_dataset(self.test_ex)
+        ds = QueryDataset(self.test_ex)
         return DataLoader(
             ds,
             batch_size=self.batch_size,
@@ -450,7 +538,6 @@ def train(epochs, batch_size, lr, checkpoint, mode, mine_every, mine_k, warmup_e
     model = DualTaskModel(
         num_union_names=len(vocab["union_name_to_idx"]),
         num_desig_names=len(vocab["desig_name_to_idx"]),
-        num_prefixes=len(vocab["prefix_to_idx"]),
         num_suffixes=len(vocab["suffix_to_idx"]),
         num_unit_ids=len(vocab["unit_id_to_idx"]),
     )
@@ -473,7 +560,7 @@ def train(epochs, batch_size, lr, checkpoint, mode, mine_every, mine_k, warmup_e
         L.pytorch.callbacks.ModelCheckpoint(
             dirpath="training",
             filename="dual_task_model",
-            monitor="v_avg",
+            monitor="v_acc",
             mode="max",
             save_top_k=1,
         ),

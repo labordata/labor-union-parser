@@ -25,32 +25,259 @@ FNUM_RECORDS_PATH = DATA_DIR / "fnum_to_records.json"
 OUTPUT_PATH = DATA_DIR / "training_examples.json"
 
 
+# Map from query text keywords to desig_name abbreviations.
+# Ordered longest-first so "local lodge" matches before "local".
+DESIG_KEYWORDS = [
+    ("local joint executive board", {"LJEB"}),
+    ("joint executive board", {"JEB"}),
+    ("building trades council", {"BCTC"}),
+    ("local joint board", {"LJB"}),
+    ("state association", {"SA", "ASSN"}),
+    ("district council", {"DC"}),
+    ("district lodge", {"DLG"}),
+    ("local division", {"LDIV"}),
+    ("local chapter", {"LCH"}),
+    ("local lodge", {"LLG"}),
+    ("local union", {"LU"}),
+    ("joint board", {"JB"}),
+    ("joint council", {"JC"}),
+    ("state council", {"STC"}),
+    ("sub-federation", {"SFED"}),
+    ("national headquarters", {"NHQ"}),
+    ("headquarters", {"NHQ"}),
+    ("association", {"ASSN", "SA"}),
+    ("conference", {"CONF"}),
+    ("federation", {"SFED"}),
+    ("division", {"DIV", "LDIV"}),
+    ("district", {"D", "DC"}),
+    ("council", {"C", "LEADC", "DC", "JC", "STC", "BCTC"}),
+    ("chapter", {"CH", "LCH"}),
+    ("branch", {"BR"}),
+    ("lodge", {"LG", "LLG", "DLG"}),
+    ("local", {"LU", "LOCAL"}),
+    ("unit", {"UNIT"}),
+]
+
+
+# When multiple desig_names remain after keyword matching, prefer the
+# first over the alternates.  E.g. keep "C" over "LEADC", "LU" over "LOCAL".
+DESIG_PREFERENCE = [
+    ("C", {"LEADC"}),
+    ("LU", {"LOCAL", "LG", "LLG", "NHQ", "DALU"}),
+    ("LLG", {"LG"}),
+    ("DC", {"DIV"}),
+    ("D", {"DC"}),
+    ("SA", {"ASSN"}),
+    ("STC", {"DLG"}),
+]
+
+
 def filter_records_by_query(query: str, records: list) -> list:
     """
-    Filter record variants to those whose desig_num matches numbers in the query.
+    Filter record variants to those matching the query.
 
-    This handles cases like IUE-CWA where the same f_num has both
-    short (134) and long (81134) number variants. We want to train on
-    the variant that matches what's in the query text.
+    Three stages:
+    1. desig_num: if records have different desig_nums, keep only those
+       whose desig_num appears in the query (2-6 digit numbers).
+    2. prefix/suffix: positive match first (query specifies prefix/suffix),
+       then inverse filter (keep plain variants when query doesn't specify).
+    3. desig_name: positive keyword match first (query contains "district",
+       "lodge", etc.), then inverse filter (keep non-blank when mixed).
     """
     if len(records) <= 1:
         return records
 
-    # Extract numbers from query (2-6 digits)
-    query_nums = set(int(n) for n in re.findall(r"\b\d{2,6}\b", query))
-    if not query_nums:
-        return records
+    # Extract numbers from query
+    all_query_nums = set(int(n) for n in re.findall(r"\d+", query))
 
-    # Check if records have different desig_nums
+    # Stage 1: filter by desig_num
+    query_nums_pos = set(n for n in all_query_nums if n >= 1)
     record_nums = set(r["desig_num"] for r in records)
-    if len(record_nums) <= 1:
-        return records
+    if len(record_nums) > 1:
+        # Positive match: keep records whose desig_num appears in query
+        if query_nums_pos:
+            matching = [r for r in records if r["desig_num"] in query_nums_pos]
+            if matching:
+                records = matching
+        # Inverse filter: if query has no numbers, keep desig_num=0 records
+        record_nums = set(r["desig_num"] for r in records)
+        if len(record_nums) > 1 and 0 in record_nums and not query_nums_pos:
+            zero_recs = [r for r in records if r["desig_num"] == 0]
+            if zero_recs:
+                records = zero_recs
 
-    # Filter to records where desig_num is in query
-    matching = [r for r in records if r["desig_num"] in query_nums]
+    # Stage 2: filter by prefix and suffix
+    # First try positive matches (query specifies prefix or suffix),
+    # then fall back to inverse matches (keep plain variants).
+    # Positive matches run first so they aren't preempted by inverse filters.
+    # Suffixes can appear after numbers (1036-C, 748L) or before (D583, W-261)
+    # Codes adjacent to numbers may also be desig_name abbreviations (D, LG, DC)
+    after_num = re.findall(r"\d-?([A-Za-z]{1,3})\b", query)
+    # Single-letter suffixes can also be separated by a space (985 L, 160 C).
+    # Limit to single letters to avoid capturing geographic codes (5 PA, 1 NY).
+    after_num += re.findall(r"\d\s([A-Za-z])\b", query)
+    before_num = re.findall(r"(?<!\w)([A-Za-z]{1,3})-?\d", query)
+    query_codes = set(m.upper() for m in after_num + before_num)
+    # Also extract numeric suffixes: short numbers after a hyphen following a longer
+    # number, e.g. "1410-1" -> "1", "662-04" -> "4".  Only match 1-2 digit suffixes
+    # after a 3+ digit number to avoid confusing with prefix-number patterns.
+    numeric_suf = re.findall(r"\d{3,}-0*(\d{1,2})\b", query)
+    query_suffixes = query_codes | set(numeric_suf)
 
-    # Return matching if any, otherwise all records
-    return matching if matching else records
+    # Try positive prefix match
+    record_prefixes = set(r.get("prefix", 0) for r in records)
+    prefix_matched = False
+    if len(record_prefixes) > 1 and all_query_nums:
+        prefix_matching = [
+            r
+            for r in records
+            if r.get("prefix", 0) != 0 and r.get("prefix", 0) in all_query_nums
+        ]
+        if prefix_matching:
+            records = prefix_matching
+            prefix_matched = True
+
+    # Try positive suffix match
+    record_suffixes = set(r.get("suffix", "") for r in records)
+    suffix_matched = False
+
+    def _norm_suffix(s):
+        """Normalize suffix for comparison: strip leading zeros from numeric."""
+        s = s.strip().upper()
+        if s.isdigit():
+            return str(int(s))
+        return s
+
+    query_suffixes_norm = set(_norm_suffix(s) for s in query_suffixes)
+    if len(record_suffixes) > 1 and query_suffixes_norm:
+        suffix_matching = [
+            r
+            for r in records
+            if r.get("suffix", "") and _norm_suffix(r["suffix"]) in query_suffixes_norm
+        ]
+        if suffix_matching:
+            records = suffix_matching
+            suffix_matched = True
+
+    # Inverse filters: if query doesn't specify prefix/suffix, keep plain variants
+    if not prefix_matched:
+        record_prefixes = set(r.get("prefix", 0) for r in records)
+        if len(record_prefixes) > 1:
+            no_prefix = [r for r in records if r.get("prefix", 0) == 0]
+            if no_prefix:
+                records = no_prefix
+
+    if not suffix_matched:
+        record_suffixes = set(r.get("suffix", "") for r in records)
+        if len(record_suffixes) > 1:
+            no_suffix = [r for r in records if not r.get("suffix", "")]
+            if no_suffix:
+                records = no_suffix
+
+    # Stage 3: filter by desig_name
+    desig_names = set(r.get("desig_name", "") for r in records)
+    if len(desig_names) > 1:
+        # Positive match: check if query contains a designation keyword
+        query_lower = query.lower()
+        desig_matched = False
+        for keyword, desig_set in DESIG_KEYWORDS:
+            if keyword in query_lower:
+                matching = [r for r in records if r.get("desig_name", "") in desig_set]
+                if matching:
+                    records = matching
+                    desig_matched = True
+                break  # stop at first keyword match (longest first)
+
+        # Try matching codes extracted near numbers against desig_name
+        if not desig_matched and query_codes:
+            desig_names = set(r.get("desig_name", "") for r in records)
+            code_matching = [
+                r for r in records if r.get("desig_name", "") in query_codes
+            ]
+            if code_matching:
+                records = code_matching
+                desig_matched = True
+
+        # Inverse filter: if no keyword match, keep non-blank desig_name
+        if not desig_matched:
+            desig_names = set(r.get("desig_name", "") for r in records)
+            if len(desig_names) > 1 and "" in desig_names:
+                non_blank = [r for r in records if r.get("desig_name", "")]
+                if non_blank:
+                    records = non_blank
+
+        # Preference filter: when keyword matched multiple synonyms,
+        # pick the more common/generic variant.
+        desig_names = set(r.get("desig_name", "") for r in records)
+        if len(desig_names) > 1:
+            for preferred, alternates in DESIG_PREFERENCE:
+                if preferred in desig_names and desig_names & alternates:
+                    keep = [
+                        r for r in records if r.get("desig_name", "") not in alternates
+                    ]
+                    if keep:
+                        records = keep
+                    break
+
+    return records
+
+
+def record_signature(record):
+    """Return a hashable tuple of all record fields (including unit_id)."""
+    return (
+        record.get("union_name", ""),
+        record.get("desig_name", ""),
+        record.get("desig_num", 0),
+        record.get("prefix", 0),
+        record.get("suffix", ""),
+        record.get("unit_id", ""),
+    )
+
+
+def build_record_index(fnum_to_records):
+    """
+    Build a reverse index: record_signature -> set of f_nums that have it.
+
+    Used to quickly find competing f_nums for the ambiguity check.
+    """
+    sig_to_fnums = defaultdict(set)
+    for fnum, records in fnum_to_records.items():
+        for rec in records:
+            sig_to_fnums[record_signature(rec)].add(fnum)
+    return sig_to_fnums
+
+
+def is_ambiguous(query, f_num, fnum_to_records, sig_to_fnums):
+    """
+    Check if a training example is ambiguous.
+
+    A training example is ambiguous if another f_num produces an identical
+    filtered record (including unit_id) for this query. This means:
+    - F_nums in conflict groups have different unit_ids, so they won't match
+      even if other fields are identical -> not ambiguous (model can learn unit_id).
+    - F_nums NOT in conflict groups share unit_id="" -> if other fields also
+      match, they're truly ambiguous -> filter out.
+    """
+    filtered = filter_records_by_query(query, fnum_to_records[f_num])
+    if not filtered:
+        return True
+
+    target_sig = record_signature(filtered[0])
+
+    # Find f_nums that have any record matching this signature
+    candidates = sig_to_fnums.get(target_sig, set())
+    competing = candidates - {f_num}
+    if not competing:
+        return False
+
+    # Verify: does filter_records_by_query for the competing f_num
+    # actually produce this same record for this query?
+    for other_fnum in competing:
+        other_filtered = filter_records_by_query(query, fnum_to_records[other_fnum])
+        if other_filtered and record_signature(other_filtered[0]) == target_sig:
+            return True
+
+    return False
 
 
 def get_split(query: str, val_frac: float = 0.1, test_frac: float = 0.1) -> str:
@@ -98,11 +325,12 @@ def load_fnum_records():
     return fnum_to_records
 
 
-def load_labeled_data(fnum_set, fnum_to_records):
+def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
     """Load labeled_data.csv using pre-assigned f_num values."""
     examples = []
     skipped_no_fnum = 0
     skipped_not_in_vocab = 0
+    skipped_ambiguous = 0
 
     with open(DATA_DIR / "labeled_data.csv") as f:
         reader = csv.DictReader(f)
@@ -127,6 +355,12 @@ def load_labeled_data(fnum_set, fnum_to_records):
                 skipped_not_in_vocab += 1
                 continue
 
+            # Filter out ambiguous examples where another f_num produces
+            # an identical record (including unit_id) for this query
+            if is_ambiguous(text, f_num, fnum_to_records, sig_to_fnums):
+                skipped_ambiguous += 1
+                continue
+
             # Filter records to match numbers in query
             records = filter_records_by_query(text, fnum_to_records[f_num])
 
@@ -141,12 +375,15 @@ def load_labeled_data(fnum_set, fnum_to_records):
             )
 
     print(f"  {len(examples)} examples loaded")
-    print(f"  Skipped: {skipped_no_fnum} no f_num, {skipped_not_in_vocab} not in vocab")
+    print(
+        f"  Skipped: {skipped_no_fnum} no f_num, {skipped_not_in_vocab} not in vocab,"
+        f" {skipped_ambiguous} ambiguous"
+    )
 
     return examples
 
 
-def load_synthetic_data(fnum_set, fnum_to_records):
+def load_synthetic_data(fnum_set, fnum_to_records, sig_to_fnums):
     """Load unaff_synthetic.csv using pre-assigned f_num values."""
     examples = []
 
@@ -157,6 +394,7 @@ def load_synthetic_data(fnum_set, fnum_to_records):
 
     skipped_no_fnum = 0
     skipped_not_in_vocab = 0
+    skipped_ambiguous = 0
 
     with open(unaff_path) as f:
         reader = csv.DictReader(f)
@@ -178,6 +416,10 @@ def load_synthetic_data(fnum_set, fnum_to_records):
                 skipped_not_in_vocab += 1
                 continue
 
+            if is_ambiguous(text, f_num, fnum_to_records, sig_to_fnums):
+                skipped_ambiguous += 1
+                continue
+
             # Filter records to match numbers in query
             records = filter_records_by_query(text, fnum_to_records[f_num])
 
@@ -192,9 +434,10 @@ def load_synthetic_data(fnum_set, fnum_to_records):
             )
 
     print(f"  {len(examples)} examples loaded")
-    if skipped_no_fnum or skipped_not_in_vocab:
+    if skipped_no_fnum or skipped_not_in_vocab or skipped_ambiguous:
         print(
-            f"  Skipped: {skipped_no_fnum} no f_num, {skipped_not_in_vocab} not in vocab"
+            f"  Skipped: {skipped_no_fnum} no f_num, {skipped_not_in_vocab} not in vocab,"
+            f" {skipped_ambiguous} ambiguous"
         )
 
     return examples
@@ -207,13 +450,17 @@ def main():
     # Load fnum_to_records
     fnum_to_records = load_fnum_records()
 
+    # Build record index for ambiguity checking
+    print("\nBuilding record index...")
+    sig_to_fnums = build_record_index(fnum_to_records)
+
     # Load labeled data
     print("\nLoading labeled data...")
-    labeled = load_labeled_data(fnum_set, fnum_to_records)
+    labeled = load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums)
 
     # Load synthetic data
     print("\nLoading synthetic data...")
-    synthetic = load_synthetic_data(fnum_set, fnum_to_records)
+    synthetic = load_synthetic_data(fnum_set, fnum_to_records, sig_to_fnums)
 
     # Assign splits: labeled data gets train/val/test, synthetic is train only
     print("\nAssigning splits...")

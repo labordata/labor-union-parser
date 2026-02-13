@@ -14,6 +14,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from .char_cnn import (
+    NUM_HASH_BUCKETS,
     SPECIAL_TOKEN_VOCAB,
     CharacterCNN,
     get_special_token_id,
@@ -51,6 +52,11 @@ class CrossAttentionEncoder(nn.Module):
 
     Uses a learned query to attend over token embeddings, allowing the model
     to learn which tokens are most relevant for classification.
+
+    Number handling:
+    - For non-numbers: uses CharCNN embeddings
+    - For numbers: uses frozen random embeddings (hash-based lookup)
+    - This makes different numbers orthogonal by construction
     """
 
     def __init__(
@@ -59,15 +65,21 @@ class CrossAttentionEncoder(nn.Module):
         embed_dim: int = 64,
         num_embed_dim: int = 8,
         num_heads: int = 4,
+        frozen_num_dim: int = 32,
     ):
         super().__init__()
         self.char_cnn = char_cnn
         self.char_embed_dim = char_cnn.embed_dim
         self.num_embed_dim = num_embed_dim
-        self.input_dim = self.char_embed_dim + num_embed_dim
+        self.frozen_num_dim = frozen_num_dim
+        self.input_dim = self.char_embed_dim + num_embed_dim + frozen_num_dim
 
         # is_number embedding (0 = not number, 1 = number)
         self.num_embed = nn.Embedding(2, num_embed_dim)
+
+        # Frozen random embeddings for numbers - makes different numbers orthogonal
+        self.frozen_num_embed = nn.Embedding(NUM_HASH_BUCKETS, frozen_num_dim)
+        self.frozen_num_embed.weight.requires_grad = False  # FROZEN
 
         # Learned query for "what class is this?"
         self.query = nn.Parameter(torch.randn(1, 1, self.input_dim) * 0.02)
@@ -86,15 +98,35 @@ class CrossAttentionEncoder(nn.Module):
             nn.Linear(128, embed_dim),
         )
 
-    def forward(self, char_ids, token_type, is_number, return_attention=False):
+    def forward(
+        self, char_ids, token_type, is_number, numeric_ids=None, return_attention=False
+    ):
         batch_size = char_ids.shape[0]
+        device = char_ids.device
 
         # Get token embeddings from CharCNN
-        token_emb = self.char_cnn(char_ids)
+        char_emb = self.char_cnn(char_ids)
 
-        # Add is_number embedding
-        num_emb = self.num_embed(is_number)
-        token_emb = torch.cat([token_emb, num_emb], dim=-1)
+        # Zero out CharCNN embeddings for number tokens (they'll use frozen embeddings)
+        is_number_mask = is_number.unsqueeze(-1).float()
+        char_emb = char_emb * (1 - is_number_mask)
+
+        # Add is_number feature embedding
+        num_feature_emb = self.num_embed(is_number)
+
+        # Frozen number embeddings (zero for non-numbers)
+        if numeric_ids is None:
+            # Fallback: zeros if not provided (for backward compatibility)
+            frozen_emb = torch.zeros(
+                batch_size, char_ids.shape[1], self.frozen_num_dim, device=device
+            )
+        else:
+            frozen_emb = self.frozen_num_embed(numeric_ids)
+            # Zero out for non-numbers
+            frozen_emb = frozen_emb * is_number_mask
+
+        # Concatenate all embeddings
+        token_emb = torch.cat([char_emb, num_feature_emb, frozen_emb], dim=-1)
 
         # Create padding mask (True = ignore)
         key_padding_mask = token_type == 4
@@ -312,7 +344,7 @@ def create_desig_label(text: str, desig_num: str, max_len: int = MAX_TOKENS) -> 
     if not desig_num:
         return 0
 
-    _, tokens, _, _ = tokenize_to_chars(text, max_tokens=max_len)
+    _, tokens, _, _, _ = tokenize_to_chars(text, max_tokens=max_len)
 
     # Find the last occurrence of the designation number
     best_idx = None
@@ -342,7 +374,7 @@ def extract_desig_from_pred(
     if desig_pred == 0:
         return ""
 
-    _, tokens, _, _ = tokenize_to_chars(text, max_tokens=max_len)
+    _, tokens, _, _, _ = tokenize_to_chars(text, max_tokens=max_len)
     token_idx = desig_pred - 1
 
     if token_idx < len(tokens):
@@ -460,19 +492,22 @@ class Extractor:
         char_ids_list = []
         token_type_list = []
         is_number_list = []
+        numeric_ids_list = []
 
         for text in texts:
-            char_ids, _, is_number, token_type = tokenize_to_chars(
+            char_ids, _, is_number, token_type, numeric_ids = tokenize_to_chars(
                 text, max_tokens=max_tokens
             )
             char_ids_list.append(char_ids)
             token_type_list.append(token_type)
             is_number_list.append(is_number)
+            numeric_ids_list.append(numeric_ids)
 
         return (
             torch.tensor(char_ids_list, dtype=torch.long, device=self.device),
             torch.tensor(token_type_list, dtype=torch.long, device=self.device),
             torch.tensor(is_number_list, dtype=torch.long, device=self.device),
+            torch.tensor(numeric_ids_list, dtype=torch.long, device=self.device),
         )
 
     def _tokenize_for_desig(self, texts: list[str], max_tokens: int = MAX_TOKENS):
@@ -484,7 +519,7 @@ class Extractor:
         token_mask_list = []
 
         for text in texts:
-            char_ids, tokens, is_number, token_type = tokenize_to_chars(
+            char_ids, tokens, is_number, token_type, _ = tokenize_to_chars(
                 text, max_tokens=max_tokens
             )
             char_ids_list.append(char_ids)
@@ -571,13 +606,13 @@ class Extractor:
     def _extract_batch_internal(self, texts: list[str]) -> list[dict]:
         """Internal batch processing (no chunking)."""
         # Stage 1: Union detection (using longer max_tokens for union detection)
-        char_ids_union, token_type_union, is_number_union = self._tokenize_batch(
-            texts, max_tokens=80
+        char_ids_union, token_type_union, is_number_union, numeric_ids_union = (
+            self._tokenize_batch(texts, max_tokens=80)
         )
 
         with torch.no_grad():
             union_emb = self.union_encoder(
-                char_ids_union, token_type_union, is_number_union
+                char_ids_union, token_type_union, is_number_union, numeric_ids_union
             )
             union_sims = torch.matmul(
                 union_emb, self.union_centroid.unsqueeze(0).T
@@ -607,12 +642,14 @@ class Extractor:
 
         # Stage 2: Affiliation classification for unions
         if union_texts:
-            char_ids_aff, token_type_aff, is_number_aff = self._tokenize_batch(
-                union_texts, max_tokens=MAX_TOKENS
+            char_ids_aff, token_type_aff, is_number_aff, numeric_ids_aff = (
+                self._tokenize_batch(union_texts, max_tokens=MAX_TOKENS)
             )
 
             with torch.no_grad():
-                aff_emb = self.aff_encoder(char_ids_aff, token_type_aff, is_number_aff)
+                aff_emb = self.aff_encoder(
+                    char_ids_aff, token_type_aff, is_number_aff, numeric_ids_aff
+                )
                 # Compute similarities to all centroids
                 similarities = torch.matmul(aff_emb, self.aff_centroids.T)
                 max_sims, max_indices = similarities.max(dim=1)

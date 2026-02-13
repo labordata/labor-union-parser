@@ -40,7 +40,7 @@ def encode_all_records(model, fnum_to_records, vocab, batch_size=512):
             field_emb, _ = model.record_encoder(
                 rec_batch["union_idx"],
                 rec_batch["desig_idx"],
-                rec_batch["prefix_idx"],
+                rec_batch["prefix_hash"],
                 rec_batch["num_hash"],
                 rec_batch["num_val"],
                 rec_batch["suffix_idx"],
