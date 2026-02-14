@@ -96,7 +96,6 @@ def main(checkpoint, k):
                 rec_batch["desig_idx"],
                 rec_batch["prefix_hash"],
                 rec_batch["num_hash"],
-                rec_batch["num_val"],
                 rec_batch["suffix_idx"],
                 rec_batch["unit_id_idx"],
             )

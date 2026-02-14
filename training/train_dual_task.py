@@ -182,7 +182,6 @@ class DualTaskLitBase(L.LightningModule):
                     rec_batch["desig_idx"],
                     rec_batch["prefix_hash"],
                     rec_batch["num_hash"],
-                    rec_batch["num_val"],
                     rec_batch["suffix_idx"],
                     rec_batch["unit_id_idx"],
                 )
@@ -307,7 +306,6 @@ class InBatchLitModule(DualTaskLitBase):
             batch["desig_idx"],
             batch["prefix_hash"],
             batch["num_hash"],
-            batch["num_val"],
             batch["suffix_idx"],
             batch["unit_id_idx"],
         )
@@ -339,7 +337,6 @@ class ANCELitModule(DualTaskLitBase):
             batch["cand_desig_idx"].reshape(-1),
             batch["cand_prefix_hash"].reshape(-1),
             batch["cand_num_hash"].reshape(-1),
-            batch["cand_num_val"].reshape(-1),
             batch["cand_suffix_idx"].reshape(-1),
             batch["cand_unit_id_idx"].reshape(-1),
         )
