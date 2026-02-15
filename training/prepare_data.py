@@ -443,6 +443,175 @@ def load_synthetic_data(fnum_set, fnum_to_records, sig_to_fnums):
     return examples
 
 
+UNIT_ID_CSV = Path(__file__).parent / "fnum_to_unit_identifier.csv"
+
+
+def load_conflict_groups():
+    """Load conflict group (component_id) for each f_num."""
+    fnum_to_component = {}
+    with open(UNIT_ID_CSV) as f:
+        for row in csv.DictReader(f):
+            fnum_to_component[int(row["f_num"])] = int(row["component_id"])
+    return fnum_to_component
+
+
+def add_structural_negatives(examples, fnum_to_records):
+    """
+    Add structural hard negatives: records with the same union+number
+    but a different f_num.
+
+    These surface suffix, desig_name, and prefix disambiguation cases
+    that ANCE mining misses because they have nearly identical embeddings.
+
+    Skips candidates that:
+    - Match any positive record variant on (desig_name, prefix, suffix)
+    - Are in the same conflict group as the positive (those need unit_id
+      to disambiguate, which is handled separately)
+    """
+    fnum_to_component = load_conflict_groups()
+
+    # Build index: (union_name, desig_num) -> [(fnum, record), ...]
+    union_num_index = defaultdict(list)
+    for fnum, records in fnum_to_records.items():
+        for rec in records:
+            if rec["desig_num"] > 0:
+                key = (rec["union_name"], rec["desig_num"])
+                union_num_index[key].append((fnum, rec))
+
+    total_added = 0
+    examples_with_structural = 0
+
+    for ex in examples:
+        pos_fnum = ex["f_num"]
+        pos_records = ex["records"]
+        if not pos_records:
+            continue
+
+        pos_rec = pos_records[0]
+        if pos_rec["desig_num"] == 0:
+            continue
+
+        key = (pos_rec["union_name"], pos_rec["desig_num"])
+        group = union_num_index.get(key, [])
+
+        # Build the set of all record shapes for the positive f_num
+        # (ignoring unit_id) so we never add a negative that matches
+        # any positive variant
+        pos_shapes = set()
+        for rec in fnum_to_records[pos_fnum]:
+            pos_shapes.add(
+                (
+                    rec.get("desig_name", ""),
+                    rec.get("prefix", 0),
+                    rec.get("suffix", ""),
+                )
+            )
+
+        # Collect structural negatives from different fnums
+        pos_component = fnum_to_component.get(pos_fnum)
+        structural = []
+        for cand_fnum, cand_rec in group:
+            if cand_fnum == pos_fnum:
+                continue
+
+            # Skip if in the same conflict group — those pairs share
+            # a representation and need unit_id to disambiguate
+            if (
+                pos_component is not None
+                and fnum_to_component.get(cand_fnum) == pos_component
+            ):
+                continue
+
+            # Skip if this record's shape matches any positive variant
+            cand_shape = (
+                cand_rec.get("desig_name", ""),
+                cand_rec.get("prefix", 0),
+                cand_rec.get("suffix", ""),
+            )
+            if cand_shape in pos_shapes:
+                continue
+
+            structural.append({"f_num": cand_fnum, "record": cand_rec})
+
+        if structural:
+            # Deduplicate by record shape — we only need one representative
+            # per distinct (desig_name, prefix, suffix) combination
+            seen = set()
+            deduped = []
+            for s in structural:
+                r = s["record"]
+                shape = (
+                    r.get("desig_name", ""),
+                    r.get("prefix", 0),
+                    r.get("suffix", ""),
+                )
+                if shape not in seen:
+                    seen.add(shape)
+                    deduped.append(s)
+            ex["structural_negatives"] = deduped
+            total_added += len(deduped)
+            examples_with_structural += 1
+
+    print(
+        f"  {total_added} structural negatives added"
+        f" to {examples_with_structural} examples"
+    )
+
+
+def classify_fnum_discrimination(fnum_to_records):
+    """
+    For each f_num, determine if (union_name, desig_num) uniquely identifies it.
+
+    Returns dict: fnum -> category string:
+      "unique"    — unique by (union_name, desig_num), or no desig_num
+      "ambiguous" — shares (union_name, desig_num) with other f_nums
+    """
+    # Build (union_name, desig_num) -> set of f_nums
+    union_num_to_fnums = defaultdict(set)
+    for fnum, records in fnum_to_records.items():
+        for rec in records:
+            if rec["desig_num"] > 0:
+                key = (rec["union_name"], rec["desig_num"])
+                union_num_to_fnums[key].add(fnum)
+
+    ambiguous_fnums = set()
+    for fnums in union_num_to_fnums.values():
+        if len(fnums) > 1:
+            ambiguous_fnums.update(fnums)
+
+    return {
+        fnum: "ambiguous" if fnum in ambiguous_fnums else "unique"
+        for fnum in fnum_to_records
+    }
+
+
+def add_example_categories(examples, fnum_to_records):
+    """
+    Add a discrimination category to each example based on whether
+    (union_name, desig_num) uniquely identifies its f_num.
+
+    Categories: unique, ambiguous
+    """
+    fnum_category = classify_fnum_discrimination(fnum_to_records)
+
+    # Assign category to each example
+    train_counts = defaultdict(int)
+    total_train = 0
+    for ex in examples:
+        cat = fnum_category.get(ex["f_num"], "unique")
+        ex["category"] = cat
+        if ex.get("split") == "train":
+            train_counts[cat] += 1
+            total_train += 1
+
+    # Print distribution
+    print("  Training distribution:")
+    for cat in sorted(train_counts, key=lambda c: train_counts[c], reverse=True):
+        print(
+            f"    {cat:>8s}: {train_counts[cat]:>6d} ({100*train_counts[cat]/total_train:.1f}%)"
+        )
+
+
 def main():
     # Load vocabularies
     fnum_set = load_vocabularies()
@@ -480,6 +649,14 @@ def main():
     print(f"  Train: {split_counts['train']} (labeled + synthetic)")
     print(f"  Val: {split_counts['val']} (labeled only)")
     print(f"  Test: {split_counts['test']} (labeled only)")
+
+    # Add structural negatives
+    print("\nAdding structural negatives...")
+    add_structural_negatives(examples, fnum_to_records)
+
+    # Assign discrimination categories to examples
+    print("\nAssigning discrimination categories...")
+    add_example_categories(examples, fnum_to_records)
 
     # Save
     print(f"\nSaving to {OUTPUT_PATH}...")

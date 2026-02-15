@@ -15,6 +15,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from labor_union_parser.char_cnn import NUMBER_VOCAB, tokenize_to_chars
 from labor_union_parser.model import MAX_QUERY_LEN
 
+CATEGORY_TO_IDX = {"unique": 0, "ambiguous": 1}
+NUM_CATEGORIES = len(CATEGORY_TO_IDX)
+
 
 def smart_truncate_nonspace(text, max_nonspace_tokens):
     """
@@ -137,7 +140,6 @@ def encode_record_batch(records, vocab):
     desig_idx = []
     prefix_hash = []
     num_hash = []
-    num_val = []
     suffix_idx = []
     unit_id_idx = []
 
@@ -153,7 +155,6 @@ def encode_record_batch(records, vocab):
         num_hash.append(
             NUMBER_VOCAB.get(str(rec.get("desig_num", 0)), NUMBER_VOCAB["<UNK>"])
         )
-        num_val.append(rec.get("desig_num", 0))
         suffix_norm = normalize_designation(rec.get("suffix", "") or "")
         suffix_idx.append(s_map.get(suffix_norm, 0))
         unit_id_idx.append(uid_map.get(rec.get("unit_id", ""), 0))
@@ -163,7 +164,6 @@ def encode_record_batch(records, vocab):
         "desig_idx": torch.tensor(desig_idx, dtype=torch.long),
         "prefix_hash": torch.tensor(prefix_hash, dtype=torch.long),
         "num_hash": torch.tensor(num_hash, dtype=torch.long),
-        "num_val": torch.tensor(num_val, dtype=torch.long),
         "suffix_idx": torch.tensor(suffix_idx, dtype=torch.long),
         "unit_id_idx": torch.tensor(unit_id_idx, dtype=torch.long),
     }
@@ -196,6 +196,10 @@ class QueryDataset(Dataset):
         f_nums = torch.tensor([ex["f_num"] for ex in batch])
         encoded = encode_query_batch(queries)
         encoded["f_num"] = f_nums
+        encoded["category"] = torch.tensor(
+            [CATEGORY_TO_IDX.get(ex.get("category", "unique"), 0) for ex in batch],
+            dtype=torch.long,
+        )
         return encoded
 
 
@@ -264,10 +268,12 @@ class QueryRecordDataset(Dataset):
             "desig_idx": torch.tensor(desig_idx, dtype=torch.long),
             "prefix_hash": torch.tensor(prefix_hash, dtype=torch.long),
             "num_hash": torch.tensor(num_hash, dtype=torch.long),
-            "num_val": torch.tensor(pos_record["desig_num"], dtype=torch.long),
             "suffix_idx": torch.tensor(suffix_idx, dtype=torch.long),
             "unit_id_idx": torch.tensor(unit_id_idx, dtype=torch.long),
             "f_num": torch.tensor(ex["f_num"], dtype=torch.long),
+            "category": torch.tensor(
+                CATEGORY_TO_IDX.get(ex.get("category", "unique"), 0), dtype=torch.long
+            ),
         }
 
     @staticmethod
@@ -311,6 +317,10 @@ class QueryRecordDatasetWithCandidates(Dataset):
             for cand_data in ex["mined_candidates"]:
                 candidates.append((cand_data["f_num"], cand_data["record"]))
 
+        if "structural_negatives" in ex and ex["structural_negatives"]:
+            for cand_data in ex["structural_negatives"]:
+                candidates.append((cand_data["f_num"], cand_data["record"]))
+
         # Encode query
         char_ids, _, is_number, _, numeric_ids = smart_truncate_nonspace(
             query, MAX_QUERY_LEN
@@ -322,7 +332,6 @@ class QueryRecordDatasetWithCandidates(Dataset):
         cand_desig_idx = []
         cand_prefix_hash = []
         cand_num_hash = []
-        cand_num_val = []
         cand_suffix_idx = []
         cand_unit_id_idx = []
 
@@ -339,7 +348,6 @@ class QueryRecordDatasetWithCandidates(Dataset):
             cand_num_hash.append(
                 NUMBER_VOCAB.get(str(rec.get("desig_num", 0)), NUMBER_VOCAB["<UNK>"])
             )
-            cand_num_val.append(rec.get("desig_num", 0))
             suffix_norm = normalize_designation(rec.get("suffix", "") or "")
             cand_suffix_idx.append(self.s_map.get(suffix_norm, 0))
             cand_unit_id_idx.append(self.uid_map.get(rec.get("unit_id", ""), 0))
@@ -355,10 +363,12 @@ class QueryRecordDatasetWithCandidates(Dataset):
             "cand_desig_idx": torch.tensor(cand_desig_idx, dtype=torch.long),
             "cand_prefix_hash": torch.tensor(cand_prefix_hash, dtype=torch.long),
             "cand_num_hash": torch.tensor(cand_num_hash, dtype=torch.long),
-            "cand_num_val": torch.tensor(cand_num_val, dtype=torch.long),
             "cand_suffix_idx": torch.tensor(cand_suffix_idx, dtype=torch.long),
             "cand_unit_id_idx": torch.tensor(cand_unit_id_idx, dtype=torch.long),
             "num_candidates": torch.tensor(len(candidates), dtype=torch.long),
+            "category": torch.tensor(
+                CATEGORY_TO_IDX.get(ex.get("category", "unique"), 0), dtype=torch.long
+            ),
         }
 
     @staticmethod
@@ -377,7 +387,6 @@ class QueryRecordDatasetWithCandidates(Dataset):
             "cand_desig_idx",
             "cand_prefix_hash",
             "cand_num_hash",
-            "cand_num_val",
             "cand_suffix_idx",
             "cand_unit_id_idx",
         ]

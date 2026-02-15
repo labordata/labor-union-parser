@@ -243,17 +243,18 @@ class CrossAttentionHead(nn.Module):
     Uses field self-attention before cross-attention and a bigger classifier.
     """
 
-    def __init__(self, embed_dim=EMBED_DIM):
+    def __init__(self, embed_dim=EMBED_DIM, pool_mode="cls", num_heads=4):
         super().__init__()
         self.embed_dim = embed_dim
+        self.pool_mode = pool_mode  # "cls" or "mean"
 
         # Cross-attention layers
-        self.cross_attn1 = CrossAttentionLayer(embed_dim, num_heads=4)
-        self.cross_attn2 = CrossAttentionLayer(embed_dim, num_heads=4)
+        self.cross_attn1 = CrossAttentionLayer(embed_dim, num_heads=num_heads)
+        self.cross_attn2 = CrossAttentionLayer(embed_dim, num_heads=num_heads)
 
         # Field self-attention before cross-attention
         self.field_self_attn = nn.MultiheadAttention(
-            embed_dim, num_heads=4, batch_first=True
+            embed_dim, num_heads=num_heads, batch_first=True
         )
         self.field_norm = nn.LayerNorm(embed_dim)
 
@@ -267,6 +268,19 @@ class CrossAttentionHead(nn.Module):
             nn.Dropout(0.1),
             nn.Linear(embed_dim, 1),
         )
+
+    def _pool(self, enhanced, token_mask):
+        """Pool cross-attended token embeddings into a single vector."""
+        if self.pool_mode == "mean":
+            # Mean pool over non-padding tokens
+            mask = ~token_mask  # True for real tokens
+            pooled = (enhanced * mask.unsqueeze(-1)).sum(dim=1) / mask.sum(
+                dim=1, keepdim=True
+            ).clamp(min=1)
+        else:
+            # [CLS] token at index 0
+            pooled = enhanced[:, 0]
+        return pooled
 
     def score_pair(self, token_emb, token_mask, field_emb, field_mask):
         """
@@ -291,10 +305,34 @@ class CrossAttentionHead(nn.Module):
         enhanced = self.cross_attn1(token_emb, field_emb, token_mask, field_mask)
         enhanced = self.cross_attn2(enhanced, field_emb, token_mask, field_mask)
 
-        # Extract [CLS] token (at index 0) for classification
-        pooled = enhanced[:, 0]
+        pooled = self._pool(enhanced, token_mask)
 
         return self.classifier(pooled).squeeze(-1)
+
+    def score_pair_with_attention(self, token_emb, token_mask, field_emb, field_mask):
+        """
+        Like score_pair but also returns cross-attention weights from both layers.
+
+        Returns:
+            scores: [batch]
+            attn_weights_1: [batch, num_heads, seq_len, 6]
+            attn_weights_2: [batch, num_heads, seq_len, 6]
+        """
+        field_enhanced, _ = self.field_self_attn(
+            field_emb, field_emb, field_emb, key_padding_mask=field_mask
+        )
+        field_emb = self.field_norm(field_emb + field_enhanced)
+
+        enhanced, attn1 = self.cross_attn1(
+            token_emb, field_emb, token_mask, field_mask, return_attn_weights=True
+        )
+        enhanced, attn2 = self.cross_attn2(
+            enhanced, field_emb, token_mask, field_mask, return_attn_weights=True
+        )
+
+        pooled = self._pool(enhanced, token_mask)
+        scores = self.classifier(pooled).squeeze(-1)
+        return scores, attn1, attn2
 
     def score_all_pairs(self, token_emb, token_mask, field_emb, field_mask):
         """
@@ -361,6 +399,8 @@ class DualTaskModel(nn.Module):
         num_suffixes,
         num_unit_ids,
         embed_dim=EMBED_DIM,
+        pool_mode="cls",
+        ca_num_heads=4,
     ):
         super().__init__()
 
@@ -380,7 +420,9 @@ class DualTaskModel(nn.Module):
 
         # Task-specific heads
         self.dual_tower = DualTowerHead(self.record_encoder, embed_dim)
-        self.cross_attention = CrossAttentionHead(embed_dim)
+        self.cross_attention = CrossAttentionHead(
+            embed_dim, pool_mode=pool_mode, num_heads=ca_num_heads
+        )
 
     def forward_dual_task(
         self,
@@ -495,5 +537,40 @@ class DualTaskModel(nn.Module):
             r_unit_id_idx,
         )
         return self.cross_attention.score_pair(
+            token_emb, padding_mask, field_emb, field_mask
+        )
+
+    def forward_reranking_with_attention(
+        self,
+        q_char_ids,
+        q_is_number,
+        q_numeric_ids,
+        r_union_idx,
+        r_desig_idx,
+        r_prefix_hash,
+        r_num_hash,
+        r_suffix_idx,
+        r_unit_id_idx,
+    ):
+        """
+        Like forward_reranking but also returns cross-attention weights.
+
+        Returns:
+            scores: [batch]
+            attn_weights_1: [batch, num_heads, seq_len, 6]
+            attn_weights_2: [batch, num_heads, seq_len, 6]
+        """
+        token_emb, padding_mask = self.query_encoder(
+            q_char_ids, q_is_number, q_numeric_ids
+        )
+        field_emb, field_mask = self.record_encoder(
+            r_union_idx,
+            r_desig_idx,
+            r_prefix_hash,
+            r_num_hash,
+            r_suffix_idx,
+            r_unit_id_idx,
+        )
+        return self.cross_attention.score_pair_with_attention(
             token_emb, padding_mask, field_emb, field_mask
         )

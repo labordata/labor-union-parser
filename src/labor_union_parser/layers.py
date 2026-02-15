@@ -98,7 +98,14 @@ class CrossAttentionLayer(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.norm = nn.LayerNorm(embed_dim)
 
-    def forward(self, query_emb, field_emb, query_mask=None, field_mask=None):
+    def forward(
+        self,
+        query_emb,
+        field_emb,
+        query_mask=None,
+        field_mask=None,
+        return_attn_weights=False,
+    ):
         B, Q, _ = query_emb.shape
         _, K, _ = (
             field_emb.shape
@@ -124,21 +131,27 @@ class CrossAttentionLayer(nn.Module):
             .transpose(1, 2)
         )
 
-        # Build attention mask for SDPA
+        # Build attention mask
         attn_mask = None
         if field_mask is not None:
-            # field_mask: [B, K] where True = masked
-            # SDPA expects [B, num_heads, Q, K] with -inf for masked positions
             attn_mask = (
                 field_mask.unsqueeze(1).unsqueeze(2).expand(B, self.num_heads, Q, K)
             )
             attn_mask = torch.where(attn_mask, float("-inf"), 0.0)
 
-        # Use SDPA for numerical stability
-        dropout_p = self.dropout.p if self.training else 0.0
-        out = F.scaled_dot_product_attention(
-            q, k, v, attn_mask=attn_mask, dropout_p=dropout_p, is_causal=False
-        )
+        if return_attn_weights:
+            # Manual computation to extract weights (SDPA doesn't expose them)
+            scores = torch.matmul(q, k.transpose(-2, -1)) / (self.head_dim**0.5)
+            if attn_mask is not None:
+                scores = scores + attn_mask
+            attn_weights = F.softmax(scores, dim=-1)
+            out = torch.matmul(attn_weights, v)
+        else:
+            dropout_p = self.dropout.p if self.training else 0.0
+            out = F.scaled_dot_product_attention(
+                q, k, v, attn_mask=attn_mask, dropout_p=dropout_p, is_causal=False
+            )
+            attn_weights = None
 
         out = out.transpose(1, 2).reshape(B, Q, self.embed_dim)
         out = self.out_proj(out)
@@ -149,4 +162,6 @@ class CrossAttentionLayer(nn.Module):
         if query_mask is not None:
             out = out.masked_fill(query_mask.unsqueeze(-1), 0.0)
 
+        if return_attn_weights:
+            return out, attn_weights
         return out

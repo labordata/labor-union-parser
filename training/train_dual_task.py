@@ -18,10 +18,7 @@ from dataset import (
     QueryRecordDatasetWithCandidates,
     encode_record_batch,
 )
-from mining import (
-    ANCEMiningCallback,
-    encode_all_records,
-)
+from mining import ANCEMiningCallback
 from torch.utils.data import DataLoader
 
 from labor_union_parser.model import DualTaskModel
@@ -63,7 +60,9 @@ def supervised_contrastive_loss(similarities, fnum_ids, temperature=0.07):
     return loss.mean()
 
 
-def contrastive_loss_with_mask(similarities, positive_mask, temperature=0.07):
+def contrastive_loss_with_mask(
+    similarities, positive_mask, temperature=0.07, weights=None
+):
     """
     Any-positive contrastive loss for per-query candidate lists.
 
@@ -72,6 +71,8 @@ def contrastive_loss_with_mask(similarities, positive_mask, temperature=0.07):
       -log(Σ_{p∈P_i} exp(s_ip/τ) / Σ_k exp(s_ik/τ))
 
     Identical to per-positive SupCon when |P_i|=1.
+
+    If weights is provided, computes a weighted mean instead of simple mean.
     """
     sim_scaled = similarities / temperature
 
@@ -81,6 +82,8 @@ def contrastive_loss_with_mask(similarities, positive_mask, temperature=0.07):
     log_denominator = torch.logsumexp(sim_scaled, dim=1)
     loss = -(log_numerator - log_denominator)
 
+    if weights is not None:
+        return (loss * weights).sum() / weights.sum()
     return loss.mean()
 
 
@@ -153,10 +156,17 @@ class DualTaskLitBase(L.LightningModule):
         retrieval_weight=1.0,
         reranking_weight=1.0,
         temperature=0.07,
+        weight_alpha=0.5,
     ):
         super().__init__()
         self.model = model
         self.save_hyperparameters(ignore=["model"])
+
+        # Dynamic category weights (updated after each validation epoch)
+        from dataset import NUM_CATEGORIES
+
+        self._category_weights = torch.ones(NUM_CATEGORIES)
+        self._train_category_fracs = None  # set by datamodule
 
     # ------------------------------------------------------------------
     # Full-corpus validation: encode all records, retrieve top-k, rerank
@@ -164,18 +174,28 @@ class DualTaskLitBase(L.LightningModule):
     VAL_K = 50
 
     def on_validation_epoch_start(self):
-        dm = self.trainer.datamodule
-        record_embs, records, record_fnums = encode_all_records(
-            self.model, dm.fnum_to_records, dm.vocab, batch_size=512
-        )
-        self._val_record_embs = record_embs.to(self.device)
-        self._val_record_fnums = record_fnums.to(self.device)
+        from dataset import NUM_CATEGORIES
 
-        # Field embeddings for cross-attention reranking
+        self._val_errors_by_cat = torch.zeros(NUM_CATEGORIES, dtype=torch.long)
+        self._val_total_by_cat = torch.zeros(NUM_CATEGORIES, dtype=torch.long)
+
+        dm = self.trainer.datamodule
+        if self._train_category_fracs is None and hasattr(dm, "train_category_fracs"):
+            self._train_category_fracs = dm.train_category_fracs
+        # Encode all records in one pass (dual-tower + field embeddings)
+        all_records = []
+        record_fnums = []
+        for fnum, records in dm.fnum_to_records.items():
+            for rec in records:
+                all_records.append(rec)
+                record_fnums.append(fnum)
+
+        all_record_embs = []
         field_embs, field_masks = [], []
+        self.model.eval()
         with torch.no_grad():
-            for i in range(0, len(records), 512):
-                rec_batch = encode_record_batch(records[i : i + 512], dm.vocab)
+            for i in range(0, len(all_records), 512):
+                rec_batch = encode_record_batch(all_records[i : i + 512], dm.vocab)
                 rec_batch = {k: v.to(self.device) for k, v in rec_batch.items()}
                 fe, fm = self.model.record_encoder(
                     rec_batch["union_idx"],
@@ -185,23 +205,65 @@ class DualTaskLitBase(L.LightningModule):
                     rec_batch["suffix_idx"],
                     rec_batch["unit_id_idx"],
                 )
+                emb = self.model.dual_tower.encode_record(fe)
+                all_record_embs.append(emb)
                 field_embs.append(fe)
                 field_masks.append(fm)
+
+        self._val_record_embs = torch.cat(all_record_embs).to(self.device)
+        self._val_record_fnums = torch.tensor(record_fnums).to(self.device)
         self._val_field_embs = torch.cat(field_embs)
         self._val_field_masks = torch.cat(field_masks)
 
     def on_validation_epoch_end(self):
+        # Compute dynamic category weights from validation errors
+        if (
+            hasattr(self, "_val_errors_by_cat")
+            and self._train_category_fracs is not None
+        ):
+            total_errors = self._val_errors_by_cat.sum().item()
+            if total_errors > 0:
+                error_fracs = self._val_errors_by_cat.float() / total_errors
+                alpha = self.hparams.get("weight_alpha", 0.5)
+                for i in range(len(self._category_weights)):
+                    train_frac = self._train_category_fracs[i]
+                    if train_frac > 0 and error_fracs[i] > 0:
+                        self._category_weights[i] = (
+                            error_fracs[i].item() / train_frac
+                        ) ** alpha
+                    else:
+                        self._category_weights[i] = 1.0
+                # Log weights
+                from dataset import CATEGORY_TO_IDX
+
+                cat_names = {v: k for k, v in CATEGORY_TO_IDX.items()}
+                parts = []
+                for i in range(len(self._category_weights)):
+                    name = cat_names.get(i, f"cat{i}")
+                    parts.append(f"{name}={self._category_weights[i]:.2f}")
+                err_parts = []
+                for i in range(len(self._category_weights)):
+                    name = cat_names.get(i, f"cat{i}")
+                    err_parts.append(
+                        f"{name}={self._val_errors_by_cat[i]}/{self._val_total_by_cat[i]}"
+                    )
+                print(f"  Errors by cat: {', '.join(err_parts)}")
+                print(f"  Category weights: {', '.join(parts)}")
+
         for attr in (
             "_val_record_embs",
             "_val_record_fnums",
             "_val_field_embs",
             "_val_field_masks",
+            "_val_errors_by_cat",
+            "_val_total_by_cat",
         ):
             if hasattr(self, attr):
                 delattr(self, attr)
 
     def _eval_step(self, batch, prefix):
         f_nums = batch["f_num"].to(self.device)
+        categories = batch["category"].to(self.device)
         n = f_nums.shape[0]
 
         token_emb, padding_mask = self.model.query_encoder(
@@ -209,41 +271,85 @@ class DualTaskLitBase(L.LightningModule):
         )
         query_embs = self.model.dual_tower.encode_query(token_emb, padding_mask)
 
+        # Retrieval: top-K candidates per query [n, VAL_K]
         sims = query_embs @ self._val_record_embs.T
         topk_vals, topk_idx = sims.topk(self.VAL_K, dim=1)
         top1_fnums = self._val_record_fnums[sims.argmax(dim=1)]
 
         ret1_correct = (top1_fnums == f_nums).sum().item()
-        retk_correct = 0
-        acc_correct = 0
 
-        for i in range(n):
-            target = f_nums[i].item()
-            cand_idx = topk_idx[i]
-            cand_fnums = self._val_record_fnums[cand_idx]
+        # Check which queries have their target in top-K
+        cand_fnums = self._val_record_fnums[topk_idx]  # [n, VAL_K]
+        retrieved = (cand_fnums == f_nums.unsqueeze(1)).any(dim=1).cpu()  # [n]
+        retk_correct = retrieved.sum().item()
 
-            if target not in cand_fnums.tolist():
-                continue
-            retk_correct += 1
-
-            # Cross-attention reranking
-            cand_fe = self._val_field_embs[cand_idx]
-            cand_fm = self._val_field_masks[cand_idx]
-            q_tok = token_emb[i].unsqueeze(0).expand(self.VAL_K, -1, -1)
-            q_mask = padding_mask[i].unsqueeze(0).expand(self.VAL_K, -1)
-            rerank_scores = self.model.cross_attention.score_pair(
-                q_tok, q_mask, cand_fe, cand_fm
+        # Category tracking: totals for all, errors for retrieval misses
+        cats_cpu = categories.cpu()
+        self._val_total_by_cat.scatter_add_(
+            0, cats_cpu, torch.ones_like(cats_cpu, dtype=torch.long)
+        )
+        miss_cats = cats_cpu[~retrieved]
+        if miss_cats.numel() > 0:
+            self._val_errors_by_cat.scatter_add_(
+                0, miss_cats, torch.ones_like(miss_cats, dtype=torch.long)
             )
 
-            fnum_best = {}
-            for j in range(self.VAL_K):
-                fn = cand_fnums[j].item()
-                s = rerank_scores[j].item()
-                if fn not in fnum_best or s > fnum_best[fn]:
-                    fnum_best[fn] = s
+        # Reranking: batch all retrieved queries at once
+        acc_correct = 0
+        if retk_correct > 0:
+            ret_idx = retrieved.nonzero(as_tuple=True)[
+                0
+            ]  # indices of retrieved queries
+            n_ret = ret_idx.shape[0]
 
-            if max(fnum_best, key=fnum_best.get) == target:
-                acc_correct += 1
+            # Gather candidates for retrieved queries [n_ret, VAL_K]
+            ret_topk = topk_idx[ret_idx]
+            ret_cand_fnums = cand_fnums[ret_idx]
+            ret_targets = f_nums[ret_idx]
+
+            # Batch cross-attention: [n_ret * VAL_K, ...]
+            cand_fe = self._val_field_embs[ret_topk.reshape(-1)]
+            cand_fm = self._val_field_masks[ret_topk.reshape(-1)]
+            q_tok = (
+                token_emb[ret_idx]
+                .unsqueeze(1)
+                .expand(n_ret, self.VAL_K, -1, -1)
+                .reshape(n_ret * self.VAL_K, token_emb.shape[1], -1)
+            )
+            q_mask = (
+                padding_mask[ret_idx]
+                .unsqueeze(1)
+                .expand(n_ret, self.VAL_K, -1)
+                .reshape(n_ret * self.VAL_K, -1)
+            )
+            rerank_scores = self.model.cross_attention.score_pair(
+                q_tok, q_mask, cand_fe, cand_fm
+            ).view(n_ret, self.VAL_K)
+
+            # For each query, check if target fnum has the highest max score
+            # Set scores for target-fnum candidates to -inf, find max non-target
+            is_target = ret_cand_fnums == ret_targets.unsqueeze(1)  # [n_ret, VAL_K]
+            neg_inf = torch.finfo(rerank_scores.dtype).min
+
+            # Max score among target-fnum candidates
+            target_scores = rerank_scores.masked_fill(~is_target, neg_inf)
+            target_max = target_scores.max(dim=1).values  # [n_ret]
+
+            # Max score among non-target candidates
+            other_scores = rerank_scores.masked_fill(is_target, neg_inf)
+            other_max = other_scores.max(dim=1).values  # [n_ret]
+
+            rerank_correct = (target_max > other_max).cpu()  # [n_ret]
+            acc_correct = rerank_correct.sum().item()
+
+            # Category errors for reranking misses
+            rerank_miss_cats = cats_cpu[ret_idx[~rerank_correct]]
+            if rerank_miss_cats.numel() > 0:
+                self._val_errors_by_cat.scatter_add_(
+                    0,
+                    rerank_miss_cats,
+                    torch.ones_like(rerank_miss_cats, dtype=torch.long),
+                )
 
         rer_acc = acc_correct / max(retk_correct, 1)
         self.log(f"{prefix}_ret1", ret1_correct / n, batch_size=n, prog_bar=True)
@@ -325,6 +431,9 @@ class ANCELitModule(DualTaskLitBase):
         N = batch["char_ids"].shape[0]
         K_plus_1 = batch["cand_union_idx"].shape[1]
 
+        # Per-example weights from category
+        weights = self._category_weights[batch["category"].cpu()].to(self.device)
+
         # Encode queries
         token_emb, padding_mask = self.model.query_encoder(
             batch["char_ids"], batch["is_number"], batch["numeric_ids"]
@@ -348,7 +457,7 @@ class ANCELitModule(DualTaskLitBase):
         retrieval_sim = torch.einsum("nd,nkd->nk", query_emb, cand_emb)
         positive_mask = batch["f_num"].unsqueeze(1) == batch["cand_fnums"]
         retrieval_loss = contrastive_loss_with_mask(
-            retrieval_sim, positive_mask, self.hparams.temperature
+            retrieval_sim, positive_mask, self.hparams.temperature, weights=weights
         )
 
         # Reranking loss
@@ -371,7 +480,7 @@ class ANCELitModule(DualTaskLitBase):
         ).view(N, K_plus_1)
 
         rerank_loss = contrastive_loss_with_mask(
-            rerank_scores, positive_mask, temperature=1.0
+            rerank_scores, positive_mask, temperature=1.0, weights=weights
         )
         return self._compute_loss(retrieval_loss, rerank_loss)
 
@@ -409,7 +518,14 @@ class DualTaskDataModule(L.LightningDataModule):
         with open(self.examples_path) as f:
             all_examples = json.load(f)
 
-        self.train_ex = [ex for ex in all_examples if ex["split"] == "train"]
+        if self.mode == "structural":
+            self.train_ex = [
+                ex
+                for ex in all_examples
+                if ex["split"] == "train" and ex.get("structural_negatives")
+            ]
+        else:
+            self.train_ex = [ex for ex in all_examples if ex["split"] == "train"]
         self.val_ex = [ex for ex in all_examples if ex["split"] == "val"]
         self.test_ex = [ex for ex in all_examples if ex["split"] == "test"]
 
@@ -429,6 +545,15 @@ class DualTaskDataModule(L.LightningDataModule):
             f"{total_records} records (full gazetteer)"
         )
 
+        # Compute training category fractions for dynamic weighting
+        from dataset import CATEGORY_TO_IDX, NUM_CATEGORIES
+
+        cat_counts = torch.zeros(NUM_CATEGORIES)
+        for ex in self.train_ex:
+            cat_idx = CATEGORY_TO_IDX.get(ex.get("category", "unique"), 0)
+            cat_counts[cat_idx] += 1
+        self.train_category_fracs = cat_counts / cat_counts.sum()
+
     def _make_inbatch_dataset(self, examples):
         return QueryRecordDataset(
             examples,
@@ -439,7 +564,7 @@ class DualTaskDataModule(L.LightningDataModule):
         )
 
     def train_dataloader(self):
-        if self.mode == "ance":
+        if self.mode in ("ance", "structural"):
             ds = QueryRecordDatasetWithCandidates(self.train_ex, self.vocab)
         else:
             ds = self._make_inbatch_dataset(self.train_ex)
@@ -511,17 +636,43 @@ class DeviceSyncCallback(L.Callback):
 )
 @click.option(
     "--mode",
-    type=click.Choice(["inbatch", "ance"]),
+    type=click.Choice(["inbatch", "ance", "structural"]),
     default="inbatch",
-    help="Training mode",
+    help="Training mode (structural = ance dataset with no mining)",
 )
 @click.option(
     "--mine-every", default=5, help="Re-mine interval in epochs (ance mode only)"
 )
 @click.option("--mine-k", default=50, help="Candidates per query (ance mode only)")
 @click.option("--warmup-epochs", default=1, help="LR warmup epochs")
-def train(epochs, batch_size, lr, checkpoint, mode, mine_every, mine_k, warmup_epochs):
-    print(f"Mode: {mode}")
+@click.option(
+    "--weight-alpha", default=0.5, help="Dampening exponent for category weights"
+)
+@click.option(
+    "--pool-mode",
+    type=click.Choice(["cls", "mean"]),
+    default="cls",
+    help="Cross-attention pooling mode",
+)
+@click.option(
+    "--retrieval-weight", default=1.0, help="Weight for retrieval loss (0 to disable)"
+)
+@click.option("--ca-heads", default=4, help="Number of cross-attention heads")
+def train(
+    epochs,
+    batch_size,
+    lr,
+    checkpoint,
+    mode,
+    mine_every,
+    mine_k,
+    warmup_epochs,
+    weight_alpha,
+    pool_mode,
+    retrieval_weight,
+    ca_heads,
+):
+    print(f"Mode: {mode}, Pool: {pool_mode}")
 
     # Data
     datamodule = DualTaskDataModule(
@@ -537,6 +688,8 @@ def train(epochs, batch_size, lr, checkpoint, mode, mine_every, mine_k, warmup_e
         num_desig_names=len(vocab["desig_name_to_idx"]),
         num_suffixes=len(vocab["suffix_to_idx"]),
         num_unit_ids=len(vocab["unit_id_to_idx"]),
+        pool_mode=pool_mode,
+        ca_num_heads=ca_heads,
     )
     print(f"Model parameters: {sum(p.numel() for p in model.parameters()):,}")
 
@@ -548,9 +701,10 @@ def train(epochs, batch_size, lr, checkpoint, mode, mine_every, mine_k, warmup_e
         model=model,
         lr=lr,
         warmup_epochs=warmup_epochs,
-        retrieval_weight=1.0,
+        retrieval_weight=retrieval_weight,
         reranking_weight=1.0,
         temperature=0.07,
+        weight_alpha=weight_alpha,
     )
 
     callbacks = [
@@ -567,6 +721,10 @@ def train(epochs, batch_size, lr, checkpoint, mode, mine_every, mine_k, warmup_e
     if mode == "inbatch":
         lit_module = InBatchLitModule(**common_kwargs)
         reload_every = 0
+    elif mode == "structural":
+        # ANCE dataset (reads structural_negatives) but no mining
+        lit_module = ANCELitModule(**common_kwargs)
+        reload_every = 0
     else:
         lit_module = ANCELitModule(**common_kwargs)
         callbacks.append(ANCEMiningCallback(mine_every, mine_k))
@@ -579,10 +737,15 @@ def train(epochs, batch_size, lr, checkpoint, mode, mine_every, mine_k, warmup_e
         reload_dataloaders_every_n_epochs=reload_every,
         callbacks=callbacks,
         enable_checkpointing=True,
+        limit_val_batches=0 if mode == "structural" else None,
+        limit_test_batches=0 if mode == "structural" else None,
     )
 
     trainer.fit(lit_module, datamodule=datamodule)
-    trainer.test(lit_module, datamodule=datamodule)
+    if mode == "structural":
+        trainer.save_checkpoint("training/dual_task_model.ckpt")
+    else:
+        trainer.test(lit_module, datamodule=datamodule)
 
 
 if __name__ == "__main__":
