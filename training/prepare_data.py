@@ -455,7 +455,7 @@ def load_conflict_groups():
     return fnum_to_component
 
 
-def add_structural_negatives(examples, fnum_to_records):
+def add_structural_negatives(examples, fnum_to_records, fnum_to_component=None):
     """
     Add structural hard negatives: records with the same union+number
     but a different f_num.
@@ -468,7 +468,8 @@ def add_structural_negatives(examples, fnum_to_records):
     - Are in the same conflict group as the positive (those need unit_id
       to disambiguate, which is handled separately)
     """
-    fnum_to_component = load_conflict_groups()
+    if fnum_to_component is None:
+        fnum_to_component = load_conflict_groups()
 
     # Build index: (union_name, desig_num) -> [(fnum, record), ...]
     union_num_index = defaultdict(list)
@@ -494,39 +495,32 @@ def add_structural_negatives(examples, fnum_to_records):
         key = (pos_rec["union_name"], pos_rec["desig_num"])
         group = union_num_index.get(key, [])
 
-        # Build the set of all record shapes for the positive f_num
-        # (ignoring unit_id) so we never add a negative that matches
-        # any positive variant
+        # Build pos_shapes from the example's (filtered) records,
+        # not all records for the f_num. Includes unit_id so that
+        # candidates differing only by unit_id are kept as negatives.
         pos_shapes = set()
-        for rec in fnum_to_records[pos_fnum]:
+        for rec in pos_records:
             pos_shapes.add(
                 (
                     rec.get("desig_name", ""),
                     rec.get("prefix", 0),
                     rec.get("suffix", ""),
+                    rec.get("unit_id", ""),
                 )
             )
 
         # Collect structural negatives from different fnums
-        pos_component = fnum_to_component.get(pos_fnum)
         structural = []
         for cand_fnum, cand_rec in group:
             if cand_fnum == pos_fnum:
                 continue
 
-            # Skip if in the same conflict group — those pairs share
-            # a representation and need unit_id to disambiguate
-            if (
-                pos_component is not None
-                and fnum_to_component.get(cand_fnum) == pos_component
-            ):
-                continue
-
-            # Skip if this record's shape matches any positive variant
+            # Skip if this record's full shape matches any positive variant
             cand_shape = (
                 cand_rec.get("desig_name", ""),
                 cand_rec.get("prefix", 0),
                 cand_rec.get("suffix", ""),
+                cand_rec.get("unit_id", ""),
             )
             if cand_shape in pos_shapes:
                 continue
@@ -535,7 +529,7 @@ def add_structural_negatives(examples, fnum_to_records):
 
         if structural:
             # Deduplicate by record shape — we only need one representative
-            # per distinct (desig_name, prefix, suffix) combination
+            # per distinct (desig_name, prefix, suffix, unit_id) combination
             seen = set()
             deduped = []
             for s in structural:
@@ -544,6 +538,7 @@ def add_structural_negatives(examples, fnum_to_records):
                     r.get("desig_name", ""),
                     r.get("prefix", 0),
                     r.get("suffix", ""),
+                    r.get("unit_id", ""),
                 )
                 if shape not in seen:
                     seen.add(shape)
@@ -558,13 +553,15 @@ def add_structural_negatives(examples, fnum_to_records):
     )
 
 
-def classify_fnum_discrimination(fnum_to_records):
+def add_example_categories(examples, fnum_to_records):
     """
-    For each f_num, determine if (union_name, desig_num) uniquely identifies it.
+    Add a discrimination category to each example based on whether
+    the query's (union_name, desig_num) uniquely identifies its f_num.
 
-    Returns dict: fnum -> category string:
-      "unique"    — unique by (union_name, desig_num), or no desig_num
-      "ambiguous" — shares (union_name, desig_num) with other f_nums
+    Uses the example's filtered records (which match the query's desig_num),
+    not all records for the f_num.
+
+    Categories: unique, ambiguous
     """
     # Build (union_name, desig_num) -> set of f_nums
     union_num_to_fnums = defaultdict(set)
@@ -574,31 +571,18 @@ def classify_fnum_discrimination(fnum_to_records):
                 key = (rec["union_name"], rec["desig_num"])
                 union_num_to_fnums[key].add(fnum)
 
-    ambiguous_fnums = set()
-    for fnums in union_num_to_fnums.values():
-        if len(fnums) > 1:
-            ambiguous_fnums.update(fnums)
-
-    return {
-        fnum: "ambiguous" if fnum in ambiguous_fnums else "unique"
-        for fnum in fnum_to_records
-    }
-
-
-def add_example_categories(examples, fnum_to_records):
-    """
-    Add a discrimination category to each example based on whether
-    (union_name, desig_num) uniquely identifies its f_num.
-
-    Categories: unique, ambiguous
-    """
-    fnum_category = classify_fnum_discrimination(fnum_to_records)
-
-    # Assign category to each example
+    # Assign category to each example based on its filtered records
     train_counts = defaultdict(int)
     total_train = 0
     for ex in examples:
-        cat = fnum_category.get(ex["f_num"], "unique")
+        pos_records = ex["records"]
+        if not pos_records or pos_records[0]["desig_num"] == 0:
+            cat = "unique"
+        else:
+            key = (pos_records[0]["union_name"], pos_records[0]["desig_num"])
+            cat = (
+                "ambiguous" if len(union_num_to_fnums.get(key, set())) > 1 else "unique"
+            )
         ex["category"] = cat
         if ex.get("split") == "train":
             train_counts[cat] += 1

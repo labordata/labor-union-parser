@@ -272,6 +272,15 @@ class CrossEncoderHead(nn.Module):
             nn.Linear(embed_dim, 1),
         )
 
+        self._init_weights()
+
+    def _init_weights(self):
+        for mod in self.classifier:
+            if isinstance(mod, nn.Linear):
+                nn.init.xavier_uniform_(mod.weight)
+                nn.init.zeros_(mod.bias)
+        nn.init.xavier_uniform_(self.segment_embed.weight)
+
     def _concat_and_mask(self, token_emb, token_mask, field_emb, field_mask):
         """
         Concatenate query and record into a single sequence with segment embeddings.

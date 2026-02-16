@@ -135,9 +135,15 @@ def load_checkpoint_with_mismatch(model, path, device=None):
                     f"  Skipped {name}: shape mismatch {param.shape} vs {model_state[name].shape}"
                 )
 
+    # Track which params were loaded from checkpoint
+    loaded_params = set()
+    for name in ckpt_state:
+        if name in model_state:
+            loaded_params.add(name)
+
     model.load_state_dict(model_state)
     print(f"  Loaded model weights from {path}")
-    return ckpt
+    return ckpt, loaded_params
 
 
 # =============================================================================
@@ -157,16 +163,84 @@ class DualTaskLitBase(L.LightningModule):
         reranking_weight=1.0,
         temperature=0.07,
         weight_alpha=0.5,
+        new_param_warmup_steps=0,
+        loaded_params=None,
     ):
         super().__init__()
         self.model = model
-        self.save_hyperparameters(ignore=["model"])
+        self.save_hyperparameters(ignore=["model", "loaded_params"])
+        self._last_batch = None
+        self._new_param_warmup_steps = new_param_warmup_steps
+        self._loaded_params = loaded_params or set()
+        self._frozen_params = []
 
         # Dynamic category weights (updated after each validation epoch)
         from dataset import NUM_CATEGORIES
 
         self._category_weights = torch.ones(NUM_CATEGORIES)
         self._train_category_fracs = None  # set by datamodule
+
+    def on_train_start(self):
+        if self._new_param_warmup_steps > 0 and self._loaded_params:
+            # Freeze params that were loaded from checkpoint;
+            # only new (randomly initialized) params train during warmup
+            for name, p in self.model.named_parameters():
+                if name in self._loaded_params:
+                    p.requires_grad = False
+                    self._frozen_params.append(p)
+            n_new = sum(
+                1
+                for n, _ in self.model.named_parameters()
+                if n not in self._loaded_params
+            )
+            print(
+                f"Froze {len(self._frozen_params)} loaded params for "
+                f"{self._new_param_warmup_steps} warmup steps "
+                f"({n_new} new params training)"
+            )
+
+    def on_train_batch_start(self, batch, batch_idx):
+        if self._frozen_params and self.global_step >= self._new_param_warmup_steps:
+            for p in self._frozen_params:
+                p.requires_grad = True
+            print(f"Unfroze all params at step {self.global_step}")
+            self._frozen_params.clear()
+
+    def on_after_backward(self):
+        nan_params = []
+        nan_grads = {}
+        for name, p in self.model.named_parameters():
+            if p.grad is not None and p.grad.isnan().any():
+                nan_params.append(name)
+                nan_grads[name] = p.grad.detach().cpu().clone()
+                p.grad.zero_()
+        if nan_params:
+            print(
+                f"\n⚠ NaN gradients in {len(nan_params)} params at step "
+                f"{self.global_step} — zeroed out, skipping update"
+            )
+            # Dump full repro snapshot on first NaN
+            dump_path = Path(__file__).parent / "nan_repro.pt"
+            if not dump_path.exists():
+                torch.save(
+                    {
+                        "model_state": {
+                            k: v.cpu() for k, v in self.model.state_dict().items()
+                        },
+                        "batch": {k: v.cpu() for k, v in self._last_batch.items()},
+                        "nan_params": nan_params,
+                        "nan_grads": nan_grads,
+                        "global_step": self.global_step,
+                        "epoch": self.current_epoch,
+                        "hparams": dict(self.hparams),
+                    },
+                    dump_path,
+                )
+                print(f"  Saved NaN repro snapshot to {dump_path}")
+                raise RuntimeError(
+                    f"NaN gradients in {len(nan_params)} params at step "
+                    f"{self.global_step} — snapshot saved to {dump_path}"
+                )
 
     # ------------------------------------------------------------------
     # Full-corpus validation: encode all records, retrieve top-k, rerank
@@ -404,6 +478,7 @@ class InBatchLitModule(DualTaskLitBase):
     """In-batch negatives: uses forward_dual_task for N x N similarities."""
 
     def training_step(self, batch, batch_idx):
+        self._last_batch = batch
         retrieval_sim, rerank_scores = self.model.forward_dual_task(
             batch["char_ids"],
             batch["is_number"],
@@ -428,6 +503,7 @@ class ANCELitModule(DualTaskLitBase):
     """ANCE mode: each query vs its own K+1 mined candidates."""
 
     def training_step(self, batch, batch_idx):
+        self._last_batch = batch
         N = batch["char_ids"].shape[0]
         K_plus_1 = batch["cand_union_idx"].shape[1]
 
@@ -658,6 +734,11 @@ class DeviceSyncCallback(L.Callback):
     "--retrieval-weight", default=1.0, help="Weight for retrieval loss (0 to disable)"
 )
 @click.option("--ca-heads", default=4, help="Number of cross-attention heads")
+@click.option(
+    "--new-param-warmup-steps",
+    default=0,
+    help="Steps to train only new (not in checkpoint) params before unfreezing all",
+)
 def train(
     epochs,
     batch_size,
@@ -671,6 +752,7 @@ def train(
     pool_mode,
     retrieval_weight,
     ca_heads,
+    new_param_warmup_steps,
 ):
     print(f"Mode: {mode}, Pool: {pool_mode}")
 
@@ -693,8 +775,9 @@ def train(
     )
     print(f"Model parameters: {sum(p.numel() for p in model.parameters()):,}")
 
+    loaded_params = set()
     if checkpoint:
-        load_checkpoint_with_mismatch(model, checkpoint)
+        _, loaded_params = load_checkpoint_with_mismatch(model, checkpoint)
 
     # Lightning module
     common_kwargs = dict(
@@ -705,6 +788,8 @@ def train(
         reranking_weight=1.0,
         temperature=0.07,
         weight_alpha=weight_alpha,
+        new_param_warmup_steps=new_param_warmup_steps,
+        loaded_params=loaded_params,
     )
 
     callbacks = [
