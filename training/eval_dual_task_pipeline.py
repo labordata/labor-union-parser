@@ -148,7 +148,7 @@ def main(checkpoint, k):
                 q_tok = token_emb[i].unsqueeze(0).expand(len(cand_indices), -1, -1)
                 q_mask = padding_mask[i].unsqueeze(0).expand(len(cand_indices), -1)
 
-                rerank_scores = model.cross_attention.score_pair(
+                rerank_scores = model.cross_encoder.score_pair(
                     q_tok, q_mask, cand_field_embs, cand_field_masks
                 )
 

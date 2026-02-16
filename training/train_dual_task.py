@@ -322,7 +322,7 @@ class DualTaskLitBase(L.LightningModule):
                 .expand(n_ret, self.VAL_K, -1)
                 .reshape(n_ret * self.VAL_K, -1)
             )
-            rerank_scores = self.model.cross_attention.score_pair(
+            rerank_scores = self.model.cross_encoder.score_pair(
                 q_tok, q_mask, cand_fe, cand_fm
             ).view(n_ret, self.VAL_K)
 
@@ -475,7 +475,7 @@ class ANCELitModule(DualTaskLitBase):
         r_flat = field_emb_flat.view(N, K_plus_1, 6, -1).reshape(N * K_plus_1, 6, -1)
         r_mask_flat = field_mask_flat.view(N, K_plus_1, 6).reshape(N * K_plus_1, 6)
 
-        rerank_scores = self.model.cross_attention.score_pair(
+        rerank_scores = self.model.cross_encoder.score_pair(
             q_exp, q_mask_exp, r_flat, r_mask_flat
         ).view(N, K_plus_1)
 

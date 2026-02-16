@@ -1,3 +1,7 @@
+fmcs.db
+*.ckpt
+checkpoints/*
+lightning_logs/*
 *.egg-info
 *.lock
 *~

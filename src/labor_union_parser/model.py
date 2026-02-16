@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from labor_union_parser.char_cnn import NUMBER_VOCAB, CharacterCNN
-from labor_union_parser.layers import CrossAttentionLayer, RoPESelfAttentionLayer
+from labor_union_parser.layers import RoPESelfAttentionLayer, SelfAttentionLayer
 
 EMBED_DIM = 64
 RETRIEVAL_DIM = 128
@@ -233,30 +233,33 @@ class DualTowerHead(nn.Module):
         return F.normalize(emb, p=2, dim=-1)
 
 
-class CrossAttentionHead(nn.Module):
+class CrossEncoderHead(nn.Module):
     """
-    Cross-attention head for re-ranking.
+    Cross-encoder head for re-ranking.
 
-    Takes shared query token embeddings and applies cross-attention to
-    shared record field embeddings (which include unit_id and field types).
+    Concatenates query token embeddings and record field embeddings into a
+    single sequence, then runs full self-attention over it. This lets query
+    tokens and record fields attend to each other bidirectionally.
 
-    Uses field self-attention before cross-attention and a bigger classifier.
+    Segment embeddings distinguish query tokens (segment 0) from record
+    fields (segment 1). No positional encoding is added — query tokens
+    already carry positional info from the shared encoder's RoPE layers,
+    and record fields are distinguished by their field type embeddings.
     """
+
+    NUM_FIELDS = 6
 
     def __init__(self, embed_dim=EMBED_DIM, pool_mode="cls", num_heads=4):
         super().__init__()
         self.embed_dim = embed_dim
         self.pool_mode = pool_mode  # "cls" or "mean"
 
-        # Cross-attention layers
-        self.cross_attn1 = CrossAttentionLayer(embed_dim, num_heads=num_heads)
-        self.cross_attn2 = CrossAttentionLayer(embed_dim, num_heads=num_heads)
+        # Segment embeddings: 0 = query, 1 = record
+        self.segment_embed = nn.Embedding(2, embed_dim)
 
-        # Field self-attention before cross-attention
-        self.field_self_attn = nn.MultiheadAttention(
-            embed_dim, num_heads=num_heads, batch_first=True
-        )
-        self.field_norm = nn.LayerNorm(embed_dim)
+        # Full self-attention layers (no positional encoding)
+        self.self_attn1 = SelfAttentionLayer(embed_dim, num_heads=num_heads)
+        self.self_attn2 = SelfAttentionLayer(embed_dim, num_heads=num_heads)
 
         # Classifier
         self.classifier = nn.Sequential(
@@ -269,17 +272,44 @@ class CrossAttentionHead(nn.Module):
             nn.Linear(embed_dim, 1),
         )
 
-    def _pool(self, enhanced, token_mask):
-        """Pool cross-attended token embeddings into a single vector."""
+    def _concat_and_mask(self, token_emb, token_mask, field_emb, field_mask):
+        """
+        Concatenate query and record into a single sequence with segment embeddings.
+
+        Returns:
+            combined: [batch, seq_len + 6, embed_dim]
+            combined_mask: [batch, seq_len + 6]
+        """
+        B, Q, _ = token_emb.shape
+        device = token_emb.device
+
+        # Segment IDs: 0 for query tokens, 1 for record fields
+        query_seg = torch.zeros(B, Q, dtype=torch.long, device=device)
+        record_seg = torch.ones(B, self.NUM_FIELDS, dtype=torch.long, device=device)
+
+        # Add segment embeddings
+        token_emb = token_emb + self.segment_embed(query_seg)
+        field_emb = field_emb + self.segment_embed(record_seg)
+
+        # Concatenate: [batch, Q + 6, embed_dim]
+        combined = torch.cat([token_emb, field_emb], dim=1)
+        combined_mask = torch.cat([token_mask, field_mask], dim=1)
+
+        return combined, combined_mask
+
+    def _pool(self, combined, token_mask):
+        """Pool from the combined sequence."""
         if self.pool_mode == "mean":
-            # Mean pool over non-padding tokens
-            mask = ~token_mask  # True for real tokens
-            pooled = (enhanced * mask.unsqueeze(-1)).sum(dim=1) / mask.sum(
+            # Mean pool over non-padding query tokens only (exclude record fields)
+            Q = token_mask.shape[1]
+            query_part = combined[:, :Q]
+            mask = ~token_mask
+            pooled = (query_part * mask.unsqueeze(-1)).sum(dim=1) / mask.sum(
                 dim=1, keepdim=True
             ).clamp(min=1)
         else:
             # [CLS] token at index 0
-            pooled = enhanced[:, 0]
+            pooled = combined[:, 0]
         return pooled
 
     def score_pair(self, token_emb, token_mask, field_emb, field_mask):
@@ -295,42 +325,37 @@ class CrossAttentionHead(nn.Module):
         Returns:
             scores: [batch]
         """
-        # Let fields interact first
-        field_enhanced, _ = self.field_self_attn(
-            field_emb, field_emb, field_emb, key_padding_mask=field_mask
+        combined, combined_mask = self._concat_and_mask(
+            token_emb, token_mask, field_emb, field_mask
         )
-        field_emb = self.field_norm(field_emb + field_enhanced)
 
-        # Cross-attention
-        enhanced = self.cross_attn1(token_emb, field_emb, token_mask, field_mask)
-        enhanced = self.cross_attn2(enhanced, field_emb, token_mask, field_mask)
+        combined = self.self_attn1(combined, combined_mask)
+        combined = self.self_attn2(combined, combined_mask)
 
-        pooled = self._pool(enhanced, token_mask)
-
+        pooled = self._pool(combined, token_mask)
         return self.classifier(pooled).squeeze(-1)
 
     def score_pair_with_attention(self, token_emb, token_mask, field_emb, field_mask):
         """
-        Like score_pair but also returns cross-attention weights from both layers.
+        Like score_pair but also returns self-attention weights from both layers.
 
         Returns:
             scores: [batch]
-            attn_weights_1: [batch, num_heads, seq_len, 6]
-            attn_weights_2: [batch, num_heads, seq_len, 6]
+            attn_weights_1: [batch, num_heads, seq_len+6, seq_len+6]
+            attn_weights_2: [batch, num_heads, seq_len+6, seq_len+6]
         """
-        field_enhanced, _ = self.field_self_attn(
-            field_emb, field_emb, field_emb, key_padding_mask=field_mask
-        )
-        field_emb = self.field_norm(field_emb + field_enhanced)
-
-        enhanced, attn1 = self.cross_attn1(
-            token_emb, field_emb, token_mask, field_mask, return_attn_weights=True
-        )
-        enhanced, attn2 = self.cross_attn2(
-            enhanced, field_emb, token_mask, field_mask, return_attn_weights=True
+        combined, combined_mask = self._concat_and_mask(
+            token_emb, token_mask, field_emb, field_mask
         )
 
-        pooled = self._pool(enhanced, token_mask)
+        combined, attn1 = self.self_attn1(
+            combined, combined_mask, return_attn_weights=True
+        )
+        combined, attn2 = self.self_attn2(
+            combined, combined_mask, return_attn_weights=True
+        )
+
+        pooled = self._pool(combined, token_mask)
         scores = self.classifier(pooled).squeeze(-1)
         return scores, attn1, attn2
 
@@ -351,25 +376,22 @@ class CrossAttentionHead(nn.Module):
         seq_len = token_emb.shape[1]
 
         # Expand queries: [N, N, seq_len, embed_dim]
-        # Each query repeated N times (once for each record)
         q_exp = token_emb.unsqueeze(1).expand(N, N, seq_len, self.embed_dim)
         q_mask_exp = token_mask.unsqueeze(1).expand(N, N, seq_len)
 
         # Expand records: [N, N, 6, embed_dim]
-        # Each record repeated N times (once for each query)
-        r_exp = field_emb.unsqueeze(0).expand(N, N, 6, self.embed_dim)
-        r_mask_exp = field_mask.unsqueeze(0).expand(N, N, 6)
+        r_exp = field_emb.unsqueeze(0).expand(N, N, self.NUM_FIELDS, self.embed_dim)
+        r_mask_exp = field_mask.unsqueeze(0).expand(N, N, self.NUM_FIELDS)
 
         # Flatten to [N*N, ...] for batch processing
         q_flat = q_exp.reshape(N * N, seq_len, self.embed_dim)
         q_mask_flat = q_mask_exp.reshape(N * N, seq_len)
-        r_flat = r_exp.reshape(N * N, 6, self.embed_dim)
-        r_mask_flat = r_mask_exp.reshape(N * N, 6)
+        r_flat = r_exp.reshape(N * N, self.NUM_FIELDS, self.embed_dim)
+        r_mask_flat = r_mask_exp.reshape(N * N, self.NUM_FIELDS)
 
         # Score all pairs
         scores_flat = self.score_pair(q_flat, q_mask_flat, r_flat, r_mask_flat)
 
-        # Reshape to [N, N]
         return scores_flat.view(N, N)
 
 
@@ -420,7 +442,7 @@ class DualTaskModel(nn.Module):
 
         # Task-specific heads
         self.dual_tower = DualTowerHead(self.record_encoder, embed_dim)
-        self.cross_attention = CrossAttentionHead(
+        self.cross_encoder = CrossEncoderHead(
             embed_dim, pool_mode=pool_mode, num_heads=ca_num_heads
         )
 
@@ -474,7 +496,7 @@ class DualTaskModel(nn.Module):
 
         # === Re-ranking task ===
         # Score all N x N pairs using cross-attention
-        rerank_scores = self.cross_attention.score_all_pairs(
+        rerank_scores = self.cross_encoder.score_all_pairs(
             token_emb, padding_mask, field_emb, field_mask
         )
 
@@ -536,7 +558,7 @@ class DualTaskModel(nn.Module):
             r_suffix_idx,
             r_unit_id_idx,
         )
-        return self.cross_attention.score_pair(
+        return self.cross_encoder.score_pair(
             token_emb, padding_mask, field_emb, field_mask
         )
 
@@ -553,12 +575,12 @@ class DualTaskModel(nn.Module):
         r_unit_id_idx,
     ):
         """
-        Like forward_reranking but also returns cross-attention weights.
+        Like forward_reranking but also returns self-attention weights.
 
         Returns:
             scores: [batch]
-            attn_weights_1: [batch, num_heads, seq_len, 6]
-            attn_weights_2: [batch, num_heads, seq_len, 6]
+            attn_weights_1: [batch, num_heads, seq_len+6, seq_len+6]
+            attn_weights_2: [batch, num_heads, seq_len+6, seq_len+6]
         """
         token_emb, padding_mask = self.query_encoder(
             q_char_ids, q_is_number, q_numeric_ids
@@ -571,6 +593,6 @@ class DualTaskModel(nn.Module):
             r_suffix_idx,
             r_unit_id_idx,
         )
-        return self.cross_attention.score_pair_with_attention(
+        return self.cross_encoder.score_pair_with_attention(
             token_emb, padding_mask, field_emb, field_mask
         )

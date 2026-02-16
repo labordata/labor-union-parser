@@ -82,6 +82,73 @@ class RoPESelfAttentionLayer(nn.Module):
         return x
 
 
+class SelfAttentionLayer(nn.Module):
+    """Standard transformer layer: self-attention + FFN, no positional encoding."""
+
+    def __init__(self, embed_dim, num_heads=4, dropout=0.1):
+        super().__init__()
+        self.embed_dim = embed_dim
+        self.num_heads = num_heads
+        self.head_dim = embed_dim // num_heads
+
+        self.q_proj = nn.Linear(embed_dim, embed_dim)
+        self.k_proj = nn.Linear(embed_dim, embed_dim)
+        self.v_proj = nn.Linear(embed_dim, embed_dim)
+        self.out_proj = nn.Linear(embed_dim, embed_dim)
+
+        self.ff = nn.Sequential(
+            nn.Linear(embed_dim, embed_dim * 4),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(embed_dim * 4, embed_dim),
+            nn.Dropout(dropout),
+        )
+
+        self.norm1 = nn.LayerNorm(embed_dim)
+        self.norm2 = nn.LayerNorm(embed_dim)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x, padding_mask=None, return_attn_weights=False):
+        B, S, _ = x.shape
+
+        q = self.q_proj(x).view(B, S, self.num_heads, self.head_dim).transpose(1, 2)
+        k = self.k_proj(x).view(B, S, self.num_heads, self.head_dim).transpose(1, 2)
+        v = self.v_proj(x).view(B, S, self.num_heads, self.head_dim).transpose(1, 2)
+
+        if return_attn_weights:
+            scores = torch.matmul(q, k.transpose(-2, -1)) / (self.head_dim**0.5)
+            if padding_mask is not None:
+                scores = scores.masked_fill(
+                    padding_mask.unsqueeze(1).unsqueeze(2), float("-inf")
+                )
+            attn_weights = F.softmax(scores, dim=-1)
+            out = torch.matmul(attn_weights, v)
+        else:
+            attn_mask = None
+            if padding_mask is not None:
+                attn_mask = (
+                    padding_mask.unsqueeze(1)
+                    .unsqueeze(2)
+                    .expand(B, self.num_heads, S, S)
+                )
+                attn_mask = torch.where(attn_mask, float("-inf"), 0.0)
+            dropout_p = self.dropout.p if self.training else 0.0
+            out = F.scaled_dot_product_attention(
+                q, k, v, attn_mask=attn_mask, dropout_p=dropout_p, is_causal=False
+            )
+            attn_weights = None
+
+        out = out.transpose(1, 2).reshape(B, S, self.embed_dim)
+        out = self.out_proj(out)
+
+        x = self.norm1(x + out)
+        x = self.norm2(x + self.ff(x))
+
+        if return_attn_weights:
+            return x, attn_weights
+        return x
+
+
 class CrossAttentionLayer(nn.Module):
     def __init__(self, embed_dim, num_heads=4, dropout=0.1, attn_temperature=1.0):
         super().__init__()
