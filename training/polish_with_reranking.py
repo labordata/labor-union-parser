@@ -310,6 +310,9 @@ def differentiable_score_candidates(
 ):
     """Compute differentiable scores for candidate records per query.
 
+    Uses the same gather-based approach as the gazetteer scorer:
+    build gather indices on CPU, then torch.gather on device.
+
     Args:
         log_probs: {field: (B, vocab_size)} — keeps grad
         batch_token_strings: list of token string lists, length B
@@ -330,7 +333,16 @@ def differentiable_score_candidates(
             scores = scores + field_scores
         else:
             f_lp = log_probs[f]  # (B, MAX_TOKENS + 1)
+            fallback = POINTER_NOT_FOUND_LOG_PROB[f]
             rec_to_val = record_pointer_values[f]
+
+            # Extend log-probs with not-found slot: (B, MAX_TOKENS + 2)
+            not_found_col = torch.full((B, 1), fallback, device=DEVICE)
+            f_lp_ext = torch.cat([f_lp, not_found_col], dim=1)
+
+            # Build gather indices on CPU: (B, K)
+            cand_np = candidate_indices.cpu().numpy()
+            gather_idx = np.full((B, K), POINTER_NOT_FOUND_IDX, dtype=np.int64)
 
             for b in range(B):
                 query_toks = batch_token_strings[b]
@@ -340,17 +352,18 @@ def differentiable_score_candidates(
                         tok_to_pos[tok] = pos
 
                 for k in range(K):
-                    ridx = candidate_indices[b, k].item()
-                    val = rec_to_val.get(ridx)
-
+                    val = rec_to_val.get(cand_np[b, k])
                     if val is None:
-                        scores[b, k] = scores[b, k] + f_lp[b, MAX_TOKENS]
+                        gather_idx[b, k] = MAX_TOKENS
                     else:
                         pos = tok_to_pos.get(val)
                         if pos is not None:
-                            scores[b, k] = scores[b, k] + f_lp[b, pos]
-                        else:
-                            scores[b, k] = scores[b, k] + POINTER_NOT_FOUND_LOG_PROB[f]
+                            gather_idx[b, k] = pos
+
+            # Single gather on device — differentiable through f_lp_ext
+            gather_idx_t = torch.from_numpy(gather_idx).to(DEVICE)
+            field_scores = torch.gather(f_lp_ext, 1, gather_idx_t)
+            scores = scores + field_scores
 
     return scores
 
