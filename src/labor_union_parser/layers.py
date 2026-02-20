@@ -108,17 +108,6 @@ class SelfAttentionLayer(nn.Module):
         self.norm2 = nn.LayerNorm(embed_dim)
         self.dropout = nn.Dropout(dropout)
 
-        self._init_weights()
-
-    def _init_weights(self):
-        for mod in [self.q_proj, self.k_proj, self.v_proj, self.out_proj]:
-            nn.init.xavier_uniform_(mod.weight)
-            nn.init.zeros_(mod.bias)
-        for mod in self.ff:
-            if isinstance(mod, nn.Linear):
-                nn.init.xavier_uniform_(mod.weight)
-                nn.init.zeros_(mod.bias)
-
     def forward(self, x, padding_mask=None, return_attn_weights=False):
         B, S, _ = x.shape
 
@@ -126,14 +115,28 @@ class SelfAttentionLayer(nn.Module):
         k = self.k_proj(x).view(B, S, self.num_heads, self.head_dim).transpose(1, 2)
         v = self.v_proj(x).view(B, S, self.num_heads, self.head_dim).transpose(1, 2)
 
-        scores = torch.matmul(q, k.transpose(-2, -1)) / (self.head_dim**0.5)
-        if padding_mask is not None:
-            scores = scores.masked_fill(
-                padding_mask.unsqueeze(1).unsqueeze(2), float("-inf")
+        if return_attn_weights:
+            scores = torch.matmul(q, k.transpose(-2, -1)) / (self.head_dim**0.5)
+            if padding_mask is not None:
+                scores = scores.masked_fill(
+                    padding_mask.unsqueeze(1).unsqueeze(2), float("-inf")
+                )
+            attn_weights = F.softmax(scores, dim=-1)
+            out = torch.matmul(attn_weights, v)
+        else:
+            attn_mask = None
+            if padding_mask is not None:
+                attn_mask = (
+                    padding_mask.unsqueeze(1)
+                    .unsqueeze(2)
+                    .expand(B, self.num_heads, S, S)
+                )
+                attn_mask = torch.where(attn_mask, float("-inf"), 0.0)
+            dropout_p = self.dropout.p if self.training else 0.0
+            out = F.scaled_dot_product_attention(
+                q, k, v, attn_mask=attn_mask, dropout_p=dropout_p, is_causal=False
             )
-        attn_weights = F.softmax(scores, dim=-1)
-        attn_weights = self.dropout(attn_weights)
-        out = torch.matmul(attn_weights, v)
+            attn_weights = None
 
         out = out.transpose(1, 2).reshape(B, S, self.embed_dim)
         out = self.out_proj(out)
@@ -203,12 +206,19 @@ class CrossAttentionLayer(nn.Module):
             )
             attn_mask = torch.where(attn_mask, float("-inf"), 0.0)
 
-        scores = torch.matmul(q, k.transpose(-2, -1)) / (self.head_dim**0.5)
-        if attn_mask is not None:
-            scores = scores + attn_mask
-        attn_weights = F.softmax(scores, dim=-1)
-        attn_weights = self.dropout(attn_weights)
-        out = torch.matmul(attn_weights, v)
+        if return_attn_weights:
+            # Manual computation to extract weights (SDPA doesn't expose them)
+            scores = torch.matmul(q, k.transpose(-2, -1)) / (self.head_dim**0.5)
+            if attn_mask is not None:
+                scores = scores + attn_mask
+            attn_weights = F.softmax(scores, dim=-1)
+            out = torch.matmul(attn_weights, v)
+        else:
+            dropout_p = self.dropout.p if self.training else 0.0
+            out = F.scaled_dot_product_attention(
+                q, k, v, attn_mask=attn_mask, dropout_p=dropout_p, is_causal=False
+            )
+            attn_weights = None
 
         out = out.transpose(1, 2).reshape(B, Q, self.embed_dim)
         out = self.out_proj(out)
