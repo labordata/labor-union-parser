@@ -59,7 +59,7 @@ MAX_CHAR_LEN = 200
 MAX_TOKENS = 20
 MAX_CHARS_PER_TOKEN = 20
 
-FIELDS = ["union_name", "desig_name", "desig_num", "prefix", "suffix", "union_unit"]
+FIELDS = ["union_name", "desig_name", "desig_num", "prefix", "suffix", "f_num"]
 
 # Fields that use pointer heads instead of classification heads.
 # Pointer heads predict which input token position contains the field value.
@@ -183,19 +183,14 @@ class StructuredDataset(Dataset):
             if not ex["records"]:
                 continue
             rec = ex["records"][0]
-            skip = False
             label_row = {}
             for f in FIELDS:
                 if f in POINTER_FIELDS:
                     continue  # pointer fields don't need vocab lookup
                 val = _get_field_value(rec, f)
                 idx = field_vocabs[f].get(val)
-                if idx is None:
-                    skip = True
-                    break
-                label_row[f] = idx
-            if skip:
-                continue
+                # Unseen values: use -100 so CE loss ignores them
+                label_row[f] = idx if idx is not None else -100
 
             queries.append(ex["query"])
             records.append(rec)
@@ -322,12 +317,8 @@ COLLATE_FNS = {
 
 def _get_field_value(record, field):
     """Get field value from record."""
-    if field == "union_unit":
-        uid = record.get("unit_id", "")
-        if uid:
-            return f"{record['union_name']}|{uid}"
-        else:
-            return record["union_name"]
+    if field == "f_num":
+        return record["f_num"]
     if field == "desig_num":
         return record.get("desig_num", 0)
     return record.get(field, "")
@@ -632,7 +623,22 @@ def get_model_input(inputs, encoder, device):
     type=click.Choice(["desig_num", "prefix", "suffix"]),
     help="Fields to use pointer heads for (can repeat). E.g. --pointer-fields desig_num",
 )
-def main(epochs, batch_size, lr, d_model, n_layers, encoder, pointer_fields):
+@click.option(
+    "--fnum-weight-decay",
+    default=0.01,
+    type=float,
+    help="Weight decay for f_num head (default: 0.01, same as rest of model)",
+)
+def main(
+    epochs,
+    batch_size,
+    lr,
+    d_model,
+    n_layers,
+    encoder,
+    pointer_fields,
+    fnum_weight_decay,
+):
     # Set global pointer fields
     global POINTER_FIELDS
     POINTER_FIELDS = set(pointer_fields)
@@ -720,7 +726,20 @@ def main(epochs, batch_size, lr, d_model, n_layers, encoder, pointer_fields):
     n_params = sum(p.numel() for p in model.parameters())
     print(f"Model parameters: {n_params:,}")
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)
+    if fnum_weight_decay != 0.01 and "f_num" in model.heads:
+        fnum_params = list(model.heads["f_num"].parameters())
+        fnum_ids = {id(p) for p in fnum_params}
+        other_params = [p for p in model.parameters() if id(p) not in fnum_ids]
+        optimizer = torch.optim.AdamW(
+            [
+                {"params": other_params, "weight_decay": 0.01},
+                {"params": fnum_params, "weight_decay": fnum_weight_decay},
+            ],
+            lr=lr,
+        )
+        print(f"f_num head weight decay: {fnum_weight_decay}")
+    else:
+        optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
     best_val_acc = 0.0
@@ -802,7 +821,7 @@ def main(epochs, batch_size, lr, d_model, n_layers, encoder, pointer_fields):
     print("  desig_num       (pending)")
     print("  prefix          test=0.9595 (0.05 weighted)")
     print("  suffix          test=0.9328 (0.05 weighted)")
-    print("  union_unit      test=0.9493")
+    print("  f_num           (new — ~34K classes)")
 
     print("\nDone!")
 

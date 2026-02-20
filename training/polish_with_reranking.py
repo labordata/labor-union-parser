@@ -468,7 +468,7 @@ def main(encoder, epochs, lr, neg_k, aux_weight, batch_size, mine_batch_size):
     field_vocabs = build_field_vocabs(splits["train"])
 
     # Build gazetteer
-    field_indices, record_fnums, records_list = build_gazetteer_matrix(
+    field_indices, field_known, record_fnums, records_list = build_gazetteer_matrix(
         fnum_to_records, field_vocabs
     )
     record_fnums_array = np.array(record_fnums)

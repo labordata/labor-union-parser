@@ -87,33 +87,31 @@ def build_gazetteer_matrix(fnum_to_records, field_vocabs):
             record_fnums.append(int(fnum))
 
     field_indices = {}
-    valid_mask = np.ones(len(records), dtype=bool)
+    field_known = {}  # bool mask: True where value is in vocab
 
     for f in FIELDS:
         if f in POINTER_FIELDS:
-            continue  # pointer fields don't need vocab indices
+            continue  # pointer fields handled separately
         indices = []
-        for i, rec in enumerate(records):
+        known = []
+        for rec in records:
             val = _get_field_value(rec, f)
             idx = field_vocabs[f].get(val)
-            if idx is None:
-                valid_mask[i] = False
-                indices.append(0)  # placeholder
-            else:
+            if idx is not None:
                 indices.append(idx)
+                known.append(True)
+            else:
+                indices.append(0)  # placeholder
+                known.append(False)
         field_indices[f] = torch.tensor(indices, dtype=torch.long)
+        field_known[f] = torch.tensor(known, dtype=torch.bool)
 
-    # Filter to valid records
-    valid_indices = np.where(valid_mask)[0]
-    print(
-        f"Gazetteer: {len(records)} records, {len(valid_indices)} with all fields in vocab"
+    n_known_all = sum(
+        all(field_known[f][i] for f in field_known) for i in range(len(records))
     )
+    print(f"Gazetteer: {len(records)} records, {n_known_all} with all fields in vocab")
 
-    field_indices = {f: t[valid_indices] for f, t in field_indices.items()}
-    record_fnums = [record_fnums[i] for i in valid_indices]
-    records_list = [records[i] for i in valid_indices]
-
-    return field_indices, record_fnums, records_list
+    return field_indices, field_known, record_fnums, records
 
 
 def _normalize_pointer_value(val):
@@ -175,9 +173,17 @@ def get_model_input(inputs, encoder, device):
     type=click.Choice(["char", "token-charcnn", "token-embed"]),
     help="Which encoder checkpoint to load",
 )
-def main(batch_size, split, encoder):
+@click.option(
+    "--fnum-weight",
+    default=0.0,
+    type=float,
+    help="Weight for f_num head log-prob (0=factored only, 1=f_num only)",
+)
+def main(batch_size, split, encoder, fnum_weight):
     print(f"Device: {DEVICE}")
     print(f"Encoder: {encoder}")
+    if fnum_weight > 0:
+        print(f"f_num blending weight: {fnum_weight}")
     print("Loading data...")
 
     with open(EXAMPLES_PATH) as f:
@@ -206,7 +212,7 @@ def main(batch_size, split, encoder):
     field_vocabs = build_field_vocabs(splits["train"])
 
     # Build gazetteer scoring matrix
-    field_indices, record_fnums, records_list = build_gazetteer_matrix(
+    field_indices, field_known, record_fnums, records_list = build_gazetteer_matrix(
         fnum_to_records, field_vocabs
     )
     record_fnums_array = np.array(record_fnums)
@@ -221,8 +227,9 @@ def main(batch_size, split, encoder):
             records_list, f
         )
 
-    # Move field indices to device
+    # Move field indices and known masks to device
     field_indices = {f: t.to(DEVICE) for f, t in field_indices.items()}
+    field_known = {f: t.to(DEVICE) for f, t in field_known.items()}
 
     # Load model
     model = load_model(ckpt)
@@ -250,16 +257,6 @@ def main(batch_size, split, encoder):
         if not ex["records"]:
             continue
         rec = ex["records"][0]
-        skip = False
-        for f in FIELDS:
-            if f in POINTER_FIELDS:
-                continue
-            val = _get_field_value(rec, f)
-            if field_vocabs[f].get(val) is None:
-                skip = True
-                break
-        if skip:
-            continue
         target_fnums.append(rec["f_num"])
         query_texts.append(ex["query"])
         if POINTER_FIELDS and encoder != "char":
@@ -303,13 +300,20 @@ def main(batch_size, split, encoder):
             # Score all gazetteer records for each query in batch
             batch_size_actual = model_input.shape[0]
             for i in range(batch_size_actual):
-                # Sum log-probs across fields for all records
+                # Sum log-probs across structured fields (excluding f_num)
                 scores = torch.zeros(n_records, device=DEVICE)
 
                 for f in FIELDS:
+                    if f == "f_num":
+                        continue  # handled separately for blending
                     if f not in POINTER_FIELDS:
-                        # Classification field: direct index lookup
-                        scores += log_probs[f][i][field_indices[f]]
+                        # Classification field: lookup with floor for unknown values
+                        field_lp = log_probs[f][i][field_indices[f]]
+                        # Unknown values get floor log-prob (uniform over vocab)
+                        vocab_size = log_probs[f].shape[-1]
+                        floor_lp = -math.log(vocab_size)
+                        field_lp = torch.where(field_known[f], field_lp, floor_lp)
+                        scores += field_lp
                     else:
                         # Pointer field: vectorized scoring
                         query_toks = query_token_strings[example_idx]
@@ -340,6 +344,47 @@ def main(batch_size, split, encoder):
                                 field_scores[rec_indices] = lp[pos]
 
                         scores += field_scores
+
+                # Blend with f_num head if available and weighted.
+                #
+                # The f_num head is a 13K-class classifier that predicts f_num
+                # directly from the query text. Its accuracy correlates strongly
+                # with how many training examples exist for each f_num:
+                #   n=0: 0%, n=1: 83%, n=4-7: 98%, n=16+: 99.6%
+                #
+                # For records whose f_num was never seen in training (n=0), the
+                # model assigns near-zero probability (~1/13K) to the correct
+                # class. It can't predict what it's never seen. But it may
+                # assign high confidence (~44%) to some *wrong* f_num that
+                # covers similar unions/locals.
+                #
+                # Per-record weighting addresses this by scaling the f_num
+                # contribution based on how many training examples exist for
+                # each record's f_num:
+                #
+                #   w = floor_w + (base_w - floor_w) * min(1, log1p(n) / log1p(sat))
+                #
+                # Critically, floor_w should be small but positive (e.g. 0.1),
+                # not zero. For unseen f_nums, the score is floor_w * log(1/V),
+                # a constant penalty applied equally to ALL unseen-f_num records.
+                # This doesn't change their ranking relative to each other (it's
+                # a constant offset), but it pushes them all down relative to
+                # seen-f_num records. This encodes a useful prior: "if the model
+                # recognizes a record's f_num, prefer it over one it doesn't
+                # recognize, all else being equal." Zeroing out the f_num weight
+                # for unseen records throws away this signal entirely, which
+                # empirically increases errors.
+                if (
+                    "f_num" in log_probs
+                    and "f_num" in field_indices
+                    and fnum_weight > 0
+                ):
+                    fnum_lp = log_probs["f_num"][i][field_indices["f_num"]]
+                    # Unknown f_nums get floor log-prob
+                    fnum_vocab_size = log_probs["f_num"].shape[-1]
+                    fnum_floor = -math.log(fnum_vocab_size)
+                    fnum_lp = torch.where(field_known["f_num"], fnum_lp, fnum_floor)
+                    scores = (1 - fnum_weight) * scores + fnum_weight * fnum_lp
 
                 # Top-1 and top-5
                 top5_indices = scores.topk(5).indices.cpu().numpy()
