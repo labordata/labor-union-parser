@@ -179,6 +179,7 @@ class DualTaskLitBase(L.LightningModule):
 
         self._category_weights = torch.ones(NUM_CATEGORIES)
         self._train_category_fracs = None  # set by datamodule
+        self._nan_skipped_batches = 0
 
     def on_train_start(self):
         if self._new_param_warmup_steps > 0 and self._loaded_params:
@@ -207,40 +208,16 @@ class DualTaskLitBase(L.LightningModule):
             self._frozen_params.clear()
 
     def on_after_backward(self):
-        nan_params = []
-        nan_grads = {}
-        for name, p in self.model.named_parameters():
+        # Fast path: short-circuit check across all grads
+        if not any(
+            p.grad.isnan().any() for p in self.model.parameters() if p.grad is not None
+        ):
+            return
+        # Slow path: only runs on NaN — zero the bad grads and count
+        for p in self.model.parameters():
             if p.grad is not None and p.grad.isnan().any():
-                nan_params.append(name)
-                nan_grads[name] = p.grad.detach().cpu().clone()
                 p.grad.zero_()
-        if nan_params:
-            print(
-                f"\n⚠ NaN gradients in {len(nan_params)} params at step "
-                f"{self.global_step} — zeroed out, skipping update"
-            )
-            # Dump full repro snapshot on first NaN
-            dump_path = Path(__file__).parent / "nan_repro.pt"
-            if not dump_path.exists():
-                torch.save(
-                    {
-                        "model_state": {
-                            k: v.cpu() for k, v in self.model.state_dict().items()
-                        },
-                        "batch": {k: v.cpu() for k, v in self._last_batch.items()},
-                        "nan_params": nan_params,
-                        "nan_grads": nan_grads,
-                        "global_step": self.global_step,
-                        "epoch": self.current_epoch,
-                        "hparams": dict(self.hparams),
-                    },
-                    dump_path,
-                )
-                print(f"  Saved NaN repro snapshot to {dump_path}")
-                raise RuntimeError(
-                    f"NaN gradients in {len(nan_params)} params at step "
-                    f"{self.global_step} — snapshot saved to {dump_path}"
-                )
+        self._nan_skipped_batches += 1
 
     # ------------------------------------------------------------------
     # Full-corpus validation: encode all records, retrieve top-k, rerank
@@ -323,6 +300,12 @@ class DualTaskLitBase(L.LightningModule):
                     )
                 print(f"  Errors by cat: {', '.join(err_parts)}")
                 print(f"  Category weights: {', '.join(parts)}")
+
+        if self._nan_skipped_batches > 0:
+            print(
+                f"  ⚠ Skipped {self._nan_skipped_batches} batches due to NaN gradients"
+            )
+            self._nan_skipped_batches = 0
 
         for attr in (
             "_val_record_embs",

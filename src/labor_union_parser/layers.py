@@ -115,28 +115,16 @@ class SelfAttentionLayer(nn.Module):
         k = self.k_proj(x).view(B, S, self.num_heads, self.head_dim).transpose(1, 2)
         v = self.v_proj(x).view(B, S, self.num_heads, self.head_dim).transpose(1, 2)
 
-        if return_attn_weights:
-            scores = torch.matmul(q, k.transpose(-2, -1)) / (self.head_dim**0.5)
-            if padding_mask is not None:
-                scores = scores.masked_fill(
-                    padding_mask.unsqueeze(1).unsqueeze(2), float("-inf")
-                )
-            attn_weights = F.softmax(scores, dim=-1)
-            out = torch.matmul(attn_weights, v)
-        else:
-            attn_mask = None
-            if padding_mask is not None:
-                attn_mask = (
-                    padding_mask.unsqueeze(1)
-                    .unsqueeze(2)
-                    .expand(B, self.num_heads, S, S)
-                )
-                attn_mask = torch.where(attn_mask, float("-inf"), 0.0)
-            dropout_p = self.dropout.p if self.training else 0.0
-            out = F.scaled_dot_product_attention(
-                q, k, v, attn_mask=attn_mask, dropout_p=dropout_p, is_causal=False
+        # Manual attention (avoid F.scaled_dot_product_attention — MPS SDPA
+        # has correctness bugs, PyTorch #174861)
+        scores = torch.matmul(q, k.transpose(-2, -1)) / (self.head_dim**0.5)
+        if padding_mask is not None:
+            scores = scores.masked_fill(
+                padding_mask.unsqueeze(1).unsqueeze(2), float("-inf")
             )
-            attn_weights = None
+        attn_weights = F.softmax(scores, dim=-1)
+        attn_weights = self.dropout(attn_weights)
+        out = torch.matmul(attn_weights, v)
 
         out = out.transpose(1, 2).reshape(B, S, self.embed_dim)
         out = self.out_proj(out)
@@ -206,19 +194,14 @@ class CrossAttentionLayer(nn.Module):
             )
             attn_mask = torch.where(attn_mask, float("-inf"), 0.0)
 
-        if return_attn_weights:
-            # Manual computation to extract weights (SDPA doesn't expose them)
-            scores = torch.matmul(q, k.transpose(-2, -1)) / (self.head_dim**0.5)
-            if attn_mask is not None:
-                scores = scores + attn_mask
-            attn_weights = F.softmax(scores, dim=-1)
-            out = torch.matmul(attn_weights, v)
-        else:
-            dropout_p = self.dropout.p if self.training else 0.0
-            out = F.scaled_dot_product_attention(
-                q, k, v, attn_mask=attn_mask, dropout_p=dropout_p, is_causal=False
-            )
-            attn_weights = None
+        # Manual attention (avoid F.scaled_dot_product_attention — MPS SDPA
+        # has correctness bugs, PyTorch #174861)
+        scores = torch.matmul(q, k.transpose(-2, -1)) / (self.head_dim**0.5)
+        if attn_mask is not None:
+            scores = scores + attn_mask
+        attn_weights = F.softmax(scores, dim=-1)
+        attn_weights = self.dropout(attn_weights)
+        out = torch.matmul(attn_weights, v)
 
         out = out.transpose(1, 2).reshape(B, Q, self.embed_dim)
         out = self.out_proj(out)

@@ -597,11 +597,9 @@ def add_example_categories(examples, fnum_to_records):
 
 
 def main():
-    # Load vocabularies
-    fnum_set = load_vocabularies()
-
     # Load fnum_to_records
     fnum_to_records = load_fnum_records()
+    fnum_set = set(fnum_to_records.keys())
 
     # Build record index for ambiguity checking
     print("\nBuilding record index...")
