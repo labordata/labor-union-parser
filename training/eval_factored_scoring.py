@@ -16,14 +16,14 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from train_structured_classifier import (
+    COLLATE_FNS,
     DEVICE,
     FIELDS,
-    MODEL_PATH,
     StructuredClassifier,
     StructuredDataset,
     _get_field_value,
     build_field_vocabs,
-    collate_fn,
+    model_path,
 )
 
 DATA_DIR = Path(__file__).parent / "data"
@@ -31,17 +31,19 @@ EXAMPLES_PATH = DATA_DIR / "training_examples.json"
 GAZETTEER_PATH = DATA_DIR / "fnum_to_records.json"
 
 
-def load_model(field_vocabs):
-    """Load trained structured classifier."""
-    ckpt = torch.load(MODEL_PATH, weights_only=False, map_location=DEVICE)
+def load_model(ckpt):
+    """Load trained structured classifier from checkpoint."""
+    encoder = ckpt.get("encoder", "char")
     field_sizes = ckpt["field_sizes"]
     model = StructuredClassifier(
         field_sizes=field_sizes,
+        encoder=encoder,
         d_model=ckpt["d_model"],
         n_heads=4,
         n_layers=ckpt["n_layers"],
         ff_dim=ckpt["d_model"] * 2,
         dropout=0.0,  # no dropout at inference
+        token_vocab_size=len(ckpt["token_vocab"]) if "token_vocab" in ckpt else None,
     ).to(DEVICE)
     model.load_state_dict(ckpt["model_state"])
     model.eval()
@@ -89,11 +91,27 @@ def build_gazetteer_matrix(fnum_to_records, field_vocabs):
     return field_indices, record_fnums
 
 
+def get_model_input(inputs, encoder, device):
+    """Extract the right tensor from inputs dict based on encoder type."""
+    mask = inputs["mask"].to(device)
+    if encoder == "token-embed":
+        return inputs["token_ids"].to(device), mask
+    else:
+        return inputs["char_ids"].to(device), mask
+
+
 @click.command()
 @click.option("--batch-size", default=256)
 @click.option("--split", default="test", type=click.Choice(["val", "test"]))
-def main(batch_size, split):
+@click.option(
+    "--encoder",
+    default="char",
+    type=click.Choice(["char", "token-charcnn", "token-embed"]),
+    help="Which encoder checkpoint to load",
+)
+def main(batch_size, split, encoder):
     print(f"Device: {DEVICE}")
+    print(f"Encoder: {encoder}")
     print("Loading data...")
 
     with open(EXAMPLES_PATH) as f:
@@ -104,6 +122,11 @@ def main(batch_size, split):
     splits = {"train": [], "val": [], "test": []}
     for ex in all_examples:
         splits[ex["split"]].append(ex)
+
+    # Load checkpoint
+    print("Loading model...")
+    ckpt = torch.load(model_path(encoder), weights_only=False, map_location=DEVICE)
+    token_vocab = ckpt.get("token_vocab")
 
     # Build vocabs from training data
     field_vocabs = build_field_vocabs(splits["train"])
@@ -118,15 +141,15 @@ def main(batch_size, split):
     field_indices = {f: t.to(DEVICE) for f, t in field_indices.items()}
 
     # Load model
-    print("Loading model...")
-    model = load_model(field_vocabs)
+    model = load_model(ckpt)
 
     # Evaluate on split
     eval_examples = splits[split]
     print(f"\nEvaluating on {len(eval_examples)} {split} examples")
 
-    # Build dataset (only examples with records)
-    eval_ds = StructuredDataset(eval_examples, field_vocabs)
+    # Build dataset
+    eval_ds = StructuredDataset(eval_examples, field_vocabs, encoder, token_vocab)
+    collate_fn = COLLATE_FNS[encoder]
     eval_loader = DataLoader(
         eval_ds,
         batch_size=batch_size,
@@ -142,7 +165,6 @@ def main(batch_size, split):
         if not ex["records"]:
             continue
         rec = ex["records"][0]
-        # Check all fields valid (same filter as StructuredDataset)
         skip = False
         for f in FIELDS:
             val = _get_field_value(rec, f)
@@ -181,21 +203,19 @@ def main(batch_size, split):
 
     with torch.no_grad():
         example_idx = 0
-        for char_ids, mask, labels in eval_loader:
-            char_ids = char_ids.to(DEVICE)
-            mask = mask.to(DEVICE)
-            logits = model(char_ids, mask)
+        for inputs, labels in eval_loader:
+            model_input, mask = get_model_input(inputs, encoder, DEVICE)
+            logits = model(model_input, mask)
 
             # Get log-probabilities for each field
             log_probs = {f: F.log_softmax(logits[f], dim=-1) for f in FIELDS}
 
             # Score all gazetteer records for each query in batch
-            batch_size_actual = char_ids.shape[0]
+            batch_size_actual = model_input.shape[0]
             for i in range(batch_size_actual):
                 # Sum log-probs across fields for all records
                 scores = torch.zeros(n_records, device=DEVICE)
                 for f in FIELDS:
-                    # log_probs[f][i] is (n_classes,), field_indices[f] is (n_records,)
                     scores += log_probs[f][i][field_indices[f]]
 
                 # Top-1 and top-5

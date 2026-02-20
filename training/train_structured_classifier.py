@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 """
-Structured multi-head classifier: single CharCNN + Transformer encoder
-with per-field classification heads.
+Structured multi-head classifier: encoder + Transformer with per-field
+classification heads.
 
-Architecture:
-  - Character embedding → 1D CNN (local n-gram features)
-  - 2 Transformer layers with RoPE (global reasoning)
-  - Mean pooling → per-field linear classification heads
+Three encoder modes (--encoder):
+  char         : character-level CNN over raw text (up to 200 chars)
+  token-charcnn: tokenize → CharCNN per token (20 tokens × 20 chars)
+  token-embed  : tokenize → learned token embedding (20 tokens)
 
-Fields: union_name, desig_name, desig_num, prefix, suffix
+Fields: union_name, desig_name, desig_num, prefix, suffix, union_unit
 """
 
 import json
 import math
+import sys
 from pathlib import Path
 
 import click
@@ -22,10 +23,26 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, Dataset
 
+# Add src to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
+from labor_union_parser.char_cnn import (
+    CharacterCNN,
+    tokenize_to_chars,
+)
+
 DATA_DIR = Path(__file__).parent / "data"
 VOCAB_PATH = DATA_DIR / "vocabularies.json"
 EXAMPLES_PATH = DATA_DIR / "training_examples.json"
-MODEL_PATH = DATA_DIR / "structured_classifier.pt"
+MODEL_DIR = DATA_DIR
+
+
+def model_path(encoder="char"):
+    return MODEL_DIR / f"structured_classifier_{encoder}.pt"
+
+
+# Default for backward compat
+MODEL_PATH = model_path("char")
 
 DEVICE = torch.device(
     "mps"
@@ -33,32 +50,113 @@ DEVICE = torch.device(
     else "cuda" if torch.cuda.is_available() else "cpu"
 )
 
-# Character vocabulary: printable ASCII
+# Character vocabulary for char encoder: printable ASCII
 CHAR_VOCAB = {chr(i): i + 1 for i in range(32, 127)}  # 1-indexed, 0 = padding
 CHAR_VOCAB_SIZE = len(CHAR_VOCAB) + 1  # +1 for padding
-MAX_QUERY_LEN = 200
+MAX_CHAR_LEN = 200
+
+# Token-level settings
+MAX_TOKENS = 20
+MAX_CHARS_PER_TOKEN = 20
 
 FIELDS = ["union_name", "desig_name", "desig_num", "prefix", "suffix", "union_unit"]
 
 
-def encode_chars(text, max_len=MAX_QUERY_LEN):
-    """Convert text to character index tensor."""
-    ids = [CHAR_VOCAB.get(c, 0) for c in text[:max_len]]
-    return ids
+# ---------------------------------------------------------------------------
+# Encoding helpers
+# ---------------------------------------------------------------------------
+
+
+def encode_chars(text, max_len=MAX_CHAR_LEN):
+    """Convert text to character index list (for char encoder)."""
+    return [CHAR_VOCAB.get(c, 0) for c in text[:max_len]]
+
+
+def smart_truncate_nonspace(text, max_tokens=MAX_TOKENS):
+    """Tokenize, drop spaces, keep first N tokens, recover lost numbers."""
+    full_chars, full_tokens, full_is_num, full_token_types, full_num_ids = (
+        tokenize_to_chars(text, 999)
+    )
+
+    nonspace = []
+    for i, tt in enumerate(full_token_types):
+        if full_tokens[i] and tt != 2:  # not space, not empty
+            nonspace.append(
+                {
+                    "chars": full_chars[i],
+                    "token": full_tokens[i],
+                    "is_num": full_is_num[i],
+                    "token_type": tt,
+                }
+            )
+
+    trunc = nonspace[:max_tokens]
+
+    # Recover lost numbers
+    trunc_numbers = {d["token"] for d in trunc if d["is_num"]}
+    lost_numbers = [
+        d for d in nonspace if d["is_num"] and d["token"] not in trunc_numbers
+    ]
+
+    if lost_numbers:
+        replace_positions = []
+        for i in range(len(trunc) - 1, -1, -1):
+            if not trunc[i]["is_num"] and trunc[i]["token"]:
+                replace_positions.append(i)
+                if len(replace_positions) >= len(lost_numbers):
+                    break
+        replace_positions.reverse()
+        for pos, lost in zip(replace_positions, lost_numbers):
+            trunc[pos] = lost
+
+    # Pad
+    while len(trunc) < max_tokens:
+        trunc.append(
+            {
+                "chars": [0] * MAX_CHARS_PER_TOKEN,
+                "token": "",
+                "is_num": 0,
+                "token_type": 4,
+            }
+        )
+
+    return trunc
+
+
+def build_token_vocab(train_examples):
+    """Build token→idx vocabulary from training data."""
+    token_counts = {}
+    for ex in train_examples:
+        tokens = smart_truncate_nonspace(ex["query"])
+        for t in tokens:
+            tok = t["token"]
+            if tok:
+                token_counts[tok] = token_counts.get(tok, 0) + 1
+
+    # Sort by frequency descending, assign indices
+    vocab = {"<PAD>": 0, "<UNK>": 1}
+    for tok, _ in sorted(token_counts.items(), key=lambda x: -x[1]):
+        vocab[tok] = len(vocab)
+
+    return vocab
+
+
+# ---------------------------------------------------------------------------
+# Dataset
+# ---------------------------------------------------------------------------
 
 
 class StructuredDataset(Dataset):
-    def __init__(self, examples, field_vocabs):
-        self.queries = []
-        self.labels = {}
-        for f in FIELDS:
-            self.labels[f] = []
+    def __init__(self, examples, field_vocabs, encoder="char", token_vocab=None):
+        self.encoder = encoder
+        self.labels = {f: [] for f in FIELDS}
 
+        # Collect valid queries
+        queries = []
         for ex in examples:
             if not ex["records"]:
                 continue
             rec = ex["records"][0]
-            # Check all fields have valid labels
             skip = False
             label_row = {}
             for f in FIELDS:
@@ -71,25 +169,68 @@ class StructuredDataset(Dataset):
             if skip:
                 continue
 
-            self.queries.append(ex["query"])
+            queries.append(ex["query"])
             for f in FIELDS:
                 self.labels[f].append(label_row[f])
 
         for f in FIELDS:
             self.labels[f] = torch.tensor(self.labels[f], dtype=torch.long)
 
+        # Pre-encode all queries at init time
+        if encoder == "char":
+            self.char_ids_list = [encode_chars(q) for q in queries]
+        elif encoder == "token-charcnn":
+            self.token_char_ids = []  # list of (MAX_TOKENS, MAX_CHARS_PER_TOKEN)
+            self.masks = []
+            for q in queries:
+                tokens = smart_truncate_nonspace(q)
+                self.token_char_ids.append([t["chars"] for t in tokens])
+                self.masks.append([1 if t["token"] else 0 for t in tokens])
+        elif encoder == "token-embed":
+            assert token_vocab is not None
+            self.token_ids = []
+            self.masks = []
+            for q in queries:
+                tokens = smart_truncate_nonspace(q)
+                self.token_ids.append(
+                    [
+                        (
+                            token_vocab.get(t["token"], token_vocab["<UNK>"])
+                            if t["token"]
+                            else 0
+                        )
+                        for t in tokens
+                    ]
+                )
+                self.masks.append([1 if t["token"] else 0 for t in tokens])
+
+        self._len = len(queries)
+
     def __len__(self):
-        return len(self.queries)
+        return self._len
 
     def __getitem__(self, idx):
-        char_ids = encode_chars(self.queries[idx])
         labels = {f: self.labels[f][idx] for f in FIELDS}
-        return char_ids, labels
+
+        if self.encoder == "char":
+            return {"char_ids": self.char_ids_list[idx]}, labels
+        elif self.encoder == "token-charcnn":
+            return {
+                "char_ids": self.token_char_ids[idx],
+                "mask": self.masks[idx],
+            }, labels
+        elif self.encoder == "token-embed":
+            return {
+                "token_ids": self.token_ids[idx],
+                "mask": self.masks[idx],
+            }, labels
+        raise ValueError(f"Unknown encoder: {self.encoder}")
 
 
-def collate_fn(batch):
-    """Pad character sequences and stack labels."""
-    char_ids_list, labels_list = zip(*batch)
+def collate_char(batch):
+    """Collate for char encoder: variable-length char sequences."""
+    inputs_list, labels_list = zip(*batch)
+    char_ids_list = [inp["char_ids"] for inp in inputs_list]
     max_len = max(len(ids) for ids in char_ids_list)
     padded = torch.zeros(len(char_ids_list), max_len, dtype=torch.long)
     mask = torch.zeros(len(char_ids_list), max_len, dtype=torch.bool)
@@ -97,7 +238,34 @@ def collate_fn(batch):
         padded[i, : len(ids)] = torch.tensor(ids, dtype=torch.long)
         mask[i, : len(ids)] = True
     labels = {f: torch.stack([el[f] for el in labels_list]) for f in FIELDS}
-    return padded, mask, labels
+    return {"char_ids": padded, "mask": mask}, labels
+
+
+def collate_token_charcnn(batch):
+    """Collate for token-charcnn: fixed-size (B, MAX_TOKENS, MAX_CHARS_PER_TOKEN)."""
+    inputs_list, labels_list = zip(*batch)
+    char_ids = torch.tensor([inp["char_ids"] for inp in inputs_list], dtype=torch.long)
+    mask = torch.tensor([inp["mask"] for inp in inputs_list], dtype=torch.bool)
+    labels = {f: torch.stack([el[f] for el in labels_list]) for f in FIELDS}
+    return {"char_ids": char_ids, "mask": mask}, labels
+
+
+def collate_token_embed(batch):
+    """Collate for token-embed: fixed-size (B, MAX_TOKENS)."""
+    inputs_list, labels_list = zip(*batch)
+    token_ids = torch.tensor(
+        [inp["token_ids"] for inp in inputs_list], dtype=torch.long
+    )
+    mask = torch.tensor([inp["mask"] for inp in inputs_list], dtype=torch.bool)
+    labels = {f: torch.stack([el[f] for el in labels_list]) for f in FIELDS}
+    return {"token_ids": token_ids, "mask": mask}, labels
+
+
+COLLATE_FNS = {
+    "char": collate_char,
+    "token-charcnn": collate_token_charcnn,
+    "token-embed": collate_token_embed,
+}
 
 
 def _get_field_value(record, field):
@@ -139,16 +307,12 @@ def precompute_freqs(dim, max_len, theta=10000.0):
 
 
 def apply_rope(x, cos_freqs, sin_freqs):
-    """Apply rotary position embedding to input tensor.
-
-    x: (batch, seq, heads, head_dim)
-    """
+    """Apply rotary position embedding. x: (batch, seq, heads, head_dim)"""
     d = x.shape[-1]
     x1 = x[..., : d // 2]
     x2 = x[..., d // 2 :]
-    # Slice freqs to match sequence length
     seq_len = x.shape[1]
-    cos_f = cos_freqs[:seq_len].unsqueeze(0).unsqueeze(2)  # (1, seq, 1, dim/2)
+    cos_f = cos_freqs[:seq_len].unsqueeze(0).unsqueeze(2)
     sin_f = sin_freqs[:seq_len].unsqueeze(0).unsqueeze(2)
     out1 = x1 * cos_f - x2 * sin_f
     out2 = x2 * cos_f + x1 * sin_f
@@ -161,7 +325,7 @@ def apply_rope(x, cos_freqs, sin_freqs):
 
 
 class RoPEMultiHeadAttention(nn.Module):
-    def __init__(self, d_model, n_heads):
+    def __init__(self, d_model, n_heads, max_seq_len=MAX_CHAR_LEN):
         super().__init__()
         self.d_model = d_model
         self.n_heads = n_heads
@@ -169,7 +333,7 @@ class RoPEMultiHeadAttention(nn.Module):
         self.qkv = nn.Linear(d_model, 3 * d_model)
         self.out_proj = nn.Linear(d_model, d_model)
 
-        cos_freqs, sin_freqs = precompute_freqs(self.head_dim, MAX_QUERY_LEN)
+        cos_freqs, sin_freqs = precompute_freqs(self.head_dim, max_seq_len)
         self.register_buffer("cos_freqs", cos_freqs)
         self.register_buffer("sin_freqs", sin_freqs)
 
@@ -178,29 +342,26 @@ class RoPEMultiHeadAttention(nn.Module):
         qkv = self.qkv(x).reshape(B, S, 3, self.n_heads, self.head_dim)
         q, k, v = qkv[:, :, 0], qkv[:, :, 1], qkv[:, :, 2]
 
-        # Apply RoPE to q and k
         q = apply_rope(q, self.cos_freqs, self.sin_freqs)
         k = apply_rope(k, self.cos_freqs, self.sin_freqs)
 
-        # Attention
         q = q.transpose(1, 2)  # (B, heads, S, head_dim)
         k = k.transpose(1, 2)
         v = v.transpose(1, 2)
 
         attn = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(self.head_dim)
         if mask is not None:
-            # mask: (B, S) -> (B, 1, 1, S)
             attn = attn.masked_fill(~mask.unsqueeze(1).unsqueeze(2), float("-inf"))
         attn = F.softmax(attn, dim=-1)
-        out = torch.matmul(attn, v)  # (B, heads, S, head_dim)
+        out = torch.matmul(attn, v)
         out = out.transpose(1, 2).reshape(B, S, D)
         return self.out_proj(out)
 
 
 class TransformerBlock(nn.Module):
-    def __init__(self, d_model, n_heads, ff_dim, dropout=0.1):
+    def __init__(self, d_model, n_heads, ff_dim, dropout=0.1, max_seq_len=MAX_CHAR_LEN):
         super().__init__()
-        self.attn = RoPEMultiHeadAttention(d_model, n_heads)
+        self.attn = RoPEMultiHeadAttention(d_model, n_heads, max_seq_len)
         self.norm1 = nn.LayerNorm(d_model)
         self.norm2 = nn.LayerNorm(d_model)
         self.ff = nn.Sequential(
@@ -222,36 +383,55 @@ class StructuredClassifier(nn.Module):
     def __init__(
         self,
         field_sizes,
+        encoder="char",
         d_model=256,
         n_heads=4,
         n_layers=2,
         ff_dim=512,
+        dropout=0.1,
+        # char encoder params
         cnn_channels=128,
         cnn_kernels=(3, 5, 7),
-        dropout=0.1,
+        # token-embed params
+        token_vocab_size=None,
     ):
         super().__init__()
-        self.char_emb = nn.Embedding(CHAR_VOCAB_SIZE, 64, padding_idx=0)
+        self.encoder_type = encoder
 
-        # CharCNN: parallel convolutions with different kernel sizes
-        self.convs = nn.ModuleList(
-            [
-                nn.Sequential(
-                    nn.Conv1d(64, cnn_channels, k, padding=k // 2),
-                    nn.GELU(),
-                )
-                for k in cnn_kernels
-            ]
-        )
-        cnn_out_dim = cnn_channels * len(cnn_kernels)
-        self.cnn_proj = nn.Linear(cnn_out_dim, d_model)
-        self.cnn_norm = nn.LayerNorm(d_model)
-        self.cnn_dropout = nn.Dropout(dropout)
+        if encoder == "char":
+            max_seq_len = MAX_CHAR_LEN
+            self.char_emb = nn.Embedding(CHAR_VOCAB_SIZE, 64, padding_idx=0)
+            self.convs = nn.ModuleList(
+                [
+                    nn.Sequential(
+                        nn.Conv1d(64, cnn_channels, k, padding=k // 2),
+                        nn.GELU(),
+                    )
+                    for k in cnn_kernels
+                ]
+            )
+            cnn_out_dim = cnn_channels * len(cnn_kernels)
+            self.cnn_proj = nn.Linear(cnn_out_dim, d_model)
+            self.cnn_norm = nn.LayerNorm(d_model)
+            self.cnn_dropout = nn.Dropout(dropout)
+
+        elif encoder == "token-charcnn":
+            max_seq_len = MAX_TOKENS
+            # Reuse the CharacterCNN from the dual task model
+            self.char_cnn = CharacterCNN(embed_dim=d_model, char_embed_dim=16)
+
+        elif encoder == "token-embed":
+            max_seq_len = MAX_TOKENS
+            assert token_vocab_size is not None
+            self.token_emb = nn.Embedding(token_vocab_size, d_model, padding_idx=0)
+
+        else:
+            raise ValueError(f"Unknown encoder: {encoder}")
 
         # Transformer layers
         self.layers = nn.ModuleList(
             [
-                TransformerBlock(d_model, n_heads, ff_dim, dropout)
+                TransformerBlock(d_model, n_heads, ff_dim, dropout, max_seq_len)
                 for _ in range(n_layers)
             ]
         )
@@ -261,16 +441,23 @@ class StructuredClassifier(nn.Module):
             {f: nn.Linear(d_model, n_classes) for f, n_classes in field_sizes.items()}
         )
 
-    def forward(self, char_ids, mask=None):
-        # char_ids: (B, S) of character indices
-        x = self.char_emb(char_ids)  # (B, S, 64)
+    def forward(self, inputs, mask=None):
+        if self.encoder_type == "char":
+            char_ids = inputs  # (B, S) character indices
+            x = self.char_emb(char_ids)  # (B, S, 64)
+            x_t = x.transpose(1, 2)
+            conv_outs = [conv(x_t) for conv in self.convs]
+            x = torch.cat(conv_outs, dim=1)
+            x = x.transpose(1, 2)
+            x = self.cnn_dropout(self.cnn_norm(self.cnn_proj(x)))
 
-        # CNN: (B, S, 64) -> (B, 64, S) -> conv -> (B, C, S)
-        x_t = x.transpose(1, 2)
-        conv_outs = [conv(x_t) for conv in self.convs]  # list of (B, cnn_channels, S)
-        x = torch.cat(conv_outs, dim=1)  # (B, cnn_out_dim, S)
-        x = x.transpose(1, 2)  # (B, S, cnn_out_dim)
-        x = self.cnn_dropout(self.cnn_norm(self.cnn_proj(x)))  # (B, S, d_model)
+        elif self.encoder_type == "token-charcnn":
+            char_ids = inputs  # (B, MAX_TOKENS, MAX_CHARS_PER_TOKEN)
+            x = self.char_cnn(char_ids)  # (B, MAX_TOKENS, d_model)
+
+        elif self.encoder_type == "token-embed":
+            token_ids = inputs  # (B, MAX_TOKENS)
+            x = self.token_emb(token_ids)  # (B, MAX_TOKENS, d_model)
 
         # Transformer layers
         for layer in self.layers:
@@ -279,7 +466,7 @@ class StructuredClassifier(nn.Module):
         # Mean pool (masked)
         if mask is not None:
             x = x * mask.unsqueeze(-1).float()
-            pooled = x.sum(dim=1) / mask.sum(dim=1, keepdim=True).float()
+            pooled = x.sum(dim=1) / mask.sum(dim=1, keepdim=True).float().clamp(min=1)
         else:
             pooled = x.mean(dim=1)
 
@@ -293,11 +480,10 @@ class StructuredClassifier(nn.Module):
 # ---------------------------------------------------------------------------
 
 
-def evaluate(model, loader, field_vocabs):
+def evaluate(model, loader, field_vocabs, encoder):
     model.eval()
     correct = {f: 0 for f in FIELDS}
     total = {f: 0 for f in FIELDS}
-    # Track non-null accuracy
     null_labels = {
         "prefix": field_vocabs["prefix"].get(0),
         "suffix": field_vocabs["suffix"].get(""),
@@ -308,16 +494,23 @@ def evaluate(model, loader, field_vocabs):
     non_null_total = {f: 0 for f in FIELDS}
 
     with torch.no_grad():
-        for char_ids, mask, labels in loader:
-            char_ids = char_ids.to(DEVICE)
-            mask = mask.to(DEVICE)
-            logits = model(char_ids, mask)
+        for inputs, labels in loader:
+            if encoder == "char":
+                model_input = inputs["char_ids"].to(DEVICE)
+                mask = inputs["mask"].to(DEVICE)
+            elif encoder == "token-charcnn":
+                model_input = inputs["char_ids"].to(DEVICE)
+                mask = inputs["mask"].to(DEVICE)
+            elif encoder == "token-embed":
+                model_input = inputs["token_ids"].to(DEVICE)
+                mask = inputs["mask"].to(DEVICE)
+
+            logits = model(model_input, mask)
             for f in FIELDS:
                 y = labels[f].to(DEVICE)
                 preds = logits[f].argmax(dim=-1)
                 correct[f] += (preds == y).sum().item()
                 total[f] += y.shape[0]
-                # Non-null
                 nl = null_labels.get(f)
                 if nl is not None:
                     non_null_mask = y != nl
@@ -343,8 +536,15 @@ def evaluate(model, loader, field_vocabs):
 @click.option("--lr", default=3e-4, help="Learning rate")
 @click.option("--d-model", default=256, help="Model hidden dimension")
 @click.option("--n-layers", default=2, help="Number of transformer layers")
-def main(epochs, batch_size, lr, d_model, n_layers):
+@click.option(
+    "--encoder",
+    default="char",
+    type=click.Choice(["char", "token-charcnn", "token-embed"]),
+    help="Encoder type",
+)
+def main(epochs, batch_size, lr, d_model, n_layers, encoder):
     print(f"Device: {DEVICE}")
+    print(f"Encoder: {encoder}")
     print("Loading data...")
 
     with open(EXAMPLES_PATH) as f:
@@ -363,14 +563,21 @@ def main(epochs, batch_size, lr, d_model, n_layers):
     field_sizes = {f: len(v) for f, v in field_vocabs.items()}
     print("Field sizes:", {f: n for f, n in field_sizes.items()})
 
+    # Build token vocab if needed
+    token_vocab = None
+    if encoder == "token-embed":
+        token_vocab = build_token_vocab(splits["train"])
+        print(f"Token vocabulary: {len(token_vocab)} tokens")
+
     # Datasets
-    train_ds = StructuredDataset(splits["train"], field_vocabs)
-    val_ds = StructuredDataset(splits["val"], field_vocabs)
-    test_ds = StructuredDataset(splits["test"], field_vocabs)
+    train_ds = StructuredDataset(splits["train"], field_vocabs, encoder, token_vocab)
+    val_ds = StructuredDataset(splits["val"], field_vocabs, encoder, token_vocab)
+    test_ds = StructuredDataset(splits["test"], field_vocabs, encoder, token_vocab)
     print(
         f"Dataset sizes: train={len(train_ds)}, val={len(val_ds)}, test={len(test_ds)}"
     )
 
+    collate_fn = COLLATE_FNS[encoder]
     train_loader = DataLoader(
         train_ds,
         batch_size=batch_size,
@@ -396,11 +603,13 @@ def main(epochs, batch_size, lr, d_model, n_layers):
     # Model
     model = StructuredClassifier(
         field_sizes=field_sizes,
+        encoder=encoder,
         d_model=d_model,
         n_heads=4,
         n_layers=n_layers,
         ff_dim=d_model * 2,
         dropout=0.1,
+        token_vocab_size=len(token_vocab) if token_vocab else None,
     ).to(DEVICE)
 
     n_params = sum(p.numel() for p in model.parameters())
@@ -415,10 +624,18 @@ def main(epochs, batch_size, lr, d_model, n_layers):
         total_loss = 0.0
         n_batches = 0
 
-        for char_ids, mask, labels in train_loader:
-            char_ids = char_ids.to(DEVICE)
-            mask = mask.to(DEVICE)
-            logits = model(char_ids, mask)
+        for inputs, labels in train_loader:
+            if encoder == "char":
+                model_input = inputs["char_ids"].to(DEVICE)
+                mask = inputs["mask"].to(DEVICE)
+            elif encoder == "token-charcnn":
+                model_input = inputs["char_ids"].to(DEVICE)
+                mask = inputs["mask"].to(DEVICE)
+            elif encoder == "token-embed":
+                model_input = inputs["token_ids"].to(DEVICE)
+                mask = inputs["mask"].to(DEVICE)
+
+            logits = model(model_input, mask)
 
             loss = 0.0
             for f in FIELDS:
@@ -437,7 +654,7 @@ def main(epochs, batch_size, lr, d_model, n_layers):
         avg_loss = total_loss / n_batches
 
         # Evaluate
-        val_results = evaluate(model, val_loader, field_vocabs)
+        val_results = evaluate(model, val_loader, field_vocabs, encoder)
         mean_val_acc = np.mean([acc for acc, _, _ in val_results.values()])
 
         print(
@@ -452,25 +669,27 @@ def main(epochs, batch_size, lr, d_model, n_layers):
 
         if mean_val_acc > best_val_acc:
             best_val_acc = mean_val_acc
-            torch.save(
-                {
-                    "model_state": model.state_dict(),
-                    "field_vocabs": field_vocabs,
-                    "field_sizes": field_sizes,
-                    "d_model": d_model,
-                    "n_layers": n_layers,
-                },
-                MODEL_PATH,
-            )
-            print(f"  ** Saved (mean val acc={mean_val_acc:.4f})")
+            save_dict = {
+                "model_state": model.state_dict(),
+                "field_vocabs": field_vocabs,
+                "field_sizes": field_sizes,
+                "d_model": d_model,
+                "n_layers": n_layers,
+                "encoder": encoder,
+            }
+            if token_vocab is not None:
+                save_dict["token_vocab"] = token_vocab
+            save_path = model_path(encoder)
+            torch.save(save_dict, save_path)
+            print(f"  ** Saved {save_path.name} (mean val acc={mean_val_acc:.4f})")
 
     # Final test evaluation
     print("\n" + "=" * 60)
     print("Loading best model for test evaluation...")
-    ckpt = torch.load(MODEL_PATH, weights_only=False)
+    ckpt = torch.load(model_path(encoder), weights_only=False)
     model.load_state_dict(ckpt["model_state"])
 
-    test_results = evaluate(model, test_loader, field_vocabs)
+    test_results = evaluate(model, test_loader, field_vocabs, encoder)
     print("\nTest results:")
     for f in FIELDS:
         acc, nn_acc, nn_total = test_results[f]
