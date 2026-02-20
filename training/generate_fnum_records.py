@@ -33,6 +33,14 @@ def load_unit_identifiers():
     return fnum_to_uid
 
 
+DESIG_NAME_COLLAPSE = {
+    "LG": "LU",
+    "LLG": "LU",
+    "Br": "BR",
+    "DLG": "DC",
+}
+
+
 def normalize_designation(s):
     """Normalize designation suffix strings — strip leading zeros from numeric values."""
     if not s:
@@ -70,6 +78,9 @@ def generate_records():
 
     for row in cur.fetchall():
         f_num, union_name, desig_name, desig_num, prefix_raw, suffix_raw = row
+
+        # Collapse desig_name variants
+        desig_name = DESIG_NAME_COLLAPSE.get(desig_name, desig_name)
 
         # Normalize prefix: strip non-alphanumeric, keep if numeric
         prefix_clean = "".join(c for c in (prefix_raw or "") if c.isalnum())

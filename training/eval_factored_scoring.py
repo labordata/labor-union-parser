@@ -5,9 +5,15 @@ probability distributions to score all gazetteer records and find the
 best match for each test query.
 
 No retrieval step — exhaustive scoring over all records.
+
+Supports pointer heads: for pointer fields (e.g. desig_num), scoring
+checks if the record's value appears as a token in the query and uses
+the pointer probability for that position. If not found, the score is
+a configurable fallback (default: log(0.01 / n_unseen), effectively -inf).
 """
 
 import json
+import math
 from pathlib import Path
 
 import click
@@ -19,16 +25,28 @@ from train_structured_classifier import (
     COLLATE_FNS,
     DEVICE,
     FIELDS,
+    MAX_TOKENS,
+    POINTER_FIELDS,
     StructuredClassifier,
     StructuredDataset,
     _get_field_value,
     build_field_vocabs,
     model_path,
+    smart_truncate_nonspace,
 )
 
 DATA_DIR = Path(__file__).parent / "data"
 EXAMPLES_PATH = DATA_DIR / "training_examples.json"
 GAZETTEER_PATH = DATA_DIR / "fnum_to_records.json"
+
+# Per-field fallback log-prob when record value not found in query text.
+# desig_num: almost always in text, so missing is strong negative evidence.
+# prefix/suffix: often absent even for correct records, use empirical absent rates.
+POINTER_NOT_FOUND_LOG_PROB = {
+    "desig_num": math.log(1e-10),  # -23.03 — effectively rules out record
+    "prefix": math.log(0.329),  # 32.9% absent — mild
+    "suffix": math.log(0.444),  # 44.4% absent — mild
+}
 
 
 def load_model(ckpt):
@@ -53,9 +71,13 @@ def load_model(ckpt):
 def build_gazetteer_matrix(fnum_to_records, field_vocabs):
     """Build a matrix of field indices for all gazetteer records.
 
+    For classification fields: field_indices[f] = tensor of vocab indices
+    For pointer fields: skipped (handled separately via raw values)
+
     Returns:
-        field_indices: dict of field -> tensor of shape (n_records,)
+        field_indices: dict of field -> tensor of shape (n_records,) [classification only]
         record_fnums: list of f_num for each row
+        records_list: list of raw record dicts (for pointer field lookups)
     """
     records = []
     record_fnums = []
@@ -68,6 +90,8 @@ def build_gazetteer_matrix(fnum_to_records, field_vocabs):
     valid_mask = np.ones(len(records), dtype=bool)
 
     for f in FIELDS:
+        if f in POINTER_FIELDS:
+            continue  # pointer fields don't need vocab indices
         indices = []
         for i, rec in enumerate(records):
             val = _get_field_value(rec, f)
@@ -87,8 +111,50 @@ def build_gazetteer_matrix(fnum_to_records, field_vocabs):
 
     field_indices = {f: t[valid_indices] for f, t in field_indices.items()}
     record_fnums = [record_fnums[i] for i in valid_indices]
+    records_list = [records[i] for i in valid_indices]
 
-    return field_indices, record_fnums
+    return field_indices, record_fnums, records_list
+
+
+def _normalize_pointer_value(val):
+    """Normalize a pointer field value for matching against query tokens.
+
+    Numbers: strip leading zeros (matching tokenizer behavior).
+    Non-numbers: lowercase (tokens are lowercased by tokenizer).
+    Empty/zero: returns None (means NONE/absent).
+    """
+    val = str(val).strip()
+    if not val or val == "0":
+        return None
+    if val.isdigit():
+        return val.lstrip("0") or "0"
+    return val.lower()
+
+
+def build_pointer_lookup(records_list, field):
+    """Build a mapping from normalized string values to record indices.
+
+    Returns:
+        value_to_indices: dict of str -> tensor of record indices
+        none_indices: tensor of record indices where value is NONE
+    """
+    from collections import defaultdict
+
+    val_to_idx = defaultdict(list)
+    none_indices = []
+    for i, rec in enumerate(records_list):
+        normalized = _normalize_pointer_value(_get_field_value(rec, field))
+        if normalized is None:
+            none_indices.append(i)
+        else:
+            val_to_idx[normalized].append(i)
+
+    # Convert to tensors
+    value_to_indices = {
+        v: torch.tensor(idxs, dtype=torch.long) for v, idxs in val_to_idx.items()
+    }
+    none_indices = torch.tensor(none_indices, dtype=torch.long)
+    return value_to_indices, none_indices
 
 
 def get_model_input(inputs, encoder, device):
@@ -123,19 +189,37 @@ def main(batch_size, split, encoder):
     for ex in all_examples:
         splits[ex["split"]].append(ex)
 
-    # Load checkpoint
+    # Load checkpoint and set pointer fields
     print("Loading model...")
     ckpt = torch.load(model_path(encoder), weights_only=False, map_location=DEVICE)
     token_vocab = ckpt.get("token_vocab")
+
+    # Restore pointer fields from checkpoint
+    global POINTER_FIELDS
+    saved_pointer_fields = ckpt.get("pointer_fields", [])
+    POINTER_FIELDS.clear()
+    POINTER_FIELDS.update(saved_pointer_fields)
+    if POINTER_FIELDS:
+        print(f"Pointer fields: {sorted(POINTER_FIELDS)}")
 
     # Build vocabs from training data
     field_vocabs = build_field_vocabs(splits["train"])
 
     # Build gazetteer scoring matrix
-    field_indices, record_fnums = build_gazetteer_matrix(fnum_to_records, field_vocabs)
+    field_indices, record_fnums, records_list = build_gazetteer_matrix(
+        fnum_to_records, field_vocabs
+    )
     record_fnums_array = np.array(record_fnums)
     n_records = len(record_fnums)
     print(f"Scoring against {n_records} gazetteer records")
+
+    # Build pointer lookup tables for pointer fields
+    pointer_val_to_indices = {}
+    pointer_none_indices = {}
+    for f in POINTER_FIELDS:
+        pointer_val_to_indices[f], pointer_none_indices[f] = build_pointer_lookup(
+            records_list, f
+        )
 
     # Move field indices to device
     field_indices = {f: t.to(DEVICE) for f, t in field_indices.items()}
@@ -158,15 +242,18 @@ def main(batch_size, split, encoder):
         num_workers=0,
     )
 
-    # We need the target f_nums and queries aligned with the dataset
+    # We need the target f_nums, queries, and token strings aligned with dataset
     target_fnums = []
     query_texts = []
+    query_token_strings = []  # for pointer field scoring
     for ex in eval_examples:
         if not ex["records"]:
             continue
         rec = ex["records"][0]
         skip = False
         for f in FIELDS:
+            if f in POINTER_FIELDS:
+                continue
             val = _get_field_value(rec, f)
             if field_vocabs[f].get(val) is None:
                 skip = True
@@ -175,6 +262,9 @@ def main(batch_size, split, encoder):
             continue
         target_fnums.append(rec["f_num"])
         query_texts.append(ex["query"])
+        if POINTER_FIELDS and encoder != "char":
+            tokens = smart_truncate_nonspace(ex["query"])
+            query_token_strings.append([t["token"] for t in tokens])
 
     # Build f_num to description for error reporting
     def describe_record(rec):
@@ -215,8 +305,41 @@ def main(batch_size, split, encoder):
             for i in range(batch_size_actual):
                 # Sum log-probs across fields for all records
                 scores = torch.zeros(n_records, device=DEVICE)
+
                 for f in FIELDS:
-                    scores += log_probs[f][i][field_indices[f]]
+                    if f not in POINTER_FIELDS:
+                        # Classification field: direct index lookup
+                        scores += log_probs[f][i][field_indices[f]]
+                    else:
+                        # Pointer field: vectorized scoring
+                        query_toks = query_token_strings[example_idx]
+                        lp = log_probs[f][i]  # (MAX_TOKENS + 1,)
+
+                        # Build position lookup: token_string -> position index
+                        tok_to_pos = {}
+                        for pos, tok in enumerate(query_toks):
+                            if tok and tok not in tok_to_pos:
+                                tok_to_pos[tok] = pos
+
+                        # Start with fallback for all records
+                        field_scores = torch.full(
+                            (n_records,), POINTER_NOT_FOUND_LOG_PROB[f], device=DEVICE
+                        )
+
+                        # NONE records get the NONE log-prob
+                        none_idx = pointer_none_indices[f]
+                        if len(none_idx) > 0:
+                            field_scores[none_idx] = lp[MAX_TOKENS]
+
+                        # For each unique value that appears in query tokens,
+                        # scatter the pointer log-prob to all matching records
+                        val_to_idx = pointer_val_to_indices[f]
+                        for tok, pos in tok_to_pos.items():
+                            rec_indices = val_to_idx.get(tok)
+                            if rec_indices is not None:
+                                field_scores[rec_indices] = lp[pos]
+
+                        scores += field_scores
 
                 # Top-1 and top-5
                 top5_indices = scores.topk(5).indices.cpu().numpy()
@@ -271,12 +394,34 @@ def main(batch_size, split, encoder):
     if missing:
         print(f"  ({missing} target f_nums not in gazetteer — impossible to get right)")
 
-    # Print errors sorted by target rank (worst first)
+    # Write all errors to CSV
     errors.sort(key=lambda e: e["target_rank"])
+    errors_path = DATA_DIR / f"factored_scoring_errors_{split}.csv"
+    with open(errors_path, "w", newline="") as f:
+        import csv
+
+        writer = csv.DictWriter(
+            f,
+            fieldnames=[
+                "query",
+                "target_fnum",
+                "target_desc",
+                "target_score",
+                "target_rank",
+                "pred_fnum",
+                "pred_desc",
+                "pred_score",
+            ],
+        )
+        writer.writeheader()
+        writer.writerows(errors)
+    print(f"\nErrors written to {errors_path}")
+
+    # Print summary to stdout
     print(f"\n{'='*80}")
-    print(f"Errors ({len(errors)} total, showing first 50):")
+    print(f"Errors ({len(errors)} total, showing first 20):")
     print(f"{'='*80}")
-    for e in errors[:50]:
+    for e in errors[:20]:
         print(f"\n  Query: {e['query']}")
         print(f"  Target (rank {e['target_rank']}): {e['target_desc']}")
         print(f"  Pred:   {e['pred_desc']}")

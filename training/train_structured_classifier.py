@@ -61,6 +61,10 @@ MAX_CHARS_PER_TOKEN = 20
 
 FIELDS = ["union_name", "desig_name", "desig_num", "prefix", "suffix", "union_unit"]
 
+# Fields that use pointer heads instead of classification heads.
+# Pointer heads predict which input token position contains the field value.
+POINTER_FIELDS = set()  # populated by --pointer-fields flag
+
 
 # ---------------------------------------------------------------------------
 # Encoding helpers
@@ -146,13 +150,35 @@ def build_token_vocab(train_examples):
 # ---------------------------------------------------------------------------
 
 
+def _find_pointer_label(tokens, target_value):
+    """Find which token position contains the target value.
+
+    Returns position index (0..MAX_TOKENS-1) or MAX_TOKENS for NONE.
+    Matches numbers by stripped value, non-numbers case-insensitively.
+    """
+    target_str = str(target_value).strip()
+    if not target_str or target_str == "0":
+        return MAX_TOKENS  # NONE
+    target_lower = target_str.lower()
+    target_num = target_str.lstrip("0") or "0"
+    for i, t in enumerate(tokens):
+        if t["is_num"] and t["token"] == target_num:
+            return i
+        if not t["is_num"] and t["token"] == target_lower:
+            return i
+    return MAX_TOKENS  # NONE
+
+
 class StructuredDataset(Dataset):
     def __init__(self, examples, field_vocabs, encoder="char", token_vocab=None):
         self.encoder = encoder
         self.labels = {f: [] for f in FIELDS}
+        # Pointer labels: position index or MAX_TOKENS for NONE
+        self.pointer_labels = {f: [] for f in POINTER_FIELDS}
 
-        # Collect valid queries
+        # Collect valid queries and records
         queries = []
+        records = []
         for ex in examples:
             if not ex["records"]:
                 continue
@@ -160,6 +186,8 @@ class StructuredDataset(Dataset):
             skip = False
             label_row = {}
             for f in FIELDS:
+                if f in POINTER_FIELDS:
+                    continue  # pointer fields don't need vocab lookup
                 val = _get_field_value(rec, f)
                 idx = field_vocabs[f].get(val)
                 if idx is None:
@@ -170,27 +198,40 @@ class StructuredDataset(Dataset):
                 continue
 
             queries.append(ex["query"])
+            records.append(rec)
             for f in FIELDS:
-                self.labels[f].append(label_row[f])
+                if f not in POINTER_FIELDS:
+                    self.labels[f].append(label_row[f])
 
         for f in FIELDS:
-            self.labels[f] = torch.tensor(self.labels[f], dtype=torch.long)
+            if f not in POINTER_FIELDS:
+                self.labels[f] = torch.tensor(self.labels[f], dtype=torch.long)
 
         # Pre-encode all queries at init time
         if encoder == "char":
             self.char_ids_list = [encode_chars(q) for q in queries]
+            # Pointer labels can't work with char encoder (no token positions)
+            if POINTER_FIELDS:
+                raise ValueError("Pointer fields require a token-level encoder")
         elif encoder == "token-charcnn":
-            self.token_char_ids = []  # list of (MAX_TOKENS, MAX_CHARS_PER_TOKEN)
+            self.token_char_ids = []
             self.masks = []
-            for q in queries:
+            self.token_strings = []  # needed for pointer scoring at eval
+            for i, q in enumerate(queries):
                 tokens = smart_truncate_nonspace(q)
                 self.token_char_ids.append([t["chars"] for t in tokens])
                 self.masks.append([1 if t["token"] else 0 for t in tokens])
+                self.token_strings.append([t["token"] for t in tokens])
+                # Compute pointer labels
+                for f in POINTER_FIELDS:
+                    val = _get_field_value(records[i], f)
+                    self.pointer_labels[f].append(_find_pointer_label(tokens, val))
         elif encoder == "token-embed":
             assert token_vocab is not None
             self.token_ids = []
             self.masks = []
-            for q in queries:
+            self.token_strings = []
+            for i, q in enumerate(queries):
                 tokens = smart_truncate_nonspace(q)
                 self.token_ids.append(
                     [
@@ -203,6 +244,15 @@ class StructuredDataset(Dataset):
                     ]
                 )
                 self.masks.append([1 if t["token"] else 0 for t in tokens])
+                self.token_strings.append([t["token"] for t in tokens])
+                for f in POINTER_FIELDS:
+                    val = _get_field_value(records[i], f)
+                    self.pointer_labels[f].append(_find_pointer_label(tokens, val))
+
+        for f in POINTER_FIELDS:
+            self.pointer_labels[f] = torch.tensor(
+                self.pointer_labels[f], dtype=torch.long
+            )
 
         self._len = len(queries)
 
@@ -210,7 +260,9 @@ class StructuredDataset(Dataset):
         return self._len
 
     def __getitem__(self, idx):
-        labels = {f: self.labels[f][idx] for f in FIELDS}
+        labels = {f: self.labels[f][idx] for f in FIELDS if f not in POINTER_FIELDS}
+        for f in POINTER_FIELDS:
+            labels[f] = self.pointer_labels[f][idx]
 
         if self.encoder == "char":
             return {"char_ids": self.char_ids_list[idx]}, labels
@@ -436,9 +488,22 @@ class StructuredClassifier(nn.Module):
             ]
         )
 
-        # Per-field classification heads
+        # Per-field classification heads (for non-pointer fields)
         self.heads = nn.ModuleDict(
-            {f: nn.Linear(d_model, n_classes) for f, n_classes in field_sizes.items()}
+            {
+                f: nn.Linear(d_model, n_classes)
+                for f, n_classes in field_sizes.items()
+                if f not in POINTER_FIELDS
+            }
+        )
+
+        # Pointer heads: project each position to a scalar score + learned NONE
+        self.pointer_heads = nn.ModuleDict(
+            {f: nn.Linear(d_model, 1) for f in POINTER_FIELDS}
+        )
+        # Learned NONE score per pointer field
+        self.pointer_none = nn.ParameterDict(
+            {f: nn.Parameter(torch.zeros(1)) for f in POINTER_FIELDS}
         )
 
     def forward(self, inputs, mask=None):
@@ -463,15 +528,28 @@ class StructuredClassifier(nn.Module):
         for layer in self.layers:
             x = layer(x, mask)
 
-        # Mean pool (masked)
+        # Mean pool (masked) for classification heads
         if mask is not None:
-            x = x * mask.unsqueeze(-1).float()
-            pooled = x.sum(dim=1) / mask.sum(dim=1, keepdim=True).float().clamp(min=1)
+            x_masked = x * mask.unsqueeze(-1).float()
+            pooled = x_masked.sum(dim=1) / mask.sum(dim=1, keepdim=True).float().clamp(
+                min=1
+            )
         else:
             pooled = x.mean(dim=1)
 
-        # Per-field logits
+        # Classification head logits
         logits = {f: head(pooled) for f, head in self.heads.items()}
+
+        # Pointer head logits: (B, MAX_TOKENS+1) — positions + NONE
+        for f in POINTER_FIELDS:
+            pos_scores = self.pointer_heads[f](x).squeeze(-1)  # (B, S)
+            # Mask out padding positions
+            if mask is not None:
+                pos_scores = pos_scores.masked_fill(~mask, float("-inf"))
+            # Append NONE score
+            none_score = self.pointer_none[f].expand(pos_scores.shape[0], 1)
+            logits[f] = torch.cat([pos_scores, none_score], dim=1)  # (B, S+1)
+
         return logits
 
 
@@ -485,33 +563,29 @@ def evaluate(model, loader, field_vocabs, encoder):
     correct = {f: 0 for f in FIELDS}
     total = {f: 0 for f in FIELDS}
     null_labels = {
-        "prefix": field_vocabs["prefix"].get(0),
-        "suffix": field_vocabs["suffix"].get(""),
-        "desig_name": field_vocabs["desig_name"].get("LU"),
-        "desig_num": field_vocabs["desig_num"].get(0),
+        "prefix": field_vocabs.get("prefix", {}).get(0),
+        "suffix": field_vocabs.get("suffix", {}).get(""),
+        "desig_name": field_vocabs.get("desig_name", {}).get("LU"),
+        "desig_num": field_vocabs.get("desig_num", {}).get(0),
     }
     non_null_correct = {f: 0 for f in FIELDS}
     non_null_total = {f: 0 for f in FIELDS}
 
     with torch.no_grad():
         for inputs, labels in loader:
-            if encoder == "char":
-                model_input = inputs["char_ids"].to(DEVICE)
-                mask = inputs["mask"].to(DEVICE)
-            elif encoder == "token-charcnn":
-                model_input = inputs["char_ids"].to(DEVICE)
-                mask = inputs["mask"].to(DEVICE)
-            elif encoder == "token-embed":
-                model_input = inputs["token_ids"].to(DEVICE)
-                mask = inputs["mask"].to(DEVICE)
-
+            model_input, mask = get_model_input(inputs, encoder, DEVICE)
             logits = model(model_input, mask)
             for f in FIELDS:
                 y = labels[f].to(DEVICE)
                 preds = logits[f].argmax(dim=-1)
                 correct[f] += (preds == y).sum().item()
                 total[f] += y.shape[0]
-                nl = null_labels.get(f)
+
+                if f in POINTER_FIELDS:
+                    # For pointer fields, "null" = NONE (position MAX_TOKENS)
+                    nl = MAX_TOKENS
+                else:
+                    nl = null_labels.get(f)
                 if nl is not None:
                     non_null_mask = y != nl
                     if non_null_mask.any():
@@ -530,6 +604,16 @@ def evaluate(model, loader, field_vocabs, encoder):
     return results
 
 
+def get_model_input(inputs, encoder, device):
+    """Extract the right tensor from inputs dict based on encoder type."""
+    mask = inputs["mask"].to(device)
+    if encoder == "token-embed":
+        return inputs["token_ids"].to(device), mask
+    elif encoder in ("token-charcnn", "char"):
+        return inputs["char_ids"].to(device), mask
+    raise ValueError(f"Unknown encoder: {encoder}")
+
+
 @click.command()
 @click.option("--epochs", default=20, help="Number of training epochs")
 @click.option("--batch-size", default=256, help="Batch size")
@@ -542,9 +626,21 @@ def evaluate(model, loader, field_vocabs, encoder):
     type=click.Choice(["char", "token-charcnn", "token-embed"]),
     help="Encoder type",
 )
-def main(epochs, batch_size, lr, d_model, n_layers, encoder):
+@click.option(
+    "--pointer-fields",
+    multiple=True,
+    type=click.Choice(["desig_num", "prefix", "suffix"]),
+    help="Fields to use pointer heads for (can repeat). E.g. --pointer-fields desig_num",
+)
+def main(epochs, batch_size, lr, d_model, n_layers, encoder, pointer_fields):
+    # Set global pointer fields
+    global POINTER_FIELDS
+    POINTER_FIELDS = set(pointer_fields)
+
     print(f"Device: {DEVICE}")
     print(f"Encoder: {encoder}")
+    if POINTER_FIELDS:
+        print(f"Pointer fields: {sorted(POINTER_FIELDS)}")
     print("Loading data...")
 
     with open(EXAMPLES_PATH) as f:
@@ -576,6 +672,15 @@ def main(epochs, batch_size, lr, d_model, n_layers, encoder):
     print(
         f"Dataset sizes: train={len(train_ds)}, val={len(val_ds)}, test={len(test_ds)}"
     )
+
+    # Report pointer label stats
+    for f in POINTER_FIELDS:
+        ptr_labels = train_ds.pointer_labels[f]
+        n_none = (ptr_labels == MAX_TOKENS).sum().item()
+        n_found = (ptr_labels < MAX_TOKENS).sum().item()
+        print(
+            f"  {f} pointer: {n_found} found in text, {n_none} NONE ({n_none/len(ptr_labels)*100:.1f}%)"
+        )
 
     collate_fn = COLLATE_FNS[encoder]
     train_loader = DataLoader(
@@ -625,16 +730,7 @@ def main(epochs, batch_size, lr, d_model, n_layers, encoder):
         n_batches = 0
 
         for inputs, labels in train_loader:
-            if encoder == "char":
-                model_input = inputs["char_ids"].to(DEVICE)
-                mask = inputs["mask"].to(DEVICE)
-            elif encoder == "token-charcnn":
-                model_input = inputs["char_ids"].to(DEVICE)
-                mask = inputs["mask"].to(DEVICE)
-            elif encoder == "token-embed":
-                model_input = inputs["token_ids"].to(DEVICE)
-                mask = inputs["mask"].to(DEVICE)
-
+            model_input, mask = get_model_input(inputs, encoder, DEVICE)
             logits = model(model_input, mask)
 
             loss = 0.0
@@ -676,6 +772,7 @@ def main(epochs, batch_size, lr, d_model, n_layers, encoder):
                 "d_model": d_model,
                 "n_layers": n_layers,
                 "encoder": encoder,
+                "pointer_fields": sorted(POINTER_FIELDS),
             }
             if token_vocab is not None:
                 save_dict["token_vocab"] = token_vocab

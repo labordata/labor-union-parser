@@ -2173,7 +2173,7 @@ United Steelworkers 1441-01,USW,1441.0,train,69490.0
 IUOE-312,IUOE,312.0,train,39603.0
 Indiana/Kentucky/Ohio Regional Council of Carpenters 357,CJA,357.0,train,518994.0
 IUOE-474,IUOE,474.0,train,3583.0
-ge 137,IBT,137.0,train,30469.0
+ge 137,IBT,137.0,train,
 UNITE HERE-1,UNITHE,1.0,train,
 IBT-912,IBT,912.0,train,1263.0
 "Danbury Nurses, AFT CT 5047",AFT,5047.0,train,513616.0
@@ -10448,7 +10448,7 @@ UAW Region 1D 2275,UAW,2275.0,train,521481.0
 Laborers International Union of North America  110,LIUNA,110.0,train,23844.0
 "United Steelworkers, AFL-CIO/CLC 13-725-01",USW,725.0,train,67255.0
 Detroit Federation of Musicians AFM 5,AFM,5.0,train,12922.0
-Painters Local/District Council 82 61,PAT,61.0,train,22851.0
+Painters Local/District Council 82 61,PAT,61.0,train,
 IBT Council 44 Local 20,IBT,20.0,train,8580.0
 Operative Plasterers and Cement Masons Int'l Asso 3,OPCM,3.0,train,28117.0
 UNITED FOOD AND COMMERCIAL WORKERS UNION 686,UFCW,686.0,train,34990.0
@@ -18958,7 +18958,7 @@ Teamsters 179,IBT,179.0,train,17603.0
 "INTERNATIONAL UNION, SECURITY, POLICE, FIRE PROFESSIONALS OF AMERICA AND ITS LOCAL 50",SPFPA,50.0,train,543424.0
 "Laborers' International Union of North America, Local 89",LIUNA,89.0,train,19943.0
 "APWU, LOCAL 807",APWU,807.0,train,89605.0
-International Brotherhood of Teamsters Joint Council 10 on Behalf of IBT LU 25,IBT,25.0,train,23301.0
+International Brotherhood of Teamsters Joint Council 10 on Behalf of IBT LU 25,IBT,25.0,train,33335.0
 United Auto Workers International Union (UAW),UAW,,train,
 "Indiana/Kentucky/Ohio Regional Council of Carpenters, Local 2420",CJA,2420.0,train,52293.0
 "LABORERS UNION, LOCAL 300",LIUNA,300.0,test,24909.0
@@ -18983,7 +18983,7 @@ UFCW INTL UNION LOCAL 99 AFL-CIO CLC,UFCW,99.0,train,2911.0
 "INTERNATIONAL UNION, UAW AND ITS LOCAL 379",UAW,379.0,train,43629.0
 "State Healthcare And Research Employees (SHARE, AFSCME Local 3900)",AFSCME,3900.0,train,546981.0
 "Communications Workers America, Local 3106",CWA,3106.0,train,38004.0
-"International Association of Sheet Metal, Air, Rail and Transportation Workers (SMART), Local 9, AFL-CIO",SMART,9.0,train,11211.0
+"International Association of Sheet Metal, Air, Rail and Transportation Workers (SMART), Local 9, AFL-CIO",SMART,9.0,train,
 International Brotherhood of Electrical Workers Local Union 222,IBEW,222.0,train,533799.0
 "UNITED FOOD & COMMERCIAL WORKERS, LOCAL, 13D",UFCW,13.0,train,16139.0
 "UNITED STEEL, PAPER & FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED-INDUSTRIAL & SERVICE WORKERS I",USW,,train,
@@ -19189,7 +19189,7 @@ TEAMSTERS UNION LOCAL NO. 58,IBT,58.0,train,1854.0
 "Ohio Postal Workers Union (OPWU), an Affiliate of the American Postal Workers Union, AFL-CIO (APWU)",APWU,,train,
 "INTERNATIONAL UNION OF SECURITY, POLICE AND  FIRE PROFESSIONALS OF AMERICA LOCAL 511, AFL-CIO",SPFPA,511.0,test,516773.0
 TEAMSTERS LOCAL UNION NO. 667,IBT,667.0,train,22627.0
-International Brotherhood of Teamsters Joint Council 10 on Behalf of International Brotherhood of Teamsters Local 25,IBT,25.0,train,23301.0
+International Brotherhood of Teamsters Joint Council 10 on Behalf of International Brotherhood of Teamsters Local 25,IBT,25.0,train,33335.0
 LABORERS LOCAL 139,LIUNA,139.0,train,19955.0
 USW Local Union No. 3372-07,USW,3372.0,train,16553.0
 "INTERNATIONAL ASSOCIATION OF MACHINISTS, LOCAL 2699",IAM,2699.0,train,513412.0
@@ -21314,7 +21314,7 @@ Service Employees International Union Health Care Illinois Indiana,SEIU,,train,
 UNITE HERE LOCAL 27,UNITHE,27.0,train,540203.0
 "American Postal Workers Union, Local 667",APWU,667.0,train,517080.0
 UNITED AUTO WORKERS LOCAL 5287,UAW,5287.0,train,543360.0
-SEIU DISTRICT 1199 NW,SEIU,1199.0,train,69557.0
+SEIU DISTRICT 1199 NW,SEIU,1199.0,train,516569.0
 "BAKERY, CONFECTIONERY, TOBACCO WORKERS AND GRAIN MILLERS UNION, LOCAL 317",BCTGMI,317.0,train,36307.0
 "United Brotherhood of Carpenters and Joiners of America (""UBC"")",CJA,,train,
 CARPENTERS LOCAL 52,CJA,52.0,train,543250.0
@@ -22997,7 +22997,7 @@ UAW Amalgamated Local 722,UAW,722.0,train,45251.0
 "SOUTHWEST REGIONAL COUNCIL OF CARPENTERS, UNITED BROTHERHOOD OF CARPENTERS AND JOINERS OF AMERICA, L",CJA,,train,
 UAW Local 807,UAW,807.0,train,15230.0
 CWA LOCAL 6310,CWA,6310.0,train,7466.0
-"District Council 16, Painters and Allied Trades, Local 12",PAT,12.0,test,34993.0
+"District Council 16, Painters and Allied Trades, Local 12",PAT,12.0,test,516232.0
 "American Postal Workers' Union, AFL-CIO, Nation's Capital Southern Maryland Area Local 140",APWU,140.0,train,509337.0
 SERVICE EMPLOYEES INTERNATIONAL UNION HEALTHCARE FLORIDA,SEIU,,train,
 "SECURITY, POLICE AND FIRE PROFESSIONALS OF AMERICA (SPFPA) LOCAL 247",SPFPA,247.0,train,544257.0
@@ -28014,7 +28014,7 @@ UNITED STEELWORKERS LOCAL 566,USW,566.0,train,
 "INTERNATIONAL BROTHERHOOD OF TEAMSTERS, GENERAL DRIVERS, WAREHOUSEMEN AND HELPERS LOCAL 745",IBT,745.0,train,39230.0
 "Local Lodge D351, International Brotherhood of Boilermakers, Iron Ship Builders, Blacksmiths, Forgers and Helpers",BBF,351.0,train,3648.0
 THE TOLEDO NEWSPAPER GUILD/CWA LOCAL 34043 A/W COMMUNICATION WORKERS OF AMERICA,CWA,34043.0,train,26951.0
-"UNITED FOOD AND COMMERCIAL WORKERS INTERNATIONAL UNION, LOCAL 17T/TEXTILE & GARMENT COUNCIL, CLC",UFCW,17.0,train,514301.0
+"UNITED FOOD AND COMMERCIAL WORKERS INTERNATIONAL UNION, LOCAL 17T/TEXTILE & GARMENT COUNCIL, CLC",UFCW,17.0,train,23418.0
 "Communication Workers of America, [CWA] Local 9404",CWA,9404.0,train,47327.0
 "Office & Professional Employees, OPEIU Local 29, AFL-CIO",OPEIU,29.0,train,16408.0
 "Communications Workers of America, Local 3685",CWA,3685.0,train,513016.0
@@ -52374,7 +52374,7 @@ Retail Wholesale Department Store Union Mid-South,RWDSU,,train,
 CWA Local 1081,CWA,1081.0,train,23560.0
 "United Food and Commercial Workers Local 368-A, AFL-CIO",UFCW,368.0,train,33306.0
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCAL 387",IBEW,387.0,train,8343.0
-"LOCAL 1123, AUTOMATED SYSTEMS WORKERS",UAW,1123.0,train,34780.0
+"LOCAL 1123, AUTOMATED SYSTEMS WORKERS",CJA,1123.0,train,543912.0
 USW LOCAL 1011,USW,1011.0,train,
 United Steelworkers Local 12004,USW,12004.0,train,45389.0
 "UNITED HEALTHCARE WORKERS- WEST, SEIU, CTW",SEIU,,train,
@@ -57686,7 +57686,7 @@ General Teamsters Local Union 174,IBT,174.0,train,7715.0
 "UFCW, LOCAL 1500",UFCW,1500.0,train,22675.0
 "International Union of Operating Engineers Local 542 A/W International Union of Operating Engineers, AFL-CIO",IUOE,542.0,train,38130.0
 "UNITED FOOD AND COMMERCIAL WORKERS INTERNATIONAL UNION, LOCAL UNION NO. 324",UFCW,324.0,train,22620.0
-"SHEET METAL AIR RAIL AND TRANSPORTATION WORKERS, LOCAL 20",SMART,20.0,train,537260.0
+"SHEET METAL AIR RAIL AND TRANSPORTATION WORKERS, LOCAL 20",SMART,20.0,train,
 SPFPA LOCAL 1227,SPFPA,1227.0,train,543150.0
 American Postal Workers Union PRAIL 387,APWU,387.0,train,71334.0
 IAM Local Lodge 774 District 70,IAM,774.0,train,23153.0
@@ -75106,7 +75106,7 @@ American Postal Workers Union Chicago Local 1,APWU,1.0,train,506243.0
 APWU Jackson Area Local 1207,APWU,1207.0,train,505803.0
 APWU Southwest Bay Area Local 512,APWU,512.0,train,509827.0
 Philadelphia/APWU Area Local 89,APWU,89.0,train,92026.0
-APWU 498-499 #1189,APWU,499.0,train,92755.0
+APWU 498-499 #1189,APWU,499.0,train,
 APWU Philadelphia Area Local,APWU,,train,
 "Palm Beach Area Local 749, branch of APWU",APWU,749.0,train,71741.0
 Indianapolis Area Local #130 AFL-CIO #30 APWU,APWU,30.0,train,92744.0
@@ -75487,7 +75487,7 @@ IUE-CWA Local 81408 United Optical Workers Union,CWA,81408.0,train,34227.0
 IUE CWA Local 84913,CWA,84913.0,train,39016.0
 "IUE-CWA, The Industrial Division of The Communication Workers of America (CWA), AFL-CIO, CLC and its Local  83-792",CWA,792.0,train,24510.0
 IUE/CWA LOCAL 81359,CWA,81359.0,train,19738.0
-IUE/CWA LOCAL 768-755,CWA,755.0,train,34133.0
+IUE/CWA LOCAL 768-755,CWA,755.0,train,
 "COMMUNICATIONS WORKERS OF AMERICA, LOCAL 81323",CWA,81323.0,train,29525.0
 COMMUNICATIONS WORKERS OF AMERICA (CWA) LOCAL 83190,CWA,83190.0,train,70224.0
 "International Union of Electronic, Electrical, Salaried, Machine & Furniture Workers- Communication Workers of America, Local 83770",CWA,83770.0,train,528341.0
@@ -76120,7 +76120,7 @@ IAW Local Lodge 850 (IAMAW DL 171),IAM,171.0,train,
 LOCAL 15 INT'L ASSOCIATION OF MACHINISTS & AEROSPACE WORKERS,IAM,15.0,train,
 "INTERNATIONAL ASSOCIATION OF MACHINISTS & AEROSPACE WORKERS, DISTRICT LODGE #24, AFL-CIO",IAM,24.0,train,544432.0
 IAM District Lodges 751 and W24,IAM,751.0,train,34980.0
-"INTERNATIONAL ASSOCIATION OF MACHINISTS AND AEROSPACE WORKERS, DISTRICT LODGE 19NO. 9",IAM,9.0,train,38242.0
+"INTERNATIONAL ASSOCIATION OF MACHINISTS AND AEROSPACE WORKERS, DISTRICT LODGE 19NO. 9",IAM,19.0,train,1775.0
 "IAMAW Local Lodge 289, District Lodge 160",IAM,289.0,train,19877.0
 "MACHINISTS LOCAL LODGE 1546, AUTOMOTIVE TRADES DISTTRICT LODGE 190, INTERNATIONAL ASSOCIATION OF MAC",IAM,1546.0,train,32741.0
 CHICAGO WEB PRINTING PRESSMEN'S UNION LOCAL 7-N,PPPWU,7.0,train,18991.0
@@ -76429,8 +76429,8 @@ CHICAGO & NORTHEAST IL DIST. CARPENTERS LOCAL 1027 / IBT LOCAL 705,UNK,,train,
 District Council 37 and its affiliated Local 95 and 205,AFSCME,,train,
 "DISTRICT COUNCIL 1707, AMERICAN FEDERATION OF STATE, COUNTY & MUNICIPAL EMPLOYEES, AFL-CIO",AFSCME,1707.0,train,61014.0
 "DISTRICT COUNCIL 37, LOCAL 1501",AFSCME,1501.0,train,59566.0
-"American Federation of State, County and Municipal Employees, District Council 88, AFL-CIO",AFSCME,88.0,train,542068.0
-"American Federation of State, County and Municipal Employees, District Council 88",AFSCME,88.0,train,542068.0
+"American Federation of State, County and Municipal Employees, District Council 88, AFL-CIO",AFSCME,88.0,train,71066.0
+"American Federation of State, County and Municipal Employees, District Council 88",AFSCME,88.0,train,71066.0
 "American Federation of State, County, and Municipal Employees, District Council 20, Local 1207",AFSCME,1207.0,train,
 "AMERICAN FEDERATION OF STATE, COUNTY AND MUNICIPAL EMPLOYEES DISTRICT COUNCIL 87",AFSCME,87.0,train,71065.0
 "AMERICAN FEDERATION OF STATE, COUNTY AND MUNICIPAL EMPLOYEES, DISTRICT COUNCIL 83, LOCAL 816,  AFL-C",AFSCME,816.0,train,513804.0
@@ -76448,7 +76448,7 @@ DISTRICT COUNCIL 37 LOCAL 74,AFSCME,74.0,train,
 "LOCAL 1501, DISTRICT COUNCIL 37 AMERICAN FEDERATION OF STATE, COUNTY AND MUNICIPAL EMPLOYEES, AFL-CI",AFSCME,1501.0,train,59566.0
 "DISTRICT COUNCIL 37, AFSME",AFSCME,37.0,train,59403.0
 District Council 33,AFSCME,33.0,train,526885.0
-"American Federation of State, County and Municipal Employees District Council 88",AFSCME,88.0,test,542068.0
+"American Federation of State, County and Municipal Employees District Council 88",AFSCME,88.0,test,71066.0
 American Federation of State County and Municipal Employees District Council 36,AFSCME,36.0,train,543163.0
 "American Federation of State, County, and Municipal Employees; District Council 71",AFSCME,71.0,train,541173.0
 "AMERICAN FEDERATION OF STATE, COUNTY, AND MUNICIPAL EMPLOYEES, DISTRICT COUNCIL 85, AFL-CIO",AFSCME,85.0,train,71063.0
@@ -76497,7 +76497,7 @@ DISTRICT COUNCIL 1707 LOCAL 205 AMERICAN FEDERATION OF STATE COUNTY & MUNICIPAL 
 "AMERICAN FEDERATION OF STATE, COUNTY AND MUNICIPAL EMPLOYEES DISTRICT COUNCIL84 AND LOCAL 324",AFSCME,324.0,test,545766.0
 "District Council 37 of the American Federal of State, County and Municipal Employees",AFSCME,37.0,train,59403.0
 COUNCIL 1707 DISTRICT COUNCIL COMMUNITY & SOCIAL AGENCY EMPLOYEES UNION,AFSCME,1707.0,train,61014.0
-"American Federation of State, County, and Municipal Employees, District Council 88",AFSCME,88.0,train,542068.0
+"American Federation of State, County, and Municipal Employees, District Council 88",AFSCME,88.0,train,71066.0
 "LOCAL 1501, DISTRICT COUNCIL 37 AMERICAN FEDERATION OF STATE, COUNTY AND MUNICIPAL EMPLOYEES, AFL-CIO",AFSCME,1501.0,train,59566.0
 "AMERICAN FEDERATION OF STATE, COUNTY AND MUNICIPAL EMPLOYEES, DISTRICT COUNCIL 85, AFL-CIO",AFSCME,85.0,train,71063.0
 "LOCAL 157 AND DISTRICT COUNCIL OF NYC, AND VICINITY",AFSCME,157.0,train,
@@ -84224,7 +84224,7 @@ AFGE-1148,AFGE,1148.0,train,501145.0
 American Federation of Government Employees 1199,AFGE,1199.0,train,501288.0
 International Association of Machinists and Aerospace Workers District Lodge 776 2427,IAM,2427.0,test,67963.0
 The National Treasury Employees Union (NTEU) Chapters 213 & 228,NTEU,,train,
-NCFO / District of SEIU Local 32BJ-320,SEIU,320.0,train,15677.0
+NCFO / District of SEIU Local 32BJ-320,SEIU,320.0,train,
 USW-2599-21,USW,2599.0,train,19157.0
 SEIU 500,SEIU,500.0,train,542923.0
 ATU-1328,ATU,1328.0,train,19638.0
@@ -89615,7 +89615,7 @@ PGW - 529,SPFPA,529.0,train,531776.0
 PGW - 127,SPFPA,127.0,train,8789.0
 PGW - 153,SPFPA,153.0,train,
 PGW - 604,SPFPA,604.0,train,513910.0
-PGW - 100,SPFPA,100.0,train,514358.0
+PGW - 100,SPFPA,100.0,train,529108.0
 PGW - 214,SPFPA,214.0,train,526793.0
 PGW - 253,SPFPA,253.0,train,
 PGW - 7,SPFPA,7.0,train,47933.0
@@ -94719,7 +94719,7 @@ Actors' Equity Association (AEA or Actors' Equity or Equity),AAA,,train,
 "Actors' Equity Association (Actors' Equity, Equity or AEA)",AAA,,test,
 Actors' Equity Association (AEA or Equity),AAA,,train,
 UNITE - ,UNITE,,train,
-UNITE - 415-475,UNITE,415.0,train,45731.0
+UNITE - 415-475,UNITE,415.0,train,
 UNITE - CHICAGO & CENTRAL STATE JB,UNITE,,train,
 UNITE - 563,UNITE,563.0,train,
 UNITE - 177,UNITE,177.0,train,
@@ -95912,7 +95912,7 @@ OVAW - 7-507,UNAFF,507.0,train,
 HEU -,UNAFF,,train,
 UPOIU - 10504,PACE,10504.0,train,
 IBSG - 971,BSOIW,971.0,train,
-TTWISEU - DISTRICT 2A,IATSE,2.0,train,22025.0
+TTWISEU - DISTRICT 2A,IATSE,2.0,train,
 TTWISEU - 2,IATSE,2.0,train,
 TTWISEU - 2A,IATSE,2.0,train,
 ARWI -,IBDWI,,train,
