@@ -1,62 +1,34 @@
-"""Three-stage contrastive extractor for labor union parsing.
+"""Two-stage extractor for labor union parsing.
 
 Stage 1: Union vs Non-union detection (contrastive similarity to union centroid)
-Stage 2: Affiliation classification via nearest centroid (distance > threshold = None/unrecognized)
-Stage 3: Designation extraction using pointer network (with affiliation context)
+Stage 2: Structured classifier + gazetteer scoring for field extraction
 """
 
-import functools
-import json
+import math
 from pathlib import Path
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 from .char_cnn import (
-    NUM_HASH_BUCKETS,
-    SPECIAL_TOKEN_VOCAB,
     CharacterCNN,
-    get_special_token_id,
     tokenize_to_chars,
 )
-from .conf import MAX_TOKENS
-
-
-@functools.cache
-def _load_fnum_lookup() -> dict:
-    """Load the fnum lookup table from package data."""
-    lookup_path = Path(__file__).parent / "weights" / "fnum_lookup.json"
-    with open(lookup_path, "r") as f:
-        return json.load(f)
-
-
-def lookup_fnum(affiliation: str, designation: str) -> list[int]:
-    """
-    Look up filing numbers (fnum) for an affiliation and designation.
-
-    Args:
-        affiliation: Affiliation abbreviation (e.g., "SEIU", "IBT")
-        designation: Local designation number as string (e.g., "1199")
-
-    Returns:
-        List of filing numbers. Empty list if no match found.
-    """
-    lookup = _load_fnum_lookup()
-    key = f"{affiliation}|{designation}"
-    return lookup.get(key, [])
+from .classifier import FIELDS, MAX_TOKENS, POINTER_FIELDS, StructuredClassifier
+from .scoring import (
+    POINTER_NOT_FOUND_LOG_PROB,
+    build_gazetteer_matrix,
+    build_pointer_lookup,
+)
+from .tokenizer import smart_truncate_nonspace
 
 
 class CrossAttentionEncoder(nn.Module):
-    """Encoder with cross-attention pooling instead of mean pooling.
+    """Encoder with cross-attention pooling for union detection.
 
-    Uses a learned query to attend over token embeddings, allowing the model
-    to learn which tokens are most relevant for classification.
-
-    Number handling:
-    - For non-numbers: uses CharCNN embeddings
-    - For numbers: uses frozen random embeddings (hash-based lookup)
-    - This makes different numbers orthogonal by construction
+    Uses frozen random embeddings for numbers to make them orthogonal.
     """
 
     def __init__(
@@ -65,357 +37,64 @@ class CrossAttentionEncoder(nn.Module):
         embed_dim: int = 64,
         num_embed_dim: int = 8,
         num_heads: int = 4,
-        frozen_num_dim: int = 32,
     ):
         super().__init__()
         self.char_cnn = char_cnn
         self.char_embed_dim = char_cnn.embed_dim
         self.num_embed_dim = num_embed_dim
-        self.frozen_num_dim = frozen_num_dim
-        self.input_dim = self.char_embed_dim + num_embed_dim + frozen_num_dim
+        self.input_dim = self.char_embed_dim + num_embed_dim
 
-        # is_number embedding (0 = not number, 1 = number)
         self.num_embed = nn.Embedding(2, num_embed_dim)
 
-        # Frozen random embeddings for numbers - makes different numbers orthogonal
-        self.frozen_num_embed = nn.Embedding(NUM_HASH_BUCKETS, frozen_num_dim)
-        self.frozen_num_embed.weight.requires_grad = False  # FROZEN
-
-        # Learned query for "what class is this?"
         self.query = nn.Parameter(torch.randn(1, 1, self.input_dim) * 0.02)
-
-        # Cross-attention: query attends to token sequence
         self.cross_attn = nn.MultiheadAttention(
             embed_dim=self.input_dim,
             num_heads=num_heads,
             batch_first=True,
         )
-
-        # Projection head
         self.projector = nn.Sequential(
             nn.Linear(self.input_dim, 128),
             nn.ReLU(),
             nn.Linear(128, embed_dim),
         )
 
-    def forward(
-        self, char_ids, token_type, is_number, numeric_ids=None, return_attention=False
-    ):
+    def forward(self, char_ids, token_type, is_number):
         batch_size = char_ids.shape[0]
-        device = char_ids.device
 
-        # Get token embeddings from CharCNN
         char_emb = self.char_cnn(char_ids)
-
-        # Zero out CharCNN embeddings for number tokens (they'll use frozen embeddings)
         is_number_mask = is_number.unsqueeze(-1).float()
         char_emb = char_emb * (1 - is_number_mask)
 
-        # Add is_number feature embedding
         num_feature_emb = self.num_embed(is_number)
 
-        # Frozen number embeddings (zero for non-numbers)
-        if numeric_ids is None:
-            # Fallback: zeros if not provided (for backward compatibility)
-            frozen_emb = torch.zeros(
-                batch_size, char_ids.shape[1], self.frozen_num_dim, device=device
-            )
-        else:
-            frozen_emb = self.frozen_num_embed(numeric_ids)
-            # Zero out for non-numbers
-            frozen_emb = frozen_emb * is_number_mask
-
-        # Concatenate all embeddings
-        token_emb = torch.cat([char_emb, num_feature_emb, frozen_emb], dim=-1)
-
-        # Create padding mask (True = ignore)
+        token_emb = torch.cat([char_emb, num_feature_emb], dim=-1)
         key_padding_mask = token_type == 4
-
-        # Expand query for batch
         query = self.query.expand(batch_size, -1, -1)
 
-        # Cross-attention: query attends to tokens
-        attn_out, attn_weights = self.cross_attn(
+        attn_out, _ = self.cross_attn(
             query=query,
             key=token_emb,
             value=token_emb,
             key_padding_mask=key_padding_mask,
-            need_weights=True,
         )
 
-        # Remove sequence dimension and project
         pooled = attn_out.squeeze(1)
         proj = self.projector(pooled)
-        normalized = F.normalize(proj, p=2, dim=-1)
-
-        if return_attention:
-            return normalized, attn_weights.squeeze(1)
-        return normalized
-
-
-class DesignationExtractor(nn.Module):
-    """
-    Standalone designation extractor using pointer network.
-
-    Architecture:
-    - CharCNN for word token embeddings
-    - Embedding lookup for non-word tokens (numbers, punct, space)
-    - is_number feature embedding
-    - Transformer encoder for context
-    - BiLSTM for sequence processing
-    - Pointer scorer for position selection
-
-    Takes predicted affiliation as input context to help select the right number.
-    """
-
-    def __init__(
-        self,
-        num_affs: int,
-        token_embed_dim: int = 64,
-        hidden_dim: int = 512,
-        aff_embed_dim: int = 64,
-        num_attn_heads: int = 4,
-        num_feature_dim: int = 16,
-        char_embed_dim: int = 16,
-        num_attn_layers: int = 3,
-    ):
-        super().__init__()
-
-        self.token_embed_dim = token_embed_dim
-        self.num_affs = num_affs
-
-        # CharacterCNN for word tokens only
-        self.char_cnn = CharacterCNN(
-            embed_dim=token_embed_dim,
-            char_embed_dim=char_embed_dim,
-        )
-
-        # Simple embedding for non-word tokens (numbers, punct, space)
-        self.special_embed = nn.Embedding(
-            len(SPECIAL_TOKEN_VOCAB), token_embed_dim, padding_idx=0
-        )
-
-        # Affiliation embedding (for context)
-        self.aff_embed = nn.Embedding(num_affs, aff_embed_dim)
-
-        # Learned embedding for "is_number" feature
-        self.num_feature_embed = nn.Embedding(2, num_feature_dim)
-
-        # Combined embedding dimension
-        combined_dim = token_embed_dim + num_feature_dim
-
-        # Transformer encoder for token context
-        encoder_layer = nn.TransformerEncoderLayer(
-            d_model=combined_dim,
-            nhead=num_attn_heads,
-            dim_feedforward=combined_dim * 4,
-            dropout=0.1,
-            batch_first=True,
-        )
-        self.transformer_encoder = nn.TransformerEncoder(
-            encoder_layer,
-            num_layers=num_attn_layers,
-            enable_nested_tensor=False,  # Disabled for MPS compatibility
-        )
-
-        # BiLSTM for designation selection
-        self.lstm = nn.LSTM(
-            combined_dim,
-            hidden_dim,
-            num_layers=1,
-            bidirectional=True,
-            batch_first=True,
-        )
-
-        # Designation pointer (takes LSTM output + affiliation embedding)
-        self.desig_scorer = nn.Linear(hidden_dim * 2 + aff_embed_dim, 1)
-        self.null_score = nn.Parameter(torch.zeros(1))
-
-    def forward(
-        self,
-        char_ids,
-        token_mask,
-        is_number=None,
-        token_type=None,
-        special_ids=None,
-        aff_idx=None,
-        desig_labels=None,
-    ):
-        """
-        Forward pass.
-
-        Args:
-            char_ids: [batch, seq_len, max_chars] character IDs for each token
-            token_mask: [batch, seq_len] 1 for valid tokens, 0 for padding
-            is_number: [batch, seq_len] 1 if token is a number, 0 otherwise
-            token_type: [batch, seq_len] 0=word, 1=number, 2=space, 3=punct, 4=pad
-            special_ids: [batch, seq_len] IDs for non-word tokens
-            aff_idx: [batch] affiliation indices (from Stage 2)
-            desig_labels: [batch] designation position (0 = no desig, 1+ = token index + 1)
-
-        Returns:
-            Dictionary with predictions and optionally losses
-        """
-        batch_size, seq_len, _ = char_ids.shape
-        device = char_ids.device
-
-        # Identify word vs non-word tokens
-        is_word = (
-            (token_type == 0)
-            if token_type is not None
-            else torch.ones(batch_size, seq_len, dtype=torch.bool, device=device)
-        )
-
-        # Get embeddings via CharacterCNN
-        if is_word.any():
-            cnn_emb = self.char_cnn(char_ids)
-        else:
-            cnn_emb = torch.zeros(
-                batch_size, seq_len, self.token_embed_dim, device=device
-            )
-
-        # Get embeddings for non-word tokens via lookup
-        if special_ids is not None:
-            special_emb = self.special_embed(special_ids)
-        else:
-            special_emb = torch.zeros(
-                batch_size, seq_len, self.token_embed_dim, device=device
-            )
-
-        # Combine: use CNN for words, lookup for non-words
-        is_word_expanded = is_word.unsqueeze(-1).float()
-        token_emb = is_word_expanded * cnn_emb + (1 - is_word_expanded) * special_emb
-
-        # Add is_number feature embedding
-        if is_number is None:
-            is_number = torch.zeros(
-                batch_size, seq_len, dtype=torch.long, device=device
-            )
-        num_feature_emb = self.num_feature_embed(is_number)
-        token_emb = torch.cat([token_emb, num_feature_emb], dim=-1)
-
-        # Transformer encoder
-        src_key_padding_mask = token_mask == 0
-        token_emb_ctx = self.transformer_encoder(
-            token_emb, src_key_padding_mask=src_key_padding_mask
-        )
-
-        # Get affiliation embedding for context
-        if aff_idx is None:
-            # Default to first affiliation if not provided
-            aff_idx = torch.zeros(batch_size, dtype=torch.long, device=device)
-        aff_emb = self.aff_embed(aff_idx)
-        aff_emb_broadcast = aff_emb.unsqueeze(1).expand(-1, seq_len, -1)
-
-        # BiLSTM for designation selection
-        lstm_out, _ = self.lstm(token_emb_ctx)
-        lstm_with_aff = torch.cat([lstm_out, aff_emb_broadcast], dim=-1)
-
-        # Score each position
-        position_scores = self.desig_scorer(lstm_with_aff).squeeze(-1)
-
-        # Mask: only number tokens can be designation
-        valid_desig_mask = (is_number == 1) & (token_mask == 1)
-        position_scores = position_scores.masked_fill(~valid_desig_mask, float("-inf"))
-
-        # Prepend null score (position 0 = no designation)
-        null_scores = self.null_score.expand(batch_size, 1)
-        desig_scores = torch.cat([null_scores, position_scores], dim=1)
-        desig_pred = desig_scores.argmax(dim=1)
-
-        results = {
-            "desig_scores": desig_scores,
-            "desig_pred": desig_pred,
-        }
-
-        if desig_labels is not None:
-            desig_loss = F.cross_entropy(desig_scores, desig_labels)
-            results["desig_loss"] = desig_loss
-
-        return results
-
-
-def create_desig_label(text: str, desig_num: str, max_len: int = MAX_TOKENS) -> int:
-    """Create designation label for training.
-
-    Returns:
-        0 if no designation, otherwise token_position + 1
-    """
-    if not desig_num:
-        return 0
-
-    _, tokens, _, _, _ = tokenize_to_chars(text, max_tokens=max_len)
-
-    # Find the last occurrence of the designation number
-    best_idx = None
-    for i, token in enumerate(tokens[:max_len]):
-        if token == desig_num:
-            best_idx = i
-
-    if best_idx is not None:
-        return best_idx + 1
-
-    return 0
-
-
-def extract_desig_from_pred(
-    text: str, desig_pred: int, max_len: int = MAX_TOKENS
-) -> str:
-    """Extract actual designation string from model prediction.
-
-    Args:
-        text: Original text
-        desig_pred: Predicted position (0 = no desig, 1+ = token index + 1)
-        max_len: Maximum token length
-
-    Returns:
-        Designation number string or empty string if not found
-    """
-    if desig_pred == 0:
-        return ""
-
-    _, tokens, _, _, _ = tokenize_to_chars(text, max_tokens=max_len)
-    token_idx = desig_pred - 1
-
-    if token_idx < len(tokens):
-        token = tokens[token_idx]
-        # Verify it looks like a number
-        if token.isdigit() or (token and token[0].isdigit()):
-            return token
-
-    return ""
+        return F.normalize(proj, p=2, dim=-1)
 
 
 class Extractor:
-    """
-    Three-stage contrastive extractor for labor union names.
+    """Two-stage extractor for labor union names.
 
     Stage 1: Union vs Non-union detection using contrastive similarity.
-    Stage 2: Affiliation classification via nearest centroid in contrastive space.
-    Stage 3: Designation extraction using pointer network (with affiliation context).
-
-    Example:
-        >>> extractor = Extractor()
-        >>> extractor.extract("SEIU Local 1199")
-        {'is_union': True, 'affiliation': 'SEIU', 'designation': '1199', ...}
+    Stage 2: Structured classifier + gazetteer scoring for field extraction.
     """
 
     def __init__(
         self,
         device: str | None = None,
         union_threshold: float = 0.5,
-        affiliation_threshold: float = 0.80,
     ):
-        """
-        Initialize the contrastive extractor.
-
-        Args:
-            device: Device to use (default: best available accelerator)
-            union_threshold: Similarity threshold for union detection (default: 0.5).
-                Texts with similarity >= threshold are classified as unions.
-            affiliation_threshold: Similarity threshold for affiliation (default: 0.80).
-                If similarity to nearest centroid < threshold, returns None (unrecognized).
-        """
         if device is None:
             self.device = torch.accelerator.current_accelerator(
                 check_available=True
@@ -424,15 +103,13 @@ class Extractor:
             self.device = device
 
         self.union_threshold = union_threshold
-        self.affiliation_threshold = affiliation_threshold
-
         self._load_models()
 
     def _load_models(self):
-        """Load all three stage models."""
+        """Load union detector and structured classifier."""
         weights_dir = Path(__file__).parent / "weights"
 
-        # Stage 1: Union detector (cross-attention)
+        # Stage 1: Union detector
         union_path = weights_dir / "union_detector.pt"
         union_checkpoint = torch.load(
             union_path, map_location=self.device, weights_only=False
@@ -448,151 +125,168 @@ class Extractor:
 
         self.union_centroid = union_checkpoint["union_centroid"].to(self.device)
 
-        # Stage 2: Affiliation classifier (cross-attention)
-        aff_model_path = weights_dir / "contrastive_aff_model.pt"
-        aff_centroids_path = weights_dir / "contrastive_aff_centroids.pt"
+        # Stage 2: Structured classifier + gazetteer (all bundled in one file)
+        sc_path = weights_dir / "structured_classifier.pt"
+        sc_ckpt = torch.load(sc_path, map_location=self.device, weights_only=False)
 
-        aff_checkpoint = torch.load(
-            aff_model_path, map_location=self.device, weights_only=False
+        self.field_vocabs = sc_ckpt["field_vocabs"]
+        field_sizes = sc_ckpt["field_sizes"]
+
+        self.structured_model = StructuredClassifier(
+            field_sizes=field_sizes,
+            d_model=sc_ckpt["d_model"],
+            n_heads=4,
+            n_layers=sc_ckpt["n_layers"],
+            ff_dim=sc_ckpt["d_model"] * 2,
+            dropout=0.0,
         )
+        self.structured_model.load_state_dict(sc_ckpt["model_state"], strict=False)
+        self.structured_model.to(self.device)
+        self.structured_model.eval()
 
-        char_cnn_aff = CharacterCNN(embed_dim=64, char_embed_dim=16)
-        self.aff_encoder = CrossAttentionEncoder(
-            char_cnn_aff, embed_dim=64, num_embed_dim=8, num_heads=4
+        # Gazetteer (bundled in checkpoint)
+        fnum_to_records = sc_ckpt["gazetteer"]
+
+        field_indices, field_known, record_fnums, records_list = build_gazetteer_matrix(
+            fnum_to_records, self.field_vocabs
         )
-        self.aff_encoder.load_state_dict(aff_checkpoint["model_state_dict"])
-        self.aff_encoder.to(self.device)
-        self.aff_encoder.eval()
+        self.field_indices = {f: t.to(self.device) for f, t in field_indices.items()}
+        self.field_known = {f: t.to(self.device) for f, t in field_known.items()}
+        self.record_fnums = np.array(record_fnums)
+        self.records_list = records_list
+        self.n_records = len(record_fnums)
 
-        self.aff_list = aff_checkpoint["aff_list"]
-        self.aff_centroids = torch.load(aff_centroids_path, map_location=self.device)
+        # Pointer lookups
+        self.pointer_val_to_indices = {}
+        self.pointer_none_indices = {}
+        for f in POINTER_FIELDS:
+            self.pointer_val_to_indices[f], self.pointer_none_indices[f] = (
+                build_pointer_lookup(records_list, f)
+            )
 
-        # Stage 3: Designation extractor (pointer network)
-        desig_path = weights_dir / "designation_extractor.pt"
-        desig_checkpoint = torch.load(
-            desig_path, map_location=self.device, weights_only=False
-        )
+        # Inverse vocabs for decoding classification predictions
+        self.inv_vocabs = {}
+        for f in FIELDS:
+            if f not in POINTER_FIELDS:
+                self.inv_vocabs[f] = {i: v for v, i in self.field_vocabs[f].items()}
 
-        self.desig_extractor = DesignationExtractor(
-            num_affs=len(self.aff_list),
-            token_embed_dim=64,
-            hidden_dim=512,
-            aff_embed_dim=64,
-            num_attn_heads=4,
-            num_feature_dim=16,
-            char_embed_dim=16,
-            num_attn_layers=3,
-        )
-        self.desig_extractor.load_state_dict(desig_checkpoint["model_state_dict"])
-        self.desig_extractor.to(self.device)
-        self.desig_extractor.eval()
+        # Per-record f_num weighting (bundled in checkpoint)
+        fnum_train_counts = sc_ckpt["fnum_train_counts"]
 
-    def _tokenize_batch(self, texts: list[str], max_tokens: int = 40):
-        """Tokenize a batch of texts."""
+        base_w, floor_w, sat = 0.6, 0.1, 16
+        self.fnum_weights = np.zeros(self.n_records, dtype=np.float32)
+        for i, fnum in enumerate(record_fnums):
+            n = fnum_train_counts.get(str(fnum), 0)
+            self.fnum_weights[i] = floor_w + (base_w - floor_w) * min(
+                1, math.log1p(n) / math.log1p(sat)
+            )
+        self.fnum_weights_t = torch.tensor(self.fnum_weights, device=self.device)
+
+    def _tokenize_for_union(self, texts, max_tokens=80):
+        """Tokenize batch for union detector."""
         char_ids_list = []
         token_type_list = []
         is_number_list = []
-        numeric_ids_list = []
 
         for text in texts:
-            char_ids, _, is_number, token_type, numeric_ids = tokenize_to_chars(
+            char_ids, _, is_number, token_type, _ = tokenize_to_chars(
                 text, max_tokens=max_tokens
             )
             char_ids_list.append(char_ids)
             token_type_list.append(token_type)
             is_number_list.append(is_number)
-            numeric_ids_list.append(numeric_ids)
 
         return (
             torch.tensor(char_ids_list, dtype=torch.long, device=self.device),
             torch.tensor(token_type_list, dtype=torch.long, device=self.device),
             torch.tensor(is_number_list, dtype=torch.long, device=self.device),
-            torch.tensor(numeric_ids_list, dtype=torch.long, device=self.device),
         )
 
-    def _tokenize_for_desig(self, texts: list[str], max_tokens: int = MAX_TOKENS):
-        """Tokenize for designation extractor (includes special_ids)."""
-        char_ids_list = []
-        token_type_list = []
-        is_number_list = []
-        special_ids_list = []
-        token_mask_list = []
+    def _tokenize_for_structured(self, texts):
+        """Tokenize batch for structured classifier using smart_truncate_nonspace."""
+        all_char_ids = []
+        all_masks = []
+        all_token_strings = []
 
         for text in texts:
-            char_ids, tokens, is_number, token_type, _ = tokenize_to_chars(
-                text, max_tokens=max_tokens
-            )
-            char_ids_list.append(char_ids)
-            token_type_list.append(token_type)
-            is_number_list.append(is_number)
+            tokens = smart_truncate_nonspace(text)
+            all_char_ids.append([t["chars"] for t in tokens])
+            all_masks.append([1 if t["token"] else 0 for t in tokens])
+            all_token_strings.append([t["token"] for t in tokens])
 
-            # Build special_ids for non-word tokens
-            special_ids = []
-            for i, (tok, ttype) in enumerate(zip(tokens, token_type)):
-                if ttype != 0:  # Not a word
-                    special_ids.append(get_special_token_id(tok))
+        char_ids = torch.tensor(all_char_ids, dtype=torch.long, device=self.device)
+        masks = torch.tensor(all_masks, dtype=torch.bool, device=self.device)
+        return char_ids, masks, all_token_strings
+
+    def _score_gazetteer(self, log_probs, token_strings_batch):
+        """Score all gazetteer records for a batch of queries.
+
+        Returns list of (top_record_idx, top_score) per query.
+        """
+        results = []
+        for i in range(len(token_strings_batch)):
+            scores = torch.zeros(self.n_records, device=self.device)
+
+            for f in FIELDS:
+                if f == "f_num":
+                    continue
+                if f not in POINTER_FIELDS:
+                    field_lp = log_probs[f][i][self.field_indices[f]]
+                    vocab_size = log_probs[f].shape[-1]
+                    floor_lp = -math.log(vocab_size)
+                    field_lp = torch.where(self.field_known[f], field_lp, floor_lp)
+                    scores += field_lp
                 else:
-                    special_ids.append(0)  # Placeholder for words
-            # Pad to max_tokens
-            while len(special_ids) < max_tokens:
-                special_ids.append(0)
-            special_ids_list.append(special_ids[:max_tokens])
+                    query_toks = token_strings_batch[i]
+                    lp = log_probs[f][i]
 
-            # Token mask: 1 for valid tokens, 0 for padding
-            mask = [1 if ttype != 4 else 0 for ttype in token_type]
-            token_mask_list.append(mask)
+                    tok_to_pos = {}
+                    for pos, tok in enumerate(query_toks):
+                        if tok and tok not in tok_to_pos:
+                            tok_to_pos[tok] = pos
 
-        return {
-            "char_ids": torch.tensor(
-                char_ids_list, dtype=torch.long, device=self.device
-            ),
-            "token_type": torch.tensor(
-                token_type_list, dtype=torch.long, device=self.device
-            ),
-            "is_number": torch.tensor(
-                is_number_list, dtype=torch.long, device=self.device
-            ),
-            "special_ids": torch.tensor(
-                special_ids_list, dtype=torch.long, device=self.device
-            ),
-            "token_mask": torch.tensor(
-                token_mask_list, dtype=torch.long, device=self.device
-            ),
-        }
+                    field_scores = torch.full(
+                        (self.n_records,),
+                        POINTER_NOT_FOUND_LOG_PROB[f],
+                        device=self.device,
+                    )
+
+                    none_idx = self.pointer_none_indices[f]
+                    if len(none_idx) > 0:
+                        field_scores[none_idx] = lp[MAX_TOKENS]
+
+                    val_to_idx = self.pointer_val_to_indices[f]
+                    for tok, pos in tok_to_pos.items():
+                        rec_indices = val_to_idx.get(tok)
+                        if rec_indices is not None:
+                            field_scores[rec_indices] = lp[pos]
+
+                    scores += field_scores
+
+            # Blend with f_num
+            fnum_lp = log_probs["f_num"][i][self.field_indices["f_num"]]
+            fnum_vocab_size = log_probs["f_num"].shape[-1]
+            fnum_floor = -math.log(fnum_vocab_size)
+            fnum_lp = torch.where(self.field_known["f_num"], fnum_lp, fnum_floor)
+
+            w = self.fnum_weights_t
+            scores = (1 - w) * scores + w * fnum_lp
+
+            top_idx = scores.argmax().item()
+            top_score = scores[top_idx].item()
+            results.append((top_idx, top_score))
+
+        return results
 
     def extract(self, text: str) -> dict:
-        """
-        Extract union status, affiliation, and designation from a text.
-
-        Args:
-            text: Input text (potential union name)
-
-        Returns:
-            Dictionary with:
-                - is_union: Whether the text is a union
-                - union_score: Similarity to union centroid
-                - affiliation: Predicted affiliation (None if not union or unrecognized)
-                - affiliation_unrecognized: True if is_union but affiliation unrecognized
-                - designation: Extracted designation number
-                - aff_score: Similarity to nearest affiliation centroid
-        """
+        """Extract union fields from a single text."""
         return self.extract_batch([text])[0]
 
     def extract_batch(self, texts: list[str], batch_size: int = 256) -> list[dict]:
-        """
-        Extract from multiple texts.
-
-        Args:
-            texts: List of input texts
-            batch_size: Maximum batch size for GPU processing (default 64)
-
-        Returns:
-            List of result dictionaries
-        """
+        """Extract from multiple texts."""
         if not texts:
             return []
 
-        # Process in chunks to avoid memory issues with large batches
         if len(texts) > batch_size:
             import itertools
 
@@ -604,105 +298,65 @@ class Extractor:
         return self._extract_batch_internal(texts)
 
     def _extract_batch_internal(self, texts: list[str]) -> list[dict]:
-        """Internal batch processing (no chunking)."""
-        # Stage 1: Union detection (using longer max_tokens for union detection)
-        char_ids_union, token_type_union, is_number_union, numeric_ids_union = (
-            self._tokenize_batch(texts, max_tokens=80)
-        )
+        """Internal batch processing."""
+        # Stage 1: Union detection
+        char_ids, token_type, is_number = self._tokenize_for_union(texts)
 
         with torch.no_grad():
-            union_emb = self.union_encoder(
-                char_ids_union, token_type_union, is_number_union, numeric_ids_union
-            )
+            union_emb = self.union_encoder(char_ids, token_type, is_number)
             union_sims = torch.matmul(
                 union_emb, self.union_centroid.unsqueeze(0).T
             ).squeeze(-1)
 
-        union_sims = union_sims.cpu().tolist()
-        is_union_list = [sim >= self.union_threshold for sim in union_sims]
+        union_sims_list = union_sims.cpu().tolist()
+        is_union_list = [sim >= self.union_threshold for sim in union_sims_list]
 
-        # Find which texts are unions for stage 2
         union_indices = [i for i, is_union in enumerate(is_union_list) if is_union]
         union_texts = [texts[i] for i in union_indices]
 
         # Initialize results
         results = [None] * len(texts)
 
-        # Non-unions get early return
-        for i, (is_union, sim) in enumerate(zip(is_union_list, union_sims)):
+        # Non-unions
+        for i, (is_union, sim) in enumerate(zip(is_union_list, union_sims_list)):
             if not is_union:
                 results[i] = {
                     "is_union": False,
                     "union_score": sim,
-                    "affiliation": None,
-                    "affiliation_unrecognized": False,
-                    "designation": None,
-                    "aff_score": None,
+                    "union_name": "",
+                    "desig_name": "",
+                    "desig_num": "",
+                    "prefix": "",
+                    "suffix": "",
+                    "f_num": "",
+                    "match_score": "",
                 }
 
-        # Stage 2: Affiliation classification for unions
+        # Stage 2: Structured classifier + gazetteer scoring
         if union_texts:
-            char_ids_aff, token_type_aff, is_number_aff, numeric_ids_aff = (
-                self._tokenize_batch(union_texts, max_tokens=MAX_TOKENS)
+            char_ids_sc, masks_sc, token_strings = self._tokenize_for_structured(
+                union_texts
             )
 
             with torch.no_grad():
-                aff_emb = self.aff_encoder(
-                    char_ids_aff, token_type_aff, is_number_aff, numeric_ids_aff
-                )
-                # Compute similarities to all centroids
-                similarities = torch.matmul(aff_emb, self.aff_centroids.T)
-                max_sims, max_indices = similarities.max(dim=1)
+                logits = self.structured_model(char_ids_sc, masks_sc)
+                log_probs = {f: F.log_softmax(logits[f], dim=-1) for f in FIELDS}
 
-            max_indices_list = max_indices.cpu().tolist()
-            max_sims_list = max_sims.cpu().tolist()
+            matches = self._score_gazetteer(log_probs, token_strings)
 
-            # Determine affiliations
-            affiliations = []
-            aff_indices_for_desig = []  # Indices to pass to Stage 3
-            for j in range(len(union_texts)):
-                similarity = max_sims_list[j]
-                pred_idx = max_indices_list[j]
-
-                if similarity < self.affiliation_threshold:
-                    affiliations.append(None)
-                    # Use index 0 as fallback for unrecognized
-                    aff_indices_for_desig.append(0)
-                else:
-                    affiliations.append(self.aff_list[pred_idx])
-                    aff_indices_for_desig.append(pred_idx)
-
-            # Stage 3: Designation extraction
-            desig_batch = self._tokenize_for_desig(union_texts)
-            aff_idx_tensor = torch.tensor(
-                aff_indices_for_desig, dtype=torch.long, device=self.device
-            )
-
-            with torch.no_grad():
-                desig_out = self.desig_extractor(
-                    char_ids=desig_batch["char_ids"],
-                    token_mask=desig_batch["token_mask"],
-                    is_number=desig_batch["is_number"],
-                    token_type=desig_batch["token_type"],
-                    special_ids=desig_batch["special_ids"],
-                    aff_idx=aff_idx_tensor,
-                )
-                desig_preds = desig_out["desig_pred"].cpu().tolist()
-
-            designations = [
-                extract_desig_from_pred(text, pred)
-                for text, pred in zip(union_texts, desig_preds)
-            ]
-
-            # Build results for union texts
             for j, orig_idx in enumerate(union_indices):
+                rec_idx, score = matches[j]
+                rec = self.records_list[rec_idx]
                 results[orig_idx] = {
                     "is_union": True,
-                    "union_score": union_sims[orig_idx],
-                    "affiliation": affiliations[j],
-                    "affiliation_unrecognized": affiliations[j] is None,
-                    "designation": designations[j],
-                    "aff_score": max_sims_list[j],
+                    "union_score": union_sims_list[orig_idx],
+                    "union_name": rec.get("union_name", ""),
+                    "desig_name": rec.get("desig_name", ""),
+                    "desig_num": str(rec.get("desig_num", 0) or ""),
+                    "prefix": str(rec.get("prefix", 0) or ""),
+                    "suffix": rec.get("suffix", ""),
+                    "f_num": str(rec.get("f_num", "")),
+                    "match_score": f"{score:.4f}",
                 }
 
         return results

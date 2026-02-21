@@ -21,8 +21,8 @@ import json
 from pathlib import Path
 
 DATA_DIR = Path(__file__).parent / "data"
-FNUM_RECORDS_PATH = DATA_DIR / "fnum_to_records.json"
-UNIT_ID_CSV = Path(__file__).parent / "fnum_to_unit_identifier.csv"
+FNUM_RECORDS_PATH = DATA_DIR / "gazetteer.json"
+UNIT_ID_CSV = Path(__file__).parent / "data" / "fnum_to_unit_identifier.csv"
 OUTPUT_PATH = DATA_DIR / "vocabularies.json"
 
 
@@ -92,7 +92,6 @@ def main():
         "unit_id_to_idx": unit_id_to_idx,
     }
 
-    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_PATH, "w") as f:
         json.dump(vocab, f)
 

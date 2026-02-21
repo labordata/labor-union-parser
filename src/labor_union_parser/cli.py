@@ -2,22 +2,23 @@
 
 import csv
 import itertools
-import json
 import sys
 
 import click
 from tqdm import tqdm
 
-from .extractor import Extractor, lookup_fnum
+from .extractor import Extractor
 
 PRED_FIELDS = [
     "pred_is_union",
-    "pred_aff",
-    "pred_unknown",
-    "pred_desig",
     "pred_union_score",
-    "pred_fnum",
-    "pred_fnum_multiple",
+    "pred_union_name",
+    "pred_desig_name",
+    "pred_desig_num",
+    "pred_prefix",
+    "pred_suffix",
+    "pred_f_num",
+    "pred_match_score",
 ]
 
 
@@ -75,31 +76,18 @@ def make_row_stream(input_file, column, no_header):
     return stream(), fieldnames + PRED_FIELDS
 
 
-def format_fnum(fnums):
-    """Format fnum lookup result for output."""
-    if len(fnums) == 0:
-        return "", ""
-    elif len(fnums) == 1:
-        return str(fnums[0]), False
-    else:
-        return json.dumps(fnums), True
-
-
 def build_pred_row(result):
     """Build prediction fields from extraction result."""
-    aff = result["affiliation"] or ""
-    desig = result["designation"] or ""
-    fnums = lookup_fnum(aff, desig) if aff and desig else []
-    fnum_str, fnum_multiple = format_fnum(fnums)
-
     return {
         "pred_is_union": result["is_union"],
-        "pred_aff": aff,
-        "pred_unknown": result["affiliation_unrecognized"],
-        "pred_desig": desig,
         "pred_union_score": f"{result['union_score']:.4f}",
-        "pred_fnum": fnum_str,
-        "pred_fnum_multiple": fnum_multiple,
+        "pred_union_name": result["union_name"],
+        "pred_desig_name": result["desig_name"],
+        "pred_desig_num": result["desig_num"],
+        "pred_prefix": result["prefix"],
+        "pred_suffix": result["suffix"],
+        "pred_f_num": result["f_num"],
+        "pred_match_score": result["match_score"],
     }
 
 
@@ -133,10 +121,11 @@ def build_pred_row(result):
 )
 def main(input_file, column, output, batch_size, no_header):
     """
-    Extract affiliation and designation from union names in a CSV file.
+    Extract union fields from union names in a CSV file.
 
     Reads CSV from INPUT_FILE (or stdin if not specified) and appends columns:
-    pred_is_union, pred_aff, pred_unknown, pred_desig, pred_union_score, pred_fnum, pred_fnum_multiple
+    pred_is_union, pred_union_score, pred_union_name, pred_desig_name,
+    pred_desig_num, pred_prefix, pred_suffix, pred_f_num, pred_match_score
 
     Examples:
 

@@ -8,26 +8,12 @@ This makes the model robust to typos: "afscme" and "afcsme" produce similar
 embeddings because they share most character n-grams.
 """
 
-import json
-from pathlib import Path
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .conf import MAX_CHARS_PER_TOKEN, MAX_TOKENS
-
-# Load designation vocabulary (numbers, prefixes, suffixes)
-VOCAB_PATH = Path(__file__).parent / "weights" / "designation_vocab.json"
-if VOCAB_PATH.exists():
-    with open(VOCAB_PATH) as f:
-        DESIGNATION_VOCAB = json.load(f)
-else:
-    DESIGNATION_VOCAB = {"<PAD>": 0, "<UNK>": 1}
-
-# Alias for backward compatibility
-NUMBER_VOCAB = DESIGNATION_VOCAB
-NUM_HASH_BUCKETS = len(DESIGNATION_VOCAB)
+MAX_TOKENS = 70
+MAX_CHARS_PER_TOKEN = 20
 
 # Character vocabulary: lowercase letters, digits, common punctuation
 CHAR_VOCAB = {
@@ -245,8 +231,7 @@ def tokenize_to_chars(
             tokens.append(num)
             is_number.append(1)
             token_type.append(1)
-            # Look up number ID in vocab
-            numeric_ids.append(NUMBER_VOCAB.get(num, NUMBER_VOCAB["<UNK>"]))
+            numeric_ids.append(0)
         elif match.group(4):  # space - normalize to single space
             tokens.append(" ")
             is_number.append(0)
@@ -283,23 +268,3 @@ def tokenize_to_chars(
         numeric_ids.append(0)
 
     return char_ids, tokens, is_number, token_type, numeric_ids
-
-
-# Build a small vocab for non-word tokens (numbers, space, punct)
-# Numbers: common local numbers get their own embedding
-SPECIAL_TOKEN_VOCAB = {
-    "<PAD>": 0,
-    "<UNK>": 1,
-    " ": 2,  # space
-}
-# Common punctuation
-for p in "-/&,.()'\"#:":
-    SPECIAL_TOKEN_VOCAB[p] = len(SPECIAL_TOKEN_VOCAB)
-# Common numbers (locals 1-1000 and some common ones)
-for i in range(1001):
-    SPECIAL_TOKEN_VOCAB[str(i)] = len(SPECIAL_TOKEN_VOCAB)
-
-
-def get_special_token_id(token: str) -> int:
-    """Get ID for non-word token (number, space, punct)."""
-    return SPECIAL_TOKEN_VOCAB.get(token, SPECIAL_TOKEN_VOCAB["<UNK>"])

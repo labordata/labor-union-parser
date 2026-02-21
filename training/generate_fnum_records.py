@@ -17,9 +17,10 @@ import sqlite3
 from collections import defaultdict
 from pathlib import Path
 
-DB_PATH = Path(__file__).parent.parent / "opdr.db"
-UNIT_ID_CSV = Path(__file__).parent / "fnum_to_unit_identifier.csv"
-OUTPUT_PATH = Path(__file__).parent / "data" / "fnum_to_records.json"
+DB_PATH = Path(__file__).parent / "data" / "opdr.db"
+UNIT_ID_CSV = Path(__file__).parent / "data" / "fnum_to_unit_identifier.csv"
+DATA_DIR = Path(__file__).parent / "data"
+OUTPUT_PATH = DATA_DIR / "gazetteer.json"
 
 
 def load_unit_identifiers():
@@ -130,8 +131,6 @@ def generate_records():
 
 
 def main():
-    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-
     fnum_to_records = generate_records()
 
     # JSON keys must be strings

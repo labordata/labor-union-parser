@@ -21,7 +21,7 @@ from pathlib import Path
 
 DATA_DIR = Path(__file__).parent / "data"
 VOCAB_PATH = DATA_DIR / "vocabularies.json"
-FNUM_RECORDS_PATH = DATA_DIR / "fnum_to_records.json"
+FNUM_RECORDS_PATH = DATA_DIR / "gazetteer.json"
 OUTPUT_PATH = DATA_DIR / "training_examples.json"
 
 
@@ -443,7 +443,7 @@ def load_synthetic_data(fnum_set, fnum_to_records, sig_to_fnums):
     return examples
 
 
-UNIT_ID_CSV = Path(__file__).parent / "fnum_to_unit_identifier.csv"
+UNIT_ID_CSV = Path(__file__).parent / "data" / "fnum_to_unit_identifier.csv"
 
 
 def load_conflict_groups():

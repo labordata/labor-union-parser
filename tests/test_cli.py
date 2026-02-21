@@ -46,9 +46,8 @@ class TestBasicExtraction:
         rows = list(reader)
         assert len(rows) == 1
         assert rows[0]["text"] == "SEIU Local 1199"
-        assert rows[0]["pred_aff"] == "SEIU"
-        assert rows[0]["pred_desig"] == "1199"
         assert rows[0]["pred_is_union"] == "True"
+        assert rows[0]["pred_f_num"] != ""
 
     def test_single_column_with_header(self):
         result = invoke([], "name\nIBT 123\n")
@@ -58,8 +57,8 @@ class TestBasicExtraction:
         rows = list(reader)
         assert len(rows) == 1
         assert rows[0]["name"] == "IBT 123"
-        assert rows[0]["pred_aff"] == "IBT"
-        assert rows[0]["pred_desig"] == "123"
+        assert rows[0]["pred_is_union"] == "True"
+        assert rows[0]["pred_f_num"] != ""
 
     def test_multi_column_with_column_flag(self):
         result = invoke(["-c", "union"], "id,union\n1,UAW 42\n")
@@ -70,8 +69,7 @@ class TestBasicExtraction:
         assert len(rows) == 1
         assert rows[0]["id"] == "1"
         assert rows[0]["union"] == "UAW 42"
-        assert rows[0]["pred_aff"] == "UAW"
-        assert rows[0]["pred_desig"] == "42"
+        assert rows[0]["pred_is_union"] == "True"
 
     def test_multiple_rows(self):
         result = invoke([], "text\nSEIU Local 1199\nIBT 123\nUAW 42\n")
@@ -80,9 +78,9 @@ class TestBasicExtraction:
         reader = csv.DictReader(io.StringIO(result.output))
         rows = list(reader)
         assert len(rows) == 3
-        assert rows[0]["pred_aff"] == "SEIU"
-        assert rows[1]["pred_aff"] == "IBT"
-        assert rows[2]["pred_aff"] == "UAW"
+        for row in rows:
+            assert row["pred_is_union"] == "True"
+            assert row["pred_f_num"] != ""
 
 
 class TestNonUnionDetection:
@@ -95,7 +93,7 @@ class TestNonUnionDetection:
         reader = csv.DictReader(io.StringIO(result.output))
         rows = list(reader)
         assert rows[0]["pred_is_union"] == "False"
-        assert rows[0]["pred_aff"] == ""
+        assert rows[0]["pred_union_name"] == ""
 
 
 class TestErrorHandling:
@@ -140,12 +138,14 @@ class TestOutputFields:
         expected_fields = [
             "text",
             "pred_is_union",
-            "pred_aff",
-            "pred_unknown",
-            "pred_desig",
             "pred_union_score",
-            "pred_fnum",
-            "pred_fnum_multiple",
+            "pred_union_name",
+            "pred_desig_name",
+            "pred_desig_num",
+            "pred_prefix",
+            "pred_suffix",
+            "pred_f_num",
+            "pred_match_score",
         ]
         for field in expected_fields:
             assert field in row, f"Missing field: {field}"
@@ -158,13 +158,13 @@ class TestOutputFields:
         score = float(row["pred_union_score"])
         assert 0.0 <= score <= 1.0
 
-    def test_fnum_lookup(self):
+    def test_match_score_present_for_union(self):
         result = invoke(["--no-header"], "IBT 123\n")
 
         reader = csv.DictReader(io.StringIO(result.output))
         row = next(reader)
-        # IBT 123 should have an fnum
-        assert row["pred_fnum"] != ""
+        assert row["pred_f_num"] != ""
+        assert row["pred_match_score"] != ""
 
 
 class TestPreservesInputColumns:
@@ -179,4 +179,4 @@ class TestPreservesInputColumns:
         assert row["id"] == "1"
         assert row["name"] == "SEIU Local 1199"
         assert row["extra"] == "foo"
-        assert row["pred_aff"] == "SEIU"
+        assert row["pred_is_union"] == "True"

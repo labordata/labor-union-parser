@@ -7,7 +7,7 @@ import sqlite3
 from collections import defaultdict
 from pathlib import Path
 
-DB_PATH = Path(__file__).parent.parent / "opdr.db"
+DB_PATH = Path(__file__).parent / "data" / "opdr.db"
 DATA_DIR = Path(__file__).parent / "data"
 ACRONYM_MAPPING_PATH = DATA_DIR / "acronym_to_fullname.csv"
 

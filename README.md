@@ -1,14 +1,18 @@
 # Labor Union Parser
 
-Extract affiliation and local designation from labor union name strings.
+Extract structured fields from labor union name strings by matching against
+an OLMS gazetteer of ~44,000 filing records.
 
 Given an input like `"SEIU Local 1199"`, the parser returns:
 - `is_union`: True (detected as a union)
-- `union_score`: 0.999 (confidence score for union detection)
-- `affiliation`: SEIU (Service Employees International Union)
-- `affiliation_unrecognized`: False (True if affiliation couldn't be matched)
-- `aff_score`: 0.997 (confidence score for affiliation)
-- `designation`: 1199 (local number)
+- `union_score`: 0.9997 (confidence score for union detection)
+- `union_name`: SERVICE EMPLOYEES (matched union name from gazetteer)
+- `desig_name`: LU (designation type — Local Union)
+- `desig_num`: 1199 (local number)
+- `prefix`: (designation prefix, if any)
+- `suffix`: (designation suffix, if any)
+- `f_num`: 509111 (OLMS filing number)
+- `match_score`: -0.5042 (log-probability score of best gazetteer match)
 
 ## Installation
 
@@ -26,8 +30,9 @@ from labor_union_parser import Extractor
 extractor = Extractor()
 result = extractor.extract("SEIU Local 1199")
 print(result)
-# {'is_union': True, 'union_score': 0.999, 'affiliation': 'SEIU',
-#  'affiliation_unrecognized': False, 'designation': '1199', 'aff_score': 0.997}
+# {'is_union': True, 'union_score': 0.9997, 'union_name': 'SERVICE EMPLOYEES',
+#  'desig_name': 'LU', 'desig_num': '1199', 'prefix': '', 'suffix': '',
+#  'f_num': '509111', 'match_score': '-0.5042'}
 ```
 
 For batch processing, use `extract_batch` which processes texts in parallel for better throughput:
@@ -64,20 +69,9 @@ with open("union_names.txt") as f:
     for chunk in itertools.batched(f, 1000):
         texts = [line.strip() for line in chunk]
         for result in extractor.extract_batch(texts):
-            print(result["affiliation"], result["designation"])
+            print(result["union_name"], result["desig_num"])
 ```
 
-
-### Filing Number Lookup
-
-Look up OLMS filing numbers for a given affiliation and designation:
-
-```python
-from labor_union_parser import lookup_fnum
-
-fnums = lookup_fnum("SEIU", "1199")
-# [31847, 69557, 508557, ...]
-```
 
 ### Command Line
 
@@ -87,8 +81,8 @@ labor-union-parser unions.csv -c union_name -o results.csv
 
 # Process from stdin
 echo "SEIU Local 1199" | labor-union-parser --no-header
-# text,pred_is_union,pred_aff,pred_unknown,pred_desig,pred_union_score,pred_fnum,pred_fnum_multiple
-# SEIU Local 1199,True,SEIU,False,1199,0.9992,"[31847, 69557, ...]",True
+# text,pred_is_union,pred_union_score,pred_union_name,pred_desig_name,pred_desig_num,pred_prefix,pred_suffix,pred_f_num,pred_match_score
+# SEIU Local 1199,True,0.9997,SERVICE EMPLOYEES,LU,1199,,,509111,-0.5042
 ```
 
 ## Output Fields
@@ -97,31 +91,36 @@ echo "SEIU Local 1199" | labor-union-parser --no-header
 |-------|-------------|
 | `is_union` | Whether the text is detected as a union name |
 | `union_score` | Similarity score to union centroid (0-1) |
-| `affiliation` | Predicted affiliation abbreviation (e.g., "SEIU", "IBT") or `None` |
-| `affiliation_unrecognized` | `True` if detected as union but affiliation unrecognized |
-| `designation` | Extracted local number (e.g., "1199") or empty string |
-| `aff_score` | Similarity to nearest affiliation centroid (higher = more confident) |
+| `union_name` | Matched parent union name (e.g., "SERVICE EMPLOYEES", "TEAMSTERS") |
+| `desig_name` | Designation type (e.g., "LU" for Local Union, "JC" for Joint Council) |
+| `desig_num` | Local/designation number (e.g., "1199") |
+| `prefix` | Designation prefix, if any |
+| `suffix` | Designation suffix, if any |
+| `f_num` | OLMS filing number for the matched record |
+| `match_score` | Log-probability score of best gazetteer match |
 
 ## Training
 
-Training data is in `training/data/labeled_data.csv` with columns:
-- `text`: Union name string
-- `aff_abbr`: Affiliation abbreviation (e.g., "SEIU", "IBT", "UAW")
-- `desig_num`: Local designation number
-
-To retrain the model:
+Training data and scripts are in `training/`. The pipeline is orchestrated by the root Makefile:
 
 ```bash
-pip install -e ".[train]"  # Install training dependencies
-python -m training.train              # Train all stages
-python -m training.train --stage 1    # Train only union detector
-python -m training.train --stage 2    # Train only affiliation classifier
-python -m training.train --stage 3    # Train only designation extractor
+pip install -e ".[train]"   # Install training dependencies
+
+make data                   # Download opdr.db, generate gazetteer and training data
+make train                  # Train structured classifier and union detector
+make evaluate               # Run evaluation scripts
+make all                    # Full pipeline (data + train)
 ```
+
+### Checked-in Data
+
+- `training/data/labeled_data.csv` — labeled union name examples
+- `training/data/nonunion_examples.csv` — non-union text examples
+- `training/data/acronym_to_fullname.csv` — union acronym mappings
 
 ## Model Architecture
 
-The model uses a three-stage contrastive extraction pipeline:
+The model uses a two-stage pipeline:
 
 ```
 Input: "SEIU Local 1199"
@@ -135,7 +134,7 @@ Input: "SEIU Local 1199"
               │
               ▼
 ┌───────────────────────────────────────────────────┐
-│  CharCNN (shared across stages)                   │
+│  CharCNN                                          │
 │                                                   │
 │  For each token: chars → char embeddings →        │
 │  parallel CNNs (1,2,3-grams) → max pool →         │
@@ -157,33 +156,25 @@ Input: "SEIU Local 1199"
               │
               ▼ (if is_union)
 ┌───────────────────────────────────────────────────┐
-│  Stage 2: Affiliation (Nearest Centroid)          │
+│  Stage 2: Structured Classifier + Gazetteer       │
 │                                                   │
-│  Token embeddings + is_number embedding →         │
-│  Cross-attention (learned query) → Projection →   │
-│  Similarity to affiliation centroids              │
+│  CharCNN per token → RoPE Transformer →           │
+│  Per-field classification & pointer heads          │
 │                                                   │
-│  Nearest: SEIU (score = 0.997)                    │
+│  Sum log-probs across fields for each of          │
+│  ~44K gazetteer records → best match              │
+│                                                   │
+│  Match: SERVICE EMPLOYEES LU 1199, f_num=509111   │
 └───────────────────────────────────────────────────┘
               │
               ▼
-┌───────────────────────────────────────────────────┐
-│  Stage 3: Designation (Pointer Network)           │
-│                                                   │
-│  Token embeddings + Transformer encoder →         │
-│  BiLSTM + affiliation embedding → pointer scores  │
-│                                                   │
-│  Points to: "1199"                                │
-└───────────────────────────────────────────────────┘
-              │
-              ▼
-Output: {is_union: True, union_score: 0.999, affiliation: "SEIU",
-         affiliation_unrecognized: False, aff_score: 0.997, designation: "1199"}
+Output: {is_union: True, union_name: "SERVICE EMPLOYEES",
+         desig_name: "LU", desig_num: "1199", f_num: "509111", ...}
 ```
 
 ### CharCNN
 
-Character-level CNN that computes token embeddings, shared across all stages.
+Character-level CNN that computes token embeddings from characters.
 
 - **Character embedding**: 16-dim lookup for ~50 chars (letters, digits, punctuation)
 - **Parallel CNNs**: 1-gram (32 filters), 2-gram (64 filters), 3-gram (128 filters)
@@ -203,34 +194,54 @@ Contrastive learning to distinguish union names from non-union text.
 - **Inference**: Cosine similarity to learned union centroid
 - **Threshold**: Similarity ≥ 0.5 → is_union = True
 
-### Stage 2: Affiliation Classification
+### Stage 2: Structured Classifier + Factored Scoring
 
-Nearest-centroid classification in contrastive embedding space.
+A single forward pass through the classifier produces per-field probability
+distributions. These are combined with a gazetteer of ~44K OLMS filing
+records to find the best match — no pairwise comparisons needed.
 
-- **Input**: CharCNN token embeddings + is_number embedding (8-dim)
-- **Cross-attention**: Learned query attends over token sequence
-- **Projection**: 2-layer MLP (72 → 128 → 64) with L2 normalization
-- **Training**: Supervised contrastive loss (same-affiliation = positive pairs)
-- **Inference**: Cosine similarity to each affiliation centroid
-- **Threshold**: Best score < 0.80 → affiliation_unrecognized = True
+**Classifier:**
+- **Encoder**: CharCNN (20 tokens × 20 chars) → Transformer with RoPE (2 layers, 4 heads)
+- **Classification heads**: `union_name`, `desig_name`, `f_num` — softmax over field vocabulary
+- **Pointer heads**: `desig_num`, `prefix`, `suffix` — attention over input token positions
 
-### Stage 3: Designation Extraction
+**Scoring:**
 
-Pointer network that selects the correct local number token.
+Each classification head produces a log-probability distribution over its
+vocabulary (e.g., all known union names). Each pointer head produces a
+log-probability distribution over input token positions (plus a "none"
+position). For each gazetteer record, we look up the log-probability of
+that record's field value under the corresponding head, then sum across
+fields to get a total score. The highest-scoring record is the prediction.
 
-- **Input**: CharCNN token embeddings + special token embeddings (numbers, punct)
-- **Context**: Transformer encoder (3 layers, 4 heads)
-- **Selection**: BiLSTM + affiliation embedding → score each number token
-- **Output**: Highest-scoring number token, or empty if no designation
+The `f_num` head is treated separately because it directly predicts the
+filing number, whereas the other fields (`union_name`, `desig_name`,
+`desig_num`, etc.) are shared properties that many records have in common
+and serve to narrow down the candidates. We blend the `f_num`
+log-probability with the other fields' combined score using a per-record
+weight: `score = (1 - w) * other_fields + w * f_num`. The weight `w`
+ranges from 0.1 (for filing numbers unseen in training) to 0.6 (for
+well-represented ones), scaling with `log(1 + n)` where `n` is the
+training count.
 
 ### Performance
 
-On labeled data (94,308 examples with known affiliations):
+On held-out test data (7,160 labeled examples scored against the full 44K-record gazetteer):
 
-| Metric | All | Non-None Predictions |
-|--------|-----|---------------------|
-| Affiliation accuracy | 99.0% | 99.7% |
-| Joint accuracy | 98.9% | 99.5% |
+| Metric | Score |
+|--------|-------|
+| Filing number accuracy (top-1) | 98.8% |
+| Filing number accuracy (top-5) | 99.6% |
+| Non-union text filtering accuracy | 96.3% |
+| Non-union text filtering ROC-AUC | 0.995 |
 
-- Designation accuracy: 99.9%
-- Only 0.7% of predictions return None (unrecognized affiliation)
+Per-field classifier accuracy on test set:
+
+| Field | Accuracy |
+|-------|----------|
+| `union_name` | 99.1% |
+| `desig_name` | 99.3% |
+| `desig_num` | 99.6% |
+| `prefix` | 99.3% |
+| `suffix` | 99.6% |
+| `f_num` | 96.7% |

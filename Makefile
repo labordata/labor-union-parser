@@ -1,44 +1,77 @@
-.PHONY: all train
-
 # Paths
 DB_URL = https://github.com/labordata/opdr/releases/download/2021-05-31/opdr.db.zip
 WEIGHTS_DIR = src/labor_union_parser/weights
-MODEL_WEIGHTS = $(WEIGHTS_DIR)/char_cnn.pt
+DATA_DIR = training/data
 
-all: $(MODEL_WEIGHTS)
+.PHONY: all
+all: weights
 
-training/dual_task_model.pt : training/data/training_examples.json
-	python training/train_dual_task.py.py
+.PHONY: evaluate
+evaluate: weights
+	python training/eval_factored_scoring.py
+	python training/eval_union_detector.py
+	python training/evaluate.py
 
-training/data/training_examples.json : training/data/unaff_synthetic.csv \
-                                       training/data/labeled_data.csv \
-                                       training/data/vocabularies.json \
-                                       training/data/fnum_to_records.json
+.PHONY: weights
+weights: $(WEIGHTS_DIR)/structured_classifier.pt \
+         $(WEIGHTS_DIR)/union_detector.pt
+
+.PHONY: train
+train: $(WEIGHTS_DIR)/structured_classifier.pt $(WEIGHTS_DIR)/union_detector.pt
+
+# Bundle trained model with gazetteer and fnum counts
+$(WEIGHTS_DIR)/structured_classifier.pt : $(DATA_DIR)/structured_classifier.ckpt \
+                                          $(DATA_DIR)/gazetteer.json \
+                                          $(DATA_DIR)/training_examples.json
+	python training/bundle_structured_classifier.py
+
+# Train structured classifier (Lightning checkpoint)
+.INTERMEDIATE: $(DATA_DIR)/structured_classifier.ckpt
+$(DATA_DIR)/structured_classifier.ckpt : $(DATA_DIR)/training_examples.json
+	python training/train_structured_classifier.py
+
+# Train union detector
+$(WEIGHTS_DIR)/union_detector.pt : $(DATA_DIR)/labeled_data.csv \
+                                   $(DATA_DIR)/nonunion_examples.csv
+	python training/train_union_detector.py
+
+.PHONY: data
+data: $(DATA_DIR)/training_examples.json
+
+$(DATA_DIR)/training_examples.json : $(DATA_DIR)/gazetteer.json \
+                                     $(DATA_DIR)/vocabularies.json \
+                                     $(DATA_DIR)/unaff_synthetic.csv \
+                                     $(DATA_DIR)/labeled_data.csv
 	python training/prepare_data.py
 
-training/data/vocabularies.json : opdr.db training/data/fnum_to_records.json
+.INTERMEDIATE: $(DATA_DIR)/vocabularies.json
+$(DATA_DIR)/vocabularies.json : $(DATA_DIR)/gazetteer.json
 	python training/generate_vocabularies.py
 
-training/data/fnum_to_records.json : opdr.db training/fnum_to_unit_identifier.csv
-	python training/generate_fnum_records.py
-
-training/fnum_to_unit_identifier.csv : opdr.db
-	python training/build_unit_identifiers.py
-
-training/data/unaff_synthetic.csv : opdr.db training/data/acronym_to_fullname.csv
+.INTERMEDIATE: $(DATA_DIR)/unaff_synthetic.csv
+$(DATA_DIR)/unaff_synthetic.csv : $(DATA_DIR)/opdr.db $(DATA_DIR)/acronym_to_fullname.csv
 	python training/generate_unaff_synthetic.py
 
+.INTERMEDIATE: $(DATA_DIR)/gazetteer.json
+$(DATA_DIR)/gazetteer.json : $(DATA_DIR)/opdr.db $(DATA_DIR)/fnum_to_unit_identifier.csv
+	python training/generate_fnum_records.py
+
+.INTERMEDIATE: $(DATA_DIR)/fnum_to_unit_identifier.csv
+$(DATA_DIR)/fnum_to_unit_identifier.csv : $(DATA_DIR)/opdr.db
+	python training/build_unit_identifiers.py
+
 # Download and extract opdr.db
-opdr.db: 
-	curl -L -o opdr.db.zip $(DB_URL)
-	unzip -o opdr.db.zip
-	rm opdr.db.zip
+$(DATA_DIR)/opdr.db:
+	curl -L -o $(DATA_DIR)/opdr.db.zip $(DB_URL)
+	unzip -o $(DATA_DIR)/opdr.db.zip -d $(DATA_DIR)
+	rm $(DATA_DIR)/opdr.db.zip
 	touch $@
 
-
-# Train the model
-$(MODEL_WEIGHTS): training/data/labeled_data.csv $(WEIGHTS_DIR)/fnum_lookup.json
-	python training/train.py
-
-train: $(MODEL_WEIGHTS)
-
+.PHONY: clean
+clean:
+	-rm $(DATA_DIR)/vocabularies.json
+	-rm $(DATA_DIR)/unaff_synthetic.csv
+	-rm $(DATA_DIR)/training_examples.json
+	-rm $(DATA_DIR)/gazetteer.json
+	-rm $(DATA_DIR)/fnum_to_unit_identifier.csv
+	-rm $(DATA_DIR)/opdr.db

@@ -22,8 +22,8 @@ import sqlite3
 from collections import defaultdict
 from pathlib import Path
 
-DB_PATH = Path(__file__).parent.parent / "opdr.db"
-OUTPUT_CSV = Path(__file__).parent / "fnum_to_unit_identifier.csv"
+DB_PATH = Path(__file__).parent / "data" / "opdr.db"
+OUTPUT_CSV = Path(__file__).parent / "data" / "fnum_to_unit_identifier.csv"
 
 
 def normalize_designation(s):
