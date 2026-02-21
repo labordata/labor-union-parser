@@ -176,10 +176,24 @@ class StructuredDataset(Dataset):
         # Pointer labels: position index or MAX_TOKENS for NONE
         self.pointer_labels = {f: [] for f in POINTER_FIELDS}
 
+        self.is_union_labels = []
+
         # Collect valid queries and records
         queries = []
         records = []
         for ex in examples:
+            is_union = ex.get("is_union", True)
+
+            if not is_union:
+                # Non-union example: all field labels ignored
+                queries.append(ex["query"])
+                records.append(None)
+                self.is_union_labels.append(0.0)
+                for f in FIELDS:
+                    if f not in POINTER_FIELDS:
+                        self.labels[f].append(-100)
+                continue
+
             if not ex["records"]:
                 continue
             rec = ex["records"][0]
@@ -194,6 +208,7 @@ class StructuredDataset(Dataset):
 
             queries.append(ex["query"])
             records.append(rec)
+            self.is_union_labels.append(1.0)
             for f in FIELDS:
                 if f not in POINTER_FIELDS:
                     self.labels[f].append(label_row[f])
@@ -201,6 +216,7 @@ class StructuredDataset(Dataset):
         for f in FIELDS:
             if f not in POINTER_FIELDS:
                 self.labels[f] = torch.tensor(self.labels[f], dtype=torch.long)
+        self.is_union_labels = torch.tensor(self.is_union_labels, dtype=torch.float32)
 
         # Pre-encode all queries at init time
         if encoder == "char":
@@ -217,10 +233,13 @@ class StructuredDataset(Dataset):
                 self.token_char_ids.append([t["chars"] for t in tokens])
                 self.masks.append([1 if t["token"] else 0 for t in tokens])
                 self.token_strings.append([t["token"] for t in tokens])
-                # Compute pointer labels
+                # Compute pointer labels (non-union records are None)
                 for f in POINTER_FIELDS:
-                    val = _get_field_value(records[i], f)
-                    self.pointer_labels[f].append(_find_pointer_label(tokens, val))
+                    if records[i] is not None:
+                        val = _get_field_value(records[i], f)
+                        self.pointer_labels[f].append(_find_pointer_label(tokens, val))
+                    else:
+                        self.pointer_labels[f].append(-100)
         elif encoder == "token-embed":
             assert token_vocab is not None
             self.token_ids = []
@@ -241,8 +260,11 @@ class StructuredDataset(Dataset):
                 self.masks.append([1 if t["token"] else 0 for t in tokens])
                 self.token_strings.append([t["token"] for t in tokens])
                 for f in POINTER_FIELDS:
-                    val = _get_field_value(records[i], f)
-                    self.pointer_labels[f].append(_find_pointer_label(tokens, val))
+                    if records[i] is not None:
+                        val = _get_field_value(records[i], f)
+                        self.pointer_labels[f].append(_find_pointer_label(tokens, val))
+                    else:
+                        self.pointer_labels[f].append(-100)
 
         for f in POINTER_FIELDS:
             self.pointer_labels[f] = torch.tensor(
@@ -258,6 +280,7 @@ class StructuredDataset(Dataset):
         labels = {f: self.labels[f][idx] for f in FIELDS if f not in POINTER_FIELDS}
         for f in POINTER_FIELDS:
             labels[f] = self.pointer_labels[f][idx]
+        labels["is_union"] = self.is_union_labels[idx]
 
         if self.encoder == "char":
             return {"char_ids": self.char_ids_list[idx]}, labels
@@ -285,6 +308,7 @@ def collate_char(batch):
         padded[i, : len(ids)] = torch.tensor(ids, dtype=torch.long)
         mask[i, : len(ids)] = True
     labels = {f: torch.stack([el[f] for el in labels_list]) for f in FIELDS}
+    labels["is_union"] = torch.stack([el["is_union"] for el in labels_list])
     return {"char_ids": padded, "mask": mask}, labels
 
 
@@ -294,6 +318,7 @@ def collate_token_charcnn(batch):
     char_ids = torch.tensor([inp["char_ids"] for inp in inputs_list], dtype=torch.long)
     mask = torch.tensor([inp["mask"] for inp in inputs_list], dtype=torch.bool)
     labels = {f: torch.stack([el[f] for el in labels_list]) for f in FIELDS}
+    labels["is_union"] = torch.stack([el["is_union"] for el in labels_list])
     return {"char_ids": char_ids, "mask": mask}, labels
 
 
@@ -305,6 +330,7 @@ def collate_token_embed(batch):
     )
     mask = torch.tensor([inp["mask"] for inp in inputs_list], dtype=torch.bool)
     labels = {f: torch.stack([el[f] for el in labels_list]) for f in FIELDS}
+    labels["is_union"] = torch.stack([el["is_union"] for el in labels_list])
     return {"token_ids": token_ids, "mask": mask}, labels
 
 
@@ -497,6 +523,9 @@ class StructuredClassifier(nn.Module):
             {f: nn.Parameter(torch.zeros(1)) for f in POINTER_FIELDS}
         )
 
+        # Binary is_union head
+        self.is_union_head = nn.Linear(d_model, 1)
+
     def forward(self, inputs, mask=None):
         if self.encoder_type == "char":
             char_ids = inputs  # (B, S) character indices
@@ -541,6 +570,9 @@ class StructuredClassifier(nn.Module):
             none_score = self.pointer_none[f].expand(pos_scores.shape[0], 1)
             logits[f] = torch.cat([pos_scores, none_score], dim=1)  # (B, S+1)
 
+        # Binary is_union logit
+        logits["is_union"] = self.is_union_head(pooled).squeeze(-1)  # (B,)
+
         return logits
 
 
@@ -562,6 +594,12 @@ def evaluate(model, loader, field_vocabs, encoder):
     non_null_correct = {f: 0 for f in FIELDS}
     non_null_total = {f: 0 for f in FIELDS}
 
+    # Track is_union binary head accuracy
+    nonunion_correct = 0
+    nonunion_total = 0
+    union_as_nonunion = 0
+    union_total = 0
+
     with torch.no_grad():
         for inputs, labels in loader:
             model_input, mask = get_model_input(inputs, encoder, DEVICE)
@@ -569,8 +607,11 @@ def evaluate(model, loader, field_vocabs, encoder):
             for f in FIELDS:
                 y = labels[f].to(DEVICE)
                 preds = logits[f].argmax(dim=-1)
-                correct[f] += (preds == y).sum().item()
-                total[f] += y.shape[0]
+                # Skip ignored labels (-100) from accuracy
+                valid = y != -100
+                if valid.any():
+                    correct[f] += (preds[valid] == y[valid]).sum().item()
+                    total[f] += valid.sum().item()
 
                 if f in POINTER_FIELDS:
                     # For pointer fields, "null" = NONE (position MAX_TOKENS)
@@ -578,12 +619,24 @@ def evaluate(model, loader, field_vocabs, encoder):
                 else:
                     nl = null_labels.get(f)
                 if nl is not None:
-                    non_null_mask = y != nl
+                    non_null_mask = valid & (y != nl)
                     if non_null_mask.any():
                         non_null_correct[f] += (
                             (preds[non_null_mask] == y[non_null_mask]).sum().item()
                         )
                         non_null_total[f] += non_null_mask.sum().item()
+
+            # is_union binary head
+            is_union_target = labels["is_union"].to(DEVICE)
+            is_union_pred = logits["is_union"] > 0  # sigmoid > 0.5
+            nu_mask = is_union_target < 0.5
+            if nu_mask.any():
+                nonunion_correct += is_union_pred[nu_mask].eq(False).sum().item()
+                nonunion_total += nu_mask.sum().item()
+            u_mask = is_union_target > 0.5
+            if u_mask.any():
+                union_as_nonunion += is_union_pred[u_mask].eq(False).sum().item()
+                union_total += u_mask.sum().item()
 
     results = {}
     for f in FIELDS:
@@ -592,6 +645,15 @@ def evaluate(model, loader, field_vocabs, encoder):
             non_null_correct[f] / non_null_total[f] if non_null_total[f] > 0 else None
         )
         results[f] = (acc, nn_acc, non_null_total[f])
+
+    if nonunion_total > 0:
+        results["nonunion"] = (
+            nonunion_correct / nonunion_total,
+            nonunion_total,
+            union_as_nonunion,
+            union_total,
+        )
+
     return results
 
 
@@ -683,7 +745,8 @@ def main(
     for f in POINTER_FIELDS:
         ptr_labels = train_ds.pointer_labels[f]
         n_none = (ptr_labels == MAX_TOKENS).sum().item()
-        n_found = (ptr_labels < MAX_TOKENS).sum().item()
+        n_valid = (ptr_labels != -100).sum().item()
+        n_found = n_valid - n_none
         print(
             f"  {f} pointer: {n_found} found in text, {n_none} NONE ({n_none/len(ptr_labels)*100:.1f}%)"
         )
@@ -757,6 +820,15 @@ def main(
                 y = labels[f].to(DEVICE)
                 loss = loss + F.cross_entropy(logits[f], y)
 
+            # Binary is_union loss — upweight non-union (minority) class
+            is_union_target = labels["is_union"].to(DEVICE)
+            is_union_loss = F.binary_cross_entropy_with_logits(
+                logits["is_union"], is_union_target, reduction="none"
+            )
+            # Weight non-union samples more heavily (is_union=0 → weight=50)
+            is_union_weight = torch.where(is_union_target == 1, 1.0, 50.0)
+            loss = loss + (is_union_loss * is_union_weight).mean()
+
             optimizer.zero_grad()
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
@@ -770,7 +842,7 @@ def main(
 
         # Evaluate
         val_results = evaluate(model, val_loader, field_vocabs, encoder)
-        mean_val_acc = np.mean([acc for acc, _, _ in val_results.values()])
+        mean_val_acc = np.mean([val_results[f][0] for f in FIELDS])
 
         print(
             f"\nEpoch {epoch+1}/{epochs}  loss={avg_loss:.4f}  lr={scheduler.get_last_lr()[0]:.2e}"
@@ -781,6 +853,12 @@ def main(
             if nn_acc is not None:
                 msg += f"  non-null={nn_acc:.4f} ({nn_total})"
             print(msg)
+        if "nonunion" in val_results:
+            nu_acc, nu_total, u_as_nu, u_total = val_results["nonunion"]
+            print(
+                f"  {'non-union':15s} recall={nu_acc:.4f} ({nu_total})"
+                f"  union→non-union={u_as_nu}/{u_total}"
+            )
 
         if mean_val_acc > best_val_acc:
             best_val_acc = mean_val_acc
@@ -813,6 +891,12 @@ def main(
         if nn_acc is not None:
             msg += f"  non-null={nn_acc:.4f} ({nn_total})"
         print(msg)
+    if "nonunion" in test_results:
+        nu_acc, nu_total, u_as_nu, u_total = test_results["nonunion"]
+        print(
+            f"  {'non-union':15s} recall={nu_acc:.4f} ({nu_total})"
+            f"  union→non-union={u_as_nu}/{u_total}"
+        )
 
     # Compare with LogReg baselines
     print("\nLogReg baselines for reference:")

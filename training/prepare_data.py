@@ -328,6 +328,7 @@ def load_fnum_records():
 def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
     """Load labeled_data.csv using pre-assigned f_num values."""
     examples = []
+    nonunion_count = 0
     skipped_no_fnum = 0
     skipped_not_in_vocab = 0
     skipped_ambiguous = 0
@@ -336,6 +337,19 @@ def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
         reader = csv.DictReader(f)
         for row in reader:
             text = row["text"]
+
+            if row.get("is_union", "True").strip() == "False":
+                examples.append(
+                    {
+                        "query": text,
+                        "source": "labeled",
+                        "is_union": False,
+                        "records": [],
+                    }
+                )
+                nonunion_count += 1
+                continue
+
             aff = row["aff_abbr"]
 
             # Use pre-assigned f_num
@@ -374,7 +388,7 @@ def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
                 }
             )
 
-    print(f"  {len(examples)} examples loaded")
+    print(f"  {len(examples)} examples loaded ({nonunion_count} non-union)")
     print(
         f"  Skipped: {skipped_no_fnum} no f_num, {skipped_not_in_vocab} not in vocab,"
         f" {skipped_ambiguous} ambiguous"
@@ -483,6 +497,8 @@ def add_structural_negatives(examples, fnum_to_records, fnum_to_component=None):
     examples_with_structural = 0
 
     for ex in examples:
+        if "f_num" not in ex:
+            continue
         pos_fnum = ex["f_num"]
         pos_records = ex["records"]
         if not pos_records:
