@@ -249,31 +249,6 @@ def main(batch_size, split, encoder, fnum_weight):
         num_workers=0,
     )
 
-    # Separate union vs non-union examples
-    union_examples = []
-    nonunion_examples = []
-    for ex in eval_examples:
-        if not ex["records"]:
-            continue
-        if ex["records"][0].get("union_name") == "NOT_A_UNION":
-            nonunion_examples.append(ex)
-        else:
-            union_examples.append(ex)
-
-    if nonunion_examples:
-        print(f"  ({len(nonunion_examples)} non-union examples evaluated separately)")
-    eval_examples = union_examples
-
-    # Rebuild dataset without non-union examples for f_num scoring
-    eval_ds = StructuredDataset(eval_examples, field_vocabs, encoder, token_vocab)
-    eval_loader = DataLoader(
-        eval_ds,
-        batch_size=batch_size,
-        shuffle=False,
-        collate_fn=collate_fn,
-        num_workers=0,
-    )
-
     # We need the target f_nums, queries, and token strings aligned with dataset
     target_fnums = []
     query_texts = []
@@ -498,79 +473,6 @@ def main(batch_size, split, encoder, fnum_weight):
         print(
             f"  Scores: pred={e['pred_score']:.2f}, target={e['target_score']:.2f}, gap={e['pred_score']-e['target_score']:.2f}"
         )
-
-    # --- Non-union evaluation ---
-    if nonunion_examples:
-        not_a_union_idx = field_vocabs["union_name"].get("NOT_A_UNION")
-        if not_a_union_idx is None:
-            print(
-                "\nWARNING: NOT_A_UNION not in union_name vocab, skipping non-union eval"
-            )
-        else:
-            print(f"\n{'='*80}")
-            print(f"Non-union evaluation ({len(nonunion_examples)} examples)")
-            print(f"{'='*80}")
-
-            nu_ds = StructuredDataset(
-                nonunion_examples, field_vocabs, encoder, token_vocab
-            )
-            nu_loader = DataLoader(
-                nu_ds,
-                batch_size=batch_size,
-                shuffle=False,
-                collate_fn=collate_fn,
-                num_workers=0,
-            )
-
-            nu_correct = 0
-            nu_total = 0
-            nu_false_unions = []  # non-union predicted as union
-
-            with torch.no_grad():
-                nu_idx = 0
-                for inputs, labels in nu_loader:
-                    model_input, mask = get_model_input(inputs, encoder, DEVICE)
-                    logits = model(model_input, mask)
-                    union_name_lp = F.log_softmax(logits["union_name"], dim=-1)
-
-                    for i in range(model_input.shape[0]):
-                        pred_class = union_name_lp[i].argmax().item()
-                        not_a_union_lp = union_name_lp[i][not_a_union_idx].item()
-                        top_lp = union_name_lp[i].max().item()
-
-                        if pred_class == not_a_union_idx:
-                            nu_correct += 1
-                        else:
-                            # Find what union_name it predicted
-                            idx_to_name = {
-                                v: k for k, v in field_vocabs["union_name"].items()
-                            }
-                            pred_name = idx_to_name.get(pred_class, "?")
-                            nu_false_unions.append(
-                                {
-                                    "query": nonunion_examples[nu_idx]["query"],
-                                    "pred_union_name": pred_name,
-                                    "pred_lp": top_lp,
-                                    "not_a_union_lp": not_a_union_lp,
-                                }
-                            )
-                        nu_total += 1
-                        nu_idx += 1
-
-            print(
-                f"  Recall: {nu_correct}/{nu_total} = {nu_correct/nu_total:.4f}"
-                f" ({nu_total - nu_correct} misclassified as union)"
-            )
-
-            if nu_false_unions:
-                print(
-                    f"\nNon-union examples predicted as union ({len(nu_false_unions)}):"
-                )
-                for e in nu_false_unions:
-                    print(
-                        f"  {e['query'][:80]:80s}  → {e['pred_union_name']:12s}"
-                        f"  (lp={e['pred_lp']:.2f}, NOT_A_UNION lp={e['not_a_union_lp']:.2f})"
-                    )
 
 
 if __name__ == "__main__":
