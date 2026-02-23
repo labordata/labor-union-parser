@@ -67,9 +67,38 @@ def load_model(ckpt):
 @click.option(
     "--sat", default=16, type=int, help="Saturation count for fnum weight curve"
 )
-def main(batch_size, split, base_w, floor_w, sat):
+@click.option(
+    "--use-temperatures",
+    is_flag=True,
+    help="Use fitted post-hoc temperatures instead of hand-tuned weighting",
+)
+@click.option(
+    "--fnum-weight",
+    default=None,
+    type=float,
+    help="With --use-temperatures, weight on f_num log-prob for known records",
+)
+@click.option(
+    "--fnum-weight-unknown",
+    default=None,
+    type=float,
+    help="With --use-temperatures, weight on f_num log-prob for unknown records (default: same as --fnum-weight)",
+)
+def main(
+    batch_size,
+    split,
+    base_w,
+    floor_w,
+    sat,
+    use_temperatures,
+    fnum_weight,
+    fnum_weight_unknown,
+):
     print(f"Device: {DEVICE}")
-    print(f"f_num weighting: base_w={base_w}, floor_w={floor_w}, sat={sat}")
+    if use_temperatures:
+        print("Using fitted post-hoc temperatures")
+    else:
+        print(f"f_num weighting: base_w={base_w}, floor_w={floor_w}, sat={sat}")
     print("Loading data...")
 
     with open(EXAMPLES_PATH) as f:
@@ -101,12 +130,40 @@ def main(batch_size, split, base_w, floor_w, sat):
     record_fnums_array = np.array(record_fnums)
     n_records = len(record_fnums)
     print(f"Scoring against {n_records} gazetteer records")
-    fnum_weights = torch.zeros(n_records, device=DEVICE)
-    for i, fnum in enumerate(record_fnums):
-        n = fnum_train_counts.get(str(fnum), 0)
-        fnum_weights[i] = floor_w + (base_w - floor_w) * min(
-            1, math.log1p(n) / math.log1p(sat)
-        )
+
+    # Load fitted temperatures or build hand-tuned fnum weights
+    head_temperatures = None
+    fnum_class_temperatures = None
+    fnum_weights = None
+    if use_temperatures:
+        temps_path = DATA_DIR / "temperatures.json"
+        with open(temps_path) as f:
+            temps = json.load(f)
+        head_temperatures = {}
+        for field in FIELDS:
+            if field != "f_num" and field in temps:
+                head_temperatures[field] = temps[field]
+                print(f"  {field}: T={temps[field]:.4f}")
+
+        # Build per-class f_num temperature vector: T(c) = exp(a + b * log(1+count))
+        fnum_a = temps["f_num_a"]
+        fnum_b = temps["f_num_b"]
+        print(f"  f_num: T(c) = exp({fnum_a:.4f} + {fnum_b:.4f} * log(1+count))")
+        fnum_vocab = field_vocabs["f_num"]
+        n_fnum_classes = len(fnum_vocab)
+        fnum_class_temperatures = torch.ones(n_fnum_classes, device=DEVICE)
+        for fnum_val, class_idx in fnum_vocab.items():
+            count = fnum_train_counts.get(str(fnum_val), 0)
+            fnum_class_temperatures[class_idx] = math.exp(
+                fnum_a + fnum_b * math.log1p(count)
+            )
+    else:
+        fnum_weights = torch.zeros(n_records, device=DEVICE)
+        for i, fnum in enumerate(record_fnums):
+            n = fnum_train_counts.get(str(fnum), 0)
+            fnum_weights[i] = floor_w + (base_w - floor_w) * min(
+                1, math.log1p(n) / math.log1p(sat)
+            )
 
     # Build pointer lookup tables
     pointer_val_to_indices = {}
@@ -179,7 +236,18 @@ def main(batch_size, split, base_w, floor_w, sat):
             char_ids = inputs["char_ids"].to(DEVICE)
             mask = inputs["mask"].to(DEVICE)
             logits = model(char_ids, mask)
-            log_probs = {f: F.log_softmax(logits[f], dim=-1) for f in FIELDS}
+
+            # Apply temperatures to logits before softmax
+            if use_temperatures:
+                scaled_logits = {}
+                for f in FIELDS:
+                    if f == "f_num":
+                        scaled_logits[f] = logits[f] / fnum_class_temperatures
+                    else:
+                        scaled_logits[f] = logits[f] / head_temperatures[f]
+                log_probs = {f: F.log_softmax(scaled_logits[f], dim=-1) for f in FIELDS}
+            else:
+                log_probs = {f: F.log_softmax(logits[f], dim=-1) for f in FIELDS}
 
             batch_size_actual = char_ids.shape[0]
             for i in range(batch_size_actual):
@@ -219,12 +287,23 @@ def main(batch_size, split, base_w, floor_w, sat):
 
                         scores += field_scores
 
-                # Blend with per-record f_num weight
+                # f_num scoring
                 fnum_lp = log_probs["f_num"][i][field_indices["f_num"]]
                 fnum_vocab_size = log_probs["f_num"].shape[-1]
                 fnum_floor = -math.log(fnum_vocab_size)
                 fnum_lp = torch.where(field_known["f_num"], fnum_lp, fnum_floor)
-                scores = (1 - fnum_weights) * scores + fnum_weights * fnum_lp
+                if use_temperatures:
+                    # Temperature-scaled: weight f_num differently for
+                    # known vs unknown records
+                    w = fnum_weight if fnum_weight is not None else 1.0
+                    w_unknown = (
+                        fnum_weight_unknown if fnum_weight_unknown is not None else w
+                    )
+                    per_record_w = torch.where(field_known["f_num"], w, w_unknown)
+                    scores += per_record_w * fnum_lp
+                else:
+                    # Hand-tuned: blend with per-record f_num weight
+                    scores = (1 - fnum_weights) * scores + fnum_weights * fnum_lp
 
                 top5_indices = scores.topk(5).indices.cpu().numpy()
                 pred_fnum = record_fnums_array[top5_indices[0]]
