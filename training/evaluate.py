@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """End-to-end pipeline evaluation on labeled data.
 
-Uses the Extractor API and evaluates:
-  1. f_num accuracy on union examples (correct gazetteer match)
-  2. Non-union rejection (correctly identifies non-union texts)
+Uses the Extractor API and evaluates combined is_union + f_num accuracy:
+  - Union example correct: is_union=True AND f_num matches
+  - Non-union example correct: is_union=False
 """
 
 import itertools
@@ -30,22 +30,27 @@ def main():
     non_union_examples = [
         ex for ex in all_examples if ex["split"] == "test" and not ex["records"]
     ]
-    print(f"Test: {len(union_examples)} union, {len(non_union_examples)} non-union")
+    n_union = len(union_examples)
+    n_non_union = len(non_union_examples)
+    n_total = n_union + n_non_union
+    print(f"Test: {n_union} union, {n_non_union} non-union")
 
     extractor = Extractor()
 
-    # --- Evaluate union examples (f_num accuracy) ---
-    texts = [ex["query"] for ex in union_examples]
-    true_fnums = [str(ex["records"][0]["f_num"]) for ex in union_examples]
-
-    results = []
-    pbar = tqdm(total=len(texts), desc="union")
-    for batch in itertools.batched(texts, BATCH_SIZE):
+    # --- Run extractor on all test examples ---
+    all_texts = [ex["query"] for ex in union_examples + non_union_examples]
+    all_results = []
+    pbar = tqdm(total=len(all_texts))
+    for batch in itertools.batched(all_texts, BATCH_SIZE):
         batch = list(batch)
-        results.extend(extractor.extract_batch(batch))
+        all_results.extend(extractor.extract_batch(batch))
         pbar.update(len(batch))
     pbar.close()
 
+    union_results = all_results[:n_union]
+    non_union_results = all_results[n_union:]
+
+    true_fnums = [str(ex["records"][0]["f_num"]) for ex in union_examples]
     score_fields = [
         "union_name",
         "desig_name",
@@ -55,10 +60,15 @@ def main():
         "suffix",
     ]
 
-    errors = []
-    for text, true_fnum, result in zip(texts, true_fnums, results):
-        if result["f_num"] != true_fnum:
+    # --- Union errors: is_union=False OR wrong f_num ---
+    union_errors = []
+    for text, true_fnum, result in zip(
+        [ex["query"] for ex in union_examples], true_fnums, union_results
+    ):
+        is_correct = result["is_union"] and result["f_num"] == true_fnum
+        if not is_correct:
             row = {
+                "type": "false_negative" if not result["is_union"] else "wrong_match",
                 "text": text[:80],
                 "true_fnum": true_fnum,
                 "pred_fnum": result["f_num"],
@@ -71,34 +81,20 @@ def main():
             for f in score_fields:
                 val = fs.get(f)
                 row[f"score_{f}"] = f"{val:.4f}" if val is not None else ""
-            errors.append(row)
+            union_errors.append(row)
 
-    n_union = len(union_examples)
-    correct = n_union - len(errors)
-    not_detected = sum(1 for e in errors if not e["is_union"])
-    wrong_match = sum(1 for e in errors if e["is_union"])
+    false_negatives = sum(1 for e in union_errors if e["type"] == "false_negative")
+    wrong_matches = sum(1 for e in union_errors if e["type"] == "wrong_match")
 
-    print(f"\nUnion f_num accuracy: {correct}/{n_union} = {correct/n_union:.4f}")
-    print(f"  {len(errors)} errors:")
-    print(f"    Not detected as union: {not_detected}")
-    print(f"    Wrong gazetteer match: {wrong_match}")
-
-    # --- Evaluate non-union examples (rejection accuracy) ---
-    non_union_texts = [ex["query"] for ex in non_union_examples]
-
-    non_union_results = []
-    pbar = tqdm(total=len(non_union_texts), desc="non-union")
-    for batch in itertools.batched(non_union_texts, BATCH_SIZE):
-        batch = list(batch)
-        non_union_results.extend(extractor.extract_batch(batch))
-        pbar.update(len(batch))
-    pbar.close()
-
+    # --- Non-union errors: is_union=True ---
     false_positives = []
-    for text, result in zip(non_union_texts, non_union_results):
+    for text, result in zip(
+        [ex["query"] for ex in non_union_examples], non_union_results
+    ):
         if result["is_union"]:
             false_positives.append(
                 {
+                    "type": "false_positive",
                     "text": text[:80],
                     "pred_fnum": result["f_num"],
                     "union_score": f"{result['union_score']:.4f}",
@@ -107,30 +103,29 @@ def main():
                 }
             )
 
-    n_non_union = len(non_union_examples)
-    rejected = n_non_union - len(false_positives)
+    # --- Summary ---
+    total_errors = len(union_errors) + len(false_positives)
+    total_correct = n_total - total_errors
+
     print(
-        f"\nNon-union rejection: {rejected}/{n_non_union} = {rejected/n_non_union:.4f}"
+        f"\nEnd-to-end: {total_correct}/{n_total} = {total_correct / n_total:.4f} ({total_errors} errors)"
     )
+    print(f"  False negatives (union, is_union=False): {false_negatives}")
+    print(f"  Wrong match (union, is_union=True, wrong f_num): {wrong_matches}")
+    print(f"  False positives (non-union, is_union=True): {len(false_positives)}")
+
     if false_positives:
-        print(f"  {len(false_positives)} false positives:")
+        print("\nFalse positives:")
         for fp in false_positives:
             print(
-                f"    {fp['text'][:60]}  -> {fp['pred_union_name']} (match_score={fp['match_score']})"
+                f"  {fp['text'][:60]}  -> {fp['pred_union_name']} (match_score={fp['match_score']})"
             )
 
-    # --- End-to-end summary ---
-    n_total = n_union + n_non_union
-    total_errors = len(errors) + len(false_positives)
-    total_correct = n_total - total_errors
-    print(
-        f"\nEnd-to-end: {total_correct}/{n_total} = {total_correct/n_total:.4f} ({total_errors} errors)"
-    )
-
     # --- Precision/recall at match_score thresholds ---
-    # Collect (match_score, is_correct) for all predictions flagged as union
+    # A prediction is "accepted" if is_union=True AND match_score >= threshold
+    # True positive: union example accepted with correct f_num
     union_preds = []
-    for true_fnum, result in zip(true_fnums, results):
+    for true_fnum, result in zip(true_fnums, union_results):
         if result["is_union"]:
             union_preds.append((result["match_score"], result["f_num"] == true_fnum))
     for result in non_union_results:
@@ -158,15 +153,14 @@ def main():
         )
 
     # --- Save error details ---
-    if errors:
-        pd.DataFrame(errors).to_csv(
+    all_errors = union_errors + false_positives
+    if all_errors:
+        pd.DataFrame(all_errors).to_csv(
             SCRIPT_DIR / "data/pipeline_errors.csv", index=False
         )
-    if false_positives:
-        pd.DataFrame(false_positives).to_csv(
-            SCRIPT_DIR / "data/pipeline_false_positives.csv", index=False
+        print(
+            f"\nAll {len(all_errors)} errors saved to training/data/pipeline_errors.csv"
         )
-    print("\nErrors saved to training/data/pipeline_errors.csv")
 
 
 if __name__ == "__main__":

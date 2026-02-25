@@ -380,55 +380,28 @@ class Extractor:
             ).squeeze(-1)
 
         union_sims_list = union_sims.cpu().tolist()
-        is_union_list = [sim >= self.union_threshold for sim in union_sims_list]
 
-        union_indices = [i for i, is_union in enumerate(is_union_list) if is_union]
-        union_texts = [texts[i] for i in union_indices]
+        # Stage 2: Structured classifier + gazetteer scoring (all texts)
+        char_ids_sc, masks_sc, token_strings = self._tokenize_for_structured(texts)
 
-        # Initialize results
-        results = [None] * len(texts)
+        with torch.no_grad():
+            logits = self.structured_model(char_ids_sc, masks_sc)
+            log_probs = {
+                f: F.log_softmax(logits[f] / self.temperatures[f], dim=-1)
+                for f in FIELDS
+            }
 
-        # Non-unions
-        for i, (is_union, sim) in enumerate(zip(is_union_list, union_sims_list)):
-            if not is_union:
-                results[i] = {
-                    "is_union": False,
-                    "union_score": sim,
-                    "union_name": "",
-                    "desig_name": "",
-                    "desig_num": "",
-                    "prefix": "",
-                    "suffix": "",
-                    "f_num": "",
-                    "match_score": 0.0,
-                    "field_scores": {},
-                }
+        matches = self._score_gazetteer(log_probs, token_strings)
 
-        # Stage 2: Structured classifier + gazetteer scoring
-        if union_texts:
-            char_ids_sc, masks_sc, token_strings = self._tokenize_for_structured(
-                union_texts
-            )
-
-            with torch.no_grad():
-                logits = self.structured_model(char_ids_sc, masks_sc)
-                # Temperature-scaled log-probs (matches training)
-                log_probs = {
-                    f: F.log_softmax(logits[f] / self.temperatures[f], dim=-1)
-                    for f in FIELDS
-                }
-
-            matches = self._score_gazetteer(log_probs, token_strings)
-
-            for j, orig_idx in enumerate(union_indices):
-                rec_idx, match_score = matches[j]
-                rec = self.records_list[rec_idx]
-                field_scores = self._field_scores(
-                    log_probs, j, token_strings[j], rec_idx
-                )
-                results[orig_idx] = {
-                    "is_union": True,
-                    "union_score": union_sims_list[orig_idx],
+        results = []
+        for i in range(len(texts)):
+            rec_idx, match_score = matches[i]
+            rec = self.records_list[rec_idx]
+            field_scores = self._field_scores(log_probs, i, token_strings[i], rec_idx)
+            results.append(
+                {
+                    "is_union": union_sims_list[i] >= self.union_threshold,
+                    "union_score": union_sims_list[i],
                     "union_name": rec.get("union_name", ""),
                     "desig_name": rec.get("desig_name", ""),
                     "desig_num": str(rec.get("desig_num", 0) or ""),
@@ -438,5 +411,6 @@ class Extractor:
                     "match_score": match_score,
                     "field_scores": field_scores,
                 }
+            )
 
         return results
