@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Train a scoring layer on precomputed features.
 
-Loads the frozen structured classifier, computes temperature-scaled
-log-probs per field, then trains a scoring model (linear or MLP) with
-cross-entropy loss over hard-negative candidates.
+Loads the frozen structured classifier, computes log-probs per field,
+then trains a GatedScoringLayer with cross-entropy loss over
+hard-negative candidates mined with a linear baseline.
 
 Train on the train split with bootstrap corruption for f_num features.
 Evaluate on val and test splits separately (full 44K scoring).
@@ -13,7 +13,6 @@ Memory strategy:
     (~17.6 GB per field × 6 fields = ~106 GB for train).
   - Hard negatives are mined from the memmaps in chunks, producing
     a small (N_train, K, 13) candidate array that fits in GPU memory.
-  - Re-mining with updated model weights is supported via callback.
   - Val/test per-field arrays are loaded from memmaps per minibatch.
 """
 
@@ -97,28 +96,15 @@ INIT_WEIGHTS = torch.tensor(
 # Models
 # ---------------------------------------------------------------------------
 
-SHORT_NAMES = [
-    "un",
-    "dn",
-    "fn",
-    "dnum",
-    "pre",
-    "suf",
-    "u_un",
-    "u_dn",
-    "u_fn",
-    "nf_dnum",
-    "nf_pre",
-    "nf_suf",
-    "lcnt",
-]
+# Feature column layout:
+# 0-5: log-probs (union_name, desig_name, f_num, desig_num, prefix, suffix)
+# 6-8: unknown indicators (union_name, desig_name, f_num)
+# 9-11: not-found indicators (desig_num, prefix, suffix)
+# 12: log1p(fnum_count)
+LP_INDICES = [0, 1, 3, 4, 5]  # base log-probs (excl f_num)
+PENALTY_INDICES = [6, 7, 8, 9, 10, 11]  # unknown/not-found indicators
 
-
-# Base field indices: log-probs are fixed at weight 1.0, penalties are learned
-# Fixed lp: union(0), desig(1), designum(3), prefix(4), suffix(5)
-# Learned penalties: unk_union(6), unk_desig(7), unk_fnum(8), nf_designum(9), nf_prefix(10), nf_suffix(11)
-LP_INDICES = [0, 1, 3, 4, 5]  # log-probs with fixed weight 1.0
-PENALTY_INDICES = [6, 7, 8, 9, 10, 11]  # learned penalty weights
+LP_NAMES = ["lp_union", "lp_desig", "lp_designum", "lp_prefix", "lp_suffix"]
 
 PENALTY_NAMES = [
     "unk_union",
@@ -135,19 +121,21 @@ class GatedScoringLayer(nn.Module):
 
     alpha = ceil * count / (count + k)       where k = exp(log_k)
 
-    base = lp_union + lp_desig + lp_designum + lp_prefix + lp_suffix    (fixed)
-         + w[0]·unk_union + w[1]·unk_desig + w[2]·unk_fnum
-         + w[3]·nf_designum + w[4]·nf_prefix + w[5]·nf_suffix + bias   (learned)
+    base = w_lp[0]·lp_union + w_lp[1]·lp_desig + w_lp[2]·lp_designum
+         + w_lp[3]·lp_prefix + w_lp[4]·lp_suffix
+         + w_pen[0]·unk_union + w_pen[1]·unk_desig + w_pen[2]·unk_fnum
+         + w_pen[3]·nf_designum + w_pen[4]·nf_prefix + w_pen[5]·nf_suffix + bias
 
     score = (1 - alpha) * base + alpha * lp_fnum
 
-    8 parameters total (6 penalties + 1 bias + 2 gate).
+    14 parameters total (5 lp weights + 6 penalties + 1 bias + 2 gate).
     """
 
     def __init__(self, init_weights=None):
         super().__init__()
         self.lp_idx = LP_INDICES
         self.penalty_idx = PENALTY_INDICES
+        self.w_lp = nn.Parameter(torch.ones(len(LP_INDICES)))
         self.w_penalty = nn.Linear(len(self.penalty_idx), 1, bias=True)
         # Gate parameters: ceil and log_k (k = exp(log_k) to keep positive)
         self.gate_ceil = nn.Parameter(torch.tensor(0.6))
@@ -165,33 +153,36 @@ class GatedScoringLayer(nn.Module):
         k = torch.exp(self.gate_log_k)
         alpha = self.gate_ceil * count / (count + k)
 
-        lp_sum = x[:, :, self.lp_idx].sum(dim=-1, keepdim=True)  # fixed weight 1.0
-        penalties = self.w_penalty(x[:, :, self.penalty_idx])  # learned
-        base = lp_sum + penalties  # (batch, n_records, 1)
+        lp_weighted = (x[:, :, self.lp_idx] * self.w_lp).sum(dim=-1, keepdim=True)
+        penalties = self.w_penalty(x[:, :, self.penalty_idx])
+        base = lp_weighted + penalties  # (batch, n_records, 1)
 
         return (1.0 - alpha) * base + alpha * lp_fnum
 
     def print_weights(self):
+        wl = self.w_lp.data.cpu().numpy()
         wp = self.w_penalty.weight.data[0].cpu().numpy()
         bb = self.w_penalty.bias.data[0].item()
         ceil = self.gate_ceil.item()
         k = math.exp(self.gate_log_k.item())
         print(f"\nGate: alpha = {ceil:.3f} * count / (count + {k:.1f})")
-        print(
-            "Base: lp_union + lp_desig + lp_designum + lp_prefix + lp_suffix (fixed=1.0)"
-        )
+        print("Log-prob weights:")
+        for i, name in enumerate(LP_NAMES):
+            print(f"  {name:20s}  {wl[i]:8.4f}")
         print("Penalties:")
         for i, name in enumerate(PENALTY_NAMES):
             print(f"  {name:20s}  {wp[i]:8.4f}")
         print(f"  {'bias':20s}  {bb:8.4f}")
 
     def weight_str(self):
+        wl = self.w_lp.data.cpu().numpy()
         wp = self.w_penalty.weight.data[0].cpu().numpy()
         bb = self.w_penalty.bias.data[0].item()
         ceil = self.gate_ceil.item()
         k = math.exp(self.gate_log_k.item())
+        lp_parts = " ".join(f"{n}={wl[i]:.2f}" for i, n in enumerate(LP_NAMES))
         p_parts = " ".join(f"{n}={wp[i]:.2f}" for i, n in enumerate(PENALTY_NAMES))
-        return f"G:ceil={ceil:.2f} k={k:.1f}  " f"P:{p_parts} bias={bb:.2f}"
+        return f"G:ceil={ceil:.2f} k={k:.1f}  LP:{lp_parts}  P:{p_parts} bias={bb:.2f}"
 
 
 # ---------------------------------------------------------------------------
@@ -221,8 +212,7 @@ def precompute_per_field(
     field_known,
     pointer_val_to_indices,
     pointer_none_indices,
-    head_temperatures,
-    fnum_class_temps,
+    temperatures,
     n_records,
     batch_size,
     device,
@@ -248,13 +238,9 @@ def precompute_per_field(
             mask = inputs["mask"].to(device)
             logits = model(char_ids, mask)
 
-            scaled_logits = {}
-            for f in FIELDS:
-                if f == "f_num":
-                    scaled_logits[f] = logits[f] / fnum_class_temps
-                else:
-                    scaled_logits[f] = logits[f] / head_temperatures[f]
-            log_probs = {f: F.log_softmax(scaled_logits[f], dim=-1) for f in FIELDS}
+            log_probs = {
+                f: F.log_softmax(logits[f] / temperatures[f], dim=-1) for f in FIELDS
+            }
 
             bs = char_ids.shape[0]
             for i in range(bs):
@@ -557,99 +543,6 @@ def mine_linear(
     return np.concatenate(all_feat), np.concatenate(all_tgt)
 
 
-def mine_with_model(
-    scoring_model,
-    field_memmaps,
-    field_known,
-    unknown_indicators_np,
-    fnum_log_counts_np,
-    record_union_corrupt_prob,
-    record_desig_corrupt_prob,
-    target_fnums,
-    record_fnums_array,
-    k,
-    device,
-    chunk_size=2048,
-):
-    n_queries = len(target_fnums)
-    n_records = field_memmaps[CLASSIFICATION_FIELDS[0]].shape[1]
-
-    # Generate fresh corruption masks for this mining pass
-    fnum_mask, union_mask, desig_mask = generate_corruption_masks(
-        n_records,
-        fnum_log_counts_np,
-        record_union_corrupt_prob,
-        record_desig_corrupt_prob,
-    )
-    c_unk = {f: unknown_indicators_np[f].copy() for f in CLASSIFICATION_FIELDS}
-    c_unk["f_num"][fnum_mask] = 1.0
-    c_unk["union_name"][union_mask] = 1.0
-    c_unk["desig_name"][desig_mask] = 1.0
-    c_log_counts = fnum_log_counts_np.copy()
-    c_log_counts[fnum_mask] = 0.0
-
-    all_feat, all_tgt = [], []
-    total_force = 0
-
-    scoring_model.eval()
-    with torch.no_grad():
-        for chunk_start in range(0, n_queries, chunk_size):
-            chunk_end = min(chunk_start + chunk_size, n_queries)
-            chunk_slice = slice(chunk_start, chunk_end)
-            n_chunk = chunk_end - chunk_start
-
-            chunk_fields = {
-                f: np.array(field_memmaps[f][chunk_slice]) for f in ALL_LP_FIELDS
-            }
-            chunk_found = process_chunk_fields(chunk_fields, field_known)
-
-            # Apply corruption
-            chunk_fields["f_num"][:, fnum_mask] = 0.0
-            chunk_fields["union_name"][:, union_mask] = 0.0
-            chunk_fields["desig_name"][:, desig_mask] = 0.0
-
-            feat_np = assemble_features_from_fields(
-                chunk_fields,
-                chunk_found,
-                c_unk,
-                c_log_counts,
-                np.arange(n_chunk),
-            )
-            scores = (
-                scoring_model(torch.from_numpy(feat_np).to(device))
-                .squeeze(-1)
-                .cpu()
-                .numpy()
-            )
-
-            cf, ct, nf = _mine_topk(
-                scores,
-                target_fnums[chunk_slice],
-                record_fnums_array,
-                k,
-                chunk_fields,
-                chunk_found,
-                c_unk,
-                c_log_counts,
-            )
-            all_feat.append(cf)
-            all_tgt.append(ct)
-            total_force += nf
-
-            del chunk_fields, chunk_found
-            if chunk_end % (chunk_size * 4) < chunk_size:
-                print(f"    {chunk_end}/{n_queries}", flush=True)
-
-    n_corrupted = int(fnum_mask.sum())
-    print(
-        f"  Force-included: {total_force}/{n_queries}  "
-        f"Corrupted: {n_corrupted}/{n_records} fnum, "
-        f"{int(union_mask.sum())} union, {int(desig_mask.sum())} desig",
-        flush=True,
-    )
-    return np.concatenate(all_feat), np.concatenate(all_tgt)
-
-
 def eval_from_memmaps(
     scoring_model,
     split_memmaps,
@@ -716,12 +609,11 @@ class CandidateDataset(Dataset):
 
 
 class ScoringModule(L.LightningModule):
-    def __init__(self, lr, reg_lambda, topk, remine_every, eval_context=None):
+    def __init__(self, lr, weight_decay, eval_context=None):
         super().__init__()
         self.save_hyperparameters(ignore=["eval_context"])
 
         self.scoring = GatedScoringLayer(init_weights=INIT_WEIGHTS)
-        self.init_weights_penalty = INIT_WEIGHTS[PENALTY_INDICES].clone()
         self.eval_ctx = eval_context or {}
 
     def forward(self, x):
@@ -729,21 +621,8 @@ class ScoringModule(L.LightningModule):
 
     def training_step(self, batch, batch_idx):
         feat, targets = batch
-        # Features are already corrupted during mining
         scores = self.scoring(feat).squeeze(-1)
-        data_loss = F.cross_entropy(scores, targets)
-
-        # L2 regularization toward init weights
-        reg_lambda = self.hparams.reg_lambda
-        iw_p = self.init_weights_penalty.to(self.device)
-        reg = reg_lambda * (
-            ((self.scoring.w_penalty.weight[0] - iw_p) ** 2).sum()
-            + self.scoring.w_penalty.bias[0] ** 2
-            + (self.scoring.gate_ceil - 0.6) ** 2
-            + (self.scoring.gate_log_k - math.log(16.0)) ** 2
-        )
-
-        loss = data_loss + reg
+        loss = F.cross_entropy(scores, targets)
         self.log("train_loss", loss, prog_bar=True, on_epoch=True, on_step=False)
         return loss
 
@@ -776,74 +655,16 @@ class ScoringModule(L.LightningModule):
         print(f"  {self.scoring.weight_str()}", flush=True)
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(
+        optimizer = torch.optim.AdamW(
             [p for p in self.parameters() if p.requires_grad],
             lr=self.hparams.lr,
+            weight_decay=self.hparams.weight_decay,
         )
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
             optimizer,
             T_max=self.trainer.max_epochs,
         )
         return [optimizer], [scheduler]
-
-
-class RemineCallback(L.Callback):
-    """Re-mine hard negatives every N epochs using current model weights."""
-
-    def __init__(
-        self,
-        remine_every,
-        train_memmaps,
-        field_known,
-        unknown_indicators_np,
-        fnum_log_counts_np,
-        record_union_corrupt_prob,
-        record_desig_corrupt_prob,
-        train_target_fnums,
-        record_fnums_array,
-        topk,
-    ):
-        self.remine_every = remine_every
-        self.train_memmaps = train_memmaps
-        self.field_known = field_known
-        self.unknown_indicators_np = unknown_indicators_np
-        self.fnum_log_counts_np = fnum_log_counts_np
-        self.record_union_corrupt_prob = record_union_corrupt_prob
-        self.record_desig_corrupt_prob = record_desig_corrupt_prob
-        self.train_target_fnums = train_target_fnums
-        self.record_fnums_array = record_fnums_array
-        self.topk = topk
-
-    def on_train_epoch_start(self, trainer, pl_module):
-        epoch = trainer.current_epoch
-        if self.remine_every <= 0 or epoch == 0 or epoch % self.remine_every != 0:
-            return
-
-        print(f"\n  Re-mining at epoch {epoch}...", flush=True)
-        new_feat, new_tgt = mine_with_model(
-            pl_module.scoring,
-            self.train_memmaps,
-            self.field_known,
-            self.unknown_indicators_np,
-            self.fnum_log_counts_np,
-            self.record_union_corrupt_prob,
-            self.record_desig_corrupt_prob,
-            self.train_target_fnums,
-            self.record_fnums_array,
-            k=self.topk,
-            device=pl_module.device,
-        )
-
-        pl_module.scoring.train()
-
-        # Replace the train dataloader's dataset
-        new_ds = CandidateDataset(new_feat, new_tgt)
-        trainer.train_dataloader = DataLoader(
-            new_ds,
-            batch_size=trainer.train_dataloader.batch_size,
-            shuffle=True,
-            num_workers=0,
-        )
 
 
 # ---------------------------------------------------------------------------
@@ -854,20 +675,11 @@ class RemineCallback(L.Callback):
 @click.command()
 @click.option("--batch-size", default=256, help="Batch size for precompute")
 @click.option("--lr", default=0.01)
-@click.option("--epochs", default=200)
+@click.option("--epochs", default=10)
 @click.option("--mb-size", default=32, help="Minibatch size for training")
-@click.option(
-    "--reg-lambda", default=0.01, help="L2 regularization toward init weights"
-)
+@click.option("--weight-decay", default=0.01, help="Weight decay for AdamW")
 @click.option("--topk", default=256, help="Top-K hard negatives per query")
-@click.option("--remine-every", default=0, help="Re-mine every N epochs (0 = never)")
-@click.option(
-    "--init-from",
-    default=None,
-    type=click.Path(exists=True),
-    help="Initialize scoring weights from a checkpoint",
-)
-def main(batch_size, lr, epochs, mb_size, reg_lambda, topk, remine_every, init_from):
+def main(batch_size, lr, epochs, mb_size, weight_decay, topk):
     device = torch.accelerator.current_accelerator() or torch.device("cpu")
     print(f"Device: {device}", flush=True)
 
@@ -883,19 +695,7 @@ def main(batch_size, lr, epochs, mb_size, reg_lambda, topk, remine_every, init_f
     field_vocabs = ckpt["field_vocabs"]
     fnum_to_records = ckpt["gazetteer"]
 
-    temps_path = DATA_DIR / "temperatures.json"
-    with open(temps_path) as f:
-        temps = json.load(f)
-    head_temperatures = {f: temps[f] for f in FIELDS if f != "f_num" and f in temps}
-    fnum_a, fnum_b = temps["f_num_a"], temps["f_num_b"]
-
-    fnum_vocab = field_vocabs["f_num"]
     fnum_train_counts = ckpt["fnum_train_counts"]
-    n_fnum_classes = len(fnum_vocab)
-    fnum_class_temps = torch.ones(n_fnum_classes, device=device)
-    for fnum_val, class_idx in fnum_vocab.items():
-        count = fnum_train_counts.get(str(fnum_val), 0)
-        fnum_class_temps[class_idx] = math.exp(fnum_a + fnum_b * math.log1p(count))
 
     field_indices, field_known, record_fnums_list, records_list = (
         build_gazetteer_matrix(fnum_to_records, field_vocabs)
@@ -949,6 +749,11 @@ def main(batch_size, lr, epochs, mb_size, reg_lambda, topk, remine_every, init_f
         flush=True,
     )
 
+    # ── Load temperatures ──
+    with open(DATA_DIR / "temperatures.json") as f:
+        temperatures = json.load(f)
+    print(f"Temperatures: {temperatures}", flush=True)
+
     # ── Precompute to disk ──
     precompute_args = dict(
         field_vocabs=field_vocabs,
@@ -956,8 +761,7 @@ def main(batch_size, lr, epochs, mb_size, reg_lambda, topk, remine_every, init_f
         field_known=field_known_dev,
         pointer_val_to_indices=pointer_val_to_indices,
         pointer_none_indices=pointer_none_indices,
-        head_temperatures=head_temperatures,
-        fnum_class_temps=fnum_class_temps,
+        temperatures=temperatures,
         device=device,
     )
 
@@ -1041,26 +845,11 @@ def main(batch_size, lr, epochs, mb_size, reg_lambda, topk, remine_every, init_f
 
     module = ScoringModule(
         lr=lr,
-        reg_lambda=reg_lambda,
-        topk=topk,
-        remine_every=remine_every,
+        weight_decay=weight_decay,
         eval_context=eval_context,
     )
 
-    # Load scoring weights from checkpoint if provided
-    if init_from:
-        print(f"\nLoading scoring weights from {init_from}", flush=True)
-        init_ckpt = torch.load(init_from, weights_only=False, map_location="cpu")
-        scoring_state = {
-            k.removeprefix("scoring."): v
-            for k, v in init_ckpt["state_dict"].items()
-            if k.startswith("scoring.")
-        }
-        module.scoring.load_state_dict(scoring_state)
-        module.scoring.to(device)
-        module.scoring.train()
-
-    # ── Mine initial hard negatives (always use linear baseline) ──
+    # ── Mine hard negatives (linear baseline) ──
     print(f"\nMining top-{topk} hard negatives (linear baseline)...", flush=True)
     train_cand_feat, train_cand_tgt = mine_linear(
         train_memmaps,
@@ -1093,21 +882,6 @@ def main(batch_size, lr, epochs, mb_size, reg_lambda, topk, remine_every, init_f
     )
 
     callbacks = [checkpoint_cb]
-    if remine_every > 0:
-        callbacks.append(
-            RemineCallback(
-                remine_every=remine_every,
-                train_memmaps=train_memmaps,
-                field_known=field_known,
-                unknown_indicators_np=unknown_indicators_np,
-                fnum_log_counts_np=fnum_log_counts_np,
-                record_union_corrupt_prob=record_union_corrupt_prob,
-                record_desig_corrupt_prob=record_desig_corrupt_prob,
-                train_target_fnums=train_target_fnums,
-                record_fnums_array=record_fnums_array,
-                topk=topk,
-            )
-        )
 
     # ── Train ──
     trainer = L.Trainer(
