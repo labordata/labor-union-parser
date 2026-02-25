@@ -4,7 +4,6 @@ Stage 1: Union vs Non-union detection (contrastive similarity to union centroid)
 Stage 2: Structured classifier + gazetteer scoring for field extraction
 """
 
-import math
 from pathlib import Path
 
 import numpy as np
@@ -174,22 +173,9 @@ class Extractor:
         sw = torch.load(sw_path, map_location=self.device, weights_only=False)
 
         self.temperatures = sw["temperatures"]
-        self.penalty_weights = sw["penalty_weights"].to(self.device)  # (6,)
-        self.penalty_bias = sw["penalty_bias"]
-        self.gate_ceil = sw["gate_ceil"]
-        self.gate_k = math.exp(sw["gate_log_k"])
+        self.scoring_weight = sw["scoring_weight"].to(self.device)  # (13,)
+        self.scoring_bias = sw.get("scoring_bias", 0.0)
         self.scoring_temperature = sw.get("scoring_temperature", 1.0)
-
-        # Per-record f_num training log-counts for gating
-        fnum_train_counts = sc_ckpt["fnum_train_counts"]
-        self.fnum_log_counts = torch.zeros(self.n_records, device=self.device)
-        idx = 0
-        for fnum, recs in fnum_to_records.items():
-            count = fnum_train_counts.get(str(fnum), 0)
-            lc = math.log1p(count)
-            for _ in recs:
-                self.fnum_log_counts[idx] = lc
-                idx += 1
 
     def _tokenize_for_union(self, texts, max_tokens=80):
         """Tokenize batch for union detector."""
@@ -228,37 +214,42 @@ class Extractor:
         return char_ids, masks, all_token_strings
 
     def _field_scores(self, log_probs, j, query_toks, rec_idx):
-        """Per-field log-prob scores for a single query–record pair.
+        """Per-field probabilities for a single query–record pair.
 
         log_probs: dict of (B, n_classes) tensors
         j: query index within the batch
+
+        Returns dict of field -> probability (or None if unknown/not-found).
+        For pointer fields where the value appears at multiple token positions,
+        probabilities are summed (logsumexp) across all matching positions.
         """
         scores = {}
 
-        # Classification fields
+        # Classification fields: single class index → exp(log_prob)
         for f in ("union_name", "desig_name", "f_num"):
             class_idx = self.field_indices[f][rec_idx].item()
             if self.field_known[f][rec_idx]:
-                scores[f] = log_probs[f][j, class_idx].item()
+                scores[f] = log_probs[f][j, class_idx].exp().item()
             else:
                 scores[f] = None
 
-        # Pointer fields
-        tok_to_pos = {}
+        # Pointer fields: collect all matching positions, logsumexp → prob
+        tok_to_positions = {}
         for pos, tok in enumerate(query_toks):
-            if tok and tok not in tok_to_pos:
-                tok_to_pos[tok] = pos
+            if tok:
+                tok_to_positions.setdefault(tok, []).append(pos)
 
         for f in ("desig_num", "prefix", "suffix"):
             rec = self.records_list[rec_idx]
             val = rec.get(f)
             if val is None or val == "" or val == 0:
-                scores[f] = log_probs[f][j, MAX_TOKENS].item()
+                scores[f] = log_probs[f][j, MAX_TOKENS].exp().item()
             else:
                 val_str = str(val)
-                pos = tok_to_pos.get(val_str)
-                if pos is not None:
-                    scores[f] = log_probs[f][j, pos].item()
+                positions = tok_to_positions.get(val_str)
+                if positions is not None:
+                    lp = log_probs[f][j, positions]
+                    scores[f] = lp.logsumexp(dim=0).exp().item()
                 else:
                     scores[f] = None
 
@@ -267,37 +258,48 @@ class Extractor:
     def _score_gazetteer(self, log_probs, token_strings_batch):
         """Score all gazetteer records for a batch of queries.
 
-        Uses learned scoring layer: fixed-weight log-probs for 5 base fields,
-        learned penalty weights for unknown/not-found indicators, and
-        empirical Bayes gating for f_num blending.
+        Assembles a 12-feature vector per (query, record) pair and applies
+        the learned linear scoring layer.
+
+        Feature layout: [lp_union, lp_desig, lp_fnum, lp_designum, lp_prefix, lp_suffix,
+                         unk_union, unk_desig, unk_fnum, nf_designum, nf_prefix, nf_suffix]
 
         Returns list of (top_record_idx, top_score) per query.
         """
-        pw = self.penalty_weights
+        w = self.scoring_weight  # (12,)
         B = len(token_strings_batch)
         R = self.n_records
 
-        # --- Classification fields (batched): (B, R) ---
-        base = torch.zeros(B, R, device=self.device)
-        for fidx, f in enumerate(("union_name", "desig_name")):
+        # --- Build per-field log-prob arrays and indicators ---
+        # Classification fields: lp where known, 0 where unknown
+        # Unknown indicators: 1 where unknown, 0 where known
+        cls_fields = ("union_name", "desig_name", "f_num")
+        lp_cls = []  # will be features 0, 1, 2
+        unk_cls = []  # will be features 6, 7, 8
+        for f in cls_fields:
             field_lp = log_probs[f][:, self.field_indices[f]]  # (B, R)
-            base += torch.where(self.field_known[f], field_lp, pw[fidx])
+            known = self.field_known[f]  # (R,)
+            lp_cls.append(torch.where(known, field_lp, torch.zeros_like(field_lp)))
+            unk_cls.append((~known).float().expand(B, -1))
 
-        # --- Pointer fields: accumulate directly into base ---
-        # Add all 3 default penalties upfront, then scatter corrections.
-        # Order must match penalty weight indices: desig_num(3), prefix(4), suffix(5)
-        base += pw[3].item() + pw[4].item() + pw[5].item()
+        # Pointer fields: lp where found, 0 where not-found
+        # Not-found indicators: 1 where not-found, 0 where found
+        ptr_fields = ("desig_num", "prefix", "suffix")
+        lp_ptr = []  # will be features 3, 4, 5
+        nf_ptr = []  # will be features 9, 10, 11
 
-        for pidx, f in enumerate(("desig_num", "prefix", "suffix")):
-            penalty = pw[3 + pidx].item()
+        for f in ptr_fields:
+            # Start with not-found for all records
+            field_scores = torch.zeros(B, R, device=self.device)
+            is_not_found = torch.ones(B, R, device=self.device)
 
+            # Records with None value: use the "none" position log-prob
             none_idx = self.pointer_none_indices[f]
             if len(none_idx) > 0:
-                base[:, none_idx] += (
-                    log_probs[f][:, MAX_TOKENS : MAX_TOKENS + 1] - penalty
-                )
+                field_scores[:, none_idx] = log_probs[f][:, MAX_TOKENS].unsqueeze(1)
+                is_not_found[:, none_idx] = 0.0
 
-            # Build scatter indices for all queries at once
+            # Records with string values: scatter from query token positions
             val_to_idx = self.pointer_val_to_indices[f]
             all_batch_idx = []
             all_rec_idx = []
@@ -319,27 +321,23 @@ class Extractor:
             if all_batch_idx:
                 bi = torch.cat(all_batch_idx)
                 ri = torch.cat(all_rec_idx).to(self.device)
-                # Gather log-probs for each (query, position) pair
                 vals = torch.empty(bi.shape[0], device=self.device)
                 offset = 0
                 for i, pos, n in all_positions:
                     vals[offset : offset + n] = log_probs[f][i, pos]
                     offset += n
-                base[bi, ri] += vals - penalty
+                field_scores[bi, ri] = vals
+                is_not_found[bi, ri] = 0.0
 
-        # --- unk_fnum penalty into base, not fnum term ---
-        fnum_known = self.field_known["f_num"]  # (R,)
-        base += torch.where(fnum_known, 0.0, pw[2])
-        base += self.penalty_bias
+            lp_ptr.append(field_scores)
+            nf_ptr.append(is_not_found)
 
-        # --- f_num (batched) ---
-        fnum_lp = log_probs["f_num"][:, self.field_indices["f_num"]]  # (B, R)
-        fnum_lp = torch.where(fnum_known, fnum_lp, 0.0)
-
-        # --- Gated blend ---
-        counts = torch.expm1(self.fnum_log_counts)  # (R,)
-        alpha = self.gate_ceil * counts / (counts + self.gate_k)  # (R,)
-        scores = base + alpha * fnum_lp  # (B, R)
+        # --- Compute score as dot product with weight vector ---
+        # Instead of materializing (B, R, 12), compute weighted sum directly
+        scores = torch.zeros(B, R, device=self.device)
+        for i, feat in enumerate(lp_cls + lp_ptr + unk_cls + nf_ptr):
+            scores += w[i] * feat
+        scores += self.scoring_bias
 
         top_indices = scores.argmax(dim=1)  # (B,)
         scaled = scores / self.scoring_temperature

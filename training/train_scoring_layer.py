@@ -2,17 +2,16 @@
 """Train a scoring layer on precomputed features.
 
 Loads the frozen structured classifier, computes log-probs per field,
-then trains a GatedScoringLayer with cross-entropy loss over
-hard-negative candidates mined with a linear baseline.
+then trains a ScoringLayer with cross-entropy loss over all gazetteer
+records (no hard-negative mining).
 
 Train on the train split with bootstrap corruption for f_num features.
-Evaluate on val and test splits separately (full 44K scoring).
+Evaluate on val and test splits separately (full scoring).
 
 Memory strategy:
   - Per-field log-prob arrays are written to numpy memmaps on disk
     (~17.6 GB per field × 6 fields = ~106 GB for train).
-  - Hard negatives are mined from the memmaps in chunks, producing
-    a small (N_train, K, 13) candidate array that fits in GPU memory.
+  - Training reads memmaps on-the-fly in chunks, scoring all records.
   - Val/test per-field arrays are loaded from memmaps per minibatch.
 """
 
@@ -73,25 +72,6 @@ N_FEATURES = len(FEATURE_NAMES)
 
 PRECOMPUTE_CHUNK = 2048
 
-INIT_WEIGHTS = torch.tensor(
-    [
-        0.2757,
-        0.0709,
-        0.1694,
-        0.2713,
-        0.3470,
-        0.3450,
-        -1.5582,
-        -0.7432,
-        -0.8317,
-        -3.1408,
-        -0.7080,
-        -0.5528,
-        0.0809,
-    ]
-)
-
-
 # ---------------------------------------------------------------------------
 # Models
 # ---------------------------------------------------------------------------
@@ -101,8 +81,6 @@ INIT_WEIGHTS = torch.tensor(
 # 6-8: unknown indicators (union_name, desig_name, f_num)
 # 9-11: not-found indicators (desig_num, prefix, suffix)
 # 12: log1p(fnum_count)
-LP_INDICES = [0, 1, 3, 4, 5]  # base log-probs (excl f_num)
-PENALTY_INDICES = [6, 7, 8, 9, 10, 11]  # unknown/not-found indicators
 
 PENALTY_NAMES = [
     "unk_union",
@@ -114,54 +92,44 @@ PENALTY_NAMES = [
 ]
 
 
-class GatedScoringLayer(nn.Module):
-    """Additive scorer with count-dependent f_num weighting.
+N_SCORING_FEATURES = 12  # 6 lp + 3 unk + 3 nf (no count)
+SCORING_IDX = list(range(12))  # first 12 of the 13-feature vector
 
-    alpha = ceil * count / (count + k)       where k = exp(log_k)
 
-    base = lp_union + lp_desig + lp_designum + lp_prefix + lp_suffix
-         + w_pen[0]·unk_union + w_pen[1]·unk_desig + w_pen[2]·unk_fnum
-         + w_pen[3]·nf_designum + w_pen[4]·nf_prefix + w_pen[5]·nf_suffix + bias
+class ScoringLayer(nn.Module):
+    """Linear scorer over 12 features (no count).
 
-    score = base + alpha * lp_fnum
+    score = w · [lp_fields, unk_indicators, nf_indicators] + bias
 
-    9 parameters total (6 penalties + 1 bias + 2 gate).
+    Features: 6 log-probs, 3 unknown indicators, 3 not-found indicators.
+    Learned: 12 weights + 1 bias = 13 parameters.
     """
 
-    def __init__(self, init_weights=None):
+    def __init__(self):
         super().__init__()
-        self.lp_idx = LP_INDICES
-        self.penalty_idx = PENALTY_INDICES
-        self.w_penalty = nn.Linear(len(self.penalty_idx), 1, bias=True)
-        # Gate parameters: ceil and log_k (k = exp(log_k) to keep positive)
-        self.gate_ceil = nn.Parameter(torch.tensor(0.6))
-        self.gate_log_k = nn.Parameter(torch.tensor(math.log(16.0)))
-        if init_weights is not None:
-            with torch.no_grad():
-                self.w_penalty.weight[0] = init_weights[self.penalty_idx].clone()
-                self.w_penalty.bias.zero_()
+        self.linear = nn.Linear(N_SCORING_FEATURES, 1)
+        # Initialize from best blended-fnum run (k collapsed → linear)
+        with torch.no_grad():
+            self.linear.weight[0] = torch.tensor(
+                [
+                    0.6301,
+                    0.4906,
+                    0.8958,
+                    1.1942,
+                    0.5614,
+                    0.7468,  # lp weights
+                    -2.7790,
+                    -1.3739,
+                    -4.6739,  # unk penalties
+                    -7.1982,
+                    -0.7877,
+                    -0.0123,  # nf penalties
+                ]
+            )
+            self.linear.bias[0] = -21.1324
 
     def forward(self, x):
-        # x: (batch, n_records, 13)
-        lp_fnum = x[:, :, 2:3]  # (batch, n_records, 1)
-        count = torch.expm1(x[:, :, 12:13])  # log1p(count) -> count
-
-        k = torch.exp(self.gate_log_k)
-        alpha = self.gate_ceil * count / (count + k)
-
-        lp_sum = x[:, :, self.lp_idx].sum(dim=-1, keepdim=True)
-        penalties = self.w_penalty(x[:, :, self.penalty_idx])
-        base = lp_sum + penalties  # (batch, n_records, 1)
-
-        return base + alpha * lp_fnum
-
-    def weight_str(self):
-        wp = self.w_penalty.weight.data[0].cpu().numpy()
-        bb = self.w_penalty.bias.data[0].item()
-        ceil = self.gate_ceil.item()
-        k = math.exp(self.gate_log_k.item())
-        p_parts = " ".join(f"{n}={wp[i]:.2f}" for i, n in enumerate(PENALTY_NAMES))
-        return f"G:ceil={ceil:.2f} k={k:.1f}  P:{p_parts} bias={bb:.2f}"
+        return self.linear(x[:, :, SCORING_IDX])
 
 
 # ---------------------------------------------------------------------------
@@ -370,166 +338,6 @@ def assemble_features_from_fields(
     return features
 
 
-def generate_corruption_masks(
-    n_records, fnum_log_counts_np, record_union_corrupt_prob, record_desig_corrupt_prob
-):
-    """Generate per-record corruption masks for one mining pass.
-
-    Returns corrupted copies of unknown_indicators and fnum_log_counts,
-    plus boolean masks for zeroing lp fields during mining.
-    """
-    fnum_counts = np.expm1(fnum_log_counts_np)
-    fnum_mask = np.random.random(n_records) < np.exp(-fnum_counts)
-    union_mask = fnum_mask & (np.random.random(n_records) < record_union_corrupt_prob)
-    desig_mask = fnum_mask & (np.random.random(n_records) < record_desig_corrupt_prob)
-    return fnum_mask, union_mask, desig_mask
-
-
-def _mine_topk(
-    scores,
-    target_fnums,
-    record_fnums_array,
-    k,
-    chunk_fields,
-    chunk_found,
-    unknown_indicators_np,
-    fnum_log_counts_np,
-):
-    """Given scores (n_chunk, n_records), mine top-K candidates per query."""
-    n_chunk = scores.shape[0]
-
-    # Vectorized top-K selection
-    topk_idx = np.argpartition(scores, -k, axis=1)[:, -k:]  # (n_chunk, k)
-
-    # Force-include correct records where missing (rare — typically <0.1%)
-    topk_fnums = record_fnums_array[topk_idx]  # (n_chunk, k)
-    has_correct = (topk_fnums == target_fnums[:, None]).any(axis=1)  # (n_chunk,)
-    n_force = 0
-    for qi in np.where(~has_correct)[0]:
-        n_force += 1
-        correct_indices = np.where(record_fnums_array == target_fnums[qi])[0]
-        best_correct = correct_indices[scores[qi, correct_indices].argmax()]
-        worst_pos = np.take(scores[qi], topk_idx[qi]).argmin()
-        topk_idx[qi, worst_pos] = best_correct
-
-    topk_idx.sort(axis=1)
-
-    # Vectorized feature extraction
-    candidate_features = np.empty((n_chunk, k, N_FEATURES), dtype=np.float32)
-    for col, f in enumerate(ALL_LP_FIELDS):
-        candidate_features[:, :, col] = np.take_along_axis(
-            chunk_fields[f], topk_idx, axis=1
-        )
-    for col, f in enumerate(CLASSIFICATION_FIELDS):
-        candidate_features[:, :, 6 + col] = unknown_indicators_np[f][topk_idx]
-    for col, f in enumerate(POINTER_FIELD_LIST):
-        candidate_features[:, :, 9 + col] = np.take_along_axis(
-            chunk_found[f], topk_idx, axis=1
-        )
-    candidate_features[:, :, 12] = fnum_log_counts_np[topk_idx]
-
-    # Vectorized target position finding
-    topk_fnums = record_fnums_array[topk_idx]  # refresh after force-include
-    correct_mask = topk_fnums == target_fnums[:, None]  # (n_chunk, k)
-    # For queries with multiple correct records, pick highest-scoring
-    correct_scores = np.where(
-        correct_mask, np.take_along_axis(scores, topk_idx, axis=1), -np.inf
-    )
-    candidate_targets = correct_scores.argmax(axis=1).astype(np.int64)
-
-    return candidate_features, candidate_targets, n_force
-
-
-def mine_linear(
-    field_memmaps,
-    field_known,
-    unknown_indicators_np,
-    fnum_log_counts_np,
-    record_union_corrupt_prob,
-    record_desig_corrupt_prob,
-    init_weights_np,
-    target_fnums,
-    record_fnums_array,
-    k,
-    chunk_size=2048,
-):
-    n_queries = len(target_fnums)
-    n_records = field_memmaps[CLASSIFICATION_FIELDS[0]].shape[1]
-    w = init_weights_np
-
-    # Generate one set of per-record corruption masks for this mining pass
-    fnum_mask, union_mask, desig_mask = generate_corruption_masks(
-        n_records,
-        fnum_log_counts_np,
-        record_union_corrupt_prob,
-        record_desig_corrupt_prob,
-    )
-
-    # Create corrupted copies of record-level arrays
-    c_unk = {f: unknown_indicators_np[f].copy() for f in CLASSIFICATION_FIELDS}
-    c_unk["f_num"][fnum_mask] = 1.0
-    c_unk["union_name"][union_mask] = 1.0
-    c_unk["desig_name"][desig_mask] = 1.0
-    c_log_counts = fnum_log_counts_np.copy()
-    c_log_counts[fnum_mask] = 0.0
-
-    base_score = np.zeros(n_records, dtype=np.float32)
-    for i, f in enumerate(CLASSIFICATION_FIELDS):
-        base_score += w[6 + i] * c_unk[f]
-    base_score += w[12] * c_log_counts
-
-    all_feat, all_tgt = [], []
-    total_force = 0
-
-    for chunk_start in range(0, n_queries, chunk_size):
-        chunk_end = min(chunk_start + chunk_size, n_queries)
-        chunk_slice = slice(chunk_start, chunk_end)
-        n_chunk = chunk_end - chunk_start
-
-        chunk_fields = {
-            f: np.array(field_memmaps[f][chunk_slice]) for f in ALL_LP_FIELDS
-        }
-        chunk_found = process_chunk_fields(chunk_fields, field_known)
-
-        # Apply corruption: zero lp for corrupted records
-        chunk_fields["f_num"][:, fnum_mask] = 0.0
-        chunk_fields["union_name"][:, union_mask] = 0.0
-        chunk_fields["desig_name"][:, desig_mask] = 0.0
-
-        scores = np.tile(base_score, (n_chunk, 1))
-        for i, f in enumerate(ALL_LP_FIELDS):
-            scores += w[i] * chunk_fields[f]
-        for i, f in enumerate(POINTER_FIELD_LIST):
-            scores += w[9 + i] * chunk_found[f]
-
-        cf, ct, nf = _mine_topk(
-            scores,
-            target_fnums[chunk_slice],
-            record_fnums_array,
-            k,
-            chunk_fields,
-            chunk_found,
-            c_unk,
-            c_log_counts,
-        )
-        all_feat.append(cf)
-        all_tgt.append(ct)
-        total_force += nf
-
-        del chunk_fields, chunk_found, scores
-        if chunk_end % (chunk_size * 4) < chunk_size:
-            print(f"    {chunk_end}/{n_queries}", flush=True)
-
-    n_corrupted = int(fnum_mask.sum())
-    print(
-        f"  Force-included: {total_force}/{n_queries}  "
-        f"Corrupted: {n_corrupted}/{n_records} fnum, "
-        f"{int(union_mask.sum())} union, {int(desig_mask.sum())} desig",
-        flush=True,
-    )
-    return np.concatenate(all_feat), np.concatenate(all_tgt)
-
-
 def eval_from_memmaps(
     scoring_model,
     split_memmaps,
@@ -656,38 +464,122 @@ def fit_scoring_temperature(
 # ---------------------------------------------------------------------------
 
 
-class CandidateDataset(Dataset):
-    """Wraps pre-corrupted candidate features + targets."""
+class FullGazetteerDataset(Dataset):
+    """Reads memmaps on-the-fly, scores all records per chunk.
 
-    def __init__(self, cand_feat, cand_tgt):
-        self.cand_feat = cand_feat  # (N, K, 13) numpy
-        self.cand_tgt = cand_tgt  # (N,) numpy int64
+    Each item is a chunk of queries scored against all gazetteer records,
+    with fresh corruption applied each access (data augmentation).
+    """
+
+    def __init__(
+        self,
+        field_memmaps,
+        field_known,
+        unknown_indicators_np,
+        fnum_log_counts_np,
+        target_fnums,
+        record_fnums_array,
+        record_fnum_corrupt_prob,
+        record_union_corrupt_prob,
+        record_desig_corrupt_prob,
+        chunk_size=128,
+    ):
+        self.memmaps = field_memmaps
+        self.field_known = field_known
+        self.unknown_indicators_np = unknown_indicators_np
+        self.fnum_log_counts_np = fnum_log_counts_np
+        self.target_fnums = target_fnums
+        self.record_fnums_array = record_fnums_array
+        self.record_fnum_corrupt_prob = record_fnum_corrupt_prob
+        self.record_union_corrupt_prob = record_union_corrupt_prob
+        self.record_desig_corrupt_prob = record_desig_corrupt_prob
+        self.chunk_size = chunk_size
+        self.n_queries = len(target_fnums)
+        self.n_records = len(record_fnums_array)
 
     def __len__(self):
-        return len(self.cand_tgt)
+        return (self.n_queries + self.chunk_size - 1) // self.chunk_size
 
-    def __getitem__(self, idx):
+    def __getitem__(self, chunk_idx):
+        cs = self.chunk_size
+        start = chunk_idx * cs
+        end = min(start + cs, self.n_queries)
+        chunk_slice = slice(start, end)
+        n_chunk = end - start
+
+        # Read from memmaps
+        chunk_fields = {
+            f: np.array(self.memmaps[f][chunk_slice]) for f in ALL_LP_FIELDS
+        }
+        chunk_found = process_chunk_fields(chunk_fields, self.field_known)
+
+        # Fresh corruption masks (data augmentation)
+        fnum_mask = np.random.random(self.n_records) < self.record_fnum_corrupt_prob
+        union_mask = fnum_mask & (
+            np.random.random(self.n_records) < self.record_union_corrupt_prob
+        )
+        desig_mask = fnum_mask & (
+            np.random.random(self.n_records) < self.record_desig_corrupt_prob
+        )
+
+        # Apply corruption to lp fields
+        chunk_fields["f_num"][:, fnum_mask] = 0.0
+        chunk_fields["union_name"][:, union_mask] = 0.0
+        chunk_fields["desig_name"][:, desig_mask] = 0.0
+
+        # Build corrupted record-level arrays
+        c_unk = {f: self.unknown_indicators_np[f].copy() for f in CLASSIFICATION_FIELDS}
+        c_unk["f_num"][fnum_mask] = 1.0
+        c_unk["union_name"][union_mask] = 1.0
+        c_unk["desig_name"][desig_mask] = 1.0
+        c_log_counts = self.fnum_log_counts_np.copy()
+        c_log_counts[fnum_mask] = 0.0
+
+        # Assemble features
+        features = assemble_features_from_fields(
+            chunk_fields, chunk_found, c_unk, c_log_counts, np.arange(n_chunk)
+        )
+
+        target_fnums = self.target_fnums[start:end]
+
         return (
-            torch.from_numpy(self.cand_feat[idx].copy()),
-            torch.tensor(self.cand_tgt[idx], dtype=torch.long),
+            torch.from_numpy(features),
+            torch.from_numpy(target_fnums.copy()),
         )
 
 
 class ScoringModule(L.LightningModule):
-    def __init__(self, lr, weight_decay, eval_context=None):
+    def __init__(self, lr, weight_decay, record_fnums_array=None, eval_context=None):
         super().__init__()
-        self.save_hyperparameters(ignore=["eval_context"])
+        self.save_hyperparameters(ignore=["eval_context", "record_fnums_array"])
 
-        self.scoring = GatedScoringLayer(init_weights=INIT_WEIGHTS)
+        self.scoring = ScoringLayer()
         self.eval_ctx = eval_context or {}
+        # Store as buffer so it moves to device automatically
+        if record_fnums_array is not None:
+            self.register_buffer(
+                "record_fnums",
+                torch.from_numpy(record_fnums_array),
+                persistent=False,
+            )
 
     def forward(self, x):
         return self.scoring(x)
 
     def training_step(self, batch, batch_idx):
-        feat, targets = batch
-        scores = self.scoring(feat).squeeze(-1)
-        loss = F.cross_entropy(scores, targets)
+        feat, target_fnums = batch  # (chunk, R, 13), (chunk,)
+        scores = self.scoring(feat).squeeze(-1)  # (chunk, R)
+
+        # Correct mask: all records matching the target fnum
+        correct_mask = self.record_fnums.unsqueeze(0) == target_fnums.unsqueeze(1)
+
+        # Full marginalized cross-entropy over all records
+        neg_inf = torch.finfo(scores.dtype).min
+        correct_scores = scores.masked_fill(~correct_mask, neg_inf)
+        loss = -(
+            torch.logsumexp(correct_scores, dim=1) - torch.logsumexp(scores, dim=1)
+        ).mean()
+
         self.log("train_loss", loss, prog_bar=True, on_epoch=True, on_step=False)
         return loss
 
@@ -716,9 +608,6 @@ class ScoringModule(L.LightningModule):
             )
             self.log(f"{split_name}_errors", float(errors), prog_bar=True)
 
-        # Print weights for interpretability
-        print(f"  {self.scoring.weight_str()}", flush=True)
-
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(
             [p for p in self.parameters() if p.requires_grad],
@@ -740,11 +629,10 @@ class ScoringModule(L.LightningModule):
 @click.command()
 @click.option("--batch-size", default=256, help="Batch size for precompute")
 @click.option("--lr", default=0.01)
-@click.option("--epochs", default=5)
-@click.option("--mb-size", default=32, help="Minibatch size for training")
+@click.option("--epochs", default=10)
+@click.option("--chunk-size", default=128, help="Queries per training chunk")
 @click.option("--weight-decay", default=0.01, help="Weight decay for AdamW")
-@click.option("--topk", default=256, help="Top-K hard negatives per query")
-def main(batch_size, lr, epochs, mb_size, weight_decay, topk):
+def main(batch_size, lr, epochs, chunk_size, weight_decay):
     device = torch.accelerator.current_accelerator() or torch.device("cpu")
     print(f"Device: {device}", flush=True)
 
@@ -761,6 +649,40 @@ def main(batch_size, lr, epochs, mb_size, weight_decay, topk):
     fnum_to_records = ckpt["gazetteer"]
 
     fnum_train_counts = ckpt["fnum_train_counts"]
+
+    # Load examples
+    with open(EXAMPLES_PATH) as f:
+        all_examples = json.load(f)
+
+    splits = {}
+    for split in ("train", "val", "test"):
+        splits[split] = [
+            ex for ex in all_examples if ex["records"] and ex["split"] == split
+        ]
+
+    n_train = len(splits["train"])
+    print(
+        f"\nTrain: {n_train}, Val: {len(splits['val'])}, Test: {len(splits['test'])}",
+        flush=True,
+    )
+
+    # ── Filter gazetteer to f_nums that appear in any split ──
+    # Include synthetic f_nums for gazetteer coverage even though we exclude
+    # synthetic queries from training.
+    split_fnums = set()
+    for ex in all_examples:
+        if ex["records"] and ex.get("split") in ("train", "val", "test"):
+            split_fnums.add(int(ex["records"][0]["f_num"]))
+    full_size = sum(len(recs) for recs in fnum_to_records.values())
+    fnum_to_records = {
+        fnum: recs for fnum, recs in fnum_to_records.items() if int(fnum) in split_fnums
+    }
+    filtered_size = sum(len(recs) for recs in fnum_to_records.values())
+    print(
+        f"\nFiltered gazetteer: {filtered_size}/{full_size} records "
+        f"({len(fnum_to_records)} f_nums in splits)",
+        flush=True,
+    )
 
     field_indices, field_known, record_fnums_list, records_list = (
         build_gazetteer_matrix(fnum_to_records, field_vocabs)
@@ -793,26 +715,6 @@ def main(batch_size, lr, epochs, mb_size, weight_decay, topk):
         unknown_indicators_np[f] = np.logical_not(field_known[f].numpy()).astype(
             np.float32
         )
-
-    # Load examples
-    with open(EXAMPLES_PATH) as f:
-        all_examples = json.load(f)
-
-    splits = {}
-    for split in ("train", "val", "test"):
-        splits[split] = [
-            ex
-            for ex in all_examples
-            if ex["records"]
-            and ex["split"] == split
-            and ex.get("source") != "synthetic"
-        ]
-
-    n_train = len(splits["train"])
-    print(
-        f"\nTrain: {n_train}, Val: {len(splits['val'])}, Test: {len(splits['test'])}",
-        flush=True,
-    )
 
     # ── Load temperatures ──
     with open(DATA_DIR / "temperatures.json") as f:
@@ -911,27 +813,25 @@ def main(batch_size, lr, epochs, mb_size, weight_decay, topk):
     module = ScoringModule(
         lr=lr,
         weight_decay=weight_decay,
+        record_fnums_array=record_fnums_array,
         eval_context=eval_context,
     )
 
-    # ── Mine hard negatives (linear baseline) ──
-    print(f"\nMining top-{topk} hard negatives (linear baseline)...", flush=True)
-    train_cand_feat, train_cand_tgt = mine_linear(
-        train_memmaps,
-        field_known,
-        unknown_indicators_np,
-        fnum_log_counts_np,
-        record_union_corrupt_prob,
-        record_desig_corrupt_prob,
-        INIT_WEIGHTS.numpy(),
-        train_target_fnums,
-        record_fnums_array,
-        k=topk,
-    )
-
     # ── Build datasets ──
-    train_ds = CandidateDataset(train_cand_feat, train_cand_tgt)
-    train_loader = DataLoader(train_ds, batch_size=mb_size, shuffle=True, num_workers=0)
+    train_ds = FullGazetteerDataset(
+        field_memmaps=train_memmaps,
+        field_known=field_known,
+        unknown_indicators_np=unknown_indicators_np,
+        fnum_log_counts_np=fnum_log_counts_np,
+        target_fnums=train_target_fnums,
+        record_fnums_array=record_fnums_array,
+        record_fnum_corrupt_prob=record_fnum_corrupt_prob,
+        record_union_corrupt_prob=record_union_corrupt_prob,
+        record_desig_corrupt_prob=record_desig_corrupt_prob,
+        chunk_size=chunk_size,
+    )
+    # batch_size=None because each item is already a chunk
+    train_loader = DataLoader(train_ds, batch_size=None, shuffle=True, num_workers=0)
 
     # Dummy val loader (actual eval is done via memmaps in on_validation_epoch_end)
     val_loader = DataLoader([0], batch_size=1)
@@ -943,7 +843,7 @@ def main(batch_size, lr, epochs, mb_size, weight_decay, topk):
         monitor="val_errors",
         mode="min",
         save_top_k=1,
-        verbose=True,
+        verbose=False,
     )
 
     callbacks = [checkpoint_cb]
@@ -954,7 +854,7 @@ def main(batch_size, lr, epochs, mb_size, weight_decay, topk):
         callbacks=callbacks,
         gradient_clip_val=1.0,
         log_every_n_steps=50,
-        enable_progress_bar=False,
+        enable_progress_bar=True,
         default_root_dir=str(DATA_DIR),
     )
 
@@ -965,6 +865,7 @@ def main(batch_size, lr, epochs, mb_size, weight_decay, topk):
     if best_path:
         best = ScoringModule.load_from_checkpoint(
             best_path,
+            record_fnums_array=record_fnums_array,
             eval_context=eval_context,
         )
         print(f"\nBest checkpoint: {best_path}")

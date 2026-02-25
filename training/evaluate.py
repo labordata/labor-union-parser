@@ -103,6 +103,27 @@ def main():
                 }
             )
 
+    # --- Per-field accuracy (union examples where is_union=True) ---
+    field_correct = {f: 0 for f in score_fields}
+    field_total = 0
+    for ex, result in zip(union_examples, union_results):
+        if not result["is_union"]:
+            continue
+        field_total += 1
+        rec = ex["records"][0]
+        if result["union_name"] == rec.get("union_name", ""):
+            field_correct["union_name"] += 1
+        if result["desig_name"] == rec.get("desig_name", ""):
+            field_correct["desig_name"] += 1
+        if result["f_num"] == str(rec.get("f_num", "")):
+            field_correct["f_num"] += 1
+        if result["desig_num"] == str(rec.get("desig_num", 0) or ""):
+            field_correct["desig_num"] += 1
+        if result["prefix"] == str(rec.get("prefix", 0) or ""):
+            field_correct["prefix"] += 1
+        if result["suffix"] == (rec.get("suffix", "") or ""):
+            field_correct["suffix"] += 1
+
     # --- Summary ---
     total_errors = len(union_errors) + len(false_positives)
     total_correct = n_total - total_errors
@@ -113,6 +134,11 @@ def main():
     print(f"  False negatives (union, is_union=False): {false_negatives}")
     print(f"  Wrong match (union, is_union=True, wrong f_num): {wrong_matches}")
     print(f"  False positives (non-union, is_union=True): {len(false_positives)}")
+
+    print(f"\nPer-field accuracy ({field_total} union examples with is_union=True):")
+    for f in score_fields:
+        acc = field_correct[f] / field_total if field_total else 0
+        print(f"  {f:>12s}: {field_correct[f]}/{field_total} = {acc:.4f}")
 
     if false_positives:
         print("\nFalse positives:")

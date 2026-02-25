@@ -26,11 +26,13 @@ $(WEIGHTS_DIR)/scoring_weights.pt : $(DATA_DIR)/temperatures.json \
 	python training/bundle_scoring_weights.py
 
 # Train scoring layer
+.INTERMEDIATE: $(WEIGHTS_DIR)/scoring_layer.ckpt
 $(WEIGHTS_DIR)/scoring_layer.ckpt : $(WEIGHTS_DIR)/structured_classifier.pt \
                                     $(DATA_DIR)/training_examples.json
 	python training/train_scoring_layer.py
 
 # Fit per-head temperatures
+.INTERMEDIATE: $(DATA_DIR)/temperatures.json
 $(DATA_DIR)/temperatures.json : $(WEIGHTS_DIR)/structured_classifier.pt
 	cd training && python fit_temperatures.py
 

@@ -133,7 +133,6 @@ def main(
 
     # Load fitted temperatures or build hand-tuned fnum weights
     head_temperatures = None
-    fnum_class_temperatures = None
     fnum_weights = None
     if use_temperatures:
         temps_path = DATA_DIR / "temperatures.json"
@@ -141,22 +140,9 @@ def main(
             temps = json.load(f)
         head_temperatures = {}
         for field in FIELDS:
-            if field != "f_num" and field in temps:
+            if field in temps:
                 head_temperatures[field] = temps[field]
                 print(f"  {field}: T={temps[field]:.4f}")
-
-        # Build per-class f_num temperature vector: T(c) = exp(a + b * log(1+count))
-        fnum_a = temps["f_num_a"]
-        fnum_b = temps["f_num_b"]
-        print(f"  f_num: T(c) = exp({fnum_a:.4f} + {fnum_b:.4f} * log(1+count))")
-        fnum_vocab = field_vocabs["f_num"]
-        n_fnum_classes = len(fnum_vocab)
-        fnum_class_temperatures = torch.ones(n_fnum_classes, device=DEVICE)
-        for fnum_val, class_idx in fnum_vocab.items():
-            count = fnum_train_counts.get(str(fnum_val), 0)
-            fnum_class_temperatures[class_idx] = math.exp(
-                fnum_a + fnum_b * math.log1p(count)
-            )
     else:
         fnum_weights = torch.zeros(n_records, device=DEVICE)
         for i, fnum in enumerate(record_fnums):
@@ -239,13 +225,10 @@ def main(
 
             # Apply temperatures to logits before softmax
             if use_temperatures:
-                scaled_logits = {}
-                for f in FIELDS:
-                    if f == "f_num":
-                        scaled_logits[f] = logits[f] / fnum_class_temperatures
-                    else:
-                        scaled_logits[f] = logits[f] / head_temperatures[f]
-                log_probs = {f: F.log_softmax(scaled_logits[f], dim=-1) for f in FIELDS}
+                log_probs = {
+                    f: F.log_softmax(logits[f] / head_temperatures[f], dim=-1)
+                    for f in FIELDS
+                }
             else:
                 log_probs = {f: F.log_softmax(logits[f], dim=-1) for f in FIELDS}
 

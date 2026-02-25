@@ -12,7 +12,7 @@ Given an input like `"SEIU Local 1199"`, the parser returns:
 - `prefix`: (designation prefix, if any)
 - `suffix`: (designation suffix, if any)
 - `f_num`: 509111 (OLMS filing number)
-- `match_score`: -0.5042 (log-probability score of best gazetteer match)
+- `match_score`: 0.3499 (probability of best gazetteer match)
 
 ## Installation
 
@@ -32,7 +32,9 @@ result = extractor.extract("SEIU Local 1199")
 print(result)
 # {'is_union': True, 'union_score': 0.9997, 'union_name': 'SERVICE EMPLOYEES',
 #  'desig_name': 'LU', 'desig_num': '1199', 'prefix': '', 'suffix': '',
-#  'f_num': '509111', 'match_score': '-0.5042'}
+#  'f_num': '509111', 'match_score': 0.3499,
+#  'field_scores': {'union_name': 0.9996, 'desig_name': 0.9651,
+#   'f_num': 0.4144, 'desig_num': 0.9999, 'prefix': 0.9975, 'suffix': 0.9985}}
 ```
 
 For batch processing, use `extract_batch` which processes texts in parallel for better throughput:
@@ -81,8 +83,8 @@ labor-union-parser unions.csv -c union_name -o results.csv
 
 # Process from stdin
 echo "SEIU Local 1199" | labor-union-parser --no-header
-# text,pred_is_union,pred_union_score,pred_union_name,pred_desig_name,pred_desig_num,pred_prefix,pred_suffix,pred_f_num,pred_match_score
-# SEIU Local 1199,True,0.9997,SERVICE EMPLOYEES,LU,1199,,,509111,-0.5042
+# text,pred_is_union,...,pred_f_num,pred_match_score,score_union_name,...,score_suffix
+# SEIU Local 1199,True,...,509111,0.3499,0.9996,...,0.9985
 ```
 
 ## Output Fields
@@ -97,7 +99,13 @@ echo "SEIU Local 1199" | labor-union-parser --no-header
 | `prefix` | Designation prefix, if any |
 | `suffix` | Designation suffix, if any |
 | `f_num` | OLMS filing number for the matched record |
-| `match_score` | Log-probability score of best gazetteer match |
+| `match_score` | Probability of best gazetteer match (0-1) |
+| `field_scores` | Per-field probabilities for the matched record (see below) |
+
+The `field_scores` dict (Python API) or `score_*` columns (CLI) give the
+classifier's probability for each field value of the matched record.
+Values close to 1.0 indicate high confidence; `None` (or empty in CSV)
+means the field value was unknown to the classifier.
 
 ## Training
 
@@ -154,15 +162,15 @@ Input: "SEIU Local 1199"
 │  score = 0.999 → is_union = True                  │
 └───────────────────────────────────────────────────┘
               │
-              ▼ (if is_union)
+              ▼ (always runs)
 ┌───────────────────────────────────────────────────┐
 │  Stage 2: Structured Classifier + Gazetteer       │
 │                                                   │
 │  CharCNN per token → RoPE Transformer →           │
 │  Per-field classification & pointer heads          │
 │                                                   │
-│  Sum log-probs across fields for each of          │
-│  ~44K gazetteer records → best match              │
+│  Learned linear combination of per-field          │
+│  log-probs across ~44K gazetteer records          │
 │                                                   │
 │  Match: SERVICE EMPLOYEES LU 1199, f_num=509111   │
 └───────────────────────────────────────────────────┘
@@ -192,7 +200,7 @@ Contrastive learning to distinguish union names from non-union text.
 - **Projection**: 2-layer MLP (72 → 128 → 64) with L2 normalization
 - **Training**: One-class contrastive loss (union examples form positive pairs)
 - **Inference**: Cosine similarity to learned union centroid
-- **Threshold**: Similarity ≥ 0.5 → is_union = True
+- **Threshold**: Similarity ≥ 0.9 → is_union = True
 
 ### Stage 2: Structured Classifier + Factored Scoring
 
@@ -210,38 +218,42 @@ records to find the best match — no pairwise comparisons needed.
 Each classification head produces a log-probability distribution over its
 vocabulary (e.g., all known union names). Each pointer head produces a
 log-probability distribution over input token positions (plus a "none"
-position). For each gazetteer record, we look up the log-probability of
-that record's field value under the corresponding head, then sum across
-fields to get a total score. The highest-scoring record is the prediction.
+position). For each gazetteer record, we assemble a 12-feature vector:
 
-The `f_num` head is treated separately because it directly predicts the
-filing number, whereas the other fields (`union_name`, `desig_name`,
-`desig_num`, etc.) are shared properties that many records have in common
-and serve to narrow down the candidates. We blend the `f_num`
-log-probability with the other fields' combined score using a per-record
-weight: `score = (1 - w) * other_fields + w * f_num`. The weight `w`
-ranges from 0.1 (for filing numbers unseen in training) to 0.6 (for
-well-represented ones), scaling with `log(1 + n)` where `n` is the
-training count.
+- 6 **log-prob features**: the classifier's log-probability for each field
+  value of that record (set to 0 if the value is unknown to the vocabulary
+  or not found in the query tokens)
+- 3 **unknown indicators**: 1 if the record's classification field value is
+  not in the vocabulary, 0 otherwise
+- 3 **not-found indicators**: 1 if the record's pointer field value is not
+  present in the query tokens, 0 otherwise
+
+A learned linear layer (12 weights + bias, trained with marginalized
+cross-entropy over all correct records) scores each record. The
+log-prob weights are less than 1.0, acting as correlation discounts
+that correct for the naive independence assumption across fields. The
+highest-scoring record is the prediction, and `match_score` is the
+softmax probability of that record.
 
 ### Performance
 
-On held-out test data (7,160 labeled examples scored against the full 44K-record gazetteer):
+End-to-end on held-out test data (7,160 union + 143 non-union examples
+scored against the full 44K-record gazetteer):
 
 | Metric | Score |
 |--------|-------|
-| Filing number accuracy (top-1) | 98.8% |
-| Filing number accuracy (top-5) | 99.6% |
-| Non-union text filtering accuracy | 96.3% |
+| Overall accuracy | 98.5% (112 errors / 7,303) |
+| Wrong match (union, wrong f_num) | 104 |
+| False negatives (union missed) | 1 |
+| False positives (non-union flagged) | 7 |
 | Non-union text filtering ROC-AUC | 0.995 |
 
-Per-field classifier accuracy on test set:
+Per-field accuracy on test set (7,159 union examples with is_union=True):
 
 | Field | Accuracy |
 |-------|----------|
-| `union_name` | 99.1% |
-| `desig_name` | 99.3% |
-| `desig_num` | 99.6% |
-| `prefix` | 99.3% |
-| `suffix` | 99.6% |
-| `f_num` | 96.7% |
+| `union_name` | 99.4% |
+| `desig_name` | 99.6% |
+| `desig_num` | 99.7% |
+| `prefix` | 99.4% |
+| `suffix` | 99.2% |
