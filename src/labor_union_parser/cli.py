@@ -9,6 +9,8 @@ from tqdm import tqdm
 
 from .extractor import Extractor
 
+SCORE_FIELDS = ["union_name", "desig_name", "f_num", "desig_num", "prefix", "suffix"]
+
 PRED_FIELDS = [
     "pred_is_union",
     "pred_union_score",
@@ -19,7 +21,7 @@ PRED_FIELDS = [
     "pred_suffix",
     "pred_f_num",
     "pred_match_score",
-]
+] + [f"score_{f}" for f in SCORE_FIELDS]
 
 
 def validate_no_header(ctx, param, value):
@@ -78,7 +80,7 @@ def make_row_stream(input_file, column, no_header):
 
 def build_pred_row(result):
     """Build prediction fields from extraction result."""
-    return {
+    row = {
         "pred_is_union": result["is_union"],
         "pred_union_score": f"{result['union_score']:.4f}",
         "pred_union_name": result["union_name"],
@@ -89,6 +91,11 @@ def build_pred_row(result):
         "pred_f_num": result["f_num"],
         "pred_match_score": result["match_score"],
     }
+    field_scores = result.get("field_scores", {})
+    for f in SCORE_FIELDS:
+        val = field_scores.get(f)
+        row[f"score_{f}"] = f"{val:.4f}" if val is not None else ""
+    return row
 
 
 @click.command()

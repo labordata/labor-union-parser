@@ -14,10 +14,25 @@ evaluate: weights
 
 .PHONY: weights
 weights: $(WEIGHTS_DIR)/structured_classifier.pt \
-         $(WEIGHTS_DIR)/union_detector.pt
+         $(WEIGHTS_DIR)/union_detector.pt \
+         $(WEIGHTS_DIR)/scoring_weights.pt
 
 .PHONY: train
 train: $(WEIGHTS_DIR)/structured_classifier.pt $(WEIGHTS_DIR)/union_detector.pt
+
+# Bundle scoring weights for production
+$(WEIGHTS_DIR)/scoring_weights.pt : $(DATA_DIR)/temperatures.json \
+                                    $(WEIGHTS_DIR)/scoring_layer.ckpt
+	python training/bundle_scoring_weights.py
+
+# Train scoring layer
+$(WEIGHTS_DIR)/scoring_layer.ckpt : $(WEIGHTS_DIR)/structured_classifier.pt \
+                                    $(DATA_DIR)/training_examples.json
+	python training/train_scoring_layer.py
+
+# Fit per-head temperatures
+$(DATA_DIR)/temperatures.json : $(WEIGHTS_DIR)/structured_classifier.pt
+	cd training && python fit_temperatures.py
 
 # Bundle trained model with gazetteer and fnum counts
 $(WEIGHTS_DIR)/structured_classifier.pt : $(DATA_DIR)/structured_classifier.ckpt \

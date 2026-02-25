@@ -104,8 +104,6 @@ INIT_WEIGHTS = torch.tensor(
 LP_INDICES = [0, 1, 3, 4, 5]  # base log-probs (excl f_num)
 PENALTY_INDICES = [6, 7, 8, 9, 10, 11]  # unknown/not-found indicators
 
-LP_NAMES = ["lp_union", "lp_desig", "lp_designum", "lp_prefix", "lp_suffix"]
-
 PENALTY_NAMES = [
     "unk_union",
     "unk_desig",
@@ -117,25 +115,23 @@ PENALTY_NAMES = [
 
 
 class GatedScoringLayer(nn.Module):
-    """Single base scorer blended with f_num via empirical Bayes shrinkage.
+    """Additive scorer with count-dependent f_num weighting.
 
     alpha = ceil * count / (count + k)       where k = exp(log_k)
 
-    base = w_lp[0]·lp_union + w_lp[1]·lp_desig + w_lp[2]·lp_designum
-         + w_lp[3]·lp_prefix + w_lp[4]·lp_suffix
+    base = lp_union + lp_desig + lp_designum + lp_prefix + lp_suffix
          + w_pen[0]·unk_union + w_pen[1]·unk_desig + w_pen[2]·unk_fnum
          + w_pen[3]·nf_designum + w_pen[4]·nf_prefix + w_pen[5]·nf_suffix + bias
 
-    score = (1 - alpha) * base + alpha * lp_fnum
+    score = base + alpha * lp_fnum
 
-    14 parameters total (5 lp weights + 6 penalties + 1 bias + 2 gate).
+    9 parameters total (6 penalties + 1 bias + 2 gate).
     """
 
     def __init__(self, init_weights=None):
         super().__init__()
         self.lp_idx = LP_INDICES
         self.penalty_idx = PENALTY_INDICES
-        self.w_lp = nn.Parameter(torch.ones(len(LP_INDICES)))
         self.w_penalty = nn.Linear(len(self.penalty_idx), 1, bias=True)
         # Gate parameters: ceil and log_k (k = exp(log_k) to keep positive)
         self.gate_ceil = nn.Parameter(torch.tensor(0.6))
@@ -153,36 +149,19 @@ class GatedScoringLayer(nn.Module):
         k = torch.exp(self.gate_log_k)
         alpha = self.gate_ceil * count / (count + k)
 
-        lp_weighted = (x[:, :, self.lp_idx] * self.w_lp).sum(dim=-1, keepdim=True)
+        lp_sum = x[:, :, self.lp_idx].sum(dim=-1, keepdim=True)
         penalties = self.w_penalty(x[:, :, self.penalty_idx])
-        base = lp_weighted + penalties  # (batch, n_records, 1)
+        base = lp_sum + penalties  # (batch, n_records, 1)
 
-        return (1.0 - alpha) * base + alpha * lp_fnum
-
-    def print_weights(self):
-        wl = self.w_lp.data.cpu().numpy()
-        wp = self.w_penalty.weight.data[0].cpu().numpy()
-        bb = self.w_penalty.bias.data[0].item()
-        ceil = self.gate_ceil.item()
-        k = math.exp(self.gate_log_k.item())
-        print(f"\nGate: alpha = {ceil:.3f} * count / (count + {k:.1f})")
-        print("Log-prob weights:")
-        for i, name in enumerate(LP_NAMES):
-            print(f"  {name:20s}  {wl[i]:8.4f}")
-        print("Penalties:")
-        for i, name in enumerate(PENALTY_NAMES):
-            print(f"  {name:20s}  {wp[i]:8.4f}")
-        print(f"  {'bias':20s}  {bb:8.4f}")
+        return base + alpha * lp_fnum
 
     def weight_str(self):
-        wl = self.w_lp.data.cpu().numpy()
         wp = self.w_penalty.weight.data[0].cpu().numpy()
         bb = self.w_penalty.bias.data[0].item()
         ceil = self.gate_ceil.item()
         k = math.exp(self.gate_log_k.item())
-        lp_parts = " ".join(f"{n}={wl[i]:.2f}" for i, n in enumerate(LP_NAMES))
         p_parts = " ".join(f"{n}={wp[i]:.2f}" for i, n in enumerate(PENALTY_NAMES))
-        return f"G:ceil={ceil:.2f} k={k:.1f}  LP:{lp_parts}  P:{p_parts} bias={bb:.2f}"
+        return f"G:ceil={ceil:.2f} k={k:.1f}  P:{p_parts} bias={bb:.2f}"
 
 
 # ---------------------------------------------------------------------------
@@ -418,37 +397,45 @@ def _mine_topk(
 ):
     """Given scores (n_chunk, n_records), mine top-K candidates per query."""
     n_chunk = scores.shape[0]
-    candidate_features = np.empty((n_chunk, k, N_FEATURES), dtype=np.float32)
-    candidate_targets = np.empty(n_chunk, dtype=np.int64)
+
+    # Vectorized top-K selection
+    topk_idx = np.argpartition(scores, -k, axis=1)[:, -k:]  # (n_chunk, k)
+
+    # Force-include correct records where missing (rare — typically <0.1%)
+    topk_fnums = record_fnums_array[topk_idx]  # (n_chunk, k)
+    has_correct = (topk_fnums == target_fnums[:, None]).any(axis=1)  # (n_chunk,)
     n_force = 0
+    for qi in np.where(~has_correct)[0]:
+        n_force += 1
+        correct_indices = np.where(record_fnums_array == target_fnums[qi])[0]
+        best_correct = correct_indices[scores[qi, correct_indices].argmax()]
+        worst_pos = np.take(scores[qi], topk_idx[qi]).argmin()
+        topk_idx[qi, worst_pos] = best_correct
 
-    for qi in range(n_chunk):
-        topk_idx = np.argpartition(scores[qi], -k)[-k:]
-        correct_mask = record_fnums_array == target_fnums[qi]
-        if not correct_mask[topk_idx].any():
-            n_force += 1
-            correct_indices = np.where(correct_mask)[0]
-            best_correct = correct_indices[scores[qi, correct_indices].argmax()]
-            topk_idx[scores[qi, topk_idx].argmin()] = best_correct
+    topk_idx.sort(axis=1)
 
-        topk_idx = np.sort(topk_idx)
+    # Vectorized feature extraction
+    candidate_features = np.empty((n_chunk, k, N_FEATURES), dtype=np.float32)
+    for col, f in enumerate(ALL_LP_FIELDS):
+        candidate_features[:, :, col] = np.take_along_axis(
+            chunk_fields[f], topk_idx, axis=1
+        )
+    for col, f in enumerate(CLASSIFICATION_FIELDS):
+        candidate_features[:, :, 6 + col] = unknown_indicators_np[f][topk_idx]
+    for col, f in enumerate(POINTER_FIELD_LIST):
+        candidate_features[:, :, 9 + col] = np.take_along_axis(
+            chunk_found[f], topk_idx, axis=1
+        )
+    candidate_features[:, :, 12] = fnum_log_counts_np[topk_idx]
 
-        for col, f in enumerate(ALL_LP_FIELDS):
-            candidate_features[qi, :, col] = chunk_fields[f][qi, topk_idx]
-        for col, f in enumerate(CLASSIFICATION_FIELDS):
-            candidate_features[qi, :, 6 + col] = unknown_indicators_np[f][topk_idx]
-        for col, f in enumerate(POINTER_FIELD_LIST):
-            candidate_features[qi, :, 9 + col] = chunk_found[f][qi, topk_idx]
-        candidate_features[qi, :, 12] = fnum_log_counts_np[topk_idx]
-
-        correct_in_cand = target_fnums[qi] == record_fnums_array[topk_idx]
-        target_positions = np.where(correct_in_cand)[0]
-        if len(target_positions) == 1:
-            candidate_targets[qi] = target_positions[0]
-        else:
-            candidate_targets[qi] = target_positions[
-                scores[qi, topk_idx[target_positions]].argmax()
-            ]
+    # Vectorized target position finding
+    topk_fnums = record_fnums_array[topk_idx]  # refresh after force-include
+    correct_mask = topk_fnums == target_fnums[:, None]  # (n_chunk, k)
+    # For queries with multiple correct records, pick highest-scoring
+    correct_scores = np.where(
+        correct_mask, np.take_along_axis(scores, topk_idx, axis=1), -np.inf
+    )
+    candidate_targets = correct_scores.argmax(axis=1).astype(np.int64)
 
     return candidate_features, candidate_targets, n_force
 
@@ -586,6 +573,84 @@ def eval_from_memmaps(
     return n_split - correct
 
 
+def fit_scoring_temperature(
+    scoring_model,
+    split_memmaps,
+    split_target_fnums,
+    field_known,
+    unknown_indicators_np,
+    fnum_log_counts_np,
+    record_fnums_array,
+    device,
+    chunk_size=128,
+    lr=0.01,
+    steps=200,
+):
+    """Fit a scalar temperature on scoring layer output via NLL on val set."""
+    scoring_model.eval()
+    n_split = len(split_target_fnums)
+
+    # Build target indices: for each query, which record index is correct?
+    # (pick highest-scoring correct record if multiple share the same fnum)
+    all_scores = []
+    with torch.no_grad():
+        for chunk_start in range(0, n_split, chunk_size):
+            chunk_end = min(chunk_start + chunk_size, n_split)
+            chunk_slice = slice(chunk_start, chunk_end)
+            n_chunk = chunk_end - chunk_start
+
+            chunk_fields = {
+                f: np.array(split_memmaps[f][chunk_slice]) for f in ALL_LP_FIELDS
+            }
+            chunk_found = process_chunk_fields(chunk_fields, field_known)
+
+            feat_np = assemble_features_from_fields(
+                chunk_fields,
+                chunk_found,
+                unknown_indicators_np,
+                fnum_log_counts_np,
+                np.arange(n_chunk),
+            )
+            scores = scoring_model(torch.from_numpy(feat_np).to(device)).squeeze(-1)
+            all_scores.append(scores.cpu())
+            del chunk_fields, chunk_found
+
+    all_scores = torch.cat(all_scores, dim=0)  # (N, R)
+
+    # Build target: index of correct record for each query
+    targets = []
+    for i in range(n_split):
+        fnum = split_target_fnums[i]
+        correct_mask = record_fnums_array == fnum
+        correct_indices = np.where(correct_mask)[0]
+        best = correct_indices[all_scores[i, correct_indices].argmax().item()]
+        targets.append(best)
+    targets = torch.tensor(targets, dtype=torch.long)
+
+    # Fit temperature
+    log_temp = torch.nn.Parameter(torch.zeros(1))
+    optimizer = torch.optim.Adam([log_temp], lr=lr)
+
+    for step in range(steps):
+        optimizer.zero_grad()
+        temp = log_temp.exp()
+        loss = F.cross_entropy(all_scores / temp, targets)
+        loss.backward()
+        optimizer.step()
+
+        if step % 50 == 0 or step == steps - 1:
+            print(f"  Step {step:3d}: T={temp.item():.4f}  NLL={loss.item():.4f}")
+
+    final_temp = log_temp.exp().item()
+
+    # Report NLL before/after
+    nll_before = F.cross_entropy(all_scores, targets).item()
+    nll_after = F.cross_entropy(all_scores / final_temp, targets).item()
+    print(f"  NLL: {nll_before:.4f} -> {nll_after:.4f}")
+
+    return final_temp
+
+
 # ---------------------------------------------------------------------------
 # Lightning module
 # ---------------------------------------------------------------------------
@@ -675,7 +740,7 @@ class ScoringModule(L.LightningModule):
 @click.command()
 @click.option("--batch-size", default=256, help="Batch size for precompute")
 @click.option("--lr", default=0.01)
-@click.option("--epochs", default=10)
+@click.option("--epochs", default=5)
 @click.option("--mb-size", default=32, help="Minibatch size for training")
 @click.option("--weight-decay", default=0.01, help="Weight decay for AdamW")
 @click.option("--topk", default=256, help="Top-K hard negatives per query")
@@ -919,6 +984,27 @@ def main(batch_size, lr, epochs, mb_size, weight_decay, topk):
             print(
                 f"  {split_name}: {correct}/{n_split} = {correct/n_split:.4f} ({errors} errors)"
             )
+
+        # ── Fit scoring temperature on val set ──
+        print("\nFitting scoring temperature on val set...")
+        scoring_temp = fit_scoring_temperature(
+            best.scoring,
+            val_memmaps,
+            val_target_fnums,
+            field_known,
+            unknown_indicators_np,
+            fnum_log_counts_np,
+            record_fnums_array,
+            device,
+        )
+        print(f"Scoring temperature: {scoring_temp:.4f}")
+
+        with open(DATA_DIR / "temperatures.json") as f:
+            temps = json.load(f)
+        temps["scoring"] = scoring_temp
+        with open(DATA_DIR / "temperatures.json", "w") as f:
+            json.dump(temps, f, indent=2)
+        print(f"Saved scoring temperature to {DATA_DIR / 'temperatures.json'}")
 
 
 if __name__ == "__main__":
