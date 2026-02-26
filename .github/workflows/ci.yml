@@ -50,5 +50,26 @@ jobs:
       - name: Run tests
         run: pytest tests/ -v
 
-      - name: Smoke test training script
-        run: python -m training.train --help
+      - name: Smoke test CLI
+        run: labor-union-parser --help
+
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,train]"
+
+      - name: Build training data
+        run: make data
+
+      - name: Run eval tests
+        run: pytest tests/eval/ -m eval -v

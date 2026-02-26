@@ -1,3 +1,7 @@
+fmcs.db
+*.ckpt
+checkpoints/*
+lightning_logs/*
 *.egg-info
 *.lock
 *~
@@ -10,3 +14,13 @@ nlrb_union_names.csv
 opdr.db
 FMCS union name crosswalk - Crosswalk.csv
 discrepancies.csv
+
+# Regenerable training artifacts (make data / make train / make evaluate)
+training/data/training_examples.json
+training/data/unaff_synthetic.csv
+training/data/vocabularies.json
+training/data/fnum_to_unit_identifier.csv
+training/data/gazetteer.json
+training/data/opdr.db
+training/data/factored_scoring_errors_test.csv
+training/data/pipeline_errors.csv

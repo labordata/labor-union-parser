@@ -5,13 +5,13 @@ description = "Extract affiliation and local designation from labor union names"
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "MIT" }
-dependencies = ["torch>=2.0", "click>=8.0", "tqdm>=4.0"]
+dependencies = ["torch>=2.0", "numpy", "click>=8.0", "tqdm>=4.0"]
 
 [project.scripts]
 labor-union-parser = "labor_union_parser.cli:main"
 
 [project.optional-dependencies]
-train = ["pandas", "scikit-learn"]
+train = ["pandas", "scikit-learn", "lightning"]
 dev = ["pytest", "pre-commit", "black", "ruff"]
 
 [build-system]
@@ -22,7 +22,13 @@ build-backend = "setuptools.build_meta"
 where = ["src"]
 
 [tool.setuptools.package-data]
-labor_union_parser = ["weights/*.pt", "weights/*.json"]
+labor_union_parser = ["weights/*.pt"]
+
+[tool.pytest.ini_options]
+addopts = "-m 'not eval'"
+markers = [
+    "eval: slow end-to-end accuracy regression tests (run with: pytest -m eval)",
+]
 
 [tool.ruff]
 line-length = 88

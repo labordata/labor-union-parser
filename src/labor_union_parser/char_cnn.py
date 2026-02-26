@@ -12,7 +12,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .conf import MAX_CHARS_PER_TOKEN, MAX_TOKENS
+MAX_TOKENS = 70
+MAX_CHARS_PER_TOKEN = 20
 
 # Character vocabulary: lowercase letters, digits, common punctuation
 CHAR_VOCAB = {
@@ -121,7 +122,7 @@ class CharacterCNN(nn.Module):
 
         # Reshape to process all tokens at once
         # [batch * seq_len, max_chars]
-        char_ids_flat = char_ids.view(-1, max_chars)
+        char_ids_flat = char_ids.reshape(-1, max_chars)
 
         # Character embeddings: [batch * seq_len, max_chars, char_embed_dim]
         char_emb = self.char_embed(char_ids_flat)
@@ -243,23 +244,3 @@ def tokenize_to_chars(
         token_type.append(4)  # pad
 
     return char_ids, tokens, is_number, token_type
-
-
-# Build a small vocab for non-word tokens (numbers, space, punct)
-# Numbers: common local numbers get their own embedding
-SPECIAL_TOKEN_VOCAB = {
-    "<PAD>": 0,
-    "<UNK>": 1,
-    " ": 2,  # space
-}
-# Common punctuation
-for p in "-/&,.()'\"#:":
-    SPECIAL_TOKEN_VOCAB[p] = len(SPECIAL_TOKEN_VOCAB)
-# Common numbers (locals 1-1000 and some common ones)
-for i in range(1001):
-    SPECIAL_TOKEN_VOCAB[str(i)] = len(SPECIAL_TOKEN_VOCAB)
-
-
-def get_special_token_id(token: str) -> int:
-    """Get ID for non-word token (number, space, punct)."""
-    return SPECIAL_TOKEN_VOCAB.get(token, SPECIAL_TOKEN_VOCAB["<UNK>"])
