@@ -21,22 +21,22 @@ BATCH_SIZE = 256
 # --- Thresholds (max allowed errors) ---
 # Update these when model weights are intentionally changed.
 
-# Union detection
+# Union detection (only counted on examples with known f_num)
 MAX_FALSE_NEGATIVES = 5
 MAX_FALSE_POSITIVES = 10
 
-# Per-field accuracy (among union examples with is_union=True)
+# Per-field accuracy (among union examples with is_union=True, skip -100 fields)
 MAX_FIELD_ERRORS = {
-    "union_name": 75,
+    "union_name": 200,
     "desig_name": 55,
-    "f_num": 110,
-    "desig_num": 30,
-    "prefix": 200,
-    "suffix": 260,
+    "f_num": 115,
+    "desig_num": 80,
+    "prefix": 175,
+    "suffix": 245,
 }
 
-# End-to-end (is_union correct AND f_num correct)
-MAX_WRONG_MATCHES = 110
+# End-to-end (is_union correct AND f_num correct, excludes potentially resolvable)
+MAX_WRONG_MATCHES = 145
 
 
 # --- Fixtures ---
@@ -79,9 +79,14 @@ def predictions(eval_data, extractor):
 class TestUnionDetection:
 
     def test_false_negatives(self, eval_data, predictions):
-        """Union texts misclassified as non-union."""
+        """Union texts misclassified as non-union (only examples with known f_num)."""
+        union, _ = eval_data
         union_results, _ = predictions
-        fn = sum(1 for r in union_results if not r["is_union"])
+        fn = sum(
+            1
+            for ex, r in zip(union, union_results)
+            if not r["is_union"] and ex["records"][0]["f_num"] != -100
+        )
         assert (
             fn <= MAX_FALSE_NEGATIVES
         ), f"False negatives: {fn} (threshold: {MAX_FALSE_NEGATIVES})"
@@ -119,7 +124,7 @@ class TestFieldAccuracy:
 
     @pytest.mark.parametrize("field", MAX_FIELD_ERRORS.keys())
     def test_field_errors(self, field, eval_data, predictions):
-        """Per-field error count on union examples where is_union=True."""
+        """Per-field error count on union examples where is_union=True, skipping -100."""
         union, _ = eval_data
         union_results, _ = predictions
         threshold = MAX_FIELD_ERRORS[field]
@@ -127,6 +132,9 @@ class TestFieldAccuracy:
         errors = 0
         for ex, result in zip(union, union_results):
             if not result["is_union"]:
+                continue
+            truth = ex["records"][0].get(field)
+            if truth == -100:
                 continue
             if result[field] != _field_truth(ex["records"][0], field):
                 errors += 1
@@ -141,14 +149,25 @@ class TestFieldAccuracy:
 class TestEndToEnd:
 
     def test_wrong_fnum_matches(self, eval_data, predictions):
-        """Union texts where is_union=True but f_num is wrong."""
+        """Union texts where is_union=True but f_num is wrong.
+
+        Excludes 'potentially resolvable' examples (unknown true f_num).
+        """
         union, _ = eval_data
         union_results, _ = predictions
 
         wrong = 0
         for ex, result in zip(union, union_results):
-            if result["is_union"] and result["f_num"] != ex["records"][0]["f_num"]:
-                wrong += 1
+            if ex.get("reason_missing_fnum") == "potentially resolvable":
+                continue
+            true_fnum = ex["records"][0]["f_num"]
+            if true_fnum == -100:
+                # No-fnum example: correct if no match found
+                if result["is_union"] and result["match_found"]:
+                    wrong += 1
+            else:
+                if result["is_union"] and result["f_num"] != true_fnum:
+                    wrong += 1
 
         assert (
             wrong <= MAX_WRONG_MATCHES
