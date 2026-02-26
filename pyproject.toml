@@ -24,6 +24,12 @@ where = ["src"]
 [tool.setuptools.package-data]
 labor_union_parser = ["weights/*.pt"]
 
+[tool.pytest.ini_options]
+addopts = "-m 'not eval'"
+markers = [
+    "eval: slow end-to-end accuracy regression tests (run with: pytest -m eval)",
+]
+
 [tool.ruff]
 line-length = 88
 exclude = ["build", "dist", ".venv"]

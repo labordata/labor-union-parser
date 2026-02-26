@@ -42,11 +42,14 @@ def build_field_vocabs(train_examples):
 
 def _normalize_pointer_value(val):
     """Normalize a pointer field value for matching against query tokens."""
+    if val is None:
+        return None
     val = str(val).strip()
     if not val or val == "0":
         return None
     if val.isdigit():
-        return val.lstrip("0") or "0"
+        val = val.lstrip("0") or "0"
+        return None if val == "0" else val
     return val.lower()
 
 

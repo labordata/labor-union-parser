@@ -1,12 +1,18 @@
 """Tests for tokenizer period handling."""
 
-from labor_union_parser.char_cnn import tokenize_to_chars
+from labor_union_parser.char_cnn import CHAR_VOCAB, chars_to_ids, tokenize_to_chars
 
 
 def get_tokens(text: str) -> list[str]:
     """Helper to get just the non-empty tokens."""
     _, tokens, _, _ = tokenize_to_chars(text, max_tokens=40)
     return [t for t in tokens if t]
+
+
+def get_tokens_and_types(text: str) -> list[tuple[str, int]]:
+    """Helper to get (token, token_type) pairs for non-empty tokens."""
+    _, tokens, _, token_types = tokenize_to_chars(text, max_tokens=40)
+    return [(t, tt) for t, tt in zip(tokens, token_types) if t]
 
 
 class TestAcronymHandling:
@@ -133,6 +139,137 @@ class TestSpaceHandling:
     def test_leading_trailing_spaces(self):
         tokens = get_tokens("  IBEW  ")
         assert tokens == [" ", "ibew", " "]
+
+
+class TestCharsToIds:
+    """chars_to_ids converts tokens to character ID sequences."""
+
+    def test_known_characters(self):
+        ids = chars_to_ids("abc")
+        assert ids[0] == CHAR_VOCAB["a"]
+        assert ids[1] == CHAR_VOCAB["b"]
+        assert ids[2] == CHAR_VOCAB["c"]
+
+    def test_unknown_character_maps_to_unk(self):
+        ids = chars_to_ids("@")
+        assert ids[0] == CHAR_VOCAB["<UNK>"]
+
+    def test_unicode_maps_to_unk(self):
+        ids = chars_to_ids("ñ")
+        assert ids[0] == CHAR_VOCAB["<UNK>"]
+
+    def test_case_folded(self):
+        assert chars_to_ids("ABC") == chars_to_ids("abc")
+
+    def test_empty_string_all_padding(self):
+        ids = chars_to_ids("")
+        assert all(c == 0 for c in ids)
+
+    def test_padding_length(self):
+        ids = chars_to_ids("hi")
+        assert len(ids) == 20  # MAX_CHARS_PER_TOKEN
+        assert ids[2:] == [0] * 18
+
+    def test_truncation_at_max_chars(self):
+        long_token = "a" * 30
+        ids = chars_to_ids(long_token, max_chars=20)
+        assert len(ids) == 20
+        assert all(c == CHAR_VOCAB["a"] for c in ids)
+
+    def test_digits(self):
+        ids = chars_to_ids("123")
+        assert ids[0] == CHAR_VOCAB["1"]
+        assert ids[1] == CHAR_VOCAB["2"]
+        assert ids[2] == CHAR_VOCAB["3"]
+
+    def test_punctuation(self):
+        for char in "-/&,.":
+            ids = chars_to_ids(char)
+            assert ids[0] == CHAR_VOCAB[char]
+
+
+class TestTokenTypes:
+    """token_type values: 0=word, 1=number, 2=space, 3=punct, 4=pad."""
+
+    def test_word_type(self):
+        pairs = get_tokens_and_types("hello")
+        assert pairs[0] == ("hello", 0)
+
+    def test_number_type(self):
+        pairs = get_tokens_and_types("42")
+        assert pairs[0] == ("42", 1)
+
+    def test_space_type(self):
+        # Use multi-char words to avoid letter-merging regex
+        pairs = get_tokens_and_types("alpha beta")
+        assert pairs[1] == (" ", 2)
+
+    def test_punct_type(self):
+        pairs = get_tokens_and_types("a-b")
+        assert pairs[1] == ("-", 3)
+
+    def test_pad_type(self):
+        _, _, _, token_types = tokenize_to_chars("hi", max_tokens=5)
+        # After real tokens, remaining should be pad (4)
+        assert token_types[-1] == 4
+
+    def test_acronym_is_word_type(self):
+        pairs = get_tokens_and_types("I.B.E.W.")
+        assert pairs[0] == ("ibew", 0)
+
+
+class TestNumberNormalization:
+    """Numbers should have leading zeros stripped for pointer matching."""
+
+    def test_leading_zeros_stripped(self):
+        tokens = get_tokens("Local 007")
+        assert "7" in tokens
+
+    def test_all_zeros_become_zero(self):
+        tokens = get_tokens("Local 000")
+        assert "0" in tokens
+
+    def test_plain_number_unchanged(self):
+        tokens = get_tokens("Local 42")
+        assert "42" in tokens
+
+
+class TestLetterMergingEdgeCases:
+    """Letter-merging regex should not merge single letters adjacent to words."""
+
+    def test_single_letter_before_word_no_merge(self):
+        tokens = get_tokens("A big union")
+        assert "a" in tokens
+        assert "big" in tokens
+        assert "union" in tokens
+
+    def test_single_letter_article(self):
+        tokens = get_tokens("I am here")
+        assert tokens == ["i", " ", "am", " ", "here"]
+
+    def test_tab_separated_letters_merge(self):
+        tokens = get_tokens("A\tF\tG\tE")
+        assert "afge" in tokens
+
+    def test_spaced_letters_near_words(self):
+        # "Local A F G E 123" - the letters should merge
+        tokens = get_tokens("Local A F G E 123")
+        assert "afge" in tokens
+        assert "local" in tokens
+        assert "123" in tokens
+
+
+class TestTrailingPeriod:
+    """Trailing periods (not followed by anything) are dropped."""
+
+    def test_trailing_period_dropped(self):
+        tokens = get_tokens("IBEW.")
+        assert "." not in tokens
+        assert "ibew" in tokens
+
+    def test_period_before_space_dropped(self):
+        tokens = get_tokens("Inc. of")
+        assert "." not in tokens
 
 
 if __name__ == "__main__":
