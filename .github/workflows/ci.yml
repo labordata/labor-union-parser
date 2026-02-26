@@ -50,8 +50,8 @@ jobs:
       - name: Run tests
         run: pytest tests/ -v
 
-      - name: Smoke test training script
-        run: python -m training.train --help
+      - name: Smoke test CLI
+        run: labor-union-parser --help
 
   eval:
     runs-on: ubuntu-latest
