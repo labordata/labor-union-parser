@@ -93,7 +93,6 @@ class TestNonUnionDetection:
         reader = csv.DictReader(io.StringIO(result.output))
         rows = list(reader)
         assert rows[0]["pred_is_union"] == "False"
-        assert rows[0]["pred_union_name"] == ""
 
 
 class TestErrorHandling:

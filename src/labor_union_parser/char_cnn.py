@@ -155,23 +155,9 @@ class CharacterCNN(nn.Module):
         return token_emb
 
 
-def deterministic_hash(s: str) -> int:
-    """Deterministic string hash (FNV-1a inspired).
-
-    Python's built-in hash() is randomized per process for security,
-    which breaks frozen embeddings that need consistent hashes across
-    training and inference.
-    """
-    h = 2166136261  # FNV offset basis
-    for c in s:
-        h ^= ord(c)
-        h = (h * 16777619) & 0xFFFFFFFF  # FNV prime, keep 32-bit
-    return h
-
-
 def tokenize_to_chars(
     text: str, max_tokens: int = MAX_TOKENS, max_chars: int = MAX_CHARS_PER_TOKEN
-) -> tuple[list[list[int]], list[str], list[int], list[int], list[int]]:
+) -> tuple[list[list[int]], list[str], list[int], list[int]]:
     """Tokenize text and convert to character IDs.
 
     Args:
@@ -184,7 +170,6 @@ def tokenize_to_chars(
         tokens: List of token strings
         is_number: [max_tokens] 1 if token is a number, 0 otherwise
         token_type: [max_tokens] 0=word, 1=number, 2=space, 3=punct, 4=pad
-        numeric_ids: [max_tokens] hash bucket ID for numbers, 0 for non-numbers
     """
     import re
 
@@ -213,46 +198,38 @@ def tokenize_to_chars(
     tokens = []
     is_number = []
     token_type = []  # 0=word, 1=number, 2=space, 3=punct
-    numeric_ids = []  # hash bucket ID for numbers
 
     for match in re.finditer(pattern, text.lower()):
         if match.group(1):  # acronym - strip periods
             tokens.append(match.group(1).replace(".", ""))
             is_number.append(0)
             token_type.append(0)
-            numeric_ids.append(0)
         elif match.group(2):  # word
             tokens.append(match.group(2))
             is_number.append(0)
             token_type.append(0)
-            numeric_ids.append(0)
         elif match.group(3):  # number
             num = match.group(3).lstrip("0") or "0"
             tokens.append(num)
             is_number.append(1)
             token_type.append(1)
-            numeric_ids.append(0)
         elif match.group(4):  # space - normalize to single space
             tokens.append(" ")
             is_number.append(0)
             token_type.append(2)
-            numeric_ids.append(0)
         elif match.group(5):  # period (followed by non-space)
             tokens.append(".")
             is_number.append(0)
             token_type.append(3)
-            numeric_ids.append(0)
         elif match.group(6):  # other punct
             tokens.append(match.group(6))
             is_number.append(0)
             token_type.append(3)
-            numeric_ids.append(0)
 
     # Truncate to max_tokens
     tokens = tokens[:max_tokens]
     is_number = is_number[:max_tokens]
     token_type = token_type[:max_tokens]
-    numeric_ids = numeric_ids[:max_tokens]
 
     # Convert to character IDs
     char_ids = []
@@ -265,6 +242,5 @@ def tokenize_to_chars(
         tokens.append("")  # empty token for padding
         is_number.append(0)
         token_type.append(4)  # pad
-        numeric_ids.append(0)
 
-    return char_ids, tokens, is_number, token_type, numeric_ids
+    return char_ids, tokens, is_number, token_type

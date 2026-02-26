@@ -9,7 +9,7 @@ def smart_truncate_nonspace(text, max_tokens=MAX_TOKENS):
 
     Returns list of dicts with keys: chars, token, is_num, token_type
     """
-    full_chars, full_tokens, full_is_num, full_token_types, _ = tokenize_to_chars(
+    full_chars, full_tokens, full_is_num, full_token_types = tokenize_to_chars(
         text, 999
     )
 

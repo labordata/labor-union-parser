@@ -17,6 +17,7 @@ from .char_cnn import (
 )
 from .classifier import FIELDS, MAX_TOKENS, POINTER_FIELDS, StructuredClassifier
 from .scoring import (
+    _normalize_pointer_value,
     build_gazetteer_matrix,
     build_pointer_lookup,
 )
@@ -24,10 +25,7 @@ from .tokenizer import smart_truncate_nonspace
 
 
 class CrossAttentionEncoder(nn.Module):
-    """Encoder with cross-attention pooling for union detection.
-
-    Uses frozen random embeddings for numbers to make them orthogonal.
-    """
+    """Encoder with cross-attention pooling for union detection."""
 
     def __init__(
         self,
@@ -138,7 +136,7 @@ class Extractor:
             ff_dim=sc_ckpt["d_model"] * 2,
             dropout=0.0,
         )
-        self.structured_model.load_state_dict(sc_ckpt["model_state"], strict=False)
+        self.structured_model.load_state_dict(sc_ckpt["model_state"], strict=True)
         self.structured_model.to(self.device)
         self.structured_model.eval()
 
@@ -173,7 +171,7 @@ class Extractor:
         sw = torch.load(sw_path, map_location=self.device, weights_only=False)
 
         self.temperatures = sw["temperatures"]
-        self.scoring_weight = sw["scoring_weight"].to(self.device)  # (13,)
+        self.scoring_weight = sw["scoring_weight"].to(self.device)  # (12,)
         self.scoring_bias = sw.get("scoring_bias", 0.0)
         self.scoring_temperature = sw.get("scoring_temperature", 1.0)
 
@@ -184,7 +182,7 @@ class Extractor:
         is_number_list = []
 
         for text in texts:
-            char_ids, _, is_number, token_type, _ = tokenize_to_chars(
+            char_ids, _, is_number, token_type = tokenize_to_chars(
                 text, max_tokens=max_tokens
             )
             char_ids_list.append(char_ids)
@@ -233,23 +231,22 @@ class Extractor:
             else:
                 scores[f] = None
 
-        # Pointer fields: collect all matching positions, logsumexp → prob
-        tok_to_positions = {}
+        # Pointer fields: use first matching position (matches _score_gazetteer)
+        tok_to_first_pos = {}
         for pos, tok in enumerate(query_toks):
-            if tok:
-                tok_to_positions.setdefault(tok, []).append(pos)
+            if tok and tok not in tok_to_first_pos:
+                tok_to_first_pos[tok] = pos
 
         for f in ("desig_num", "prefix", "suffix"):
             rec = self.records_list[rec_idx]
             val = rec.get(f)
-            if val is None or val == "" or val == 0:
+            normalized = _normalize_pointer_value(val)
+            if normalized is None:
                 scores[f] = log_probs[f][j, MAX_TOKENS].exp().item()
             else:
-                val_str = str(val)
-                positions = tok_to_positions.get(val_str)
-                if positions is not None:
-                    lp = log_probs[f][j, positions]
-                    scores[f] = lp.logsumexp(dim=0).exp().item()
+                pos = tok_to_first_pos.get(normalized)
+                if pos is not None:
+                    scores[f] = log_probs[f][j, pos].exp().item()
                 else:
                     scores[f] = None
 

@@ -132,7 +132,9 @@ def main(input_file, column, output, batch_size, no_header):
 
     Reads CSV from INPUT_FILE (or stdin if not specified) and appends columns:
     pred_is_union, pred_union_score, pred_union_name, pred_desig_name,
-    pred_desig_num, pred_prefix, pred_suffix, pred_f_num, pred_match_score
+    pred_desig_num, pred_prefix, pred_suffix, pred_f_num, pred_match_score,
+    score_union_name, score_desig_name, score_f_num, score_desig_num,
+    score_prefix, score_suffix
 
     Examples:
 

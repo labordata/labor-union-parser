@@ -5,7 +5,7 @@ from labor_union_parser.char_cnn import tokenize_to_chars
 
 def get_tokens(text: str) -> list[str]:
     """Helper to get just the non-empty tokens."""
-    _, tokens, _, _, _ = tokenize_to_chars(text, max_tokens=40)
+    _, tokens, _, _ = tokenize_to_chars(text, max_tokens=40)
     return [t for t in tokens if t]
 
 

@@ -41,7 +41,7 @@ class UnionDataset(Dataset):
         return len(self.texts)
 
     def __getitem__(self, idx):
-        char_ids, _, is_number, token_type, _ = tokenize_to_chars(
+        char_ids, _, is_number, token_type = tokenize_to_chars(
             self.texts[idx], max_tokens=MAX_TOKENS
         )
         return {
