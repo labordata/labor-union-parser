@@ -175,7 +175,7 @@ class Extractor:
         self.scoring_bias = sw.get("scoring_bias", 0.0)
         self.scoring_temperature = sw.get("scoring_temperature", 1.0)
 
-    def _tokenize_for_union(self, texts, max_tokens=80):
+    def _tokenize_for_union(self, texts, max_tokens=30):
         """Tokenize batch for union detector."""
         char_ids_list = []
         token_type_list = []
@@ -388,11 +388,16 @@ class Extractor:
 
         matches = self._score_gazetteer(log_probs, token_strings)
 
+        # Move log_probs to CPU to avoid per-element GPU→CPU sync in _field_scores
+        log_probs_cpu = {f: lp.cpu() for f, lp in log_probs.items()}
+
         results = []
         for i in range(len(texts)):
             rec_idx, match_score = matches[i]
             rec = self.records_list[rec_idx]
-            field_scores = self._field_scores(log_probs, i, token_strings[i], rec_idx)
+            field_scores = self._field_scores(
+                log_probs_cpu, i, token_strings[i], rec_idx
+            )
             results.append(
                 {
                     "is_union": union_sims_list[i] >= self.union_threshold,
