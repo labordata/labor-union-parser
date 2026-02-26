@@ -22,21 +22,21 @@ BATCH_SIZE = 256
 # Update these when model weights are intentionally changed.
 
 # Union detection
-MAX_FALSE_NEGATIVES = 5  # union text → is_union=False (currently 1)
-MAX_FALSE_POSITIVES = 10  # non-union text → is_union=True (currently 7)
+MAX_FALSE_NEGATIVES = 5
+MAX_FALSE_POSITIVES = 10
 
 # Per-field accuracy (among union examples with is_union=True)
 MAX_FIELD_ERRORS = {
-    "union_name": 75,  # currently 66
-    "desig_name": 55,  # currently 47
-    "f_num": 110,  # currently 100
-    "desig_num": 30,  # currently 25
-    "prefix": 200,  # currently 181
-    "suffix": 260,  # currently 240
+    "union_name": 75,
+    "desig_name": 55,
+    "f_num": 110,
+    "desig_num": 30,
+    "prefix": 200,
+    "suffix": 260,
 }
 
 # End-to-end (is_union correct AND f_num correct)
-MAX_WRONG_MATCHES = 110  # currently 104
+MAX_WRONG_MATCHES = 110
 
 
 # --- Fixtures ---
@@ -98,18 +98,20 @@ class TestUnionDetection:
 # --- Per-field accuracy tests ---
 
 
+def _normalize_pointer_value(val):
+    """Normalize pointer field values (desig_num, prefix, suffix) to match Extractor."""
+    if val is None or val == "" or val == 0:
+        return ""
+    return str(val).lower()
+
+
 def _field_truth(rec, field):
     """Extract ground truth value for a field, matching Extractor output format."""
     if field == "f_num":
         return rec.get("f_num", 0)
     if field in ("union_name", "desig_name"):
         return rec.get(field, "")
-    # Pointer fields: head predictions are raw token strings (lowercased numbers,
-    # lowercase text) — normalize the ground truth the same way.
-    from labor_union_parser.scoring import _normalize_pointer_value
-
-    val = _normalize_pointer_value(rec.get(field))
-    return val or ""
+    return _normalize_pointer_value(rec.get(field))
 
 
 @pytest.mark.eval
