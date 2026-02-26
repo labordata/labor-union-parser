@@ -906,6 +906,7 @@ def main(batch_size, lr, epochs, chunk_size, weight_decay, null_mask_prob):
         mode="min",
         save_top_k=1,
         verbose=False,
+        enable_version_counter=False,
     )
 
     callbacks = [checkpoint_cb]
