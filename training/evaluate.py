@@ -148,6 +148,35 @@ def main():
         acc = field_correct[f] / field_total if field_total else 0
         print(f"  {f:>12s}: {field_correct[f]}/{field_total} = {acc:.4f}")
 
+    # --- match_found breakdown ---
+    null_total = 0
+    null_correct_fnum = 0
+    match_total = 0
+    match_correct_fnum = 0
+    for true_fnum, result in zip(true_fnums, union_results):
+        if not result["is_union"]:
+            continue
+        if result["match_found"]:
+            match_total += 1
+            if result["f_num"] == true_fnum:
+                match_correct_fnum += 1
+        else:
+            null_total += 1
+            if result["f_num"] == true_fnum:
+                null_correct_fnum += 1
+
+    print(f"\nMatch found breakdown ({field_total} union examples with is_union=True):")
+    if match_total:
+        print(
+            f"  match_found=True:  {match_correct_fnum}/{match_total} correct f_num "
+            f"({match_correct_fnum / match_total:.4f})"
+        )
+    if null_total:
+        print(
+            f"  match_found=False: {null_correct_fnum}/{null_total} correct f_num "
+            f"({null_correct_fnum / null_total:.4f})"
+        )
+
     if false_positives:
         print("\nFalse positives:")
         for fp in false_positives:
