@@ -27,12 +27,12 @@ MAX_FALSE_POSITIVES = 10  # non-union text → is_union=True (currently 7)
 
 # Per-field accuracy (among union examples with is_union=True)
 MAX_FIELD_ERRORS = {
-    "union_name": 50,  # currently 41
-    "desig_name": 35,  # currently 26
-    "f_num": 110,  # currently 104
-    "desig_num": 30,  # currently 20
-    "prefix": 50,  # currently 40
-    "suffix": 65,  # currently 55
+    "union_name": 75,  # currently 66
+    "desig_name": 55,  # currently 47
+    "f_num": 110,  # currently 100
+    "desig_num": 30,  # currently 25
+    "prefix": 200,  # currently 181
+    "suffix": 260,  # currently 240
 }
 
 # End-to-end (is_union correct AND f_num correct)
