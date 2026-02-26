@@ -66,12 +66,18 @@ class StructuredDataset(Dataset):
 
             for f in classification_fields:
                 val = _get_field_value(rec, f)
-                idx = field_vocabs[f].get(val)
-                labels[f].append(idx if idx is not None else -100)
+                if val == -100:
+                    labels[f].append(-100)
+                else:
+                    idx = field_vocabs[f].get(val)
+                    labels[f].append(idx if idx is not None else -100)
 
             for f in POINTER_FIELDS:
                 val = _get_field_value(rec, f)
-                pointer_labels[f].append(_find_pointer_label(tokens, val))
+                if val == -100:
+                    pointer_labels[f].append(-100)
+                else:
+                    pointer_labels[f].append(_find_pointer_label(tokens, val))
 
             self.token_char_ids.append([t["chars"] for t in tokens])
             self.masks.append([1 if t["token"] else 0 for t in tokens])
@@ -157,8 +163,11 @@ class StructuredClassifierModule(L.LightningModule):
         for f in FIELDS:
             preds = logits[f].argmax(dim=-1)
             y = labels[f]
-            accs.append((preds == y).float().mean())
-        self.log("train_mean_acc", torch.stack(accs).mean(), prog_bar=True)
+            valid = y != -100
+            if valid.any():
+                accs.append((preds[valid] == y[valid]).float().mean())
+        if accs:
+            self.log("train_mean_acc", torch.stack(accs).mean(), prog_bar=True)
 
         return loss
 
@@ -170,12 +179,15 @@ class StructuredClassifierModule(L.LightningModule):
         for f in FIELDS:
             preds = logits[f].argmax(dim=-1)
             y = labels[f]
-            acc = (preds == y).float().mean()
-            self.log(f"val_{f}_acc", acc, prog_bar=False, sync_dist=True)
-            accs.append(acc)
-        self.log(
-            "val_mean_acc", torch.stack(accs).mean(), prog_bar=True, sync_dist=True
-        )
+            valid = y != -100
+            if valid.any():
+                acc = (preds[valid] == y[valid]).float().mean()
+                self.log(f"val_{f}_acc", acc, prog_bar=False, sync_dist=True)
+                accs.append(acc)
+        if accs:
+            self.log(
+                "val_mean_acc", torch.stack(accs).mean(), prog_bar=True, sync_dist=True
+            )
 
     def test_step(self, batch, batch_idx):
         loss, logits, labels = self._compute_loss(batch)
@@ -184,7 +196,10 @@ class StructuredClassifierModule(L.LightningModule):
         for f in FIELDS:
             preds = logits[f].argmax(dim=-1)
             y = labels[f]
-            acc = (preds == y).float().mean()
+            valid = y != -100
+            if not valid.any():
+                continue
+            acc = (preds[valid] == y[valid]).float().mean()
             self.log(f"test_{f}_acc", acc, sync_dist=True)
             accs.append(acc)
 
@@ -193,13 +208,14 @@ class StructuredClassifierModule(L.LightningModule):
             else:
                 nl = self.null_labels.get(f)
             if nl is not None:
-                non_null_mask = y != nl
+                non_null_mask = valid & (y != nl)
                 if non_null_mask.any():
                     nn_acc = (preds[non_null_mask] == y[non_null_mask]).float().mean()
                     self.log(f"test_{f}_nonnull_acc", nn_acc, sync_dist=True)
-        self.log(
-            "test_mean_acc", torch.stack(accs).mean(), prog_bar=True, sync_dist=True
-        )
+        if accs:
+            self.log(
+                "test_mean_acc", torch.stack(accs).mean(), prog_bar=True, sync_dist=True
+            )
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(

@@ -69,14 +69,27 @@ def main():
     ]
 
     # --- Union errors: is_union=False OR wrong f_num ---
+    # "potentially resolvable" examples (known union, unknown f_num) are excluded
+    # from error counts — we can't say the match is wrong.
     union_errors = []
-    for text, true_fnum, result in zip(
-        [ex["query"] for ex in union_examples], true_fnums, union_results
-    ):
-        is_correct = result["is_union"] and result["f_num"] == true_fnum
+    for ex, true_fnum, result in zip(union_examples, true_fnums, union_results):
+        text = ex["query"]
+        reason = ex.get("reason_missing_fnum")
+        if reason == "potentially resolvable":
+            continue
+        if true_fnum == -100:
+            is_correct = result["is_union"] and not result["match_found"]
+        else:
+            is_correct = result["is_union"] and result["f_num"] == true_fnum
         if not is_correct:
+            if not result["is_union"]:
+                error_type = "false_negative"
+            elif true_fnum == -100:
+                error_type = "false_match_no_fnum"
+            else:
+                error_type = "wrong_match"
             row = {
-                "type": "false_negative" if not result["is_union"] else "wrong_match",
+                "type": error_type,
                 "text": text[:80],
                 "true_fnum": true_fnum,
                 "pred_fnum": result["f_num"],
@@ -93,6 +106,9 @@ def main():
 
     false_negatives = sum(1 for e in union_errors if e["type"] == "false_negative")
     wrong_matches = sum(1 for e in union_errors if e["type"] == "wrong_match")
+    false_match_no_fnum = sum(
+        1 for e in union_errors if e["type"] == "false_match_no_fnum"
+    )
 
     # --- Non-union errors: is_union=True ---
     false_positives = []
@@ -111,50 +127,65 @@ def main():
                 }
             )
 
-    # --- Per-field accuracy (union examples where is_union=True) ---
+    # --- Per-field accuracy (union examples where is_union=True, skip -100 fields) ---
     field_correct = {f: 0 for f in score_fields}
-    field_total = 0
+    n_is_union_per = {f: 0 for f in score_fields}
+    n_is_union = 0
     for ex, result in zip(union_examples, union_results):
         if not result["is_union"]:
             continue
-        field_total += 1
+        n_is_union += 1
         rec = ex["records"][0]
-        if result["union_name"] == rec.get("union_name", ""):
-            field_correct["union_name"] += 1
-        if result["desig_name"] == rec.get("desig_name", ""):
-            field_correct["desig_name"] += 1
-        if result["f_num"] == rec.get("f_num", 0):
-            field_correct["f_num"] += 1
-        if result["desig_num"] == _normalize_or_empty(rec.get("desig_num")):
-            field_correct["desig_num"] += 1
-        if result["prefix"] == _normalize_or_empty(rec.get("prefix")):
-            field_correct["prefix"] += 1
-        if result["suffix"] == _normalize_or_empty(rec.get("suffix")):
-            field_correct["suffix"] += 1
+        for f, pred, raw_true in [
+            ("union_name", result["union_name"], rec.get("union_name", "")),
+            ("desig_name", result["desig_name"], rec.get("desig_name", "")),
+            ("f_num", result["f_num"], rec.get("f_num", 0)),
+            ("desig_num", result["desig_num"], rec.get("desig_num")),
+            ("prefix", result["prefix"], rec.get("prefix")),
+            ("suffix", result["suffix"], rec.get("suffix")),
+        ]:
+            if raw_true == -100:
+                continue
+            if f in ("desig_num", "prefix", "suffix"):
+                true = _normalize_or_empty(raw_true)
+            else:
+                true = raw_true
+            n_is_union_per[f] += 1
+            if pred == true:
+                field_correct[f] += 1
 
     # --- Summary ---
+    n_potentially_resolvable = sum(
+        1
+        for ex in union_examples
+        if ex.get("reason_missing_fnum") == "potentially resolvable"
+    )
+    n_scored = n_total - n_potentially_resolvable
     total_errors = len(union_errors) + len(false_positives)
-    total_correct = n_total - total_errors
+    total_correct = n_scored - total_errors
 
     print(
-        f"\nEnd-to-end: {total_correct}/{n_total} = {total_correct / n_total:.4f} ({total_errors} errors)"
+        f"\nEnd-to-end: {total_correct}/{n_scored} = {total_correct / n_scored:.4f} "
+        f"({total_errors} errors, {n_potentially_resolvable} potentially resolvable excluded)"
     )
     print(f"  False negatives (union, is_union=False): {false_negatives}")
     print(f"  Wrong match (union, is_union=True, wrong f_num): {wrong_matches}")
+    print(f"  False match on no-fnum examples: {false_match_no_fnum}")
     print(f"  False positives (non-union, is_union=True): {len(false_positives)}")
 
-    print(f"\nPer-field accuracy ({field_total} union examples with is_union=True):")
+    print(f"\nPer-field accuracy ({n_is_union} union examples with is_union=True):")
     for f in score_fields:
-        acc = field_correct[f] / field_total if field_total else 0
-        print(f"  {f:>12s}: {field_correct[f]}/{field_total} = {acc:.4f}")
+        ft = n_is_union_per[f]
+        acc = field_correct[f] / ft if ft else 0
+        print(f"  {f:>12s}: {field_correct[f]}/{ft} = {acc:.4f}")
 
-    # --- match_found breakdown ---
+    # --- match_found breakdown (only examples with known f_num) ---
     null_total = 0
     null_correct_fnum = 0
     match_total = 0
     match_correct_fnum = 0
     for true_fnum, result in zip(true_fnums, union_results):
-        if not result["is_union"]:
+        if not result["is_union"] or true_fnum == -100:
             continue
         if result["match_found"]:
             match_total += 1
@@ -165,7 +196,8 @@ def main():
             if result["f_num"] == true_fnum:
                 null_correct_fnum += 1
 
-    print(f"\nMatch found breakdown ({field_total} union examples with is_union=True):")
+    n_with_fnum = match_total + null_total
+    print(f"\nMatch found breakdown ({n_with_fnum} with-fnum examples, is_union=True):")
     if match_total:
         print(
             f"  match_found=True:  {match_correct_fnum}/{match_total} correct f_num "
@@ -175,6 +207,42 @@ def main():
         print(
             f"  match_found=False: {null_correct_fnum}/{null_total} correct f_num "
             f"({null_correct_fnum / null_total:.4f})"
+        )
+
+    # --- No-fnum breakdown by reason ---
+    nofnum_by_reason = {}
+    for ex, result in zip(union_examples, union_results):
+        true_fnum = ex["records"][0]["f_num"]
+        if true_fnum != -100:
+            continue
+        reason = ex.get("reason_missing_fnum", "unknown")
+        if reason not in nofnum_by_reason:
+            nofnum_by_reason[reason] = {
+                "total": 0,
+                "is_union": 0,
+                "matched": 0,
+                "null": 0,
+            }
+        bucket = nofnum_by_reason[reason]
+        bucket["total"] += 1
+        if result["is_union"]:
+            bucket["is_union"] += 1
+            if result["match_found"]:
+                bucket["matched"] += 1
+            else:
+                bucket["null"] += 1
+
+    n_nofnum = sum(b["total"] for b in nofnum_by_reason.values())
+    print(f"\nNo-fnum breakdown ({n_nofnum} examples):")
+    for reason in sorted(nofnum_by_reason, key=lambda r: -nofnum_by_reason[r]["total"]):
+        b = nofnum_by_reason[reason]
+        not_union = b["total"] - b["is_union"]
+        scored = "excluded" if reason == "potentially resolvable" else "scored"
+        print(
+            f"  {reason:>25s} ({scored}): {b['total']:>5d} total, "
+            f"{b['matched']:>5d} matched, "
+            f"{b['null']:>5d} null, "
+            f"{not_union:>5d} not_union"
         )
 
     if false_positives:
@@ -188,9 +256,15 @@ def main():
     # A prediction is "accepted" if is_union=True AND match_score >= threshold
     # True positive: union example accepted with correct f_num
     union_preds = []
-    for true_fnum, result in zip(true_fnums, union_results):
+    for ex, true_fnum, result in zip(union_examples, true_fnums, union_results):
+        if ex.get("reason_missing_fnum") == "potentially resolvable":
+            continue
         if result["is_union"]:
-            union_preds.append((result["match_score"], result["f_num"] == true_fnum))
+            if true_fnum == -100:
+                correct = not result["match_found"]
+            else:
+                correct = result["f_num"] == true_fnum
+            union_preds.append((result["match_score"], correct))
     for result in non_union_results:
         if result["is_union"]:
             union_preds.append((result["match_score"], False))
@@ -205,7 +279,7 @@ def main():
         tp = sum(1 for _, c in accepted if c)
         fp = sum(1 for _, c in accepted if not c)
         precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
-        recall = tp / n_union
+        recall = tp / n_scored
         f1 = (
             2 * precision * recall / (precision + recall)
             if (precision + recall) > 0

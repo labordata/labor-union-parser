@@ -35,7 +35,9 @@ def build_field_vocabs(train_examples):
         values = set()
         for ex in train_examples:
             if ex["records"]:
-                values.add(_get_field_value(ex["records"][0], f))
+                val = _get_field_value(ex["records"][0], f)
+                if val != -100:
+                    values.add(val)
         vocabs[f] = {v: i for i, v in enumerate(sorted(values, key=str))}
     return vocabs
 

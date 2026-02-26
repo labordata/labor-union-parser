@@ -336,10 +336,10 @@ def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
     classification heads even though they have no gazetteer match.
     """
     examples = []
-    skipped_no_union = 0
     skipped_not_in_vocab = 0
     skipped_ambiguous = 0
     no_fnum_included = 0
+    unknown_union_included = 0
 
     with open(DATA_DIR / "labeled_data.csv") as f:
         reader = csv.DictReader(f)
@@ -355,9 +355,6 @@ def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
                 try:
                     f_num = int(float(fnum_str))
                 except ValueError:
-                    # Malformed f_num — skip if no union_name either
-                    if not union_name:
-                        skipped_no_union += 1
                     continue
 
                 # Validate f_num is in vocabulary and has records
@@ -385,40 +382,62 @@ def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
                 )
             else:
                 # --- Row WITHOUT f_num ---
-                if not union_name:
-                    skipped_no_union += 1
-                    continue
-
                 desig_num_str = row.get("desig_num", "").strip()
                 desig_num = int(float(desig_num_str)) if desig_num_str else 0
                 reason = row.get("reason_missing_fnum", "").strip()
 
-                synthetic_record = {
-                    "union_name": union_name,
-                    "desig_name": "",
-                    "desig_num": desig_num,
-                    "prefix": 0,
-                    "suffix": "",
-                    "unit_id": "",
-                    "f_num": None,
-                }
-
-                examples.append(
-                    {
-                        "query": text,
-                        "f_num": None,
-                        "source": "labeled",
-                        "union_name": union_name,
-                        "reason_missing_fnum": reason,
-                        "records": [synthetic_record],
+                if not union_name:
+                    # Unknown union: all fields unknown
+                    synthetic_record = {
+                        "union_name": -100,
+                        "desig_name": -100,
+                        "desig_num": -100,
+                        "prefix": -100,
+                        "suffix": -100,
+                        "unit_id": -100,
+                        "f_num": -100,
                     }
-                )
+                    examples.append(
+                        {
+                            "query": text,
+                            "f_num": -100,
+                            "source": "labeled",
+                            "union_name": "",
+                            "reason_missing_fnum": reason,
+                            "records": [synthetic_record],
+                        }
+                    )
+                    unknown_union_included += 1
+                else:
+                    # Known union_name and desig_num, but no gazetteer match
+                    synthetic_record = {
+                        "union_name": union_name,
+                        "desig_name": -100,
+                        "desig_num": desig_num,
+                        "prefix": -100,
+                        "suffix": -100,
+                        "unit_id": -100,
+                        "f_num": -100,
+                    }
+                    examples.append(
+                        {
+                            "query": text,
+                            "f_num": -100,
+                            "source": "labeled",
+                            "union_name": union_name,
+                            "reason_missing_fnum": reason,
+                            "records": [synthetic_record],
+                        }
+                    )
                 no_fnum_included += 1
 
-    print(f"  {len(examples)} examples loaded ({no_fnum_included} without f_num)")
     print(
-        f"  Skipped: {skipped_no_union} no union_name,"
-        f" {skipped_not_in_vocab} not in vocab,"
+        f"  {len(examples)} examples loaded"
+        f" ({no_fnum_included} without f_num,"
+        f" {unknown_union_included} unknown union)"
+    )
+    print(
+        f"  Skipped: {skipped_not_in_vocab} not in vocab,"
         f" {skipped_ambiguous} ambiguous"
     )
 
@@ -526,7 +545,7 @@ def add_structural_negatives(examples, fnum_to_records, fnum_to_component=None):
 
     for ex in examples:
         pos_fnum = ex["f_num"]
-        if pos_fnum is None:
+        if pos_fnum == -100:
             continue
 
         pos_records = ex["records"]

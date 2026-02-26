@@ -2,15 +2,15 @@
 """Train a scoring layer on precomputed features.
 
 Loads the frozen structured classifier, computes log-probs per field,
-then trains a ScoringLayer with cross-entropy loss over all gazetteer
-records (no hard-negative mining).
+then trains a ScoringLayer with cross-entropy loss over gazetteer
+records whose f_num appears in some training example (~17K records,
+filtered from the full ~44K gazetteer).
 
 Train on the train split with bootstrap corruption for f_num features.
 Evaluate on val and test splits separately (full scoring).
 
 Memory strategy:
-  - Per-field log-prob arrays are written to numpy memmaps on disk
-    (~17.6 GB per field × 6 fields = ~106 GB for train).
+  - Per-field log-prob arrays are written to numpy memmaps on disk.
   - Training reads memmaps on-the-fly in chunks, scoring all records.
   - Val/test per-field arrays are loaded from memmaps per minibatch.
 """
@@ -255,7 +255,12 @@ def precompute_to_memmaps(
             path, dtype=np.float32, mode="w+", shape=(n_queries, n_records)
         )
 
-    target_fnums = np.array([ex["records"][0]["f_num"] for ex in examples])
+    target_fnums = np.array(
+        [
+            int(ex["records"][0]["f_num"]) if ex["f_num"] != -100 else -1
+            for ex in examples
+        ]
+    )
     np.save(split_dir / "target_fnums.npy", target_fnums)
 
     for chunk_start in range(0, n_queries, PRECOMPUTE_CHUNK):
@@ -387,16 +392,42 @@ def eval_from_memmaps(
             del chunk_fields, chunk_found
 
     preds = np.concatenate(all_preds)
-    # Predictions pointing to index n_records are null predictions
-    null_preds = (preds == n_records).sum()
-    # For error counting, null predictions are always wrong (all eval queries have correct records)
-    real_preds = np.minimum(preds, n_records - 1)
-    pred_fnums = record_fnums_array[real_preds]
-    wrong_match = ((pred_fnums != split_target_fnums) & (preds != n_records)).sum()
-    errors = int(wrong_match + null_preds)
-    if null_preds > 0:
-        print(f"    (null predictions: {null_preds})", flush=True)
-    return errors
+    pred_is_null = preds == n_records
+
+    # Split into match queries (target_fnum >= 0) and null queries (target_fnum == -1)
+    is_null_target = split_target_fnums == -1
+    is_match_target = ~is_null_target
+
+    # Match accuracy: among queries with a correct record
+    n_match = int(is_match_target.sum())
+    if n_match > 0:
+        real_preds = np.minimum(preds, n_records - 1)
+        pred_fnums = record_fnums_array[real_preds]
+        match_correct = int(
+            ((pred_fnums == split_target_fnums) & ~pred_is_null & is_match_target).sum()
+        )
+        match_errors = n_match - match_correct
+    else:
+        match_correct = 0
+        match_errors = 0
+
+    # Null accuracy: among queries that should be null
+    n_null = int(is_null_target.sum())
+    if n_null > 0:
+        null_correct = int((pred_is_null & is_null_target).sum())
+        null_errors = n_null - null_correct
+    else:
+        null_correct = 0
+        null_errors = 0
+
+    total_errors = match_errors + null_errors
+    return {
+        "errors": total_errors,
+        "match_correct": match_correct,
+        "n_match": n_match,
+        "null_correct": null_correct,
+        "n_null": n_null,
+    }
 
 
 def fit_scoring_temperature(
@@ -448,15 +479,24 @@ def fit_scoring_temperature(
 
     all_scores = torch.cat(all_scores, dim=0)  # (N, R+1)
 
-    # Build target: index of correct record for each query
-    targets = []
+    # Build correct mask: (N, R+1) — marginalize over all records with matching f_num
+    n_records = len(record_fnums_array)
+    record_fnums_t = torch.from_numpy(record_fnums_array)
+    correct_mask = torch.zeros(n_split, n_records + 1, dtype=torch.bool)
     for i in range(n_split):
         fnum = split_target_fnums[i]
-        correct_mask = record_fnums_array == fnum
-        correct_indices = np.where(correct_mask)[0]
-        best = correct_indices[all_scores[i, correct_indices].argmax().item()]
-        targets.append(best)
-    targets = torch.tensor(targets, dtype=torch.long)
+        if fnum == -1:
+            correct_mask[i, n_records] = True  # null column
+        else:
+            correct_mask[i, :n_records] = record_fnums_t == fnum
+
+    neg_inf = torch.finfo(all_scores.dtype).min
+
+    def marginalized_nll(scores):
+        correct_scores = scores.masked_fill(~correct_mask, neg_inf)
+        return -(
+            torch.logsumexp(correct_scores, dim=1) - torch.logsumexp(scores, dim=1)
+        ).mean()
 
     # Fit temperature
     log_temp = torch.nn.Parameter(torch.zeros(1))
@@ -465,7 +505,7 @@ def fit_scoring_temperature(
     for step in range(steps):
         optimizer.zero_grad()
         temp = log_temp.exp()
-        loss = F.cross_entropy(all_scores / temp, targets)
+        loss = marginalized_nll(all_scores / temp)
         loss.backward()
         optimizer.step()
 
@@ -475,8 +515,8 @@ def fit_scoring_temperature(
     final_temp = log_temp.exp().item()
 
     # Report NLL before/after
-    nll_before = F.cross_entropy(all_scores, targets).item()
-    nll_after = F.cross_entropy(all_scores / final_temp, targets).item()
+    nll_before = marginalized_nll(all_scores).item()
+    nll_after = marginalized_nll(all_scores / final_temp).item()
     print(f"  NLL: {nll_before:.4f} -> {nll_after:.4f}")
 
     return final_temp
@@ -612,6 +652,10 @@ class ScoringModule(L.LightningModule):
         null_mask_prob = self.hparams.null_mask_prob
         null_targets = torch.rand(chunk_size, device=scores.device) < null_mask_prob
 
+        # Force null for examples with no known f_num (sentinel -1)
+        always_null = target_fnums == -1
+        null_targets = null_targets | always_null
+
         # For null-targeted queries: mask out correct real records so null must win
         neg_inf = torch.finfo(scores.dtype).min
         if null_targets.any():
@@ -652,7 +696,7 @@ class ScoringModule(L.LightningModule):
             return
 
         for split_name in ("val", "test"):
-            errors = eval_from_memmaps(
+            result = eval_from_memmaps(
                 self.scoring,
                 ctx[f"{split_name}_memmaps"],
                 ctx[f"{split_name}_target_fnums"],
@@ -662,7 +706,11 @@ class ScoringModule(L.LightningModule):
                 ctx["record_fnums_array"],
                 self.device,
             )
-            self.log(f"{split_name}_errors", float(errors), prog_bar=True)
+            self.log(f"{split_name}_errors", float(result["errors"]), prog_bar=True)
+            self.log(f"{split_name}_match_correct", float(result["match_correct"]))
+            self.log(f"{split_name}_match_total", float(result["n_match"]))
+            self.log(f"{split_name}_null_correct", float(result["null_correct"]))
+            self.log(f"{split_name}_null_total", float(result["n_null"]))
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(
@@ -715,33 +763,40 @@ def main(batch_size, lr, epochs, chunk_size, weight_decay, null_mask_prob):
     with open(EXAMPLES_PATH) as f:
         all_examples = json.load(f)
 
+    NULL_TARGET_REASONS = {"not in gazetteer", "unknown union"}
+
     splits = {}
     for split in ("train", "val", "test"):
         splits[split] = [
-            ex for ex in all_examples if ex["records"] and ex["split"] == split
+            ex
+            for ex in all_examples
+            if ex["records"]
+            and ex["split"] == split
+            and (
+                ex["f_num"] != -100
+                or ex.get("reason_missing_fnum") in NULL_TARGET_REASONS
+            )
         ]
 
+    for split in ("train", "val", "test"):
+        null_count = sum(1 for ex in splits[split] if ex["f_num"] == -100)
+        print(
+            f"  {split}: {len(splits[split])} ({null_count} null targets)",
+            flush=True,
+        )
     n_train = len(splits["train"])
-    print(
-        f"\nTrain: {n_train}, Val: {len(splits['val'])}, Test: {len(splits['test'])}",
-        flush=True,
-    )
 
-    # ── Filter gazetteer to f_nums that appear in any split ──
-    # Include synthetic f_nums for gazetteer coverage even though we exclude
-    # synthetic queries from training.
-    split_fnums = set()
-    for ex in all_examples:
-        if ex["records"] and ex.get("split") in ("train", "val", "test"):
-            split_fnums.add(int(ex["records"][0]["f_num"]))
+    # ── Filter gazetteer to f_nums with training examples ──
     full_size = sum(len(recs) for recs in fnum_to_records.values())
     fnum_to_records = {
-        fnum: recs for fnum, recs in fnum_to_records.items() if int(fnum) in split_fnums
+        fnum: recs
+        for fnum, recs in fnum_to_records.items()
+        if fnum_train_counts.get(str(fnum), 0) > 0
     }
     filtered_size = sum(len(recs) for recs in fnum_to_records.values())
     print(
         f"\nFiltered gazetteer: {filtered_size}/{full_size} records "
-        f"({len(fnum_to_records)} f_nums in splits)",
+        f"({len(fnum_to_records)} f_nums with examples)",
         flush=True,
     )
 
@@ -833,6 +888,8 @@ def main(batch_size, lr, epochs, chunk_size, weight_decay, null_mask_prob):
         fnum_to_union[int(fnum)] = recs[0].get("union_name", "")
         fnum_to_desig[int(fnum)] = recs[0].get("desig_name", "")
     for ex in splits["train"]:
+        if ex["f_num"] == -100:
+            continue
         fnum = ex["records"][0]["f_num"]
         union_counts[fnum_to_union.get(fnum, "")] += 1
         desig_counts[fnum_to_desig.get(fnum, "")] += 1
@@ -933,7 +990,7 @@ def main(batch_size, lr, epochs, chunk_size, weight_decay, null_mask_prob):
         )
         print(f"\nBest checkpoint: {best_path}")
         for split_name in ("val", "test"):
-            errors = eval_from_memmaps(
+            result = eval_from_memmaps(
                 best.scoring,
                 eval_context[f"{split_name}_memmaps"],
                 eval_context[f"{split_name}_target_fnums"],
@@ -944,9 +1001,12 @@ def main(batch_size, lr, epochs, chunk_size, weight_decay, null_mask_prob):
                 device,
             )
             n_split = len(eval_context[f"{split_name}_target_fnums"])
+            errors = result["errors"]
             correct = n_split - errors
             print(
-                f"  {split_name}: {correct}/{n_split} = {correct/n_split:.4f} ({errors} errors)"
+                f"  {split_name}: {correct}/{n_split} = {correct/n_split:.4f} "
+                f"({errors} errors, match: {result['match_correct']}/{result['n_match']}, "
+                f"null: {result['null_correct']}/{result['n_null']})"
             )
 
         # ── Fit scoring temperature on val set ──

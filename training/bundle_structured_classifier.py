@@ -18,7 +18,17 @@ WEIGHTS_DIR = Path(__file__).parent.parent / "src" / "labor_union_parser" / "wei
 
 def main():
     # Load Lightning checkpoint
-    ckpt = torch.load(DATA_DIR / "structured_classifier.ckpt", weights_only=False)
+    # Find the latest versioned checkpoint
+    ckpt_files = sorted(
+        DATA_DIR.glob("structured_classifier-v*.ckpt"),
+        key=lambda p: p.stat().st_mtime,
+    )
+    if ckpt_files:
+        ckpt_path = ckpt_files[-1]
+    else:
+        ckpt_path = DATA_DIR / "structured_classifier.ckpt"
+    print(f"Loading checkpoint: {ckpt_path.name}")
+    ckpt = torch.load(ckpt_path, weights_only=False)
 
     # Extract model weights (strip "model." prefix from Lightning state_dict)
     model_state = {
@@ -34,7 +44,7 @@ def main():
     with open(DATA_DIR / "gazetteer.json") as f:
         gazetteer = json.load(f)
 
-    # Compute fnum training counts
+    # Compute fnum counts across all splits
     with open(DATA_DIR / "training_examples.json") as f:
         examples = json.load(f)
     fnum_train_counts = {
@@ -42,7 +52,7 @@ def main():
         for k, v in Counter(
             ex["records"][0]["f_num"]
             for ex in examples
-            if ex["split"] == "train" and ex["records"]
+            if ex["records"] and ex["records"][0]["f_num"] != -100
         ).items()
     }
 
