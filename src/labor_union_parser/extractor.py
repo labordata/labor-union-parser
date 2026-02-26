@@ -172,8 +172,9 @@ class Extractor:
 
         self.temperatures = sw["temperatures"]
         self.scoring_weight = sw["scoring_weight"].to(self.device)  # (12,)
-        self.scoring_bias = sw.get("scoring_bias", 0.0)
-        self.scoring_temperature = sw.get("scoring_temperature", 1.0)
+        self.scoring_bias = sw["scoring_bias"]
+        self.scoring_temperature = sw["scoring_temperature"]
+        self.null_bias = sw["null_bias"]
 
     def _tokenize_for_union(self, texts, max_tokens=30):
         """Tokenize batch for union detector."""
@@ -336,13 +337,24 @@ class Extractor:
             scores += w[i] * feat
         scores += self.scoring_bias
 
+        # Append null bias column → (B, R+1)
+        null_col = torch.full((B, 1), self.null_bias, device=self.device)
+        scores_with_null = torch.cat([scores, null_col], dim=1)
+
+        # Best real record (always from the first R columns)
         top_indices = scores.argmax(dim=1)  # (B,)
-        scaled = scores / self.scoring_temperature
+
+        # Softmax over all columns (including null) for match_score
+        scaled = scores_with_null / self.scoring_temperature
         top_scaled = scaled.gather(1, top_indices.unsqueeze(1)).squeeze(1)
         log_normalizers = torch.logsumexp(scaled, dim=1)  # (B,)
         match_probs = (top_scaled - log_normalizers).exp()  # (B,)
 
-        return list(zip(top_indices.tolist(), match_probs.tolist()))
+        # Check if null wins (argmax over R+1 columns points to last column)
+        overall_winners = scores_with_null.argmax(dim=1)  # (B,)
+        null_wins = (overall_winners == R).tolist()
+
+        return list(zip(top_indices.tolist(), match_probs.tolist(), null_wins))
 
     def extract(self, text: str) -> dict:
         """Extract union fields from a single text."""
@@ -391,25 +403,71 @@ class Extractor:
         # Move log_probs to CPU to avoid per-element GPU→CPU sync in _field_scores
         log_probs_cpu = {f: lp.cpu() for f, lp in log_probs.items()}
 
+        # Decode per-head argmax predictions
+        head_preds = {}
+        for f in ("union_name", "desig_name"):
+            indices = log_probs_cpu[f].argmax(dim=-1)  # (B,)
+            head_preds[f] = [self.inv_vocabs[f].get(idx.item(), "") for idx in indices]
+        for f in ("desig_num", "prefix", "suffix"):
+            indices = log_probs_cpu[f].argmax(dim=-1)  # (B,)
+            preds = []
+            for i, idx in enumerate(indices):
+                pos = idx.item()
+                if pos >= MAX_TOKENS:
+                    preds.append("")
+                else:
+                    preds.append(
+                        token_strings[i][pos] if pos < len(token_strings[i]) else ""
+                    )
+            head_preds[f] = preds
+
         results = []
         for i in range(len(texts)):
-            rec_idx, match_score = matches[i]
+            rec_idx, match_score, null_won = matches[i]
             rec = self.records_list[rec_idx]
             field_scores = self._field_scores(
                 log_probs_cpu, i, token_strings[i], rec_idx
             )
+
+            pred_union = head_preds["union_name"][i]
+            pred_desig = head_preds["desig_name"][i]
+            pred_desig_num = head_preds["desig_num"][i]
+            pred_prefix = head_preds["prefix"][i]
+            pred_suffix = head_preds["suffix"][i]
+
+            # Detect conflicts between head predictions and matched record
+            conflicts = []
+            if pred_union != rec.get("union_name", ""):
+                conflicts.append("union_name_mismatch")
+            if pred_desig != rec.get("desig_name", ""):
+                conflicts.append("desig_name_mismatch")
+
+            rec_desig_num = _normalize_pointer_value(rec.get("desig_num", 0))
+            if (pred_desig_num or None) != (rec_desig_num or None):
+                conflicts.append("desig_num_mismatch")
+
+            rec_prefix = _normalize_pointer_value(rec.get("prefix", 0))
+            if (pred_prefix or None) != (rec_prefix or None):
+                conflicts.append("prefix_mismatch")
+
+            rec_suffix = _normalize_pointer_value(rec.get("suffix", ""))
+            if (pred_suffix or None) != (rec_suffix or None):
+                conflicts.append("suffix_mismatch")
+
             results.append(
                 {
                     "is_union": union_sims_list[i] >= self.union_threshold,
                     "union_score": union_sims_list[i],
-                    "union_name": rec.get("union_name", ""),
-                    "desig_name": rec.get("desig_name", ""),
-                    "desig_num": str(rec.get("desig_num", 0) or ""),
-                    "prefix": str(rec.get("prefix", 0) or ""),
-                    "suffix": rec.get("suffix", ""),
-                    "f_num": str(rec.get("f_num", "")),
+                    "union_name": pred_union,
+                    "desig_name": pred_desig,
+                    "desig_num": pred_desig_num,
+                    "prefix": pred_prefix,
+                    "suffix": pred_suffix,
+                    "f_num": int(self.record_fnums[rec_idx]),
+                    "match_found": not null_won,
                     "match_score": match_score,
                     "field_scores": field_scores,
+                    "conflicts": conflicts,
                 }
             )
 

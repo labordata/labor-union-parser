@@ -20,7 +20,9 @@ PRED_FIELDS = [
     "pred_prefix",
     "pred_suffix",
     "pred_f_num",
+    "pred_match_found",
     "pred_match_score",
+    "pred_conflicts",
 ] + [f"score_{f}" for f in SCORE_FIELDS]
 
 
@@ -89,7 +91,9 @@ def build_pred_row(result):
         "pred_prefix": result["prefix"],
         "pred_suffix": result["suffix"],
         "pred_f_num": result["f_num"],
+        "pred_match_found": result["match_found"],
         "pred_match_score": result["match_score"],
+        "pred_conflicts": "|".join(result.get("conflicts", [])),
     }
     field_scores = result.get("field_scores", {})
     for f in SCORE_FIELDS:
@@ -132,9 +136,27 @@ def main(input_file, column, output, batch_size, no_header):
 
     Reads CSV from INPUT_FILE (or stdin if not specified) and appends columns:
     pred_is_union, pred_union_score, pred_union_name, pred_desig_name,
-    pred_desig_num, pred_prefix, pred_suffix, pred_f_num, pred_match_score,
-    score_union_name, score_desig_name, score_f_num, score_desig_num,
-    score_prefix, score_suffix
+    pred_desig_num, pred_prefix, pred_suffix, pred_f_num, pred_match_found,
+    pred_match_score, pred_conflicts, score_union_name, score_desig_name,
+    score_f_num, score_desig_num, score_prefix, score_suffix
+
+    The pred_union_name, pred_desig_name, pred_desig_num, pred_prefix, and
+    pred_suffix columns are the per-field classification head predictions
+    (what the model thinks each field is). The pred_f_num column is the OLMS
+    filing number of the best-scoring gazetteer record.
+
+    The pred_conflicts column flags mismatches between the head predictions
+    and the matched gazetteer record, pipe-delimited. Conflict codes:
+
+    \b
+      union_name_mismatch   Head predicts a different parent union than the
+                            matched record. Strongest signal of a bad match.
+      desig_name_mismatch   Head predicts a different designation type
+                            (e.g., LU vs JC) than the matched record.
+      desig_num_mismatch    Head's pointer picks a different number than
+                            the matched record's designation number.
+      prefix_mismatch       Head's pointer picks a different prefix.
+      suffix_mismatch       Head's pointer picks a different suffix.
 
     Examples:
 

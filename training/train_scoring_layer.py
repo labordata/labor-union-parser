@@ -97,12 +97,15 @@ SCORING_IDX = list(range(12))  # first 12 of the 13-feature vector
 
 
 class ScoringLayer(nn.Module):
-    """Linear scorer over 12 features (no count).
+    """Linear scorer over 12 features (no count) + learnable null bias.
 
     score = w · [lp_fields, unk_indicators, nf_indicators] + bias
 
     Features: 6 log-probs, 3 unknown indicators, 3 not-found indicators.
-    Learned: 12 weights + 1 bias = 13 parameters.
+    Learned: 12 weights + 1 bias + 1 null_bias = 14 parameters.
+
+    The null_bias competes with real record scores in the softmax.
+    When it wins, it signals "no match" for the query.
     """
 
     def __init__(self):
@@ -127,6 +130,8 @@ class ScoringLayer(nn.Module):
                 ]
             )
             self.linear.bias[0] = -21.1324
+        # Null bias: initialized near the record bias so it's competitive
+        self.null_bias = nn.Parameter(torch.tensor(self.linear.bias[0].item()))
 
     def forward(self, x):
         return self.linear(x[:, :, SCORING_IDX])
@@ -351,6 +356,7 @@ def eval_from_memmaps(
 ):
     scoring_model.eval()
     n_split = len(split_target_fnums)
+    n_records = len(record_fnums_array)
     all_preds = []
 
     with torch.no_grad():
@@ -371,14 +377,26 @@ def eval_from_memmaps(
                 fnum_log_counts_np,
                 np.arange(n_chunk),
             )
-            scores = scoring_model(torch.from_numpy(feat_np).to(device)).squeeze(-1)
+            real_scores = scoring_model(torch.from_numpy(feat_np).to(device)).squeeze(
+                -1
+            )
+            # Append null score column → (chunk, R+1)
+            null_col = scoring_model.null_bias.expand(n_chunk, 1)
+            scores = torch.cat([real_scores, null_col], dim=1)
             all_preds.append(scores.argmax(dim=1).cpu().numpy())
             del chunk_fields, chunk_found
 
     preds = np.concatenate(all_preds)
-    pred_fnums = record_fnums_array[preds]
-    correct = (pred_fnums == split_target_fnums).sum()
-    return n_split - correct
+    # Predictions pointing to index n_records are null predictions
+    null_preds = (preds == n_records).sum()
+    # For error counting, null predictions are always wrong (all eval queries have correct records)
+    real_preds = np.minimum(preds, n_records - 1)
+    pred_fnums = record_fnums_array[real_preds]
+    wrong_match = ((pred_fnums != split_target_fnums) & (preds != n_records)).sum()
+    errors = int(wrong_match + null_preds)
+    if null_preds > 0:
+        print(f"    (null predictions: {null_preds})", flush=True)
+    return errors
 
 
 def fit_scoring_temperature(
@@ -419,11 +437,16 @@ def fit_scoring_temperature(
                 fnum_log_counts_np,
                 np.arange(n_chunk),
             )
-            scores = scoring_model(torch.from_numpy(feat_np).to(device)).squeeze(-1)
+            real_scores = scoring_model(torch.from_numpy(feat_np).to(device)).squeeze(
+                -1
+            )
+            # Append null score column → (chunk, R+1)
+            null_col = scoring_model.null_bias.expand(n_chunk, 1).to(device)
+            scores = torch.cat([real_scores, null_col], dim=1)
             all_scores.append(scores.cpu())
             del chunk_fields, chunk_found
 
-    all_scores = torch.cat(all_scores, dim=0)  # (N, R)
+    all_scores = torch.cat(all_scores, dim=0)  # (N, R+1)
 
     # Build target: index of correct record for each query
     targets = []
@@ -549,7 +572,14 @@ class FullGazetteerDataset(Dataset):
 
 
 class ScoringModule(L.LightningModule):
-    def __init__(self, lr, weight_decay, record_fnums_array=None, eval_context=None):
+    def __init__(
+        self,
+        lr,
+        weight_decay,
+        null_mask_prob=0.15,
+        record_fnums_array=None,
+        eval_context=None,
+    ):
         super().__init__()
         self.save_hyperparameters(ignore=["eval_context", "record_fnums_array"])
 
@@ -568,14 +598,40 @@ class ScoringModule(L.LightningModule):
 
     def training_step(self, batch, batch_idx):
         feat, target_fnums = batch  # (chunk, R, 13), (chunk,)
-        scores = self.scoring(feat).squeeze(-1)  # (chunk, R)
+        real_scores = self.scoring(feat).squeeze(-1)  # (chunk, R)
+        chunk_size = real_scores.shape[0]
 
-        # Correct mask: all records matching the target fnum
+        # Append null score column → (chunk, R+1)
+        null_col = self.scoring.null_bias.expand(chunk_size, 1)
+        scores = torch.cat([real_scores, null_col], dim=1)
+
+        # Correct mask for real records: all records matching the target fnum
         correct_mask = self.record_fnums.unsqueeze(0) == target_fnums.unsqueeze(1)
 
-        # Full marginalized cross-entropy over all records
+        # Randomly select some queries as "no match" targets
+        null_mask_prob = self.hparams.null_mask_prob
+        null_targets = torch.rand(chunk_size, device=scores.device) < null_mask_prob
+
+        # For null-targeted queries: mask out correct real records so null must win
         neg_inf = torch.finfo(scores.dtype).min
-        correct_scores = scores.masked_fill(~correct_mask, neg_inf)
+        if null_targets.any():
+            # Zero out correct record scores for null-targeted queries
+            scores[null_targets, :-1] = scores[null_targets, :-1].masked_fill(
+                correct_mask[null_targets], neg_inf
+            )
+
+        # Build correct mask over R+1 columns
+        # For normal queries: correct real records are targets, null is not
+        # For null-targeted queries: null column is the target
+        null_correct = torch.zeros(
+            chunk_size, 1, dtype=torch.bool, device=scores.device
+        )
+        null_correct[null_targets] = True
+        full_correct = torch.cat([correct_mask, null_correct], dim=1)
+        # Null-targeted queries should not have any real records as correct
+        full_correct[null_targets, :-1] = False
+
+        correct_scores = scores.masked_fill(~full_correct, neg_inf)
         loss = -(
             torch.logsumexp(correct_scores, dim=1) - torch.logsumexp(scores, dim=1)
         ).mean()
@@ -632,7 +688,12 @@ class ScoringModule(L.LightningModule):
 @click.option("--epochs", default=10)
 @click.option("--chunk-size", default=128, help="Queries per training chunk")
 @click.option("--weight-decay", default=0.01, help="Weight decay for AdamW")
-def main(batch_size, lr, epochs, chunk_size, weight_decay):
+@click.option(
+    "--null-mask-prob",
+    default=0.15,
+    help="Prob of masking correct records (null training)",
+)
+def main(batch_size, lr, epochs, chunk_size, weight_decay, null_mask_prob):
     device = torch.accelerator.current_accelerator() or torch.device("cpu")
     print(f"Device: {device}", flush=True)
 
@@ -813,6 +874,7 @@ def main(batch_size, lr, epochs, chunk_size, weight_decay):
     module = ScoringModule(
         lr=lr,
         weight_decay=weight_decay,
+        null_mask_prob=null_mask_prob,
         record_fnums_array=record_fnums_array,
         eval_context=eval_context,
     )

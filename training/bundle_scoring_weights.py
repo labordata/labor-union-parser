@@ -33,6 +33,7 @@ def main():
 
     scoring_weight = scoring_state["linear.weight"][0, :12]  # (12,) drop count
     scoring_bias = scoring_state["linear.bias"][0].item()
+    null_bias = scoring_state["null_bias"].item()
 
     scoring_temp = temps.get("scoring", 1.0)
 
@@ -48,6 +49,7 @@ def main():
         "scoring_weight": scoring_weight,
         "scoring_bias": scoring_bias,
         "scoring_temperature": scoring_temp,
+        "null_bias": null_bias,
     }
 
     output = WEIGHTS_DIR / "scoring_weights.pt"
@@ -74,6 +76,7 @@ def main():
     for name, w in zip(feature_names, scoring_weight.tolist()):
         print(f"  {name:>15s}: {w:+.4f}")
     print(f"  {'bias':>15s}: {scoring_bias:+.4f}")
+    print(f"  {'null_bias':>15s}: {null_bias:+.4f}")
     print(f"  Scoring temperature: {scoring_temp:.4f}")
 
 

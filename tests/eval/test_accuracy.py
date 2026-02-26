@@ -101,14 +101,15 @@ class TestUnionDetection:
 def _field_truth(rec, field):
     """Extract ground truth value for a field, matching Extractor output format."""
     if field == "f_num":
-        return str(rec.get("f_num", ""))
-    if field == "desig_num":
-        return str(rec.get("desig_num", 0) or "")
-    if field == "prefix":
-        return str(rec.get("prefix", 0) or "")
-    if field == "suffix":
-        return rec.get("suffix", "") or ""
-    return rec.get(field, "")
+        return rec.get("f_num", 0)
+    if field in ("union_name", "desig_name"):
+        return rec.get(field, "")
+    # Pointer fields: head predictions are raw token strings (lowercased numbers,
+    # lowercase text) — normalize the ground truth the same way.
+    from labor_union_parser.scoring import _normalize_pointer_value
+
+    val = _normalize_pointer_value(rec.get(field))
+    return val or ""
 
 
 @pytest.mark.eval
@@ -144,7 +145,7 @@ class TestEndToEnd:
 
         wrong = 0
         for ex, result in zip(union, union_results):
-            if result["is_union"] and result["f_num"] != str(ex["records"][0]["f_num"]):
+            if result["is_union"] and result["f_num"] != ex["records"][0]["f_num"]:
                 wrong += 1
 
         assert (

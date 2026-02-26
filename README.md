@@ -6,13 +6,15 @@ an OLMS gazetteer of ~44,000 filing records.
 Given an input like `"SEIU Local 1199"`, the parser returns:
 - `is_union`: True (detected as a union)
 - `union_score`: 0.9997 (confidence score for union detection)
-- `union_name`: SERVICE EMPLOYEES (matched union name from gazetteer)
-- `desig_name`: LU (designation type — Local Union)
-- `desig_num`: 1199 (local number)
-- `prefix`: (designation prefix, if any)
-- `suffix`: (designation suffix, if any)
-- `f_num`: 509111 (OLMS filing number)
+- `union_name`: SERVICE EMPLOYEES (predicted parent union name)
+- `desig_name`: LU (predicted designation type — Local Union)
+- `desig_num`: 1199 (predicted local number)
+- `prefix`: (predicted designation prefix, if any)
+- `suffix`: (predicted designation suffix, if any)
+- `f_num`: 509111 (OLMS filing number of best-scoring gazetteer record)
+- `match_found`: True (whether the model found a confident gazetteer match)
 - `match_score`: 0.3499 (probability of best gazetteer match)
+- `conflicts`: [] (mismatches between predictions and matched record)
 
 ## Installation
 
@@ -32,7 +34,7 @@ result = extractor.extract("SEIU Local 1199")
 print(result)
 # {'is_union': True, 'union_score': 0.9997, 'union_name': 'SERVICE EMPLOYEES',
 #  'desig_name': 'LU', 'desig_num': '1199', 'prefix': '', 'suffix': '',
-#  'f_num': '509111', 'match_score': 0.3499,
+#  'f_num': 509111, 'match_found': True, 'match_score': 0.3499, 'conflicts': [],
 #  'field_scores': {'union_name': 0.9996, 'desig_name': 0.9651,
 #   'f_num': 0.4144, 'desig_num': 0.9999, 'prefix': 0.9975, 'suffix': 0.9985}}
 ```
@@ -93,14 +95,31 @@ echo "SEIU Local 1199" | labor-union-parser --no-header
 |-------|-------------|
 | `is_union` | Whether the text is detected as a union name |
 | `union_score` | Similarity score to union centroid (0-1) |
-| `union_name` | Matched parent union name (e.g., "SERVICE EMPLOYEES", "TEAMSTERS") |
-| `desig_name` | Designation type (e.g., "LU" for Local Union, "JC" for Joint Council) |
-| `desig_num` | Local/designation number (e.g., "1199") |
-| `prefix` | Designation prefix, if any |
-| `suffix` | Designation suffix, if any |
-| `f_num` | OLMS filing number for the matched record |
+| `union_name` | Predicted parent union name (e.g., "SERVICE EMPLOYEES", "TEAMSTERS") |
+| `desig_name` | Predicted designation type (e.g., "LU" for Local Union, "JC" for Joint Council) |
+| `desig_num` | Predicted local/designation number (e.g., "1199") |
+| `prefix` | Predicted designation prefix, if any |
+| `suffix` | Predicted designation suffix, if any |
+| `f_num` | OLMS filing number of the best-scoring gazetteer record |
+| `match_found` | Whether the model found a confident gazetteer match (False when the learned null record outscores all real records) |
 | `match_score` | Probability of best gazetteer match (0-1) |
+| `conflicts` | List of conflict codes (see below) |
 | `field_scores` | Per-field probabilities for the matched record (see below) |
+
+### Conflict Codes
+
+The `conflicts` list (Python API) or `pred_conflicts` column (CLI, pipe-delimited)
+flags mismatches between the field predictions and the matched gazetteer record.
+A non-empty conflicts list indicates the model's field-level predictions disagree
+with the record selected by the gazetteer scoring, which may signal a bad match.
+
+| Code | Description |
+|------|-------------|
+| `union_name_mismatch` | Predicted union name differs from the matched record. Strongest signal of a bad match. |
+| `desig_name_mismatch` | Predicted designation type differs from the matched record (e.g., LU vs JC). |
+| `desig_num_mismatch` | Predicted designation number differs from the matched record. |
+| `prefix_mismatch` | Predicted prefix differs from the matched record. |
+| `suffix_mismatch` | Predicted suffix differs from the matched record. |
 
 The `field_scores` dict (Python API) or `score_*` columns (CLI) give the
 classifier's probability for each field value of the matched record.

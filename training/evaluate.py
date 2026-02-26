@@ -14,6 +14,14 @@ import pandas as pd
 from tqdm import tqdm
 
 from labor_union_parser import Extractor
+from labor_union_parser.scoring import _normalize_pointer_value
+
+
+def _normalize_or_empty(val):
+    """Normalize a pointer field value, returning '' for None."""
+    result = _normalize_pointer_value(val)
+    return result if result is not None else ""
+
 
 SCRIPT_DIR = Path(__file__).parent
 
@@ -50,7 +58,7 @@ def main():
     union_results = all_results[:n_union]
     non_union_results = all_results[n_union:]
 
-    true_fnums = [str(ex["records"][0]["f_num"]) for ex in union_examples]
+    true_fnums = [ex["records"][0]["f_num"] for ex in union_examples]
     score_fields = [
         "union_name",
         "desig_name",
@@ -115,13 +123,13 @@ def main():
             field_correct["union_name"] += 1
         if result["desig_name"] == rec.get("desig_name", ""):
             field_correct["desig_name"] += 1
-        if result["f_num"] == str(rec.get("f_num", "")):
+        if result["f_num"] == rec.get("f_num", 0):
             field_correct["f_num"] += 1
-        if result["desig_num"] == str(rec.get("desig_num", 0) or ""):
+        if result["desig_num"] == _normalize_or_empty(rec.get("desig_num")):
             field_correct["desig_num"] += 1
-        if result["prefix"] == str(rec.get("prefix", 0) or ""):
+        if result["prefix"] == _normalize_or_empty(rec.get("prefix")):
             field_correct["prefix"] += 1
-        if result["suffix"] == (rec.get("suffix", "") or ""):
+        if result["suffix"] == _normalize_or_empty(rec.get("suffix")):
             field_correct["suffix"] += 1
 
     # --- Summary ---
