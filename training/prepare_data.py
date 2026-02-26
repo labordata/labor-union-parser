@@ -326,57 +326,99 @@ def load_fnum_records():
 
 
 def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
-    """Load labeled_data.csv using pre-assigned f_num values."""
+    """Load labeled_data.csv using pre-assigned f_num values.
+
+    Rows with f_num go through gazetteer lookup, ambiguity check, and
+    filter_records_by_query as before.
+
+    Rows without f_num but with union_name get a synthetic record built
+    from the CSV fields.  These can train the union_name and desig_name
+    classification heads even though they have no gazetteer match.
+    """
     examples = []
-    skipped_no_fnum = 0
+    skipped_no_union = 0
     skipped_not_in_vocab = 0
     skipped_ambiguous = 0
+    no_fnum_included = 0
 
     with open(DATA_DIR / "labeled_data.csv") as f:
         reader = csv.DictReader(f)
         for row in reader:
             text = row["text"]
-            aff = row["aff_abbr"]
+            union_name = row.get("union_name", "").strip()
 
             # Use pre-assigned f_num
             fnum_str = row.get("f_num", "").strip()
-            if not fnum_str:
-                skipped_no_fnum += 1
-                continue
 
-            try:
-                f_num = int(float(fnum_str))
-            except ValueError:
-                skipped_no_fnum += 1
-                continue
+            if fnum_str:
+                # --- Row WITH f_num: existing logic ---
+                try:
+                    f_num = int(float(fnum_str))
+                except ValueError:
+                    # Malformed f_num — skip if no union_name either
+                    if not union_name:
+                        skipped_no_union += 1
+                    continue
 
-            # Validate f_num is in vocabulary and has records
-            if f_num not in fnum_set or f_num not in fnum_to_records:
-                skipped_not_in_vocab += 1
-                continue
+                # Validate f_num is in vocabulary and has records
+                if f_num not in fnum_set or f_num not in fnum_to_records:
+                    skipped_not_in_vocab += 1
+                    continue
 
-            # Filter out ambiguous examples where another f_num produces
-            # an identical record (including unit_id) for this query
-            if is_ambiguous(text, f_num, fnum_to_records, sig_to_fnums):
-                skipped_ambiguous += 1
-                continue
+                # Filter out ambiguous examples where another f_num produces
+                # an identical record (including unit_id) for this query
+                if is_ambiguous(text, f_num, fnum_to_records, sig_to_fnums):
+                    skipped_ambiguous += 1
+                    continue
 
-            # Filter records to match numbers in query
-            records = filter_records_by_query(text, fnum_to_records[f_num])
+                # Filter records to match numbers in query
+                records = filter_records_by_query(text, fnum_to_records[f_num])
 
-            examples.append(
-                {
-                    "query": text,
-                    "f_num": f_num,
-                    "source": "labeled",
-                    "aff_abbr": aff,
-                    "records": records,
+                examples.append(
+                    {
+                        "query": text,
+                        "f_num": f_num,
+                        "source": "labeled",
+                        "union_name": union_name,
+                        "records": records,
+                    }
+                )
+            else:
+                # --- Row WITHOUT f_num ---
+                if not union_name:
+                    skipped_no_union += 1
+                    continue
+
+                desig_num_str = row.get("desig_num", "").strip()
+                desig_num = int(float(desig_num_str)) if desig_num_str else 0
+                reason = row.get("reason_missing_fnum", "").strip()
+
+                synthetic_record = {
+                    "union_name": union_name,
+                    "desig_name": "",
+                    "desig_num": desig_num,
+                    "prefix": 0,
+                    "suffix": "",
+                    "unit_id": "",
+                    "f_num": None,
                 }
-            )
 
-    print(f"  {len(examples)} examples loaded")
+                examples.append(
+                    {
+                        "query": text,
+                        "f_num": None,
+                        "source": "labeled",
+                        "union_name": union_name,
+                        "reason_missing_fnum": reason,
+                        "records": [synthetic_record],
+                    }
+                )
+                no_fnum_included += 1
+
+    print(f"  {len(examples)} examples loaded ({no_fnum_included} without f_num)")
     print(
-        f"  Skipped: {skipped_no_fnum} no f_num, {skipped_not_in_vocab} not in vocab,"
+        f"  Skipped: {skipped_no_union} no union_name,"
+        f" {skipped_not_in_vocab} not in vocab,"
         f" {skipped_ambiguous} ambiguous"
     )
 
@@ -428,7 +470,7 @@ def load_synthetic_data(fnum_set, fnum_to_records, sig_to_fnums):
                     "query": text,
                     "f_num": f_num,
                     "source": "synthetic",
-                    "aff_abbr": "UNAFF",
+                    "union_name": "UNAFF",
                     "records": records,
                 }
             )
@@ -484,6 +526,9 @@ def add_structural_negatives(examples, fnum_to_records, fnum_to_component=None):
 
     for ex in examples:
         pos_fnum = ex["f_num"]
+        if pos_fnum is None:
+            continue
+
         pos_records = ex["records"]
         if not pos_records:
             continue
@@ -553,49 +598,6 @@ def add_structural_negatives(examples, fnum_to_records, fnum_to_component=None):
     )
 
 
-def add_example_categories(examples, fnum_to_records):
-    """
-    Add a discrimination category to each example based on whether
-    the query's (union_name, desig_num) uniquely identifies its f_num.
-
-    Uses the example's filtered records (which match the query's desig_num),
-    not all records for the f_num.
-
-    Categories: unique, ambiguous
-    """
-    # Build (union_name, desig_num) -> set of f_nums
-    union_num_to_fnums = defaultdict(set)
-    for fnum, records in fnum_to_records.items():
-        for rec in records:
-            if rec["desig_num"] > 0:
-                key = (rec["union_name"], rec["desig_num"])
-                union_num_to_fnums[key].add(fnum)
-
-    # Assign category to each example based on its filtered records
-    train_counts = defaultdict(int)
-    total_train = 0
-    for ex in examples:
-        pos_records = ex["records"]
-        if not pos_records or pos_records[0]["desig_num"] == 0:
-            cat = "unique"
-        else:
-            key = (pos_records[0]["union_name"], pos_records[0]["desig_num"])
-            cat = (
-                "ambiguous" if len(union_num_to_fnums.get(key, set())) > 1 else "unique"
-            )
-        ex["category"] = cat
-        if ex.get("split") == "train":
-            train_counts[cat] += 1
-            total_train += 1
-
-    # Print distribution
-    print("  Training distribution:")
-    for cat in sorted(train_counts, key=lambda c: train_counts[c], reverse=True):
-        print(
-            f"    {cat:>8s}: {train_counts[cat]:>6d} ({100*train_counts[cat]/total_train:.1f}%)"
-        )
-
-
 def main():
     # Load fnum_to_records
     fnum_to_records = load_fnum_records()
@@ -635,10 +637,6 @@ def main():
     # Add structural negatives
     print("\nAdding structural negatives...")
     add_structural_negatives(examples, fnum_to_records)
-
-    # Assign discrimination categories to examples
-    print("\nAssigning discrimination categories...")
-    add_example_categories(examples, fnum_to_records)
 
     # Save
     print(f"\nSaving to {OUTPUT_PATH}...")
