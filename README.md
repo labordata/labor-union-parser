@@ -13,7 +13,7 @@ Given an input like `"SEIU Local 1199"`, the parser returns:
 - `suffix`: (predicted designation suffix, if any)
 - `f_num`: 509111 (OLMS filing number of best-scoring gazetteer record)
 - `match_found`: True (whether the model found a confident gazetteer match)
-- `match_score`: 0.3499 (probability of best gazetteer match)
+- `match_score`: 0.4496 (probability of best gazetteer match)
 - `conflicts`: [] (mismatches between predictions and matched record)
 
 ## Installation
@@ -34,7 +34,7 @@ result = extractor.extract("SEIU Local 1199")
 print(result)
 # {'is_union': True, 'union_score': 0.9997, 'union_name': 'SERVICE EMPLOYEES',
 #  'desig_name': 'LU', 'desig_num': '1199', 'prefix': '', 'suffix': '',
-#  'f_num': 509111, 'match_found': True, 'match_score': 0.3499, 'conflicts': [],
+#  'f_num': 509111, 'match_found': True, 'match_score': 0.4496, 'conflicts': [],
 #  'field_scores': {'union_name': 0.9996, 'desig_name': 0.9651,
 #   'f_num': 0.4144, 'desig_num': 0.9999, 'prefix': 0.9975, 'suffix': 0.9985}}
 ```
@@ -85,8 +85,8 @@ labor-union-parser unions.csv -c union_name -o results.csv
 
 # Process from stdin
 echo "SEIU Local 1199" | labor-union-parser --no-header
-# text,pred_is_union,...,pred_f_num,pred_match_score,score_union_name,...,score_suffix
-# SEIU Local 1199,True,...,509111,0.3499,0.9996,...,0.9985
+# text,pred_is_union,...,pred_f_num,pred_match_found,pred_match_score,...,score_suffix
+# SEIU Local 1199,True,...,509111,True,0.4496,...,0.9985
 ```
 
 ## Output Fields
@@ -122,9 +122,9 @@ with the record selected by the gazetteer scoring, which may signal a bad match.
 | `suffix_mismatch` | Predicted suffix differs from the matched record. |
 
 The `field_scores` dict (Python API) or `score_*` columns (CLI) give the
-classifier's probability for each field value of the matched record.
-Values close to 1.0 indicate high confidence; `None` (or empty in CSV)
-means the field value was unknown to the classifier.
+classifier's confidence in its top prediction for each field.
+Values close to 1.0 indicate the head is confident in its prediction;
+lower values indicate uncertainty among multiple candidates.
 
 ## Training
 
@@ -196,7 +196,7 @@ Input: "SEIU Local 1199"
               │
               ▼
 Output: {is_union: True, union_name: "SERVICE EMPLOYEES",
-         desig_name: "LU", desig_num: "1199", f_num: "509111", ...}
+         desig_name: "LU", desig_num: "1199", f_num: 509111, ...}
 ```
 
 ### CharCNN
@@ -256,23 +256,20 @@ softmax probability of that record.
 
 ### Performance
 
-End-to-end on held-out test data (7,160 union + 143 non-union examples
+End-to-end on held-out test data (7,160 union examples
 scored against the full 44K-record gazetteer):
 
 | Metric | Score |
 |--------|-------|
-| Overall accuracy | 98.5% (112 errors / 7,303) |
-| Wrong match (union, wrong f_num) | 104 |
+| Wrong match (union, wrong f_num) | 100 |
 | False negatives (union missed) | 1 |
-| False positives (non-union flagged) | 7 |
-| Non-union text filtering ROC-AUC | 0.995 |
 
 Per-field accuracy on test set (7,159 union examples with is_union=True):
 
 | Field | Accuracy |
 |-------|----------|
-| `union_name` | 99.4% |
-| `desig_name` | 99.6% |
+| `union_name` | 99.1% |
+| `desig_name` | 99.3% |
 | `desig_num` | 99.7% |
-| `prefix` | 99.4% |
-| `suffix` | 99.2% |
+| `prefix` | 97.5% |
+| `suffix` | 96.6% |

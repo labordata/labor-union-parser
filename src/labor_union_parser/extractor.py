@@ -212,45 +212,17 @@ class Extractor:
         masks = torch.tensor(all_masks, dtype=torch.bool, device=self.device)
         return char_ids, masks, all_token_strings
 
-    def _field_scores(self, log_probs, j, query_toks, rec_idx):
-        """Per-field probabilities for a single query–record pair.
+    def _field_scores(self, log_probs, j):
+        """Per-field confidence for the head's top prediction.
 
         log_probs: dict of (B, n_classes) tensors
         j: query index within the batch
 
-        Returns dict of field -> probability (or None if unknown/not-found).
-        For pointer fields where the value appears at multiple token positions,
-        probabilities are summed (logsumexp) across all matching positions.
+        Returns dict of field -> probability of the argmax prediction.
         """
         scores = {}
-
-        # Classification fields: single class index → exp(log_prob)
-        for f in ("union_name", "desig_name", "f_num"):
-            class_idx = self.field_indices[f][rec_idx].item()
-            if self.field_known[f][rec_idx]:
-                scores[f] = log_probs[f][j, class_idx].exp().item()
-            else:
-                scores[f] = None
-
-        # Pointer fields: use first matching position (matches _score_gazetteer)
-        tok_to_first_pos = {}
-        for pos, tok in enumerate(query_toks):
-            if tok and tok not in tok_to_first_pos:
-                tok_to_first_pos[tok] = pos
-
-        for f in ("desig_num", "prefix", "suffix"):
-            rec = self.records_list[rec_idx]
-            val = rec.get(f)
-            normalized = _normalize_pointer_value(val)
-            if normalized is None:
-                scores[f] = log_probs[f][j, MAX_TOKENS].exp().item()
-            else:
-                pos = tok_to_first_pos.get(normalized)
-                if pos is not None:
-                    scores[f] = log_probs[f][j, pos].exp().item()
-                else:
-                    scores[f] = None
-
+        for f in ("union_name", "desig_name", "f_num", "desig_num", "prefix", "suffix"):
+            scores[f] = log_probs[f][j].softmax(dim=-1).max().item()
         return scores
 
     def _score_gazetteer(self, log_probs, token_strings_batch):
@@ -425,9 +397,7 @@ class Extractor:
         for i in range(len(texts)):
             rec_idx, match_score, null_won = matches[i]
             rec = self.records_list[rec_idx]
-            field_scores = self._field_scores(
-                log_probs_cpu, i, token_strings[i], rec_idx
-            )
+            field_scores = self._field_scores(log_probs_cpu, i)
 
             pred_union = head_preds["union_name"][i]
             pred_desig = head_preds["desig_name"][i]
