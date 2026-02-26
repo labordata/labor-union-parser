@@ -44,9 +44,6 @@ MAX_WRONG_MATCHES = 110  # currently 104
 
 @pytest.fixture(scope="module")
 def eval_data():
-    if not DATA_PATH.exists():
-        pytest.skip(f"Eval data not found: {DATA_PATH}")
-
     with open(DATA_PATH) as f:
         all_examples = json.load(f)
 
