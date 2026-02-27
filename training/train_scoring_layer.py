@@ -317,18 +317,18 @@ def process_chunk_fields(field_arrays, field_known):
             np.float32
         )
 
-    found_arrays = {}
+    not_found_arrays = {}
     for f in POINTER_FIELD_LIST:
         not_found = np.float32(POINTER_NOT_FOUND_LOG_PROB[f])
         is_nf = field_arrays[f] == not_found
-        found_arrays[f] = is_nf.astype(np.float32)
+        not_found_arrays[f] = is_nf.astype(np.float32)
         field_arrays[f] = np.where(is_nf, 0.0, field_arrays[f]).astype(np.float32)
-    return found_arrays
+    return not_found_arrays
 
 
 def assemble_features_from_fields(
     field_arrays,
-    found_arrays,
+    not_found_arrays,
     unknown_indicators_np,
     fnum_log_counts_np,
     query_indices,
@@ -342,7 +342,7 @@ def assemble_features_from_fields(
     for col, f in enumerate(CLASSIFICATION_FIELDS):
         features[:, :, 6 + col] = unknown_indicators_np[f]
     for col, f in enumerate(POINTER_FIELD_LIST):
-        features[:, :, 9 + col] = found_arrays[f][query_indices]
+        features[:, :, 9 + col] = not_found_arrays[f][query_indices]
     features[:, :, 12] = fnum_log_counts_np
     return features
 
