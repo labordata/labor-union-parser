@@ -386,6 +386,20 @@ def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
                 desig_num = int(float(desig_num_str)) if desig_num_str else 0
                 reason = row.get("reason_missing_fnum", "").strip()
 
+                if reason == "not a union":
+                    # Non-union text: empty records list
+                    examples.append(
+                        {
+                            "query": text,
+                            "f_num": -100,
+                            "source": "labeled",
+                            "union_name": "",
+                            "reason_missing_fnum": reason,
+                            "records": [],
+                        }
+                    )
+                    continue
+
                 if not union_name:
                     # Unknown union: all fields unknown
                     synthetic_record = {
