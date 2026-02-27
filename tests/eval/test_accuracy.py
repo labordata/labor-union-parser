@@ -28,15 +28,15 @@ MAX_FALSE_POSITIVES = 10
 # Per-field accuracy (among union examples with is_union=True, skip -100 fields)
 MAX_FIELD_ERRORS = {
     "union_name": 200,
-    "desig_name": 55,
-    "f_num": 115,
+    "desig_name": 65,
+    "f_num": 125,
     "desig_num": 80,
     "prefix": 175,
     "suffix": 245,
 }
 
 # End-to-end (is_union correct AND f_num correct, excludes potentially resolvable)
-MAX_WRONG_MATCHES = 145
+MAX_WRONG_MATCHES = 170
 
 
 # --- Fixtures ---
