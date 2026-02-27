@@ -218,8 +218,19 @@ class StructuredClassifierModule(L.LightningModule):
             )
 
     def configure_optimizers(self):
+        head_params = []
+        other_params = []
+        for name, param in self.model.named_parameters():
+            if name.startswith("heads."):
+                head_params.append(param)
+            else:
+                other_params.append(param)
         optimizer = torch.optim.AdamW(
-            self.model.parameters(), lr=self.lr, weight_decay=0.01
+            [
+                {"params": other_params, "weight_decay": 0.01},
+                {"params": head_params, "weight_decay": 1.0},
+            ],
+            lr=self.lr,
         )
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
             optimizer, T_max=self.trainer.max_epochs
