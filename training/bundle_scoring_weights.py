@@ -19,17 +19,12 @@ def main():
     with open(DATA_DIR / "temperatures.json") as f:
         temps = json.load(f)
 
-    # Load scoring layer checkpoint
-    ckpt_path = WEIGHTS_DIR / "scoring_layer.ckpt"
+    # Load scoring layer checkpoint (plain state_dict)
+    ckpt_path = WEIGHTS_DIR / "scoring_layer.pt"
     if not ckpt_path.exists():
         raise FileNotFoundError(f"No {ckpt_path} found")
     print(f"Loading checkpoint: {ckpt_path.name}")
-    ckpt = torch.load(ckpt_path, weights_only=False, map_location="cpu")
-    scoring_state = {
-        k.removeprefix("scoring."): v
-        for k, v in ckpt["state_dict"].items()
-        if k.startswith("scoring.")
-    }
+    scoring_state = torch.load(ckpt_path, weights_only=True, map_location="cpu")
 
     scoring_weight = scoring_state["linear.weight"][0, :12]  # (12,) drop count
     scoring_bias = scoring_state["linear.bias"][0].item()

@@ -21,12 +21,11 @@ from collections import Counter
 from pathlib import Path
 
 import click
-import lightning as L
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 from train_structured_classifier import (
     StructuredDataset,
     collate_fn,
@@ -523,206 +522,115 @@ def fit_scoring_temperature(
 
 
 # ---------------------------------------------------------------------------
-# Lightning module
+# LBFGS training
 # ---------------------------------------------------------------------------
 
 
-class FullGazetteerDataset(Dataset):
-    """Reads memmaps on-the-fly, scores all records per chunk.
+def train_scoring_lbfgs(
+    scoring,
+    train_memmaps,
+    train_target_fnums,
+    field_known,
+    unknown_indicators_np,
+    fnum_log_counts_np,
+    record_fnums_array,
+    corruption_masks,
+    null_mask,
+    n_outer=10,
+    chunk_size=128,
+):
+    """Train scoring layer with LBFGS on full dataset.
 
-    Each item is a chunk of queries scored against all gazetteer records,
-    with fresh corruption applied each access (data augmentation).
+    Args:
+        corruption_masks: dict with 'fnum', 'union', 'desig' boolean arrays (n_records,)
+        null_mask: boolean array (n_queries,) — True means train as null target
     """
+    record_fnums_t = torch.from_numpy(record_fnums_array)
+    n_train = len(train_target_fnums)
+    neg_inf = float("-inf")
 
-    def __init__(
-        self,
-        field_memmaps,
-        field_known,
-        unknown_indicators_np,
-        fnum_log_counts_np,
-        target_fnums,
-        record_fnums_array,
-        record_fnum_corrupt_prob,
-        record_union_corrupt_prob,
-        record_desig_corrupt_prob,
-        chunk_size=128,
-    ):
-        self.memmaps = field_memmaps
-        self.field_known = field_known
-        self.unknown_indicators_np = unknown_indicators_np
-        self.fnum_log_counts_np = fnum_log_counts_np
-        self.target_fnums = target_fnums
-        self.record_fnums_array = record_fnums_array
-        self.record_fnum_corrupt_prob = record_fnum_corrupt_prob
-        self.record_union_corrupt_prob = record_union_corrupt_prob
-        self.record_desig_corrupt_prob = record_desig_corrupt_prob
-        self.chunk_size = chunk_size
-        self.n_queries = len(target_fnums)
-        self.n_records = len(record_fnums_array)
+    # Apply null mask: copy target fnums and set masked entries to -1
+    effective_targets = train_target_fnums.copy()
+    effective_targets[null_mask] = -1
+    target_fnums_t = torch.from_numpy(effective_targets)
 
-    def __len__(self):
-        return (self.n_queries + self.chunk_size - 1) // self.chunk_size
+    # Pre-build corrupted record-level arrays
+    c_unk = {f: unknown_indicators_np[f].copy() for f in CLASSIFICATION_FIELDS}
+    c_unk["f_num"][corruption_masks["fnum"]] = 1.0
+    c_unk["union_name"][corruption_masks["union"]] = 1.0
+    c_unk["desig_name"][corruption_masks["desig"]] = 1.0
+    c_log_counts = fnum_log_counts_np.copy()
+    c_log_counts[corruption_masks["fnum"]] = 0.0
 
-    def __getitem__(self, chunk_idx):
-        cs = self.chunk_size
-        start = chunk_idx * cs
-        end = min(start + cs, self.n_queries)
-        chunk_slice = slice(start, end)
-        n_chunk = end - start
+    optimizer = torch.optim.LBFGS(
+        scoring.parameters(), lr=1.0, max_iter=20, history_size=20
+    )
+    call_count = [0]
 
-        # Read from memmaps
-        chunk_fields = {
-            f: np.array(self.memmaps[f][chunk_slice]) for f in ALL_LP_FIELDS
-        }
-        chunk_found = process_chunk_fields(chunk_fields, self.field_known)
+    n_chunks = (n_train + chunk_size - 1) // chunk_size
 
-        # Fresh corruption masks (data augmentation)
-        fnum_mask = np.random.random(self.n_records) < self.record_fnum_corrupt_prob
-        union_mask = fnum_mask & (
-            np.random.random(self.n_records) < self.record_union_corrupt_prob
-        )
-        desig_mask = fnum_mask & (
-            np.random.random(self.n_records) < self.record_desig_corrupt_prob
-        )
+    def closure():
+        optimizer.zero_grad()
+        total_loss = 0.0
 
-        # Apply corruption to lp fields
-        chunk_fields["f_num"][:, fnum_mask] = 0.0
-        chunk_fields["union_name"][:, union_mask] = 0.0
-        chunk_fields["desig_name"][:, desig_mask] = 0.0
+        for chunk_idx, start in enumerate(range(0, n_train, chunk_size)):
+            end = min(start + chunk_size, n_train)
+            n_chunk = end - start
+            chunk_slice = slice(start, end)
 
-        # Build corrupted record-level arrays
-        c_unk = {f: self.unknown_indicators_np[f].copy() for f in CLASSIFICATION_FIELDS}
-        c_unk["f_num"][fnum_mask] = 1.0
-        c_unk["union_name"][union_mask] = 1.0
-        c_unk["desig_name"][desig_mask] = 1.0
-        c_log_counts = self.fnum_log_counts_np.copy()
-        c_log_counts[fnum_mask] = 0.0
+            chunk_fields = {
+                f: np.array(train_memmaps[f][chunk_slice]) for f in ALL_LP_FIELDS
+            }
+            chunk_found = process_chunk_fields(chunk_fields, field_known)
 
-        # Assemble features
-        features = assemble_features_from_fields(
-            chunk_fields, chunk_found, c_unk, c_log_counts, np.arange(n_chunk)
-        )
+            # Apply corruption to lp fields
+            chunk_fields["f_num"][:, corruption_masks["fnum"]] = 0.0
+            chunk_fields["union_name"][:, corruption_masks["union"]] = 0.0
+            chunk_fields["desig_name"][:, corruption_masks["desig"]] = 0.0
 
-        target_fnums = self.target_fnums[start:end]
-
-        return (
-            torch.from_numpy(features),
-            torch.from_numpy(target_fnums.copy()),
-        )
-
-
-class ScoringModule(L.LightningModule):
-    def __init__(
-        self,
-        lr,
-        weight_decay,
-        null_mask_prob=0.15,
-        record_fnums_array=None,
-        eval_context=None,
-    ):
-        super().__init__()
-        self.save_hyperparameters(ignore=["eval_context", "record_fnums_array"])
-
-        self.scoring = ScoringLayer()
-        self.eval_ctx = eval_context or {}
-        # Store as buffer so it moves to device automatically
-        if record_fnums_array is not None:
-            self.register_buffer(
-                "record_fnums",
-                torch.from_numpy(record_fnums_array),
-                persistent=False,
+            feat_np = assemble_features_from_fields(
+                chunk_fields, chunk_found, c_unk, c_log_counts, np.arange(n_chunk)
             )
+            feat_t = torch.from_numpy(feat_np[:, :, :N_SCORING_FEATURES]).float()
+            real_scores = scoring(feat_t).squeeze(-1)
+            null_col = scoring.null_bias.expand(n_chunk, 1)
+            scores = torch.cat([real_scores, null_col], dim=1)
 
-    def forward(self, x):
-        return self.scoring(x)
+            chunk_targets = target_fnums_t[start:end]
+            correct_mask = record_fnums_t.unsqueeze(0) == chunk_targets.unsqueeze(1)
+            is_null = chunk_targets == -1
+            null_correct = torch.zeros(n_chunk, 1, dtype=torch.bool)
+            null_correct[is_null] = True
+            full_correct = torch.cat([correct_mask, null_correct], dim=1)
+            full_correct[is_null, :-1] = False
 
-    def training_step(self, batch, batch_idx):
-        feat, target_fnums = batch  # (chunk, R, 13), (chunk,)
-        real_scores = self.scoring(feat).squeeze(-1)  # (chunk, R)
-        chunk_size = real_scores.shape[0]
+            correct_scores = scores.masked_fill(~full_correct, neg_inf)
+            loss = -(
+                torch.logsumexp(correct_scores, dim=1) - torch.logsumexp(scores, dim=1)
+            ).sum()
+            loss.backward()
+            total_loss += loss.item()
+            del feat_np, feat_t, real_scores, scores
 
-        # Append null score column → (chunk, R+1)
-        null_col = self.scoring.null_bias.expand(chunk_size, 1)
-        scores = torch.cat([real_scores, null_col], dim=1)
+            if (chunk_idx + 1) % 100 == 0:
+                print(
+                    f"    chunk {chunk_idx + 1}/{n_chunks}",
+                    end="\r",
+                    flush=True,
+                )
 
-        # Correct mask for real records: all records matching the target fnum
-        correct_mask = self.record_fnums.unsqueeze(0) == target_fnums.unsqueeze(1)
-
-        # Randomly select some queries as "no match" targets
-        null_mask_prob = self.hparams.null_mask_prob
-        null_targets = torch.rand(chunk_size, device=scores.device) < null_mask_prob
-
-        # Force null for examples with no known f_num (sentinel -1)
-        always_null = target_fnums == -1
-        null_targets = null_targets | always_null
-
-        # For null-targeted queries: mask out correct real records so null must win
-        neg_inf = torch.finfo(scores.dtype).min
-        if null_targets.any():
-            # Zero out correct record scores for null-targeted queries
-            scores[null_targets, :-1] = scores[null_targets, :-1].masked_fill(
-                correct_mask[null_targets], neg_inf
-            )
-
-        # Build correct mask over R+1 columns
-        # For normal queries: correct real records are targets, null is not
-        # For null-targeted queries: null column is the target
-        null_correct = torch.zeros(
-            chunk_size, 1, dtype=torch.bool, device=scores.device
+        call_count[0] += 1
+        print(
+            f"  closure {call_count[0]:3d}: loss={total_loss/n_train:.4f}    ",
+            flush=True,
         )
-        null_correct[null_targets] = True
-        full_correct = torch.cat([correct_mask, null_correct], dim=1)
-        # Null-targeted queries should not have any real records as correct
-        full_correct[null_targets, :-1] = False
+        return torch.tensor(total_loss / n_train)
 
-        correct_scores = scores.masked_fill(~full_correct, neg_inf)
-        loss = -(
-            torch.logsumexp(correct_scores, dim=1) - torch.logsumexp(scores, dim=1)
-        ).mean()
+    for outer in range(n_outer):
+        print(f"  LBFGS outer step {outer}", flush=True)
+        optimizer.step(closure)
 
-        self.log("train_loss", loss, prog_bar=True, on_epoch=True, on_step=False)
-        return loss
-
-    def on_validation_epoch_start(self):
-        self._val_results = {}
-
-    def validation_step(self, batch, batch_idx, dataloader_idx=0):
-        # Validation is done in on_validation_epoch_end via memmaps
-        pass
-
-    def on_validation_epoch_end(self):
-        ctx = self.eval_ctx
-        if not ctx:
-            return
-
-        for split_name in ("val", "test"):
-            result = eval_from_memmaps(
-                self.scoring,
-                ctx[f"{split_name}_memmaps"],
-                ctx[f"{split_name}_target_fnums"],
-                ctx["field_known"],
-                ctx["unknown_indicators_np"],
-                ctx["fnum_log_counts_np"],
-                ctx["record_fnums_array"],
-                self.device,
-            )
-            self.log(f"{split_name}_errors", float(result["errors"]), prog_bar=True)
-            self.log(f"{split_name}_match_correct", float(result["match_correct"]))
-            self.log(f"{split_name}_match_total", float(result["n_match"]))
-            self.log(f"{split_name}_null_correct", float(result["null_correct"]))
-            self.log(f"{split_name}_null_total", float(result["n_null"]))
-
-    def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(
-            [p for p in self.parameters() if p.requires_grad],
-            lr=self.hparams.lr,
-            weight_decay=self.hparams.weight_decay,
-        )
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-            optimizer,
-            T_max=self.trainer.max_epochs,
-        )
-        return [optimizer], [scheduler]
+    print(f"  Done ({call_count[0]} closure calls)", flush=True)
 
 
 # ---------------------------------------------------------------------------
@@ -732,16 +640,14 @@ class ScoringModule(L.LightningModule):
 
 @click.command()
 @click.option("--batch-size", default=256, help="Batch size for precompute")
-@click.option("--lr", default=0.01)
-@click.option("--epochs", default=10)
 @click.option("--chunk-size", default=128, help="Queries per training chunk")
-@click.option("--weight-decay", default=0.01, help="Weight decay for AdamW")
+@click.option("--n-outer", default=10, help="Number of LBFGS outer steps")
 @click.option(
-    "--null-mask-prob",
-    default=0.15,
-    help="Prob of masking correct records (null training)",
+    "--train-sample",
+    default=15000,
+    help="Subsample training queries for LBFGS (0 = use all)",
 )
-def main(batch_size, lr, epochs, chunk_size, weight_decay, null_mask_prob):
+def main(batch_size, chunk_size, n_outer, train_sample):
     device = torch.accelerator.current_accelerator() or torch.device("cpu")
     print(f"Device: {device}", flush=True)
 
@@ -916,119 +822,103 @@ def main(batch_size, lr, epochs, chunk_size, weight_decay, null_mask_prob):
         flush=True,
     )
 
-    # ── Build module ──
-    eval_context = dict(
-        val_memmaps=val_memmaps,
-        val_target_fnums=val_target_fnums,
-        test_memmaps=test_memmaps,
-        test_target_fnums=test_target_fnums,
+    # ── Subsample training queries ──
+    rng = np.random.RandomState(seed=42)
+    if train_sample and train_sample < n_train:
+        sample_idx = np.sort(rng.choice(n_train, size=train_sample, replace=False))
+        sub_memmaps = {f: np.array(train_memmaps[f][sample_idx]) for f in ALL_LP_FIELDS}
+        sub_target_fnums = train_target_fnums[sample_idx]
+        n_sub = train_sample
+        print(f"\nSubsampled {n_sub}/{n_train} training queries", flush=True)
+    else:
+        sub_memmaps = train_memmaps
+        sub_target_fnums = train_target_fnums
+        n_sub = n_train
+
+    # ── Pre-bake corruption masks (deterministic) ──
+    fnum_mask = rng.random(n_records) < record_fnum_corrupt_prob
+    union_mask = fnum_mask & (rng.random(n_records) < record_union_corrupt_prob)
+    desig_mask = fnum_mask & (rng.random(n_records) < record_desig_corrupt_prob)
+    corruption_masks = {"fnum": fnum_mask, "union": union_mask, "desig": desig_mask}
+    print(
+        f"Corruption masks: fnum={int(fnum_mask.sum())}, "
+        f"union={int(union_mask.sum())}, desig={int(desig_mask.sum())}",
+        flush=True,
+    )
+
+    # ── Pre-bake null mask (deterministic) ──
+    # For each training query with a real target, flip to null with prob 0.15
+    null_mask = rng.random(n_sub) < 0.15
+    # Queries already null (target == -1) stay null regardless
+    null_mask = null_mask | (sub_target_fnums == -1)
+    print(f"Null mask: {int(null_mask.sum())}/{n_sub} queries", flush=True)
+
+    # ── Train with LBFGS ──
+    scoring = ScoringLayer()
+    print("\nTraining scoring layer with LBFGS...", flush=True)
+    train_scoring_lbfgs(
+        scoring=scoring,
+        train_memmaps=sub_memmaps,
+        train_target_fnums=sub_target_fnums,
         field_known=field_known,
         unknown_indicators_np=unknown_indicators_np,
         fnum_log_counts_np=fnum_log_counts_np,
         record_fnums_array=record_fnums_array,
-    )
-
-    module = ScoringModule(
-        lr=lr,
-        weight_decay=weight_decay,
-        null_mask_prob=null_mask_prob,
-        record_fnums_array=record_fnums_array,
-        eval_context=eval_context,
-    )
-
-    # ── Build datasets ──
-    train_ds = FullGazetteerDataset(
-        field_memmaps=train_memmaps,
-        field_known=field_known,
-        unknown_indicators_np=unknown_indicators_np,
-        fnum_log_counts_np=fnum_log_counts_np,
-        target_fnums=train_target_fnums,
-        record_fnums_array=record_fnums_array,
-        record_fnum_corrupt_prob=record_fnum_corrupt_prob,
-        record_union_corrupt_prob=record_union_corrupt_prob,
-        record_desig_corrupt_prob=record_desig_corrupt_prob,
+        corruption_masks=corruption_masks,
+        null_mask=null_mask,
+        n_outer=n_outer,
         chunk_size=chunk_size,
     )
-    # batch_size=None because each item is already a chunk
-    train_loader = DataLoader(train_ds, batch_size=None, shuffle=True, num_workers=0)
 
-    # Dummy val loader (actual eval is done via memmaps in on_validation_epoch_end)
-    val_loader = DataLoader([0], batch_size=1)
-
-    # ── Callbacks ──
-    checkpoint_cb = L.pytorch.callbacks.ModelCheckpoint(
-        dirpath=weights_dir,
-        filename="scoring_layer",
-        monitor="val_errors",
-        mode="min",
-        save_top_k=1,
-        verbose=False,
-        enable_version_counter=False,
-    )
-
-    callbacks = [checkpoint_cb]
-
-    # ── Train ──
-    trainer = L.Trainer(
-        max_epochs=epochs,
-        callbacks=callbacks,
-        gradient_clip_val=1.0,
-        log_every_n_steps=50,
-        enable_progress_bar=True,
-        default_root_dir=str(DATA_DIR),
-    )
-
-    trainer.fit(module, train_dataloaders=train_loader, val_dataloaders=val_loader)
+    # ── Save weights ──
+    torch.save(scoring.state_dict(), weights_dir / "scoring_layer.pt")
+    print(f"\nSaved scoring weights to {weights_dir / 'scoring_layer.pt'}")
 
     # ── Final report ──
-    best_path = checkpoint_cb.best_model_path
-    if best_path:
-        best = ScoringModule.load_from_checkpoint(
-            best_path,
-            record_fnums_array=record_fnums_array,
-            eval_context=eval_context,
-        )
-        print(f"\nBest checkpoint: {best_path}")
-        for split_name in ("val", "test"):
-            result = eval_from_memmaps(
-                best.scoring,
-                eval_context[f"{split_name}_memmaps"],
-                eval_context[f"{split_name}_target_fnums"],
-                field_known,
-                unknown_indicators_np,
-                fnum_log_counts_np,
-                record_fnums_array,
-                device,
-            )
-            n_split = len(eval_context[f"{split_name}_target_fnums"])
-            errors = result["errors"]
-            correct = n_split - errors
-            print(
-                f"  {split_name}: {correct}/{n_split} = {correct/n_split:.4f} "
-                f"({errors} errors, match: {result['match_correct']}/{result['n_match']}, "
-                f"null: {result['null_correct']}/{result['n_null']})"
-            )
-
-        # ── Fit scoring temperature on val set ──
-        print("\nFitting scoring temperature on val set...")
-        scoring_temp = fit_scoring_temperature(
-            best.scoring,
-            val_memmaps,
-            val_target_fnums,
+    cpu = torch.device("cpu")
+    for split_name, split_memmaps, split_targets in [
+        ("val", val_memmaps, val_target_fnums),
+        ("test", test_memmaps, test_target_fnums),
+    ]:
+        result = eval_from_memmaps(
+            scoring,
+            split_memmaps,
+            split_targets,
             field_known,
             unknown_indicators_np,
             fnum_log_counts_np,
             record_fnums_array,
-            device,
+            cpu,
         )
-        print(f"Scoring temperature: {scoring_temp:.4f}")
+        n_split = len(split_targets)
+        errors = result["errors"]
+        correct = n_split - errors
+        print(
+            f"  {split_name}: {correct}/{n_split} = {correct/n_split:.4f} "
+            f"({errors} errors, match: {result['match_correct']}/{result['n_match']}, "
+            f"null: {result['null_correct']}/{result['n_null']})"
+        )
 
-        with open(DATA_DIR / "temperatures.json") as f:
-            temps = json.load(f)
-        temps["scoring"] = scoring_temp
-        with open(DATA_DIR / "temperatures.json", "w") as f:
-            json.dump(temps, f, indent=2)
-        print(f"Saved scoring temperature to {DATA_DIR / 'temperatures.json'}")
+    # ── Fit scoring temperature on val set ──
+    print("\nFitting scoring temperature on val set...")
+    scoring_temp = fit_scoring_temperature(
+        scoring,
+        val_memmaps,
+        val_target_fnums,
+        field_known,
+        unknown_indicators_np,
+        fnum_log_counts_np,
+        record_fnums_array,
+        cpu,
+    )
+    print(f"Scoring temperature: {scoring_temp:.4f}")
+
+    with open(DATA_DIR / "temperatures.json") as f:
+        temps = json.load(f)
+    temps["scoring"] = scoring_temp
+    with open(DATA_DIR / "temperatures.json", "w") as f:
+        json.dump(temps, f, indent=2)
+    print(f"Saved scoring temperature to {DATA_DIR / 'temperatures.json'}")
 
 
 if __name__ == "__main__":
