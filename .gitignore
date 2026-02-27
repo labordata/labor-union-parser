@@ -1,5 +1,7 @@
 fmcs.db
 *.ckpt
+# Intermediate scoring layer checkpoint (bundled into scoring_weights.pt)
+src/labor_union_parser/weights/scoring_layer.pt
 checkpoints/*
 lightning_logs/*
 *.egg-info
