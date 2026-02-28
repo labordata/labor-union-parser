@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Train the union vs non-union detector.
 
-Uses CrossAttentionEncoder from the production package with PyTorch Lightning.
+Uses AttentionPoolingEncoder from the production package with PyTorch Lightning.
 Trains CharCNN from scratch (no pretrained weights needed).
 """
 
@@ -16,7 +16,7 @@ from sklearn.metrics import accuracy_score, roc_auc_score, roc_curve
 from torch.utils.data import DataLoader, Dataset
 
 from labor_union_parser.char_cnn import CharacterCNN, tokenize_to_chars
-from labor_union_parser.extractor import CrossAttentionEncoder
+from labor_union_parser.extractor import AttentionPoolingEncoder
 
 DATA_DIR = Path(__file__).parent / "data"
 WEIGHTS_DIR = Path(__file__).parent.parent / "src" / "labor_union_parser" / "weights"
@@ -32,20 +32,27 @@ MAX_TOKENS = 80  # union detector uses longer sequences than structured classifi
 
 class UnionDataset(Dataset):
     def __init__(self, texts, labels):
-        self.texts = texts
+        self.char_ids = []
+        self.token_types = []
+        self.is_numbers = []
         self.labels = labels
 
+        for text in texts:
+            char_ids, _, is_number, token_type = tokenize_to_chars(
+                text, max_tokens=MAX_TOKENS
+            )
+            self.char_ids.append(torch.tensor(char_ids, dtype=torch.long))
+            self.token_types.append(torch.tensor(token_type, dtype=torch.long))
+            self.is_numbers.append(torch.tensor(is_number, dtype=torch.long))
+
     def __len__(self):
-        return len(self.texts)
+        return len(self.labels)
 
     def __getitem__(self, idx):
-        char_ids, _, is_number, token_type = tokenize_to_chars(
-            self.texts[idx], max_tokens=MAX_TOKENS
-        )
         return {
-            "char_ids": torch.tensor(char_ids, dtype=torch.long),
-            "token_type": torch.tensor(token_type, dtype=torch.long),
-            "is_number": torch.tensor(is_number, dtype=torch.long),
+            "char_ids": self.char_ids[idx],
+            "token_type": self.token_types[idx],
+            "is_number": self.is_numbers[idx],
             "label": self.labels[idx],
         }
 
@@ -110,7 +117,7 @@ class UnionDetectorModule(L.LightningModule):
         self.lr = lr
 
         char_cnn = CharacterCNN(embed_dim=64, char_embed_dim=16)
-        self.model = CrossAttentionEncoder(
+        self.model = AttentionPoolingEncoder(
             char_cnn, embed_dim=64, num_embed_dim=8, num_heads=4
         )
 
@@ -130,7 +137,7 @@ class UnionDetectorModule(L.LightningModule):
 
 
 class UnionDataModule(L.LightningDataModule):
-    def __init__(self, batch_size=128, n_union_samples=10000, seed=42):
+    def __init__(self, batch_size=256, n_union_samples=0, seed=42):
         super().__init__()
         self.batch_size = batch_size
         self.n_union_samples = n_union_samples
@@ -165,8 +172,8 @@ class UnionDataModule(L.LightningDataModule):
             if not ex["records"] and ex["split"] in ("val", "test")
         ]
 
-        # Subsample union training examples if needed
-        if len(train_union) > self.n_union_samples:
+        # Subsample union training examples if requested
+        if self.n_union_samples and len(train_union) > self.n_union_samples:
             rng = random.Random(self.seed)
             train_union = rng.sample(train_union, self.n_union_samples)
 
@@ -265,7 +272,7 @@ def compute_centroid_and_threshold(module, dm):
 
 @click.command()
 @click.option("--epochs", default=30, help="Number of training epochs")
-@click.option("--batch-size", default=128, help="Batch size")
+@click.option("--batch-size", default=256, help="Batch size")
 @click.option("--lr", default=1e-3, help="Learning rate")
 def main(epochs, batch_size, lr):
     dm = UnionDataModule(batch_size=batch_size)

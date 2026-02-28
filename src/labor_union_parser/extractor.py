@@ -25,8 +25,8 @@ from .scoring import (
 from .tokenizer import smart_truncate_nonspace
 
 
-class CrossAttentionEncoder(nn.Module):
-    """Encoder with cross-attention pooling for union detection."""
+class AttentionPoolingEncoder(nn.Module):
+    """Encoder with learned-query attention pooling for union detection."""
 
     def __init__(
         self,
@@ -113,7 +113,7 @@ class Extractor:
         )
 
         char_cnn_union = CharacterCNN(embed_dim=64, char_embed_dim=16)
-        self.union_encoder = CrossAttentionEncoder(
+        self.union_encoder = AttentionPoolingEncoder(
             char_cnn_union, embed_dim=64, num_embed_dim=8, num_heads=4
         )
         self.union_encoder.load_state_dict(union_checkpoint["model_state_dict"])
