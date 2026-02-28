@@ -2120,7 +2120,7 @@ United Food & Commercial Workers 1995,FOOD AND COMMERCIAL WKRS,1995.0,540076.0,,
 USW AFL-CIO CLC District 10 Local 22L,"STEELWORKERS, AFL-CIO",22.0,35808.0,,train
 AFM 7,MUSICIANS AFL-CIO,7.0,33271.0,,train
 IAMAW 4,MACHINISTS AFL-CIO,4.0,,potentially resolvable,train
-IAM Lodge 1414/ IBEW Local 1245/ OE No. 3,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+IAM Lodge 1414/ IBEW Local 1245/ OE No. 3,,,,multi-union,train
 IBT -162 & 305,TEAMSTERS,,,potentially resolvable,train
 UAW-1416,AUTO WORKERS AFL-CIO,1416.0,66540.0,,train
 USW-378/377,"STEELWORKERS, AFL-CIO",,,potentially resolvable,train
@@ -11673,7 +11673,7 @@ USW-12623-01 Dist 4,"STEELWORKERS, AFL-CIO",12623.0,1372.0,,train
 International Longshoremens Assoc. 2038,LONGSHOREMENS ASN AFL-CIO,2038.0,516947.0,,train
 Salt Lake Mailers Union M21/CWA 14759 14759,COMMUNICATIONS WORKERS AFL-CIO,14759.0,21528.0,,train
 International  Brotherhood of Teamsters 270,TEAMSTERS,270.0,37852.0,,train
-"Northern California Warehouse Council, IBT-ILWU-853/6",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"Northern California Warehouse Council, IBT-ILWU-853/6",,,,multi-union,train
 ATU 998,TRANSIT UNION AFL-CIO,998.0,11830.0,,test
 UNITED FOOD COMMERCIAL WORKERS 655,FOOD AND COMMERCIAL WKRS,655.0,15641.0,,train
 United Steelworkers-1408-66,"STEELWORKERS, AFL-CIO",1408.0,,potentially resolvable,train
@@ -12087,7 +12087,6 @@ IAMAW-2282,MACHINISTS AFL-CIO,2282.0,501456.0,,train
 United Steelworkers 1085,"STEELWORKERS, AFL-CIO",1085.0,67543.0,,train
 USW-563,"STEELWORKERS, AFL-CIO",563.0,,potentially resolvable,train
 IUOE 139,"ENGINEERS, OPERATING, AFL-CIO",139.0,35847.0,,train
-Andy Space ALLEN 568/2006,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
 International Association of Machinist and Aerospace Workers Harmony Lodge #831,MACHINISTS AFL-CIO,831.0,42277.0,,train
 UNITE HERE  54,UNITE HERE,54.0,71117.0,,train
 Workers United 23,"WORKERS UNITED, SEIU",23.0,43961.0,,train
@@ -13510,7 +13509,7 @@ UNITED STEELWORKERS INTERNATIONAL UNION 1017,"STEELWORKERS, AFL-CIO",1017.0,,pot
 IUOE-965,"ENGINEERS, OPERATING, AFL-CIO",965.0,24200.0,,train
 IBEW-648,ELECTRICAL WORKERS IBEW AFL-CIO,648.0,25486.0,,train
 Shopmen's Ironworkers 790,IRON WORKERS AFL-CIO,790.0,29837.0,,train
-IAMAW / IBEW-291/136,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+IAMAW / IBEW-291/136,,,,multi-union,train
 Cement Masons 11-638,PLASTERERS AND CEMENT MASONS AFL-CIO,638.0,,not in gazetteer,train
 "International Brotherhood of Teamsters, AFL-CIO 601",TEAMSTERS,601.0,39153.0,,train
 United Steelworkers 12623-08,"STEELWORKERS, AFL-CIO",12623.0,1372.0,,train
@@ -17906,7 +17905,7 @@ TEAMSTERS LOCAL UNION 115,TEAMSTERS,115.0,12292.0,,train
 CWA -  LOCAL 6320,COMMUNICATIONS WORKERS AFL-CIO,6320.0,26643.0,,train
 "International Association of Bridge, Structural, Ornamental & Reinforcing of Iron Workers AFL-CIO, Local 847",IRON WORKERS AFL-CIO,847.0,544014.0,,train
 IBEW Local 1426,ELECTRICAL WORKERS IBEW AFL-CIO,1426.0,23635.0,,train
-Minnesota Pipetrades,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+Minnesota Pipetrades,,,,not in gazetteer,train
 "American Postal Workers Union, Central Arkansas Area Local 189","POSTAL WORKERS, AMERICAN, AFL-CIO",189.0,91731.0,,train
 "UNITED FOOD AND COMMERCIAL WORKERS INTERNATIONAL UNION, CLC (UFCW), LOCAL 1059",FOOD AND COMMERCIAL WKRS,1059.0,23709.0,,train
 "United Food and Commercial Workers Union, Local 99, AFL-CIO",FOOD AND COMMERCIAL WKRS,99.0,2911.0,,train
@@ -18488,7 +18487,6 @@ TEAMSTERS LOCAL 589,TEAMSTERS,589.0,42242.0,,train
 International Union of Bricklayers & Allied Crafts Mountain West District Council,BRICKLAYERS AFL-CIO,,,potentially resolvable,train
 "International Brotherhood of Electrical Workers, Local 1638",ELECTRICAL WORKERS IBEW AFL-CIO,1638.0,517690.0,,train
 Bakery Confectionary Tobacco and Grain Millers Union Local 111,"BAKERY, TOBACCO AND GRAIN AFL-CIO",111.0,63644.0,,train
-ILLINOIS PIPE TRADES ADVANCEMENT AND PROMOTION PROGRAM,PLUMBERS AFL-CIO,,,potentially resolvable,train
 UE,ELECTRICAL WORKERS UE IND,,,potentially resolvable,train
 "International Brotherhood of Electrical Workers, LOCAL 457, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,457.0,508671.0,,train
 UNITED FOOD & COMMERCIAL WORKERS INTERNATIONAL UNION,FOOD AND COMMERCIAL WKRS,,,potentially resolvable,train
@@ -22313,7 +22311,7 @@ United Healthcare Workers SEIU,SERVICE EMPLOYEES,,,potentially resolvable,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCAL UNION NO. 1873",ELECTRICAL WORKERS IBEW AFL-CIO,1873.0,49605.0,,train
 "BAKERY, CONFECTIONERY, TOBACCO WORKERS AND GRAIN MILLERS INTERNATIONAL UNION, (BCTGM) LOCAL 57","BAKERY, TOBACCO AND GRAIN AFL-CIO",57.0,,potentially resolvable,train
 TEAMSTERS LOCAL UNION NO. 456,TEAMSTERS,456.0,21006.0,,train
-PRODUCTION SERVICE AND SALES DISTRICT COUNCIL,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,test
+PRODUCTION SERVICE AND SALES DISTRICT COUNCIL,FOOD AND COMMERCIAL WKRS,,6136,,test
 IUPAT DC#5 Local 1094,PAINTERS AFL-CIO,1094.0,32393.0,,train
 "LOCAL 804, INTERNATIONAL BROTHERHOOD OF TEAMSTERS, AFL-CIO",TEAMSTERS,804.0,31841.0,,test
 "IRON WORKERS, LOCAL 3, AFL-CIO",IRON WORKERS AFL-CIO,3.0,13253.0,,train
@@ -25569,7 +25567,7 @@ Chicago Regional Council of Carpenters Local Union 1889,CARPENTERS IND,1889.0,41
 "TRANSPORT WORKERS UNION OF AMERICA, AFL-CIO, LOCAL 721",TRANSPORT WORKERS AFL-CIO,721.0,542085.0,,train
 Laborers’ International Union of North America,LABORERS,,,potentially resolvable,train
 United Steelworkers Local 741,"STEELWORKERS, AFL-CIO",741.0,,potentially resolvable,train
-PENNSYLVANIA NURSES ASSOCIATION/OPEIU,OFFICE AND PROFESSIONAL EMPLS AFL-CIO,,,potentially resolvable,train
+PENNSYLVANIA NURSES ASSOCIATION/OPEIU,OFFICE AND PROFESSIONAL EMPLS AFL-CIO,,529079,,train
 "INTERNATIONAL ASSOCIATION OF BRIDGE, STRUCTURAL AND ORNAMENTAL & REINFORCING IRONWORKERS",IRON WORKERS AFL-CIO,,,potentially resolvable,train
 "Bakery, Confectionery, Tobacco Workers' and Grain Millers International Union, Local Union No. 232, AFL-CIO-CLC","BAKERY, TOBACCO AND GRAIN AFL-CIO",232.0,,potentially resolvable,train
 "IBEW, LOCAL 153",ELECTRICAL WORKERS IBEW AFL-CIO,153.0,28635.0,,train
@@ -26081,7 +26079,7 @@ UAW Local 1435,AUTO WORKERS AFL-CIO,1435.0,64778.0,,train
 UFCW LOCAL 135 REPRESENTATIVE: SARAH SAEZ,FOOD AND COMMERCIAL WKRS,135.0,517319.0,,train
 "UNITED FOOD AND COMMERCIAL WORKERS, LOCAL 540",FOOD AND COMMERCIAL WKRS,540.0,41547.0,,train
 "Bakery, Confectionery, Tobacco Workers, and Grain Millers International Union Local 218","BAKERY, TOBACCO AND GRAIN AFL-CIO",218.0,2735.0,,train
-"AREA TRADES COUNCIL AFFILIATES OF THE OPERATING ENGINEERS, CARPENTERS, ELECTRICAL WORKERS, PLUMBERS",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"AREA TRADES COUNCIL AFFILIATES OF THE OPERATING ENGINEERS, CARPENTERS, ELECTRICAL WORKERS, PLUMBERS",,,,multi-union,train
 "UNITED AUTO WORKERS, LOCAL 624",AUTO WORKERS AFL-CIO,624.0,32214.0,,train
 "Local 804, Teamsters",TEAMSTERS,804.0,31841.0,,train
 APWU LOCAL 1006,"POSTAL WORKERS, AMERICAN, AFL-CIO",1006.0,512139.0,,train
@@ -27399,7 +27397,7 @@ UAW LOCAL 624,AUTO WORKERS AFL-CIO,624.0,32214.0,,train
 Iron Workers St. Louis District Council,IRON WORKERS AFL-CIO,,,potentially resolvable,train
 UGSOA International Union and its Local 15,"GOVERNMENT SECURITY OFFICERS, IND",15.0,508745.0,,train
 Teamsters Local 340,TEAMSTERS,340.0,11443.0,,train
-"PENNSYLVANIA NURSES ASSOCIATION, AFL-CIO",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,test
+"PENNSYLVANIA NURSES ASSOCIATION, AFL-CIO",PASNAP,,542163,,test
 "International Longshoremen's Association Local 1694, AFL-CIO",LONGSHOREMENS ASN AFL-CIO,1694.0,,potentially resolvable,train
 IAMAW - District Lodge 10,MACHINISTS AFL-CIO,10.0,9340.0,,train
 American Postal Workers Union NOVA Local 6803,"POSTAL WORKERS, AMERICAN, AFL-CIO",6803.0,507353.0,,train
@@ -32765,7 +32763,7 @@ Teamsters Local 890,TEAMSTERS,890.0,4180.0,,train
 "UNITED ELECTRICAL, RADIO AND MACHINE WORKERS OF AMERICA, (UE), LOCAL 1110",ELECTRICAL WORKERS UE IND,1110.0,,potentially resolvable,train
 UFCW  UNION DISTRICT LOCAL NO. 271,FOOD AND COMMERCIAL WKRS,271.0,,potentially resolvable,train
 "INTERNATIONAL ASSOCIATION OF BRIDGE, STRUCTUAL AND ORNAMENTAL IRON WORKERS, LOCAL 37,  AFL-CIO",IRON WORKERS AFL-CIO,37.0,23416.0,,train
-PASNAP-Crozer Chester Nurses Association,PASNAP,,,not in gazetteer,test
+PASNAP-Crozer Chester Nurses Association,PASNAP,,542163,,test
 APWU Kansas Kaw Valley Area Local 238,"POSTAL WORKERS, AMERICAN, AFL-CIO",238.0,511497.0,,train
 "International Association of Machinists & Aerospace Workers, Local Lodge 130, AFL-CIO",MACHINISTS AFL-CIO,130.0,531708.0,,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS LOCAL UNION NO. 302, INTERNATIONAL BROTHERHOOD OF EL",ELECTRICAL WORKERS IBEW AFL-CIO,302.0,36765.0,,train
@@ -36234,7 +36232,7 @@ American Postal Workers Union Local 89,"POSTAL WORKERS, AMERICAN, AFL-CIO",89.0,
 "Utility Workers Union of America, Local 537",UTILITY WORKERS AFL-CIO,537.0,512374.0,,train
 General Teamsters Local 439,TEAMSTERS,439.0,14236.0,,train
 "AMALGAMATED TRANSIT UNION, AFL-CIO, CLC LOCAL 770",TRANSIT UNION AFL-CIO,770.0,544036.0,,train
-"MISSISSIPPI CASINO WORKERS UNION COUNCIL (UNITE HERE, TEAMSTERS, OPERATING ENGINEERS)",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"MISSISSIPPI CASINO WORKERS UNION COUNCIL (UNITE HERE, TEAMSTERS, OPERATING ENGINEERS)",,,,multi-union,train
 "GENERAL TEAMSTERS, LOCAL 662",TEAMSTERS,662.0,28535.0,,train
 "Service Employees International Union, Local 87",SERVICE EMPLOYEES,87.0,34951.0,,train
 "Communications Workers of America, Local 3218",COMMUNICATIONS WORKERS AFL-CIO,3218.0,33615.0,,train
@@ -37475,7 +37473,7 @@ Teamsters Union Local 455,TEAMSTERS,455.0,2409.0,,train
 "IBEW, LOCAL 520",ELECTRICAL WORKERS IBEW AFL-CIO,520.0,36424.0,,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCAL 2326, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,2326.0,68380.0,,train
 "UNITED STEELWORKERS OF AMERICA, LOCAL 107","STEELWORKERS, AFL-CIO",107.0,,potentially resolvable,train
-"UNITE HERE, NY NJ REGIONAL JOINT BOARD",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"UNITE HERE, NY NJ REGIONAL JOINT BOARD","WORKERS UNITED, SEIU",,48899,,train
 "Local 1029, Laborers' International Union of North America (LIUNA), AFL-CIO",LABORERS,1029.0,65349.0,,train
 "Local 32 BJ, SEIU",SERVICE EMPLOYEES,32.0,516823.0,,train
 "American Federation of State, County and Municipal Employees, AFL-CIO Council 93",STATE COUNTY AND MUNI EMPLS AFL-CIO,93.0,511964.0,,train
@@ -39198,7 +39196,7 @@ United Steelworkers Local 2002-15,"STEELWORKERS, AFL-CIO",2002.0,7040.0,,train
 "UNITED STEELWORKERS OF AMERICA, LOCAL UNION NO. 7609-05, AFL-CIO","STEELWORKERS, AFL-CIO",7609.0,67066.0,,train
 INTERNATIONAL ASSOCIATION OF HEAT AND FROST INSULATORS & ALLIED WORKERS,INSULATORS AFL-CIO,,,potentially resolvable,train
 "IBEW, LOCAL UNION #68",ELECTRICAL WORKERS IBEW AFL-CIO,68.0,46158.0,,train
-Service Employees International Union (SEIU) Chicago and Midwest Regional Board,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+Service Employees International Union (SEIU) Chicago and Midwest Regional Board,"WORKERS UNITED, SEIU",,511518,,train
 "BALTIMORE FRANCIS ""STU"" FILBEY AREA LOCAL 181, AMERICAN POSTAL WORKERS UNION, AFL-CIO","POSTAL WORKERS, AMERICAN, AFL-CIO",181.0,71604.0,,train
 SERVICE EMPLOYEES INTERNATIONAL UNION (SEIU) - UNITED LONG TERM CARE WORKERS - LOCAL 6434,SERVICE EMPLOYEES,6434.0,543788.0,,train
 IUE-CWA LOCAL 485,COMMUNICATIONS WORKERS AFL-CIO,485.0,45926.0,,train
@@ -39239,7 +39237,7 @@ SHEET METAL WORKERS LOCAL 55,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS"
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, AFL-CIO LOCAL UNION NO. 1250",ELECTRICAL WORKERS IBEW AFL-CIO,1250.0,33431.0,,train
 UAW PUBLIC REVIEW BOARD,AUTO WORKERS AFL-CIO,,,potentially resolvable,train
 Local 738 UAW Union,AUTO WORKERS AFL-CIO,738.0,20602.0,,train
-UNITED FEDERATION OF NURSES,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+UNITED FEDERATION OF NURSES,TEACHERS AFL-CIO,,516719,,train
 International Association of Machinists and Aerospace Workers District 34,MACHINISTS AFL-CIO,34.0,17207.0,,train
 "Drivers, Chauffeurs and Helpers, Teamsters Local Union No. 639 a/w International Brotherhood of Teamsters, Chauffeurs, Warehousemen and Helpers of America",TEAMSTERS,639.0,11839.0,,train
 "LOCAL 412, UAW, AFL-CIO",AUTO WORKERS AFL-CIO,412.0,20544.0,,train
@@ -40325,7 +40323,7 @@ United Steel Workers Local 711,"STEELWORKERS, AFL-CIO",711.0,,potentially resolv
 LABORER'S INTERNATIONAL UNION OF NORTH AMERICA LOCAL #145,LABORERS,145.0,3113.0,,train
 Ironworkers Local Union No. 550,IRON WORKERS AFL-CIO,550.0,32576.0,,train
 "International Brotherhood of Electrical Workers, Local Union No. 932",ELECTRICAL WORKERS IBEW AFL-CIO,932.0,48006.0,,train
-WORKERS UNITED LAUNDRY DISTRIBUTION AND FOOD SERVICE,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+WORKERS UNITED LAUNDRY DISTRIBUTION AND FOOD SERVICE,"WORKERS UNITED, SEIU",,544405,,train
 "International Brotherhood of Teamsters, Local No. 728",TEAMSTERS,728.0,35292.0,,test
 Gerneral Teamsters Auto Truck Drivers and Helpers Local Union No. 162 affiliated with International Brotherhood of Teamsters,TEAMSTERS,162.0,2370.0,,test
 "International Union of Painters and Allied Trades (IUPAT), District Council 5",PAINTERS AFL-CIO,5.0,37950.0,,train
@@ -41558,7 +41556,7 @@ Teamsters Joint Council # 37,TEAMSTERS,37.0,36047.0,,train
 "International Brotherhood of Electrical Workers, Local 304",ELECTRICAL WORKERS IBEW AFL-CIO,304.0,6349.0,,train
 "Local 919, New England Joint Board, UNITE HERE",UNITE HERE,919.0,542525.0,,train
 SEIU HEALTHCARE FLORIDA,SERVICE EMPLOYEES,,,potentially resolvable,train
-Crozer Chester Nurses Association Union/Pennsylvania Association of Staff Nurses and Allied Professionals,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+Crozer Chester Nurses Association Union/Pennsylvania Association of Staff Nurses and Allied Professionals,PASNAP,,542163,,train
 "Service Employees International Union, United Healthcare Workers, Local 250",SERVICE EMPLOYEES,250.0,7760.0,,train
 "PLUMBERS & PIPEFITTERS LOCAL UNION NO. 189, AFL-CIO",PLUMBERS AFL-CIO,189.0,2751.0,,train
 CWA 3217,COMMUNICATIONS WORKERS AFL-CIO,3217.0,46102.0,,train
@@ -42798,7 +42796,7 @@ Service Employee Interantional Union Local 200 United,SERVICE EMPLOYEES,200.0,54
 New York State Pipe Trades Association,PLUMBERS AFL-CIO,,,potentially resolvable,train
 Communications Workers of America 9511,COMMUNICATIONS WORKERS AFL-CIO,9511.0,54380.0,,train
 International UAW and its Local 12,AUTO WORKERS AFL-CIO,12.0,7160.0,,train
-NATIONAL UNION OF SECURITY OFFICERS & GUARDS (NUSOG),COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+NATIONAL UNION OF SECURITY OFFICERS & GUARDS (NUSOG),"INDUSTRIAL TRADE UNIONS, IUJAT",,517954,,train
 "IBT, LOCAL 523",TEAMSTERS,523.0,33164.0,,train
 American Postal Workers Union Local 159,"POSTAL WORKERS, AMERICAN, AFL-CIO",159.0,71872.0,,train
 "UNITED STEELWORKERS OF AMERICA, LOCAL 7139-02, AFL-CIO, CLC","STEELWORKERS, AFL-CIO",7139.0,53584.0,,train
@@ -45133,7 +45131,7 @@ Laborers Union Local No. 1,LABORERS,1.0,,potentially resolvable,train
 "United Steelworkers, Local 892","STEELWORKERS, AFL-CIO",892.0,,potentially resolvable,train
 "LOCAL 1485, UAW, AFL-CIO",AUTO WORKERS AFL-CIO,1485.0,33350.0,,test
 The Ohio State Association of Plumbers and Pipefitters,PLUMBERS AFL-CIO,,,potentially resolvable,train
-"EAST BAY AUTOMOTIVE COUNCIL, EAST BAY AUTOMOTIVE MACHINISTS LODGE NO. 1546, (AFFILIATED WITH MACHINISTS AUTOMOTIVE TRADES DISTRICT LODGE NO.190 OF CALIFORNIA), AND TEAMSTERS LOCAL NO. 853",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"EAST BAY AUTOMOTIVE COUNCIL, EAST BAY AUTOMOTIVE MACHINISTS LODGE NO. 1546, (AFFILIATED WITH MACHINISTS AUTOMOTIVE TRADES DISTRICT LODGE NO.190 OF CALIFORNIA), AND TEAMSTERS LOCAL NO. 853",,,,multi-union,train
 INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 137,TEAMSTERS,137.0,30469.0,,train
 "BRICKLAYERS AND ALLIED CRAFTWORKERS, LOCAL UNION #1 OF PENNSYLVANIA AND DELAWARE",BRICKLAYERS AFL-CIO,1.0,531788.0,,train
 "United Automobile, Aerospace and Agricultural Implement Workers of America, UAW Local 1803",AUTO WORKERS AFL-CIO,1803.0,70447.0,,train
@@ -51271,7 +51269,7 @@ LOCAL 998 LABORERS INT'L UNION OF N. AMERICA,LABORERS,998.0,11727.0,,train
 North Carolina Counsel of the American Postal Workers Union (NCCAPWU),"POSTAL WORKERS, AMERICAN, AFL-CIO",,,potentially resolvable,train
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY ALLIED-INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION, AND ITS LOCAL 991","STEELWORKERS, AFL-CIO",991.0,,potentially resolvable,train
 "LOCAL 1292, INT'L UNION, UAW",AUTO WORKERS AFL-CIO,1292.0,18941.0,,train
-ROCHESTER REGIONAL JOINT BOARD UNITE/HERE,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+ROCHESTER REGIONAL JOINT BOARD UNITE/HERE,UNITE HERE,,543234,,train
 United Autoworkers Local 722,AUTO WORKERS AFL-CIO,722.0,45251.0,,train
 Communications Workers of America Local 3204,COMMUNICATIONS WORKERS AFL-CIO,3204.0,44648.0,,train
 "PLUMBERS & STEAMFITTERS, LOCAL 377",PLUMBERS AFL-CIO,377.0,44711.0,,train
@@ -55693,7 +55691,7 @@ UE Local 1187,ELECTRICAL WORKERS UE IND,1187.0,509542.0,,train
 American Postal Workers Waterville Area Local 5729,"POSTAL WORKERS, AMERICAN, AFL-CIO",5729.0,92810.0,,test
 "WOKERS UNITED, NY- NJ REGIONAL JOINT BOARD","WORKERS UNITED, SEIU",,,potentially resolvable,train
 "International Longshoreman Association (ILA), Local 1408",LONGSHOREMENS ASN AFL-CIO,1408.0,20988.0,,train
-"Graduate Organized Laborers of Dartmouth-United Electrical, Radio and Machine Workers of America (UE)",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"Graduate Organized Laborers of Dartmouth-United Electrical, Radio and Machine Workers of America (UE)",,,,not in gazetteer,train
 "MILLMEN'S LOCAL NO. 1733, OF THE UNITED BROTHERHOOD OF CARPENTERS AND JOINERS OF AMERICA",CARPENTERS IND,1733.0,53020.0,,train
 UNITED STEELWORKERS LOCAL 13833,"STEELWORKERS, AFL-CIO",13833.0,67199.0,,train
 "LABORERS INTERNATIONAL UNION OF NORTH AMERICA, LOCAL 6",LABORERS,6.0,,potentially resolvable,train
@@ -56688,7 +56686,7 @@ Plumbers and Pipefitters Local 360,PLUMBERS AFL-CIO,360.0,4503.0,,train
 American Postal Workers Union Flushing New York Local 2286,"POSTAL WORKERS, AMERICAN, AFL-CIO",2286.0,72065.0,,train
 Ironworkers Local 86 Seattle,IRON WORKERS AFL-CIO,86.0,15685.0,,train
 International Brotherhood Teamsters Local 697,TEAMSTERS,697.0,25932.0,,train
-"CHAUFFEURS, TEAMSTERS AND HELPERS LOCAL UNION NO. 175. AND WEST VIRGINIA APPALACHIAN LABORERS DISTRI",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"CHAUFFEURS, TEAMSTERS AND HELPERS LOCAL UNION NO. 175. AND WEST VIRGINIA APPALACHIAN LABORERS DISTRI",,,,multi-union,train
 Bricklayers and Allied Craftworkers Local 15,BRICKLAYERS AFL-CIO,15.0,,potentially resolvable,train
 "International Brotherhood of Boilermakers, Local 484",BOILERMAKERS AFL-CIO,484.0,509183.0,,train
 WORKERS UNITE AN AFFILIATE OF SEIU,"WORKERS UNITED, SEIU",,,potentially resolvable,train
@@ -56952,7 +56950,6 @@ Georgia-Carolina Pipe Trades Association,PLUMBERS AFL-CIO,,,potentially resolvab
 "LOCAL 174, INTERNATIONAL UNION, UNITED AUTOMOIBLE, AEROSPACE AND AGRICULTURAL IMPLEMENT WORKERS OF A",AUTO WORKERS AFL-CIO,174.0,,potentially resolvable,train
 "American Postal Workers Union, Local 8006","POSTAL WORKERS, AMERICAN, AFL-CIO",8006.0,544087.0,,train
 "UNITED STEELWORKERS INT'L UNION, LOCAL 882L","STEELWORKERS, AFL-CIO",882.0,67076.0,,train
-ILLINOIS PIPE TRADES ADVANCEMENT & PROMOTION PROGRAM,PLUMBERS AFL-CIO,,,potentially resolvable,train
 "Service Employees International Union, Local 775, AFL-CIO",SERVICE EMPLOYEES,775.0,542433.0,,train
 "LABORERS' INTERNATIONAL UNION OF NORTH AMERICA, LOCAL 83, AFL-CIO",LABORERS,83.0,7842.0,,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCAL 11, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,11.0,12121.0,,train
@@ -59790,7 +59787,7 @@ DISTRICT LODGE W-475 IAM AFL-CIO,MACHINISTS AFL-CIO,475.0,,potentially resolvabl
 TEAMSTERS LOCAL 662,TEAMSTERS,662.0,28535.0,,train
 International Alliance of Theatrical Stage Employees Local 134 Santa Clara County,STAGE AND PICTURE OPERATORS AFL-CIO,134.0,519477.0,,train
 "American Postal Workers Union, Columbus Ohio Area Local #232","POSTAL WORKERS, AMERICAN, AFL-CIO",232.0,72370.0,,train
-"Mississippi Casino Workers Union Council (Unite Here, Teamsters, Operating Engineers)",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"Mississippi Casino Workers Union Council (Unite Here, Teamsters, Operating Engineers)",,,,multi-union,train
 INTERNATIONAL CHEMICAL WORKERS UNION COUNCIL/UNITED FOOD AND COMMERCIAL WORKERS UNION,FOOD AND COMMERCIAL WKRS,,,potentially resolvable,train
 "AMERICAN POSTAL WORKERS UNION, COLUMBUS, OH AREA LOCAL 232, AFL-CIO","POSTAL WORKERS, AMERICAN, AFL-CIO",232.0,72370.0,,train
 IUE/CWA LOCAL 755,COMMUNICATIONS WORKERS AFL-CIO,755.0,34133.0,,train
@@ -60188,7 +60185,7 @@ Ironworkers Local 395,IRON WORKERS AFL-CIO,395.0,37378.0,,train
 LOCAL 640 OF THE UTILITY WORKERS UNION OF AMERICA,UTILITY WORKERS AFL-CIO,640.0,543416.0,,train
 International Brotherhood of Teamsters Local 104,TEAMSTERS,104.0,4987.0,,train
 Chicago and Midwest Regional Joint Board for Workers United,"WORKERS UNITED, SEIU",,,potentially resolvable,train
-AUTOMOTIVE PARTS & SERVICE WORKERS UNION,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+AUTOMOTIVE PARTS & SERVICE WORKERS UNION,,,,not in gazetteer,train
 "Teamsters Local Union No. 348, a/w International Brotherhood of Teamsters",TEAMSTERS,348.0,26316.0,,test
 "INTERNATIONAL UNION OF PAINTERS AND ALLIED TRADES DISTRICT COUNCIL 711, AFL-CIO",PAINTERS AFL-CIO,711.0,530442.0,,train
 "American Federal Government Emploeesk, (AFGE)",GOVERNMENT EMPLOYEES AFGE AFL-CIO,,,potentially resolvable,train
@@ -61071,7 +61068,7 @@ American Postal Worker's Union Santa Barbara Local 264,"POSTAL WORKERS, AMERICAN
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCAL 1228",ELECTRICAL WORKERS IBEW AFL-CIO,1228.0,31977.0,,train
 "American Federation of Government Employees, Local 2028, AFL-CIO",GOVERNMENT EMPLOYEES AFGE AFL-CIO,2028.0,502072.0,,train
 CARPENTERS UNION LOCAL 971,CARPENTERS IND,971.0,34860.0,,train
-"AREA TRADES COUNCIL, OPERATING ENGINEERS, ELECTRICAL WORKERS, CARPENTERS, PLUMBERS & GASFITTERS AND",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"AREA TRADES COUNCIL, OPERATING ENGINEERS, ELECTRICAL WORKERS, CARPENTERS, PLUMBERS & GASFITTERS AND",,,,multi-union,train
 "UNITED FOOD AND COMMERCIAL WORKERS UNION, LOCAL NO. 75",FOOD AND COMMERCIAL WKRS,75.0,544266.0,,train
 SEIU LOCAL 668,SERVICE EMPLOYEES,668.0,505025.0,,train
 "American Postal Workers Union, Local 1044","POSTAL WORKERS, AMERICAN, AFL-CIO",1044.0,72450.0,,train
@@ -61217,7 +61214,7 @@ International Brotherhood of Carpenters and Joiners of America Local 2285,CARPEN
 "INTERNATIONAL UNION OF PAINTERS AND ALLIED TRADES, AFL-CIO DISTRICT COUNCIL 88",PAINTERS AFL-CIO,88.0,543270.0,,train
 SEIU-UW,SERVICE EMPLOYEES,,,potentially resolvable,train
 "AMERICAN POSTAL WORKERS UNION, CENTRAL MA, AREA LOCAL 4553","POSTAL WORKERS, AMERICAN, AFL-CIO",4553.0,514976.0,,train
-Rochester Union of Nurses and Allied Professionals c/o Northeast Nurses Association,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+Rochester Union of Nurses and Allied Professionals c/o Northeast Nurses Association,MASSACHUSETTS NURSES ASSOCIATION,,543023,,train
 "United Autoworkers, Local 686",AUTO WORKERS AFL-CIO,686.0,44111.0,,train
 International Association of Heat & Frost Insulators & Allied Workers Local No. 7,INSULATORS AFL-CIO,7.0,27017.0,,train
 "INTERNATIONAL BROTHERHOOD OF TEAMSTERS (IBT), TEAMSTERS LOCAL UNION 769",TEAMSTERS,769.0,61186.0,,train
@@ -61437,7 +61434,7 @@ OFFICE OF PROFESSIONAL EMPLOYEES INTERNATIONAL UNION,OFFICE AND PROFESSIONAL EMP
 "United Autoworkers, Local 70",AUTO WORKERS AFL-CIO,70.0,35158.0,,train
 "TEAMSTERS LOCAL UNION NO. 436 A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS, AFL-CIO (IBT)",TEAMSTERS,436.0,18978.0,,train
 "IUOE, LOCAL 94-94A-94B,","ENGINEERS, OPERATING, AFL-CIO",94.0,4156.0,,train
-international longshoremen,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+international longshoremen,,,,unknown union,train
 Plumbers Local Union No. 519,PLUMBERS AFL-CIO,519.0,10634.0,,train
 "UNITED GOVERNMENT SECURITY OFFICERS OF AMERICA INTERNATIONAL UNION, LOCAL #203","GOVERNMENT SECURITY OFFICERS, IND",203.0,541819.0,,test
 "United Auto Workers, Local 865-Shop Committee",AUTO WORKERS AFL-CIO,865.0,8320.0,,train
@@ -62274,7 +62271,7 @@ INTERNATIONAL UNION OF PAINTERS & ALLIED TRADES,PAINTERS AFL-CIO,,,potentially r
 OPEIU International Union,OFFICE AND PROFESSIONAL EMPLS AFL-CIO,,,potentially resolvable,train
 "INTERNATIONAL UNION, USW, AFL-CIO, CLC","STEELWORKERS, AFL-CIO",,,potentially resolvable,train
 United Steelworkers Local 5073,"STEELWORKERS, AFL-CIO",5073.0,19138.0,,train
-United Service Workers West,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+United Service Workers West,,,,not in gazetteer,train
 "United Association of Plumbers, Pipefitters, Welders and HVAC Service Techs, Local 114",PLUMBERS AFL-CIO,114.0,14337.0,,train
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED, INDUSTRIAL AND SERVICE LOCAL 155-03","STEELWORKERS, AFL-CIO",155.0,14627.0,,train
 SHEET METAL WORKERS LOCAL UNION NO. 2,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",2.0,,potentially resolvable,train
@@ -65259,7 +65256,7 @@ LOCAL 636 INT'L UNION OF PLUMBERS & PIPEFITTERS,PLUMBERS AFL-CIO,636.0,22479.0,,
 UFCW LOCAL 342 AFL-CIO,FOOD AND COMMERCIAL WKRS,342.0,,potentially resolvable,test
 "Technical, Office and Professional UAW, Local 2110",AUTO WORKERS AFL-CIO,2110.0,,potentially resolvable,train
 UFCW Local No. 360,FOOD AND COMMERCIAL WKRS,360.0,,potentially resolvable,train
-IBT/HERE EMPLOYEE REPRESENTATIVES' COUNCIL,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+IBT/HERE EMPLOYEE REPRESENTATIVES' COUNCIL,,,,multi-union,train
 "International Association of Machinists & Aerospace Workers, District Lodge 751, AFL-CIO",MACHINISTS AFL-CIO,751.0,34980.0,,train
 "THE DENVER NEWSPAPER GUILD -CWA, LOCAL 37074, AFL-CIO-CLC",COMMUNICATIONS WORKERS AFL-CIO,37074.0,42048.0,,test
 "INTERNATIONAL UNION, SECURITY, POLICE AND FIRE PROFESSIONALS OF AMERICA (SPFPA) AND AMALGAMATED LOCA","SECURITY POLICE, FIRE PROF, IND",,,potentially resolvable,train
@@ -71699,7 +71696,6 @@ NALC BRANCH 373,"LETTER CARRIERS, NATL ASN, AFL-CIO",373.0,81606.0,,train
 National Rural Letter Carriers' Association Local Union,"LETTER CARRIERS, RURAL, IND",,,potentially resolvable,train
 NALC BRANCH 1260,"LETTER CARRIERS, NATL ASN, AFL-CIO",1260.0,80546.0,,train
 National Association of Letter Carriers-Tri-Valley Branch 2902,"LETTER CARRIERS, NATL ASN, AFL-CIO",2902.0,80141.0,,train
-North West Florida Letter Carriers,"LETTER CARRIERS, NATL ASN, AFL-CIO",,,potentially resolvable,train
 BRANCH 3126 NATIONAL ASSOCIATION OF LETTER CARRIERS,"LETTER CARRIERS, NATL ASN, AFL-CIO",3126.0,81994.0,,train
 Hudson Valley Merged Branch 137 NALC,"LETTER CARRIERS, NATL ASN, AFL-CIO",137.0,82456.0,,train
 "National Association of Letter Carriers, Local Branch 545, AFL-CIO","LETTER CARRIERS, NATL ASN, AFL-CIO",545.0,82513.0,,train
@@ -74626,24 +74622,18 @@ PROFESSIONAL EMTS & PARAMEDICS (PEP),GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potent
 "INTERNATIONAL ASSOCIATION OF EMTS AND PARAMEDICS, LOCAL 600",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,600.0,,not in gazetteer,train
 International Association of EMT's and Paramedics Local 999,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,999.0,,not in gazetteer,test
 INTERNATIONAL ASSOCIATION OF EMT'S & PARAMEDICS,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
-Kaiser Permanente Labor Management Partnership Trust,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
 International Association of EMTs and Paramedics Local R14-98,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,98.0,,not in gazetteer,train
-Air Traffic Management Consulting Inc.,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
 International Association of EMTS and Paramedics,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 Crozer-Chester Paramedics Association,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 International Association of EMTs and Paramedics/N.A.G.E,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
-"CCP MANAGEMENT, LLC",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 International Association of EMTs and Paramedics Local 02-424,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,424.0,545080.0,,train
 International Association of EMTs and Paramedics Local 152,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,152.0,546530.0,,train
 INTERNATIONAL ASSOCIATION OF EMT'S AND PARAMEDICS LOCAL R12-911,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,911.0,,not in gazetteer,train
 "International Association of EMTs and Paramedics, Local R12-509",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,509.0,,not in gazetteer,train
 KAUAI PARAMEDICS ASSOCIATION,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 "International Association of EMT's and Paramedics, Local R8-20",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,20.0,,potentially resolvable,train
-SBM Management Services,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
 "International Association of EMT's and Paramedics, Local R1-294",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,294.0,,not in gazetteer,train
-LABOR MANAGEMENT TRAINING COMMITTEE OF  WASHINGTON DC AND VICINITY,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 INTERNATIONAL ASSOCIATION OF EMTS AND PARAMEDICS,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
-COLUMBUS SQUARE MANAGEMENT,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 IAEPNAGE,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 "LOCAL 18, PATRICK L. SINK, BUSINESS MANAGER, KENNETH M. TRIPLETT, PRESIDENT, STEVE D. DELONG, FINANC",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,18.0,,not in gazetteer,train
 INT'L ASSOC. OF EMT'S & PARAMEDICA LOCAL 15,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,15.0,502952.0,,train
@@ -74653,18 +74643,15 @@ INTERNATIONAL ASSOCIATION OF EMTs and PARAMEDICS,GOVERNMENT EMPLS NAGE SEIU AFL-
 INTL. ASSN. OF EMT'S & PARAMEDICS,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 Crozer Chester Paramedics Association,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 "INTERNATIONAL ASSOCIATION OF EMT'S AND PARAMEDICS, LOCAL R12-77",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,77.0,,potentially resolvable,train
-"National Dental, PLLC National Dental, LLC (National Dental Management, LLC).",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
 INT'L ASSOCIATION OF EMT'S & PARAMEDICS,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 "INTERNATIONAL ASSOCIATION OF EMT'S AND PARAMEDICS AFL-CIO, CLC",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 International Association of EMTs and Paramedics Local 294/N.A.G.E,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,294.0,,not in gazetteer,train
-"Waste Management, Inc.",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 International Association of EMT and Paramedics Local 91,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,91.0,,not in gazetteer,train
 PROFESSIONAL EMT'S & PARAMEDICS LOCAL 3,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,3.0,543539.0,,train
 International Association of EMTs and Paramedics Local 43,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,43.0,541664.0,,train
 "International Association of EMTs and Paramedics Local, 152",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,152.0,546530.0,,train
 "International Association of EMT's and Paramedics, Local 1 a/w National Association of Government Em",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,1.0,540279.0,,train
 International Association of EMT's & Paramedics,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
-WASTE MANAGEMENT RECYCLE OF NEW JERSEY,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 NAGE,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 NATIONAL EMERGENCY MEDICAL SERVICES ASSOCIATION (NEMSA)/NAGE,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 "INTERNATIONAL ASSOCIATION OF EMTS AND PARAMEDICS, LOCAL R1-294",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,294.0,,not in gazetteer,train
@@ -74681,10 +74668,8 @@ NAGE/International Association of EMT's and Paramedics Local R56-023,GOVERNMENT 
 "International Association of EMTs & Paramedics, Local R-1 294",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,294.0,,not in gazetteer,train
 INTERNATIONAL ASSOCIATION OF EMTS AND PARAMEDICS - LOCAL R7-320,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,320.0,,not in gazetteer,train
 "International Association of EMTs and Paramedics, Local 56-23",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,23.0,505097.0,,train
-"LM WASTE MANAGEMENT, CORP.",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 "INTERNATIONAL ASSOCIATION OF EMT'S AND PARAMEDICS, LOCAL R12-108",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,108.0,,not in gazetteer,train
 "FRATERNAL ASSOCIATION OF PROFESSIONAL PARAMEDICS A/W IUPA, LOCAL 8",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,8.0,,potentially resolvable,train
-Electchester Management LLC,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
 International Association of EMTs & Paramedics,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 "International Association of EMTs & Paramedics, Local 1",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,1.0,540279.0,,train
 INTERNATIONAL ASSOCIATION OF EMTS AND PARAMEDICS/,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
@@ -74706,7 +74691,6 @@ Siouxland Paramedics Association Local I-53,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,5
 NORTH MEMORIAL METRO PARAMEDIC/EMT ASSOCIATION,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 INTERNATIONAL ASSOCIATION OF EMTS AND PARAMEDICS LOCAL R12-152,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,152.0,546530.0,,train
 International Association of EMTs and Paramedics Local RI -999,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,999.0,,not in gazetteer,train
-"GEM HEALTHCARE MANAGEMENT, INC.",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 EL MONTE MID-MANAGEMENT ASSOCIATION,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 International Association Of EMTs and Paramedics Local R2-287,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,287.0,,not in gazetteer,train
 "PROFESSIONAL EMT'S & PARAMEDICS, A DIVISION OF THE INTERNATIONAL BROTHERHOOD OF BOILMAKERS",BOILERMAKERS AFL-CIO,,,potentially resolvable,train
@@ -74726,7 +74710,6 @@ ASSOCIATION OF MANAGED CARE PHARMACISTS,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,pot
 Fraternal Association of Professional Paramedics,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 "INTERNATIONAL ASSOCIATION OF EMTS AND PARAMEDICS, LOCAL R12-911",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,911.0,,not in gazetteer,train
 "International Association of EMTs and Paramedics, Local 509",GOVERNMENT EMPLS NAGE SEIU AFL-CIO,509.0,,not in gazetteer,train
-Southern California Glass Management Association,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
 INT'L. ASSN. OF EMTS AND PARAMEDICS,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 Arizona Care Managers Union,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,,,potentially resolvable,train
 "DALLAS AREA LOCAL #0732, APWU","POSTAL WORKERS, AMERICAN, AFL-CIO",732.0,505987.0,,train
@@ -75964,7 +75947,7 @@ MACHINISTS WOODWORKERS DISTRICT LODGE 1,MACHINISTS AFL-CIO,1.0,,potentially reso
 DISTRICT 27 INTERNATIONAL ASSOCIATION OF MACHINISTS AND AEROSPACE WORKERS,MACHINISTS AFL-CIO,27.0,14993.0,,train
 "INTERNATIONAL ASSOCIATION OF MACHINISTS AND AEROSPACE WORKERS, LOCAL LODGE 340, DISTRICT LODGE 15, A",MACHINISTS AFL-CIO,340.0,544637.0,,train
 "International Association of Machinists and Aerospace Workers, District Lodge 4, Local Lodge S7, AFL-CIO",MACHINISTS AFL-CIO,7.0,,potentially resolvable,train
-"International Association of Sheet Metal, Air, Rail and Transportation Workers, Local Union #263; District Lodge 6, International Association of Machinists and Aerospace Workers, AFL-CIO; and United Brotherhood of Carpenters and Joiners of America, Local Union #2060, as Joint Representative",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"International Association of Sheet Metal, Air, Rail and Transportation Workers, Local Union #263; District Lodge 6, International Association of Machinists and Aerospace Workers, AFL-CIO; and United Brotherhood of Carpenters and Joiners of America, Local Union #2060, as Joint Representative",,,,multi-union,train
 "MACHINISTS & MECHANICS LODGE 2182, DISTRICT 190",MACHINISTS AFL-CIO,2182.0,29572.0,,test
 "International Association of Machinists and Aerospace Workers, Lodge 917, District 1",MACHINISTS AFL-CIO,917.0,37900.0,,train
 "Machinists and Mechanics Lodge No. 2182, District Lodge 190, International Association of Machinists and Aerospace Workers, AFL-CIO",MACHINISTS AFL-CIO,2182.0,29572.0,,train
@@ -76257,7 +76240,7 @@ TEAMSTERS LOCAL 24 AW INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,24.0,2257
 "LOCAL UNION NO. 135, CHAUFFEURS, TEAMSTERS, WAREHOUSEMEN AND HELPERS INDIANAPOLIS, IN AND AIRLINE EMPLOYEES IN THE STATE OF INDIANA A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,135.0,9836.0,,train
 "EASTERN AND SOUTHERN REGION OF TEAMSTERS, LOCAL UNIONS 61, 71, 171, ET AL",TEAMSTERS,,,potentially resolvable,train
 "Teamsters No. Local 104, an affiliate of the International Brotherhood of Teamsters, General Teamsters (Excluding Mailers), State of Arizona",TEAMSTERS,104.0,4987.0,,train
-"UNITE HERE, Local 7, AFL-CIO; International Union of Operating Engineers, Local 37, AFL-CIO; International Brotherhood of Teamsters Local 355; and United Automobile, Aerospace, and Agricultural Implement Workers of America, AFL-CIO; joint unions collectively known as The National Gaming Workers Coalition",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"UNITE HERE, Local 7, AFL-CIO; International Union of Operating Engineers, Local 37, AFL-CIO; International Brotherhood of Teamsters Local 355; and United Automobile, Aerospace, and Agricultural Implement Workers of America, AFL-CIO; joint unions collectively known as The National Gaming Workers Coalition",,,,multi-union,train
 "Teamsters, Chauffeurs, Warehousemen and Helpers Local Union No. 20, affiliated with the International Brotherhood of Teamsters",TEAMSTERS,20.0,8580.0,,train
 "Local Union No. 135, Chauffeurs, Teamsters, Warehousemen, and Helpers Indianapolis, IN and Airline Employees in the state of Indiana a/w International Brotherhood of Teamsters",TEAMSTERS,135.0,9836.0,,train
 "GCC of the IBT, Local 6-505M",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,505.0,64088.0,,train
@@ -76405,9 +76388,9 @@ Local 25M of District Council 3 of the Graphic Communications Conference of the 
 "Local 594-S, District Council 9 of the Graphic Communications Conference of the International Brotherhood of Teamsters",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,594.0,25702.0,,train
 "AMERICAN POSTAL WORKERS UNION, TEAMSTER LOCAL 264",TEAMSTERS,264.0,38823.0,,test
 "MINNESOTA TEAMSTERS PUBLIC AND LAW ENFORCEMENT EMPLOYEES' UNION, LOCAL NO. 320",TEAMSTERS,320.0,,not in gazetteer,train
-1199 SEIU TEAMSTERS LOCAL  UNION NO. 445,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+1199 SEIU TEAMSTERS LOCAL  UNION NO. 445,,,,multi-union,train
 "MINNESOTA TEAMSTERS PUBLIC AND LAW ENFORCEMENT EMPLOYEES UNION, LOCAL NO. 320",TEAMSTERS,320.0,,not in gazetteer,train
-CHICAGO & NORTHEAST IL DIST. CARPENTERS LOCAL 1027 / IBT LOCAL 705,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+CHICAGO & NORTHEAST IL DIST. CARPENTERS LOCAL 1027 / IBT LOCAL 705,,,,multi-union,train
 "American Federation of State, County and Municipal Employees, AFL-CIO, District Council 87",STATE COUNTY AND MUNI EMPLS AFL-CIO,87.0,71065.0,,train
 "American Federation of State, County and Municipal Employees, District Council 36",STATE COUNTY AND MUNI EMPLS AFL-CIO,36.0,543163.0,,train
 "American Federation of State, County and Municipal Employees District Council 87, AFL-CIO",STATE COUNTY AND MUNI EMPLS AFL-CIO,87.0,71065.0,,train
@@ -76818,7 +76801,7 @@ Fraternal Order of Police/Ohio Labor Council,NATIONAL FRATERNAL ORDER OF POLICE,
 FRATERNAL ORDER OF POLICE NATIONAL LABOR COUNCIL #2,NATIONAL FRATERNAL ORDER OF POLICE,2.0,,not in gazetteer,train
 "FRATERNAL ORDER OF POLICE, NATIONAL LABOR COUNCIL, USPS NO. 2",NATIONAL FRATERNAL ORDER OF POLICE,2.0,,not in gazetteer,train
 "FRATERNAL ORDER OF POLICE, NATIONAL LABOR COUNCIL #2, UNITED STATES POSTAL SERVICE",NATIONAL FRATERNAL ORDER OF POLICE,2.0,,not in gazetteer,train
-Federation of Police and Security (FOPS),COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+Federation of Police and Security (FOPS),FEDERATION OF POLICE SECURITY AND,,513148,,train
 FRATERNAL ORDER OF POLICE NATIONAL LABOR COUNCIL # 2,NATIONAL FRATERNAL ORDER OF POLICE,2.0,,not in gazetteer,train
 Fraternal Order of Police Lodge 27,NATIONAL FRATERNAL ORDER OF POLICE,27.0,,not in gazetteer,train
 MICHIGAN FRATERNAL ORDER OF POLICE,NATIONAL FRATERNAL ORDER OF POLICE,,,potentially resolvable,train
@@ -76972,7 +76955,7 @@ California Nurses Association (CNA),CALIFORNIA NURSES ASSOCIATION,,15724.0,,trai
 "MAINE STATE NURSES ASSOCIATION, LOCAL UNIT 7631","NURSES ASN, AMERICAN, IND",7631.0,541191.0,,train
 "OHIO NURSES ASSOCIATION, AFL-CIO",TEACHERS AFL-CIO,,40094.0,,train
 CALIFORNIA NURSES ASSOCIATION/NNU,CALIFORNIA NURSES ASSOCIATION,,15724.0,,train
-Crozer Chester Nurses Association/PASNAP,PASNAP,,,not in gazetteer,train
+Crozer Chester Nurses Association/PASNAP,PASNAP,,542163,,train
 OHIO NURSES ASSOCIATION/AMERICAN NURSES ASSOCIATION/NATIONAL FEDERATION OF NURSES,TEACHERS AFL-CIO,,40094.0,,train
 "Minnesota Nurses Association, AFL-CIO","NURSES ASN, AMERICAN, IND",,53683.0,,train
 NATIONAL UNION OF HEALTHCARE WORKERS-CALIFORNIA NURSES ASSOCIATION (NUHW-CNA),CALIFORNIA NURSES ASSOCIATION,,15724.0,,train
@@ -77044,7 +77027,7 @@ United Nurses Associations of California,STATE COUNTY AND MUNI EMPLS AFL-CIO,,,n
 MAINE STATE NURSES ASSOCIATION/NNOC/NNU,"NURSES ASN, AMERICAN, IND",,66830.0,,train
 Alaska Nurses Association (AaNA),TEACHERS AFL-CIO,,544695.0,,train
 Minnesota Nurses Association (MNA),"NURSES ASN, AMERICAN, IND",,53683.0,,train
-Crozer Chester Nurses Association,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+Crozer Chester Nurses Association,"NURSES ASN, AMERICAN, IND",,529069,,train
 Wyoming Valley Nurses Association (PASNAP),WYOMING VALLEY NURSES ASSOCIATION,,542168.0,,train
 Nurses Association of Lower Bucks Hospital (PASNAP),PASNAP,,,not in gazetteer,train
 Temple University Hospital Nurses Association/PASNAP,PENNSYLVANIA ASSOCIATION OF STAFF,,543991.0,,train
@@ -77066,7 +77049,7 @@ Fitzgerald Mercy Hospital Nurses Association - PASNAP,PASNAP,,,not in gazetteer,
 OHIO NURSES ASSOCIATION,TEACHERS AFL-CIO,,40094.0,,train
 CALIFORNIA NURSES ASSOCIATION/NATIONAL NURSES ORGANIZING COMMITTEE (CNA/NNOC)/NNU,CALIFORNIA NURSES ASSOCIATION,,15724.0,,train
 Wyoming Valley Nurses Association/PASNAP,WYOMING VALLEY NURSES ASSOCIATION,,542168.0,,train
-"United Nurses Associations of California/Union of Health Care Professionals, NUHHCE, AFSME, AFL-CIO",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"United Nurses Associations of California/Union of Health Care Professionals, NUHHCE, AFSME, AFL-CIO",STATE COUNTY AND MUNI EMPLS AFL-CIO,,543560,,train
 Montana Nurses Association Local #15,TEACHERS AFL-CIO,15.0,544363.0,,train
 "Caregivers & Healthcare Employees Union, California Nurses Association",CALIFORNIA NURSES ASSOCIATION,,15724.0,,train
 District of Columbia Nurses Association,"NURSES ASN, AMERICAN, IND",,53423.0,,train
@@ -77924,7 +77907,7 @@ HOTEL EMPLOYEE & RESTAURANT EMPLOYEES LOCAL 483,UNITE HERE,483.0,39882.0,,train
 "HOTEL EMPLOYEES, RESTAURANT EMPLOYEES INTERNATIONAL UNION, LOCAL 12, AFL-CIO",UNITE HERE,12.0,,potentially resolvable,test
 "LOCAL 6, HOTEL, RESTAURANT EMPLOYEES UNION",UNITE HERE,6.0,28501.0,,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCAL 26, A/W INTERNATIONAL BROTHERHOOD OF ELECTRIC",ELECTRICAL WORKERS IBEW AFL-CIO,26.0,12627.0,,train
-"AREA TRADES COUNCIL, A/W IUOE LOCAL UNION 877, IBEW LOCAL UNION 103, NERC LOCAL UNION 51, UA LOCAL U",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"AREA TRADES COUNCIL, A/W IUOE LOCAL UNION 877, IBEW LOCAL UNION 103, NERC LOCAL UNION 51, UA LOCAL U",,,,multi-union,train
 "Local Union 10, International Brotherhood of Electrical Workers, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,10.0,545106.0,,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCAL UNION NO. 69 affiliated with INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS",ELECTRICAL WORKERS IBEW AFL-CIO,69.0,1195.0,,test
 "IBEW LOCAL 160, IBEW LOCAL 949 AND IBEW LOCAL 953",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
@@ -77939,7 +77922,7 @@ International Brotherhood of Electrical Workers Local Unions 494 & 1220,ELECTRIC
 "WEST MICHIGAN LOCAL UNION NO. 275, IBEW, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,275.0,35909.0,,train
 "International Brotherhood of Electrical Workers, Locals 23, 160, 949, 953 and 1426",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
 "International Brotherhood of Electrical Workers Local Unions No. 203, 239, 524 and 949",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
-"AREA TRADES COUNCIL, A/W IUOE LOCAL 877, IBEW LOCAL 103, PLUMBERS UNION(UA) LOCAL 12, CARPENTERS UNI",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"AREA TRADES COUNCIL, A/W IUOE LOCAL 877, IBEW LOCAL 103, PLUMBERS UNION(UA) LOCAL 12, CARPENTERS UNI",,,,multi-union,train
 "International Brotherhood of Electrical Workers, Locals 949, 203, 239, 524",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
 LOCAL 1 INTERNATINAL BROTHERHOOD OF ELECTRICAL WORKERS AFL-CIO,ELECTRICAL WORKERS IBEW AFL-CIO,1.0,35303.0,,train
 "Local Union No. 1, International Brotherhood of Electrical Workers, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,1.0,35303.0,,train
@@ -77951,17 +77934,17 @@ INTERNATIONAL UNION OF ELECTRICAL WORKERS - COMMUNICATIONS WORKERS OF AMERICA,CO
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS LOCAL UNION NOS. 13, 231, 288, 347 AND 704",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
 "International Brotherhood of Electrical Workers,Local No. 3",ELECTRICAL WORKERS IBEW AFL-CIO,3.0,6367.0,,train
 "Local Union No. 1, International Brotherhood of Electrical Workers, St. Louis, Missouri",ELECTRICAL WORKERS IBEW AFL-CIO,1.0,35303.0,,train
-"AREA TRADES COUNCIL A/W IUOE, LOCAL 877, IBEW LOCAL 103, NERCC, LOCAL 51, PLUMBERS & GASFITTERS, LOC",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"AREA TRADES COUNCIL A/W IUOE, LOCAL 877, IBEW LOCAL 103, NERCC, LOCAL 51, PLUMBERS & GASFITTERS, LOC",,,,multi-union,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCAL UNIONS 446, 489, AND 576",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
-AREA TRADES COUNCIL AW IUOE LOCAL 877 IBEW LOCAL 103 PLUMBERS UNION (UA) LOCAL 12 CARPENTERS UNION (,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
-"AREA TRADES COUNCIL, A/W IUOE LOCAL 877; IBEW LOCAL 103; PLUMBERS UNION (UA) LOCAL 12; CARPENTERS (N",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+AREA TRADES COUNCIL AW IUOE LOCAL 877 IBEW LOCAL 103 PLUMBERS UNION (UA) LOCAL 12 CARPENTERS UNION (,,,,multi-union,train
+"AREA TRADES COUNCIL, A/W IUOE LOCAL 877; IBEW LOCAL 103; PLUMBERS UNION (UA) LOCAL 12; CARPENTERS (N",,,,multi-union,train
 INTERNATIONAL UNION OF ELECTRICAL WORKERS-COMMUNICATION WORKERS OF AMERICA LOCAL 725,COMMUNICATIONS WORKERS AFL-CIO,725.0,23439.0,,train
 INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS LOCALS 605 & 985,ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
 IBEW Locals 46 and 76,ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
 "INTERNATIONAL UNION OF ELECTRICAL WORKERS, COMMUNICATIONS WORKERS OF AMERICA, LOCAL 86023",COMMUNICATIONS WORKERS AFL-CIO,86023.0,545303.0,,train
 "INTERNATIONAL UNION ELECTRICAL WORKERS AND COMMUNICATION WORKERS OF AMERICA, LOCAL 716",COMMUNICATIONS WORKERS AFL-CIO,716.0,55777.0,,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCAL #1, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,1.0,35303.0,,train
-"AREA TRADES COUNCIL, A/W IUOE LOCAL 877, IBEW LOCAL 103, PLUMBERS UNION (UA) LOCAL 12, CARPENTERS LO",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"AREA TRADES COUNCIL, A/W IUOE LOCAL 877, IBEW LOCAL 103, PLUMBERS UNION (UA) LOCAL 12, CARPENTERS LO",,,,multi-union,train
 "International Brotherhood of Electrical Workers, Locals 23, 160, 949, 953, and 1426",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
 LOCAL UNION 3 INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS OF GREATER NEW YORK AND VICINITY,ELECTRICAL WORKERS IBEW AFL-CIO,3.0,6367.0,,train
 "International Brotherhood of Electrical Workers, Local 26 A/W International Brotherhood of Electrical Workers, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,26.0,12627.0,,train
@@ -77974,13 +77957,13 @@ INTERNATIONAL UNION OF ELECTRICAL WORKERS A/W COMMUNICATION WORKERS AMERICA,COMM
 International Union of Electrical Workers-Communications Workers of America Local 7032 East,COMMUNICATIONS WORKERS AFL-CIO,7032.0,47610.0,,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCALS 420 & 457",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
 "INTERNATIONAL UNION OF ELECTRICAL WORKERS INDUSTRIAL DIVISION-COMMUNICATION WORKERS OF AMERICA, AFL-",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
-"AREA TRADES COUNCIL A/W IUOE, LOCAL 877, IBEW, LOCAL 103, NERCC, LOCAL 51, PLUMBERS & GASFITTERS, LO",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"AREA TRADES COUNCIL A/W IUOE, LOCAL 877, IBEW, LOCAL 103, NERCC, LOCAL 51, PLUMBERS & GASFITTERS, LO",,,,multi-union,train
 "IBEW, Local Union No.12, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,12.0,9000.0,,train
 LOCAL363 UNITED ELECTRICAL WORKERS OF AMERICA,ELECTRICAL WORKERS UE IND,363.0,,not in gazetteer,train
 "LOCAL UNION NO. 3, INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS OF GREATER NEW YORK AND VICINITY,",ELECTRICAL WORKERS IBEW AFL-CIO,3.0,6367.0,,train
 International Union of Electrical Workers Communications Workers of America Local 82167,COMMUNICATIONS WORKERS AFL-CIO,82167.0,542598.0,,train
 INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS LOCAL 1,ELECTRICAL WORKERS IBEW AFL-CIO,1.0,35303.0,,test
-DEMIL TRADES COUNCIL (IUOE LOCAL #701 & IBEW LOCAL #112),COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+DEMIL TRADES COUNCIL (IUOE LOCAL #701 & IBEW LOCAL #112),,,,multi-union,train
 "International Union of Electrical Workers & Communication Workers of America, Local 502, AFL-CIO",COMMUNICATIONS WORKERS AFL-CIO,502.0,9646.0,,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCAL 494 AND LOCAL 890",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,test
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS LOCALS 2321, 2322, 2323, 2324, 2325 AND 2222, AFL-CI",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
@@ -77990,7 +77973,7 @@ United Electrical Workers Local 115,ELECTRICAL WORKERS UE IND,115.0,546730.0,,tr
 INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS LOCAL UNION NO. 5,ELECTRICAL WORKERS IBEW AFL-CIO,5.0,35389.0,,train
 INTERNATIONAL UNION OF ELECTRICAL WORKERS/COMMUNICATIONS WORKERS OF AMERICA LOCAL 84755,COMMUNICATIONS WORKERS AFL-CIO,84755.0,34133.0,,train
 International Union of Electrical Workers-Communication Workers of America 84-707,COMMUNICATIONS WORKERS AFL-CIO,84.0,,not in gazetteer,train
-"AREA TRADES COUNCIL, A/W IUOE LOCAL 877; IBEW LOCAL 103, PAINTERS UNION, DC #35, PLUMBERS UNION (UA)",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"AREA TRADES COUNCIL, A/W IUOE LOCAL 877; IBEW LOCAL 103, PAINTERS UNION, DC #35, PLUMBERS UNION (UA)",,,,multi-union,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, A/W SYSTEM COUNCIL T-6 LOCALS 2222,  2321, 2322, 23",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,test
 "LOCAL #3, INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS UNION",ELECTRICAL WORKERS IBEW AFL-CIO,3.0,6367.0,,train
 "Local 58, International Brotherhood of Teamster (IBEW), AFL-CIO/CLC",ELECTRICAL WORKERS IBEW AFL-CIO,58.0,24247.0,,train
@@ -78009,12 +77992,12 @@ INTERNATIONAL UNION OF ELECTRICAL WORKERS/ COMMUNICATION WORKERS OF AMERICA LOCA
 International Brotherhood of Electrical Workers Local 494 and 1220,ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
 "Local 58 and 252, International Brotherhood of Electrical Workers (IBEW), AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
 "LOCAL 26, INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, AFL-CIO, CLC",ELECTRICAL WORKERS IBEW AFL-CIO,26.0,12627.0,,train
-AREA TRADES COUNCIL A/W: IUOE LOCAL 877; IBEW LOCAL 103; NERCC LOCAL 51; PLUMBERS UNION (UA) LOCAL 1,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+AREA TRADES COUNCIL A/W: IUOE LOCAL 877; IBEW LOCAL 103; NERCC LOCAL 51; PLUMBERS UNION (UA) LOCAL 1,,,,multi-union,train
 "UNITED ELECTRICAL WORKERS,  LOCAL 1177",ELECTRICAL WORKERS UE IND,1177.0,,potentially resolvable,train
-"AREA TRADES COUNCIL A/W OPERATING ENGINEERS LOCAL 877, IBEW LOCAL 103, PLUMBERS LOCAL 12, CARPENTERS",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"AREA TRADES COUNCIL A/W OPERATING ENGINEERS LOCAL 877, IBEW LOCAL 103, PLUMBERS LOCAL 12, CARPENTERS",,,,multi-union,train
 "LOCALS 702, 51, 309 AND 1306, INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, AFL-CIO, A/K/A SYSTEM",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
 "International Brotherhood of Electrical Workers Local Unions 145, 146, 364 & 601 (Joint Petitioners)",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
-"AREA TRADE COUNCIL OF NEW ENGLAND (IUOE LOCAL 877, IBEW LOCAL 103, UA LOCAL 12, IUPAT DC 35, NERCC LOCAL 51)",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"AREA TRADE COUNCIL OF NEW ENGLAND (IUOE LOCAL 877, IBEW LOCAL 103, UA LOCAL 12, IUPAT DC 35, NERCC LOCAL 51)",,,,multi-union,train
 IBEW Local #1,ELECTRICAL WORKERS IBEW AFL-CIO,1.0,35303.0,,train
 "International Brotherhood of Electrical Workers, Local Unions 1451, 1635 and 1637, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
 "Local No. 1, International Brotherhood of Electrical Workers, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,1.0,35303.0,,train
@@ -78033,9 +78016,9 @@ International Union of Electrical Workers/Communications Workers of America Loca
 "INTERNATIONAL UNION OF ELECTRICAL WORKERS AND COMMUNICATIONS WORKERS OF AMERICA, AFL-CIO",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
 "International Brotherhood of Electrical Workers Local Unions 1451, 1635 and 1637",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
 "International Brotherhood of Electrical Workers, Locals 949 & 1426 (Joint Charge)",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
-"PLUMBERS UA LOCAL 12, PAINTERS DC35, IBEW 103, CARPENTERS LOCAL 51 IUOE 877",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,test
+"PLUMBERS UA LOCAL 12, PAINTERS DC35, IBEW 103, CARPENTERS LOCAL 51 IUOE 877",,,,multi-union,test
 "LOCAL UNION 1, INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, AFL-CIO, ST. LOUIS, MISSOURI",ELECTRICAL WORKERS IBEW AFL-CIO,1.0,35303.0,,train
-"AREA TRADES COUNCIL, A/W  IUOE LOCAL 877, IBEW LOCAL 103, NERCC LOCAL 51, PLUMBERS & GASFITTERS LOCA",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"AREA TRADES COUNCIL, A/W  IUOE LOCAL 877, IBEW LOCAL 103, NERCC LOCAL 51, PLUMBERS & GASFITTERS LOCA",,,,multi-union,train
 "International Brotherhood of Electrical Workers, Local 26, A/W International Brotherhood of Electrical Workers, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,26.0,12627.0,,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS SYSTEM COUNCIL T-6 (IBEW LOCALS 2321, 2222,2322, 2323, 2324 AND 2325)",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS LOCAL 22, 347 & 231",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
@@ -78052,7 +78035,7 @@ International Union of Electrical Workers-Communication Workers of America Local
 "International Brotherhood of Electrical Workers, Local 13, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,13.0,512585.0,,train
 "International Union of Electrical Workers, Communications Workers of America, Local 83697",COMMUNICATIONS WORKERS AFL-CIO,83697.0,64579.0,,train
 "INTERNATIONAL UNION OF ELECTRICAL WORKERS-COMMUNICATION WORKERS OF AMERICA, LOCAL 84719",COMMUNICATIONS WORKERS AFL-CIO,84719.0,51361.0,,train
-"AREA TRADES COUNCIL, A/W OPERATING ENGINEERS IUOE LOCAL 877; ELECTRICAL WORKERS IBEW LOCAL 103; PLUM",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"AREA TRADES COUNCIL, A/W OPERATING ENGINEERS IUOE LOCAL 877; ELECTRICAL WORKERS IBEW LOCAL 103; PLUM",,,,multi-union,train
 "IBEW, LOCAL NO. 1",ELECTRICAL WORKERS IBEW AFL-CIO,1.0,35303.0,,train
 "International Union of Electrical Workers-Communication Workers of America, Local 89118",COMMUNICATIONS WORKERS AFL-CIO,89118.0,542188.0,,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS LOCAL 22, 347 AND 231",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
@@ -78060,7 +78043,7 @@ INTERNATIONAL UNION OF ELECTRICAL WORKERS/COMMUNICATIONS WORKERS OF AMERICA,COMM
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCAL 320(2218)",ELECTRICAL WORKERS IBEW AFL-CIO,320.0,22821.0,,train
 "International Brotherhood of Electrical Workers, Local Union No.3",ELECTRICAL WORKERS IBEW AFL-CIO,3.0,6367.0,,train
 INTERNATIONAL UNION OF ELECTRICAL WORKERS A/W COMMUNICATION WORKERS OF AMERICA,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
-"AREA TRADES COUNCIL A/W: IUOE LOCAL 877, IBEW LOCAL 103, PLUMBERS UNION (UA) LOCAL 12, CARPENTERS UN",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"AREA TRADES COUNCIL A/W: IUOE LOCAL 877, IBEW LOCAL 103, PLUMBERS UNION (UA) LOCAL 12, CARPENTERS UN",,,,multi-union,train
 "International Union of Electrical Workers (AFL-CIO) and Communication Workers of America, (AFL-CIO) Local 83761",COMMUNICATIONS WORKERS AFL-CIO,83761.0,23941.0,,train
 "LOCAL NO. 1, INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,1.0,35303.0,,test
 "LOCAL UNION NO. #3, INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS",ELECTRICAL WORKERS IBEW AFL-CIO,3.0,6367.0,,train
@@ -78071,9 +78054,9 @@ Electrical Workers Local 98 and 380,ELECTRICAL WORKERS IBEW AFL-CIO,,,potentiall
 International Union of Electrical Workers/Communication Workers of America,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
 "International Brotherhood of Electrical Workers Local 48, affiliated with American Federation of Labor and Congress of Industrial Organizations",ELECTRICAL WORKERS IBEW AFL-CIO,48.0,33435.0,,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCAL 26, A/W INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,26.0,12627.0,,train
-AREA TRADES COUNCIL A/W IUOE L 877; IBEW L 103; UA L 12; NERCC L 51; IUPAT DC L 35,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
-"USW LOCAL 646 AND UNITED STEELWORKERS LOCAL 646, 777, 1648 IBEW, LOCAL 1947",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
-"AREA TRADES COUNCIL, A/W IUOE LOCAL 877; IBEW LOCAL 103; PLUMBERS UNION (UA) LOCAL 12; CARPENTERS UN",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+AREA TRADES COUNCIL A/W IUOE L 877; IBEW L 103; UA L 12; NERCC L 51; IUPAT DC L 35,,,,multi-union,train
+"USW LOCAL 646 AND UNITED STEELWORKERS LOCAL 646, 777, 1648 IBEW, LOCAL 1947",,,,multi-union,train
+"AREA TRADES COUNCIL, A/W IUOE LOCAL 877; IBEW LOCAL 103; PLUMBERS UNION (UA) LOCAL 12; CARPENTERS UN",,,,multi-union,train
 "INTERNATIONAL UNION OF ELECTRICAL WORKERS (INDUSTRIAL DIVISION)-COMMUNICATIONS WORKERS OF AMERICA, L",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
 Local Union 3 IBEW JATC Joint Apprentice and Training Committee of the Elevator Industry,ELECTRICAL WORKERS IBEW AFL-CIO,3.0,6367.0,,train
 International Union of Electrical Workers -Communications Workers of America,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
@@ -78083,9 +78066,9 @@ UNITED ELECTRICAL WORKERS,ELECTRICAL WORKERS UE IND,,,potentially resolvable,tra
 "LOCAL 2, INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,2.0,25379.0,,train
 "International Brother of Electrical Workers, Local 26 A/W International Brotherhood of Electrical Workers, AFO-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,26.0,12627.0,,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, AFL-CIO,  LOCAL UNIONS 13, 22, 145, 231, 288, 347,",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
-"Area Trades Council of New England (IUOE Local 877, IBEW Local 103, IUPAT District Council 35, NERCC Local 51, UA Local 12)",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"Area Trades Council of New England (IUOE Local 877, IBEW Local 103, IUPAT District Council 35, NERCC Local 51, UA Local 12)",,,,multi-union,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCALS 605 AND 985",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
-"AREA TRADES COUNCIL - IUOE LOCAL 877, IBEW LOCAL 103, PLUMBERS UNION LOCAL 12, PAINTERS DISTRICT COUNCIL 35, CARPENTERS LOCAL 51",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,test
+"AREA TRADES COUNCIL - IUOE LOCAL 877, IBEW LOCAL 103, PLUMBERS UNION LOCAL 12, PAINTERS DISTRICT COUNCIL 35, CARPENTERS LOCAL 51",,,,multi-union,test
 "Local 17, International Brotherhood of Electrical Workers (IBEW), AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,17.0,16740.0,,train
 New York Hotel and Motel Trades Council Local 6 and Affiliate IBEW Local 3 International Brotherhood,ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
 International Union Electrical Workers -Communications Workers of America,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
@@ -78094,7 +78077,7 @@ International Union Electrical Workers -Communications Workers of America,COMMUN
 "United Electrical Workers, Local 248",ELECTRICAL WORKERS UE IND,248.0,541266.0,,train
 Local Union 53 of the International Brotherhood of Electrical Workers,ELECTRICAL WORKERS IBEW AFL-CIO,53.0,24867.0,,train
 GMP Council of the USW,GLASS MOLDERS PLASTICS AFL-CIO,,,potentially resolvable,train
-USW/UAW Toledo & Columbus Casino Workers Council,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+USW/UAW Toledo & Columbus Casino Workers Council,,,,multi-union,train
 HEALTH CARE WORKERS COUNCIL OF THE USW,"STEELWORKERS, AFL-CIO",,,potentially resolvable,train
 "UNITED SERVICE WORKERS, INTERNATIONAL UNION OF JOURNEYMEN & ALLIED TRADES (USW), (IUJAT), LOCAL 74","UNITED SERVICE WORKERS UNION, IUJAT",74.0,543609.0,,train
 "International Union, United Automobile, Aerospace and Agricultural Implement Workers of America (UAW), AFL-CIO and its Locals 2500, 1781, 2145, 2256",AUTO WORKERS AFL-CIO,,,potentially resolvable,train
@@ -78166,7 +78149,7 @@ Automobile Workers Local 701,AUTO WORKERS AFL-CIO,701.0,,not in gazetteer,train
 "TECHNICAL, OFFICE and PROFESSIONAL UNION, Local 2110 UAW, AFL-CIO",AUTO WORKERS AFL-CIO,2110.0,,potentially resolvable,train
 "Region 1-D, United Automobile, Aerospace & Agricultural Implement Workers of America International Union (UAW), AFL-CIO, CLC",AUTO WORKERS AFL-CIO,1.0,529027.0,,train
 "UNIFICATION ORGANIZING COMMITTEE, UNITED AUTOWORKERS (UAW), INTERNATIONAL ASSOCIATION OF MACHINISTS",AUTO WORKERS AFL-CIO,,,potentially resolvable,train
-"United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union (UAW), AFL-CIO/CLC",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union (UAW), AFL-CIO/CLC","STEELWORKERS, AFL-CIO",,,potentially resolvable,train
 REG.1 UAW,AUTO WORKERS AFL-CIO,1.0,529027.0,,train
 "Region 1, International Union, United Automobile, Aerospace and Agricultural Implement Worker of America (UAW), AFL-CIO",AUTO WORKERS AFL-CIO,1.0,529027.0,,train
 "REGION 1A, INTERNATIONAL UNION, UNITED AUTOMOBILE, AEROSPACE AND AGRICULTURAL IMPLEMENT WORKERS OF A",AUTO WORKERS AFL-CIO,1.0,529027.0,,train
@@ -78254,7 +78237,7 @@ International Union of Painters and Allied Trades 1169 District 77,PAINTERS AFL-
 PAINTERS TRUST #200 AND 220,PAINTERS AFL-CIO,,,potentially resolvable,train
 "INTERNATIONAL UNION OF PAINTERS AND ALLIED TRADES, DISTRICT COUNCIL NO. 5",PAINTERS AFL-CIO,5.0,37950.0,,train
 "DISTRICT COUNCIL OF PAINTERS NO. 16, INTERNATIONAL UNION OF PAINTERS AND ALLIED TRADES",PAINTERS AFL-CIO,16.0,36708.0,,train
-BOARD OF TRUSTEES OF THE SOUTHERN CALIFORNIA FLOOR COVERING PENSION TRUST FUND; BOARD OF TRUSTEES OF THE SOUTHERN CALIFORNIA FLOOR COVERING HEALTH AND WELFARE TRUST FUND; BOARD OF TRUSTEES OF THE SOUTHERN CALIFORNIA FLOOR COVERING APPRENTICESHIP AND TRAINING TRUST FUND; BOARD OF TRUSTEES OF THE SOUTHERN CALIFORNIA FLOOR COVERING VACATION AND HOLIDAY TRUST FUND; BOARD OF TRUSTEES OF THE SOUTHERN CLAIFORNIA FLOOR COVERING CONTRACT ADMINISTRATION TRUST FUND; BOARD OF TRUSTEES OF THE PAINTERS AND ALLIED TRADES LABOR MANAGEMENT COOPERATION FUND,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+BOARD OF TRUSTEES OF THE SOUTHERN CALIFORNIA FLOOR COVERING PENSION TRUST FUND; BOARD OF TRUSTEES OF THE SOUTHERN CALIFORNIA FLOOR COVERING HEALTH AND WELFARE TRUST FUND; BOARD OF TRUSTEES OF THE SOUTHERN CALIFORNIA FLOOR COVERING APPRENTICESHIP AND TRAINING TRUST FUND; BOARD OF TRUSTEES OF THE SOUTHERN CALIFORNIA FLOOR COVERING VACATION AND HOLIDAY TRUST FUND; BOARD OF TRUSTEES OF THE SOUTHERN CLAIFORNIA FLOOR COVERING CONTRACT ADMINISTRATION TRUST FUND; BOARD OF TRUSTEES OF THE PAINTERS AND ALLIED TRADES LABOR MANAGEMENT COOPERATION FUND,,,,multi-union,train
 "INTERNATIONAL UNION OF PAINTERS AND ALLIED TRADES, METAL POLISHERS, PRODUCTION AND NOVELTY WORKERS LOCAL 8A-28A, DC 9, AFL-CIO",PAINTERS AFL-CIO,8.0,13369.0,,train
 "DISTRICT COUNCIL NO. 16, INTERNATIONAL UNION OF PAINTERS AND ALLIED TRADES, AFL-CIO",PAINTERS AFL-CIO,16.0,36708.0,,train
 "LOCAL 8A-28-A, INTERNATIONAL UNION OF PAINTERS AND ALLIED TRADES, AFL-CIO",PAINTERS AFL-CIO,8.0,,potentially resolvable,train
@@ -78410,14 +78393,14 @@ Plasters Local 9 and Laborers Local 210,LABORERS,,,potentially resolvable,train
 "Postal Mail Handlers, LIUNA","POSTAL MAIL HANDLERS, LIUNA",,,potentially resolvable,train
 "SAN DIEGO BRANCH NATIONAL POSTAL MAIL HANDLERS UNION LOCAL 303, DIVISION OF LIUNA, AFL-CIO","POSTAL MAIL HANDLERS, LIUNA",303.0,506225.0,,train
 "NATIONAL POSTAL MAILHANDLERS UNION, LOCAL 301, BRANCH 36 A/W LABORERS' INTERNATIONAL UNION OF NORTH","POSTAL MAIL HANDLERS, LIUNA",301.0,91828.0,,train
-"Central-Northern New York Building & Construction Trades Council (“Union”) on behalf of the International Union of Operating Engineers Local 158, Laborers Local 633, and Carpenters Local 277",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"Central-Northern New York Building & Construction Trades Council (“Union”) on behalf of the International Union of Operating Engineers Local 158, Laborers Local 633, and Carpenters Local 277",,,,multi-union,train
 AMALGAMATED INDUSTRIAL WORKERS UNION LOCAL 2061 NFIU/LIUNA,LABORERS,2061.0,,not in gazetteer,train
 "Local 307, National Postal Mail Handlers Union (NPMHU), a division of the Laborers' International Union of North America (LIUNA), AFL-CIO","POSTAL MAIL HANDLERS, LIUNA",307.0,89127.0,,train
 "NATIONAL POSTAL MAILLHANDLERS UNION, LOCAL 301, BRANCH 237, A/W LABORERS' INTERNATIONAL UNION OF NOR","POSTAL MAIL HANDLERS, LIUNA",301.0,91828.0,,train
 LOCAL 10 LABORERS INT'L UNION OF NORTH AMERICA,LABORERS,10.0,543695.0,,train
 "Construction and General Laborers’ Union of North America, Local Union 190 of Albany, New York and Vicinity",LABORERS,190.0,45317.0,,train
 "Waste Material Recycling and General Industrial Local 108, LIUNA, AFL-CIO",LABORERS,108.0,541709.0,,train
-TRI-STATE BUILDING AND CONSTRUCTION TRADES COUNCIL (ON BEHALF OF IUOE LOCAL 18 AND LIUNA LOCAL 83),COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+TRI-STATE BUILDING AND CONSTRUCTION TRADES COUNCIL (ON BEHALF OF IUOE LOCAL 18 AND LIUNA LOCAL 83),,,,multi-union,train
 "LIUNA, NEW ENGLAND REGIONAL OFFICE, AFL-CIO",LABORERS,,,potentially resolvable,train
 National Postal Mail Handlers Union a/w LIUNA,"POSTAL MAIL HANDLERS, LIUNA",,,potentially resolvable,train
 Laborers' District Eight Regional Organizing Committee,LABORERS,,,potentially resolvable,train
@@ -78482,7 +78465,7 @@ LABORERS LOCAL 427 AND 1140,LABORERS,,,potentially resolvable,train
 "LABORERS LOCAL #4, LABORERS INTERNATIONAL UNION OF NORTH AMERICA, AFL-CIO",LABORERS,4.0,19490.0,,train
 "NATIONAL POSTAL MAIL HANDLERS' UNION, LOCAL 301, BRANCH 237, A/W LABORERS' INTERNATIONAL UNION OF NO","POSTAL MAIL HANDLERS, LIUNA",301.0,91828.0,,train
 "NATIONAL POSTAL MAILHANDLERS UNION, LOCAL 301, BRANCH 205, A/W LABORERS' INTERNATIONAL UNION OF NORT","POSTAL MAIL HANDLERS, LIUNA",301.0,91828.0,,train
-"INTERNATIONAL UNION OF OPERATING ENGINEERS LOCAL 965, AFL-CIO AND LABORERS INTERNATIONAL UNION OF NORTH AMERICA LOCAL 159, AFL-CIO, JOINTLY",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"INTERNATIONAL UNION OF OPERATING ENGINEERS LOCAL 965, AFL-CIO AND LABORERS INTERNATIONAL UNION OF NORTH AMERICA LOCAL 159, AFL-CIO, JOINTLY",,,,multi-union,train
 "Northern California District Council of Laborers and Laborers Local Union No. 73, affiliated with the Laborers International Union of North America, AFL-CIO",LABORERS,73.0,39316.0,,train
 "NATIONAL POST OFFICE, MAIL HANDLERS, WATCHMEN, MESSENGERS AND GROUP LEADERS, A DIVISION OF LABORERS","POSTAL MAIL HANDLERS, LIUNA",,,potentially resolvable,train
 "NATIONAL POSTAL MAIL HANDLERS' UNION, LOCAL 301, BRANCH 127, A/W LABORERS' INTERNATIONAL UNION OF NO","POSTAL MAIL HANDLERS, LIUNA",301.0,91828.0,,train
@@ -78578,7 +78561,7 @@ LOCAL 100-A/1546 UFCW,FOOD AND COMMERCIAL WKRS,100.0,29021.0,,train
 "RETAIL WHOLESALE AND DEPARTMENT STORE UNION, LOCAL 108, UFCW","RETAIL WHOLESALE, DC, UFCW",108.0,22833.0,,train
 "Retail, Wholesale and Department Store Union, Local 550, UFCW AFL-CIO","RETAIL WHOLESALE, DC, UFCW",550.0,504589.0,,train
 United Food and Commercial Workers Union Local #8,FOOD AND COMMERCIAL WKRS,8.0,,potentially resolvable,train
-ICWUC/UFCW; UNITED STEEL WORKERS; INTERNATIONAL MACHINISTS OF AMERICA; INTERNATIONAL BROTHERHOOD OF,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+ICWUC/UFCW; UNITED STEEL WORKERS; INTERNATIONAL MACHINISTS OF AMERICA; INTERNATIONAL BROTHERHOOD OF,,,,multi-union,train
 "RETAIL, WHOLESALE AND DEPARTMENT STORE UNION COUNCIL A/W UFCW, LOCAL 550, AFL-CIO, CLC","RETAIL WHOLESALE, DC, UFCW",550.0,504589.0,,train
 United Food and Commercial Workers Local 17-18,FOOD AND COMMERCIAL WKRS,17.0,,potentially resolvable,train
 "RETAIL, WHOLESALE DEPARTMENT STORE UNION/UFCW SOUTHEAST COUNCIL","RETAIL WHOLESALE, DC, UFCW",,,potentially resolvable,train
@@ -78673,7 +78656,7 @@ Jeanes Nurses United/PASNAP,PASNAP,,,not in gazetteer,test
 "NURSES UNITED FOR IMPROVED PATIENT CARE, AFL HEALTHCARE, AFL-CIO",NATIONAL NURSES UNITED,,,potentially resolvable,train
 NNOC-MO & KS/NATIONAL NURSES UNITED,NATIONAL NURSES UNITED,,,potentially resolvable,train
 CALIFORNIA NURSES ASSOCIATION/NATIONAL NURSES UNITED (CNA/NNU),CALIFORNIA NURSES ASSOCIATION,,15724.0,,train
-"District of Columbia Nurses Association, National Nurses United, AFL-CIO",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"District of Columbia Nurses Association, National Nurses United, AFL-CIO",,,,not in gazetteer,train
 National Nurses Organizing Committee/National Nurses United,NATIONAL NURSES UNITED,,,potentially resolvable,train
 National Nurses Organizing Committee (NNOC) -Missouri & Kansas/National Nurses United,NATIONAL NURSES UNITED,,,potentially resolvable,train
 California Nurses Association & National Nurses United,CALIFORNIA NURSES ASSOCIATION,,15724.0,,train
@@ -78729,7 +78712,7 @@ National Nurses Organizing Committee California Nurses Association/National Nurs
 "Michigan Nurses Association (MNA), National Nurses United (NNU), AFL-CIO",MICHIGAN NURSES ASSOCIATION,,67961.0,,train
 St. Christopher's Hospital for Children Nurses United,NATIONAL NURSES UNITED,,,potentially resolvable,train
 "SOUTHERN UNITED NURSES/NATIONAL NURSES UNITED (SUN/NNU), AFL-CIO",NATIONAL NURSES UNITED,,,potentially resolvable,train
-California Nursing Association National Nurses United,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+California Nursing Association National Nurses United,CALIFORNIA NURSES ASSOCIATION,,15724,,train
 "MASSACHUSETTS NURSES ASSOCIATION, NATIONAL NURSES UNITED, AFL-CIO",NATIONAL NURSES UNITED,,57925.0,,train
 "National Nurses Organizing Committee-Texas/National Nurses United (Bay Area Healthcare Group, Ltd. d/b/a Corpus Christi Medical Center an indirect subsidiary of HCA Holdings, Inc.)",NATIONAL NURSES UNITED,,,potentially resolvable,train
 National Nurses United,NATIONAL NURSES UNITED,,,potentially resolvable,train
@@ -78859,7 +78842,7 @@ LOCAL 1031 USWU,"UNITED SERVICE WORKERS UNION, IUJAT",1031.0,543825.0,,train
 "United Plant & Production Workers, LOCAL 175 P, IUJAT",JOURNEYMEN AND ALLIED TRADES IND,175.0,,not in gazetteer,train
 ASOCIACION INTERNACIONAL DE MAQUINISTAS Y TRABAJADORES AEROESPACIALES (IAM),MACHINISTS AFL-CIO,,,potentially resolvable,train
 IAM Bluff City Lodge 600,MACHINISTS AFL-CIO,600.0,69311.0,,train
-"EAST BAY AUTOMOTIVE COUNCIL (MACHINISTS LOCAL LODGE 1546, DISTRICT LODGE 190; PAINTERS LOCAL 1176; T",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"EAST BAY AUTOMOTIVE COUNCIL (MACHINISTS LOCAL LODGE 1546, DISTRICT LODGE 190; PAINTERS LOCAL 1176; T",,,,multi-union,train
 Transportation Communications International Union/IAM Local 6700 (Brotherhood of Railway Clerks),"TRANSPORTATION COMMUNICATIONS UNION/IAM, AFL-CIO",6700.0,545479.0,,train
 "IAM, MIDWEST TERRITORY REGIONAL OFFICE",MACHINISTS AFL-CIO,,,potentially resolvable,train
 "NATIONAL FEDERATION OF FEDERAL EMPLOYEES, FD-1, IAMAW, AFL-CIO",MACHINISTS AFL-CIO,1.0,541793.0,,train
@@ -78875,7 +78858,7 @@ Venango Regional Machinist and Tool Makers Union,MACHINISTS AFL-CIO,,,potentiall
 "LOCAL PM 2848, IAM",MACHINISTS AFL-CIO,2848.0,538006.0,,train
 NATIONAL PROFESSIONAL CORRECTIONS EMPLOYEES UNION (IAMAW),MACHINISTS AFL-CIO,,,potentially resolvable,train
 "National Federation of Federal Employees, F-D1, IAMAW, AFL-CIO",MACHINISTS AFL-CIO,1.0,541793.0,,train
-United Steelworkers Local 7-507 & IAM District 8,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+United Steelworkers Local 7-507 & IAM District 8,,,,multi-union,train
 SERVICE WORKERS UNITED LOCAL #2552,SERVICE EMPLOYEES,2552.0,543137.0,,train
 Flex Workers United,"WORKERS UNITED, SEIU",,,potentially resolvable,train
 "Wells Fargo Workers United, affiliated with Communication Workers of America, AFL-CIO",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
@@ -78884,16 +78867,16 @@ Equitas Health Workers United/Ohio Federation of Teachers,TEACHERS AFL-CIO,,5133
 "Staff Workers United, Local 2599","WORKERS UNITED, SEIU",2599.0,,not in gazetteer,train
 Pharmacy Workers United,"WORKERS UNITED, SEIU",,,potentially resolvable,train
 Service Workers United,SERVICE EMPLOYEES,,,potentially resolvable,train
-Preeminent Protective Services Workers United,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+Preeminent Protective Services Workers United,,,,not in gazetteer,exclude
 Lowe's Workers United,"WORKERS UNITED, SEIU",,,potentially resolvable,train
 "Utility Workers United Association, Local 537",UTILITY WORKERS AFL-CIO,537.0,512374.0,,train
 Requiem Workers United,"WORKERS UNITED, SEIU",,,potentially resolvable,train
-Millworkers United,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Inland Empire Amazon Workers United,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+Millworkers United,,,,not in gazetteer,exclude
+Inland Empire Amazon Workers United,,,,not in gazetteer,train
 "Local 169 of the New York New Jersey Regional Joint Board, Workers United","WORKERS UNITED, SEIU",169.0,,not in gazetteer,train
 "New York Coat, Suit, Dress, Rainwear and Allied Workers' Union, Local 89-22-1. Workers United","WORKERS UNITED, SEIU",89.0,512269.0,,train
 "LOCAL 319C, WORKERS UNITED","WORKERS UNITED, SEIU",319.0,49645.0,,train
-Healthcare Workers United,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+Healthcare Workers United,,,,not in gazetteer,exclude
 "SERVICE WORKERS UNITED, LOCAL 2552",SERVICE EMPLOYEES,2552.0,543137.0,,train
 "Wells Fargo Workers United, Communications of America",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
 "WORKERS UNITED LOCAL 574-A, LOCAL 574-C, LOCAL 2496 & LOCAL 2750A","WORKERS UNITED, SEIU",,,potentially resolvable,train
@@ -78901,7 +78884,7 @@ Jollibee Workers United,"WORKERS UNITED, SEIU",,,potentially resolvable,test
 New York Metropolitan Area Joint Board Workers United,"WORKERS UNITED, SEIU",,,potentially resolvable,train
 Restaurant Workers United,RESTAURANT WORKERS UNITED,,,potentially resolvable,train
 American Postal Workers United,"POSTAL WORKERS, AMERICAN, AFL-CIO",,,potentially resolvable,train
-SERVICE WORKERS UNITED UNION,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+SERVICE WORKERS UNITED UNION,SERVICE EMPLOYEES,,543137,,train
 SPIRAL WORKERS UNITED,"WORKERS UNITED, SEIU",,,potentially resolvable,train
 "NEW YORK METROPOLITAN AREA JOINT BOARD, WORKERS UNITED","WORKERS UNITED, SEIU",,,potentially resolvable,train
 "SERVICE WORKERS UNITED, HERE, LOCAL 217",UNITE HERE,217.0,40240.0,,train
@@ -78919,7 +78902,7 @@ Workers United (WU) affiliated with SEIU,"WORKERS UNITED, SEIU",,,potentially re
 LOCAL 192C 1C\WU-UFCW,COMMUNICATIONS WORKERS AFL-CIO,192.0,,not in gazetteer,train
 "UTILITY WORKERS UNITED ASSOCIATION, LOCAL 537",UTILITY WORKERS AFL-CIO,537.0,512374.0,,train
 "Alphabet Workers United, Local 9009",COMMUNICATIONS WORKERS AFL-CIO,9009.0,546898.0,,train
-Laundry Dry Cleaning Workers and Allied Industries Health Fund Workers United,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+Laundry Dry Cleaning Workers and Allied Industries Health Fund Workers United,,,,not in gazetteer,exclude
 PenFed Workers United,"WORKERS UNITED, SEIU",,,potentially resolvable,train
 RESTAURANT WORKERS UNITED,RESTAURANT WORKERS UNITED,,,potentially resolvable,train
 Union Workers United,"WORKERS UNITED, SEIU",,,potentially resolvable,train
@@ -78932,7 +78915,7 @@ Home Depot Workers United,"WORKERS UNITED, SEIU",,,potentially resolvable,train
 "DALLAS WORKERS UNITED, LOCAL 700",COMMUNICATIONS WORKERS AFL-CIO,700.0,,not in gazetteer,exclude
 GLOVE CITIES HUDSON DISTRICT WORKERS UNITED,"WORKERS UNITED, SEIU",,,potentially resolvable,train
 SERVICE WORKERS UNITED LOCAL 2552,SERVICE EMPLOYEES,2552.0,543137.0,,train
-WAREHOUSE WORKERS UNITED,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+WAREHOUSE WORKERS UNITED,,,,not in gazetteer,exclude
 SPROUTS WORKERS UNITED,"WORKERS UNITED, SEIU",,,potentially resolvable,train
 Bangs Ambulance Workers United,"WORKERS UNITED, SEIU",,,potentially resolvable,train
 SERVICE WORKERS UNITED,SERVICE EMPLOYEES,,,potentially resolvable,train
@@ -78947,7 +78930,7 @@ Spiral Workers United,"WORKERS UNITED, SEIU",,,potentially resolvable,train
 "Workers United, Mid-Atlantic Regional Joint Board, Local 2024 and Local 1995","WORKERS UNITED, SEIU",,,potentially resolvable,train
 SERVICES WORKERS UNITED LOCAL 2552,SERVICE EMPLOYEES,2552.0,543137.0,,train
 Young Workers United,"WORKERS UNITED, SEIU",,,potentially resolvable,test
-WAREHOUSE WORKERS UNITED/CHANGE TO WIN FEDERATION,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+WAREHOUSE WORKERS UNITED/CHANGE TO WIN FEDERATION,,,,not in gazetteer,exclude
 "Delonis Workers United of the Industrial Workers of the World, Ypsilanti General Membership Branch",INDUSTRIAL WORKERS OF THE WORLD,,,potentially resolvable,train
 International Union of Operating Engineers Local No.1,"ENGINEERS, OPERATING, AFL-CIO",1.0,5121.0,,train
 "INTERNATIONAL UNION OF OPERATING ENGINEERS, LOCAL 18 A/W INTERNATIONAL UNION OF OPERATING ENGINEERS","ENGINEERS, OPERATING, AFL-CIO",18.0,39040.0,,train
@@ -79429,11 +79412,11 @@ INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 771 AND JOINT  COUNCIL 53,TEAMSTERS
 Teamsters Local Union No. 30 A/W International Brotherhood of Teamsters1,TEAMSTERS,30.0,36259.0,,train
 "TEAMSTERS LOCAL UNION NO. 206 AND TEAMSTERS LOCAL UNION NO. 926, AFFILIATED WITH INTERNATIONAL BROTH",TEAMSTERS,206.0,42547.0,,train
 "TEAMSTERS LOCALS 386, 853",TEAMSTERS,,,potentially resolvable,train
-"OPERATING ENGINEERS LOCAL UNION NO. 3: TEAMSTERS UNION LOCAL UNION LOCAL 287, INTERNATIONAL BROTHERHOOD OF TEAMSTERS; INTERNATIONAL ASSOCIATION OF MACHINISTS AND AEROSPACE WORKERS, LOCAL LODGE NO. 93, DISTRICT NO. 190; AND LABORERS' LOCAL 270 AND THE NORTHERN CALIFORNIA DISTRICT COUNCIL OF LABORERS (JOINT PETITIONERS)",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"OPERATING ENGINEERS LOCAL UNION NO. 3: TEAMSTERS UNION LOCAL UNION LOCAL 287, INTERNATIONAL BROTHERHOOD OF TEAMSTERS; INTERNATIONAL ASSOCIATION OF MACHINISTS AND AEROSPACE WORKERS, LOCAL LODGE NO. 93, DISTRICT NO. 190; AND LABORERS' LOCAL 270 AND THE NORTHERN CALIFORNIA DISTRICT COUNCIL OF LABORERS (JOINT PETITIONERS)",,,,multi-union,train
 "Graphic Communications Conference, IBT, Local 25-M, District Council-3",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,25.0,,not in gazetteer,train
 Teamsters Local 337 and Teamsters Local 20,TEAMSTERS,,,potentially resolvable,train
 TEAMSTERS LOCAL 638 AND INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 120,TEAMSTERS,,,potentially resolvable,train
-Studio Transportation Drivers Local Union No. 399 of the International Brotherhood of Teamsters and IATSE Local 80,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+Studio Transportation Drivers Local Union No. 399 of the International Brotherhood of Teamsters and IATSE Local 80,,,,multi-union,train
 GCC/IBT Local 6-505M,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,505.0,64088.0,,train
 GRAPHIC COMMUNICATIONS CONFERENCE/INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 571-M OF DISTRICT COUNCIL 3,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,571.0,512199.0,,train
 GRAPHIC COMMUNICATIONS CONFERENCE OF THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS L619M DC3,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,3.0,542772.0,,train
@@ -79485,7 +79468,7 @@ Unite HERE! Local 2,UNITE HERE,2.0,507427.0,,train
 UNITE HERE! Local 2,UNITE HERE,2.0,507427.0,,train
 "LOCAL 6, NEW YORK HOTEL &  MOTEL TRADES COUNCIL, UNITE HERE",UNITE HERE,6.0,28501.0,,train
 "LOCAL 6, UNITE HERE  HOTEL & MOTEL TRADES COUNCIL OF NEW YORK",UNITE HERE,6.0,28501.0,,train
-"Unite Here Local 7 and International Union of Operating Engineers, AFL-CIO, Local 37 (Joint Petitioners)",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"Unite Here Local 7 and International Union of Operating Engineers, AFL-CIO, Local 37 (Joint Petitioners)",,,,multi-union,train
 "UNITE HERE, Local 631 AND UNITE HERE Local 11",UNITE HERE,,,potentially resolvable,train
 "UNITE HERE, NY NJ REGIONAL JOINT BOARD A/W WORKERS UNITED , SEIU","WORKERS UNITED, SEIU",,,potentially resolvable,train
 "SERVICE WORKERS UNITED, AN AFFILATE OF UNITE HERE AND SEIU",SERVICE EMPLOYEES,,,potentially resolvable,train
@@ -80042,7 +80025,7 @@ Local 768 TWU (Theatrical Wardrobe Union (under trusteeship),STAGE AND PICTURE O
 "LOCAL 1179, AMALGAMATED TRANSPORT WORKERS UNION",TRANSPORT WORKERS AFL-CIO,1179.0,,not in gazetteer,train
 "Independent Petroleum Transport Workers Union, Local 108",TRANSPORT WORKERS AFL-CIO,108.0,,not in gazetteer,train
 NATIONAL CONFERENCE OF FIREMEN OILERS LOCAL 320,SERVICE EMPLOYEES,320.0,15677.0,,train
-"MARINE FIREMEN OILERS, WATERTENDERS AND WIPERS ASSOCIATION, PACIFIC COAST",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+"MARINE FIREMEN OILERS, WATERTENDERS AND WIPERS ASSOCIATION, PACIFIC COAST",,,,not in gazetteer,train
 NATIONAL CONFERENCE OF FIREMEN & OILERS,SERVICE EMPLOYEES,,,potentially resolvable,train
 "NATIONAL CONFERENCE OF FIREMEN & OILERS, LOCAL 27",SERVICE EMPLOYEES,27.0,33899.0,,train
 "NATIONAL CONFERENCE OF FIREMEN & OILERS, LOCAL 3, AFL-CIO",SERVICE EMPLOYEES,3.0,21988.0,,train
@@ -80063,7 +80046,7 @@ NORTHERN RHODE ISLAND UNITED NURSES AND ALLIED PROFESSIONALS LOCAL 5067,UNITED N
 "NORTHERN RHODE ISLAND UNITED NURSES& ALLIED PROFESSIONALS, LOCAL 5067",UNITED NURSES AND ALLIED PROFESSIONALS,5067.0,516623.0,,train
 Northern Rhode Island United Nurses and Allied Professionals Local 5067,UNITED NURSES AND ALLIED PROFESSIONALS,5067.0,516623.0,,train
 UNITED NURSES AND ALLIED PROFESSIONALS OF RHODE ISLAND,UNITED NURSES AND ALLIED PROFESSIONALS,,,potentially resolvable,train
-St. Mary United Nurses Union/Pennsylvania Association of Staff Nurses and Allied Professionals,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+St. Mary United Nurses Union/Pennsylvania Association of Staff Nurses and Allied Professionals,PASNAP,,546590,,train
 "UNITED NURSES & ALLIED PROFESSIONALS, HCRS CLINICIANS LOCAL 5051",UNITED NURSES AND ALLIED PROFESSIONALS,5051.0,543401.0,,train
 "Plastic Workers' Union Local 18, AFL-CIO affiliated with International Union of Allied Novelty & Production Workers, AFL-CIO",NOVELTY AND PRODUCTION WKRS AFL-CIO,18.0,3180.0,,train
 "Central States Joint Board, Internatinoal Union of Allied, Novelty and Production Workers, Local 18 Plastic Workers Union",NOVELTY AND PRODUCTION WKRS AFL-CIO,18.0,3180.0,,train
@@ -80263,34 +80246,13 @@ USA - 200A,"STEELWORKERS, AFL-CIO",200.0,,potentially resolvable,train
 "PLANT PROTECTION ASSOCIATION, NATIONAL LOCAL 104",PLANT PROTECTION ASSOCIATION NATIONAL,104.0,54776.0,,train
 "Plant Protection Association National, Local 104",PLANT PROTECTION ASSOCIATION NATIONAL,104.0,54776.0,,train
 SPECIAL PATROLMAN'S BENEVOLENT ASSOCIATION LOCAL 1,SPECIAL PATROLMEN BENEVOLENT ASSN,1.0,,not in gazetteer,train
-The Boeing Company,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Saputo Cheese USA, Inc.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Northwest Washington Rehabilitation Hospital, LLC d/b/a Providence Swedish Rehab",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"International Public Terminal, LLC (IPT)",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-STRAUSS PAPER COMPANY,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"MAGIC LAUNDRY SERVICES, INC.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-RESTAURANT ASSOCIATES @ 1 CHASE PLAZA,COMMUNICATIONS WORKERS AFL-CIO,1.0,,not in gazetteer,exclude
-"James Monroe Condominium at Newport, Inc.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Cabell Huntington Hospital,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"RWD Consulting, LLC",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-GIBSON & ASSOCIATES,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Levy, Ford & Wallach",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-BIGNAULT & CARTER,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"O'Donoghue & O'Donoghue, LLP",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Putney Twombly Hall & Hirson LLP,",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"COSME, D'ANGELO & SZOLLOSI CO., LPA",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-CLEARY & JOSEM,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Maria Workers Birruete,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Suzanne Wickline,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Michael J. Rusinek,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-L. CARTER -,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Ronald R. Patenaude,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+"Levy, Ford & Wallach",,,,not a union,exclude
+Maria Workers Birruete,,,,not a union,exclude
+Ronald R. Patenaude,,,,not a union,exclude
 Hank McKay 6,COMMUNICATIONS WORKERS AFL-CIO,6.0,,not in gazetteer,exclude
-National Alliance of State & Territorial AIDS Directors (d/b/a/ NASTAD),COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Our Lady of Mount Carmel Roman School,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-ASIAN AMERICAN LEGAL DEFENSE AND EDUCATION FUND,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Texas Rio Grande Legal Aid, Inc",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-VARIOUS ** - VARIOUS **,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+National Alliance of State & Territorial AIDS Directors (d/b/a/ NASTAD),,,,not a union,exclude
+ASIAN AMERICAN LEGAL DEFENSE AND EDUCATION FUND,,,,not a union,exclude
+VARIOUS ** - VARIOUS **,,,,not a union,exclude
 "PRODUCTION WORKERS, LOCAL 148 A/W ALLIED, NOVELTY & PRODUCTION WORKERS, UNITED S",NOVELTY AND PRODUCTION WKRS AFL-CIO,148.0,20902.0,,train
 "LOCAL 1931 International Union of Allied Novelty & Production Workers, AFL-CIO",NOVELTY AND PRODUCTION WKRS AFL-CIO,1931.0,,not in gazetteer,train
 National Production Workers Union Local 707,NATIONAL PRODUCTION WKRS UNION IND,707.0,,potentially resolvable,train
@@ -80953,7 +80915,7 @@ Teamsters 618,TEAMSTERS,618.0,28325.0,,train
 Workers United 360,"WORKERS UNITED, SEIU",360.0,542110.0,,train
 Workers United-365,"WORKERS UNITED, SEIU",365.0,43822.0,,train
 IATSE - Wadrobe Attendants-893,STAGE AND PICTURE OPERATORS AFL-CIO,893.0,68454.0,,test
-IBEW/USW-876/13547,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
+IBEW/USW-876/13547,,,,multi-union,train
 IBT-754,TEAMSTERS,754.0,21374.0,,train
 "Roofers, Waterproofers and Allied Workers 75",ROOFERS AFL-CIO,75.0,30572.0,,train
 Heat and Frost Insulators and Allied Workers 4,INSULATORS AFL-CIO,4.0,29768.0,,train
@@ -84364,93 +84326,30 @@ SEAFARERS INTL UNION OF NORTH AMERICA,SEAFARERS AFL-CIO,,,potentially resolvable
 "UNITED INDUSTRIAL WORKERS, SEAFARERS INTERNATIONAL UNION",SEAFARERS AFL-CIO,,,potentially resolvable,train
 "UNITED INDUSTRIAL WORKERS OF THE SEAFARERS INTERNATIONAL UNION, AFL-CIO",SEAFARERS AFL-CIO,,,potentially resolvable,train
 Seafarers,SEAFARERS AFL-CIO,,,potentially resolvable,train
-"Danvers – T, Inc. d/b/a Ira Toyota of Danvers",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"McKnight, Canzano, Smith, Radtke & Brault, P.C.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Spear Wilderman, P.C.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-MarinHealth Medical Center,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Pyle Rome Ehrenberg PC,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"SAINT LUKE'S MEMORIAL HOSPITAL INC., D/B/A SAINT LUKES MEMORIAL HOSPITAL PONCE",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Bles Broadway Food Corp.,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"XPO Logistics Worldwide, Inc.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-UNIVERSITY OF CINCINNATI MEDICAL CENTER,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-kenneth A. Wardsworth,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"CARLOS ORTIZ, PRESIDENT",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
 Jonathan Elliott 774,,774.0,,unknown union,exclude
-"KROLL, HEINEMAN, GIBLIN",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
 "NATIONAL ORGANIZATION OF INDUSTRIAL TRADE UNIONS, LU 119","INDUSTRIAL TRADE UNIONS, IUJAT",119.0,,not in gazetteer,train
-"Jubelirer, Pass & Intrieri, P.C.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Spivak Lipton LLP,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"EGGLESTON, SIEGEL & LEWITTER",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Lamb Weston,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Columbia College Chicago,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"ASSOCIATED & GENERAL CONTRACTORS OF AMERICA SAN DIEGO CHAPTER, INC.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"DHSC, LLC d/b/a Affinity Medical Center",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"MASSUNITING, INC",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Cookies On Fulton, Inc.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Sysco USA I, Inc. d/b/a Sysco Arizona, Inc.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Howard Industries, Inc.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"SOBEL CORRUGATED CONTAINERS, INC., ET AL.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
 UNION OF NEEDLETRADES INDUSTRIAL & TEXTILE EMPLOYEES,UNITE HERE,,,potentially resolvable,train
 Plant Protection Association Local Union 251,PLANT PROTECTION ASSOCIATION NATIONAL,251.0,541768.0,,train
 Truckers Movement for Justice,,,,not a union,train
 TRUCKERS MOVEMENT FOR JUSTICE,,,,not a union,train
-Godwin Morris Laurenzi & Bloomfield PC,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Livingston Adler Pulda,Meiklejohn & Kelly P.C",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Office of Robert T. Reilly,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Jackson Shields & Yeiser,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-NTN Bearing Corporation of America,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-HATHAWAY MANOR NURSING HOME,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"TERMINIX INTERNATIONAL CO., LP",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Verizon Wireless,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-valerie jefferson,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
 Scott Michael 3863,STATE COUNTY AND MUNI EMPLS AFL-CIO,3863.0,542906.0,,train
 Craig Karnes 974-10,COMMUNICATIONS WORKERS AFL-CIO,974.0,,not in gazetteer,exclude
-UNKNOWN,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Unknown,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-unknown,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-HKM Employment Attorneys LLP,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"LóPEZ LAY, VIZCARRA & SIMONET",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-LEVINE & BLIT PLLC,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"BASS, BERRY & SIMS",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Bryan C. McCarthy, Esq. and Associates, P.C.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"BRUCE FICKMAN, ESQ.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"STEPHEN GOLDBLATT, P.C.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Monserrate Simonet & Gierbolini,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-RURAL/METRO CORPORATION D/B/A BOWERS COMPANIES,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Passaic Rubber Co.,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Sunbelt Rentals, Inc.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Arthur Brown,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
 Stephen Bowen 117,COMMUNICATIONS WORKERS AFL-CIO,117.0,,not in gazetteer,exclude
 UNITE - 104 183 383 398 593,UNITE HERE,,,potentially resolvable,train
 "UNION OF NEEDLETRADES, INDUSTRIAL AND TEXTILE EMPLOYEES INTERNATIONAL (""UNITE"" INTERNATIONAL)",UNITE HERE,,,potentially resolvable,train
-DeCarlo & Shanley,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Merck, Sharp & Dohme Corp.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Branstetter, Stranch and Jennings, PLLC",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-M&K Truck Centers,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Koehler & Isaacs, LLP",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Bush Gotlieb,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Siegel & Yee,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+DeCarlo & Shanley,,,,not a union,exclude
+Siegel & Yee,,,,not a union,exclude
 John Ratica  3403,,3403.0,,unknown union,exclude
 Scott Long 57,COMMUNICATIONS WORKERS AFL-CIO,57.0,,not in gazetteer,exclude
-Howard Terry 87140,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Juanita Ray 223,COMMUNICATIONS WORKERS AFL-CIO,223.0,,potentially resolvable,exclude
-Jeremy Gene Pearson,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Unknown Union,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-ALLIANCE OF MOTION PICTURE & TELEVISION PRODUCERS (AMPTP),COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+Howard Terry 87140,,,,not a union,exclude
+Juanita Ray 223,,223.0,,not a union,exclude
+Unknown Union,,,,unknown union,exclude
+ALLIANCE OF MOTION PICTURE & TELEVISION PRODUCERS (AMPTP),,,,not a union,exclude
 "UNION OF NEEDLETRADES, INDUSTRIAL AND TEXTILE EMPLOYEES LOCAL 99",UNITE HERE,99.0,,not in gazetteer,train
 "UNION OF NEEDLETRADES, INDUSTRIAL AND TEXTILE EMPLOYEES (UNITE)",UNITE HERE,,,potentially resolvable,test
 Industrial Workers of the World-Portland Chapter d/b/a Burgerville Workers Union,INDUSTRIAL WORKERS OF THE WORLD,,,potentially resolvable,train
 NPWU - 707 CLEVELAND,NATIONAL PRODUCTION WKRS UNION IND,707.0,,potentially resolvable,train
 Devereux Staff Association,TEACHERS AFL-CIO,,546397.0,,train
-Foss Maritime Company,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"JAMES & HOFFMAN, P. C.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Bridgewater Sodexo,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Working Families Legal Clinic,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-BLITMAN & KING LLP,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"The Cogar Group, Ltd",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-AMERICOLD  LOGISTICS,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Sean Burkland,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Branstetter, Stranch & Jennings, PLLC",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
 "INTERNATIONAL UNION OF JOURNEYMEN AND ALLIED TRADES, LOCAL 726",JOURNEYMEN AND ALLIED TRADES IND,726.0,541969.0,,train
 "International Union of Journeymen and Allied Trades, Local 726",JOURNEYMEN AND ALLIED TRADES IND,726.0,541969.0,,train
 "LOCAL 726, INTERNATIONAL UNION OF JOURNEYMEN AND ALLIED TRADES",JOURNEYMEN AND ALLIED TRADES IND,726.0,541969.0,,train
@@ -84465,29 +84364,6 @@ Industrial Workers of the World Heartland Branch,INDUSTRIAL WORKERS OF THE WORLD
 IWW Heartland Branch,INDUSTRIAL WORKERS OF THE WORLD,,,potentially resolvable,train
 Local 103 Plant Protection Association National,PLANT PROTECTION ASSOCIATION NATIONAL,103.0,37160.0,,train
 Plant Protection Association National Local 103,PLANT PROTECTION ASSOCIATION NATIONAL,103.0,37160.0,,train
-MOGEL SPEIDEL BOBB & KERSCHNER,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Mogel Speidel Bobb & Kerschner,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Law Offices of Mogel Speidel,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-THOMAS E. CHASE ESQ.,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Thomas E. Chase Esq.,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Attorney Thomas E. Chase,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-SEHAM SEHAM MELTZ & PETERSEN LLP,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Seham Seham Meltz & Petersen LLP,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Law Offices of Seham Seham,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-MEYER SUOZZI ENGLISH & KLEIN P.C.,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Meyer Suozzi English & Klein P.C.,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Law Offices of Meyer Suozzi,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-BARNES IACCARINO VIRGINIA AMBINDER & SHEPARD P.L.L.C,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Barnes Iaccarino Virginia Ambinder & Shepard PLLC,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Jackson Lewis P.C.,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-JACKSON LEWIS P.C.,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Jackson Lewis LLP,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-ABM Janitorial Services Inc.,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-ABM JANITORIAL SERVICES INC,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-ABM Industries,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-National Dental PLLC,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-National Dental Management LLC,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-CCP Management LLC,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
 Lehigh Valley Industrial Workers of the World,INDUSTRIAL WORKERS OF THE WORLD,,,potentially resolvable,train
 Industrial Workers of the World Lehigh Valley,INDUSTRIAL WORKERS OF THE WORLD,,,potentially resolvable,train
 IWW Lehigh Valley Branch,INDUSTRIAL WORKERS OF THE WORLD,,,potentially resolvable,train
@@ -84495,31 +84371,12 @@ IWW General Membership Branch,INDUSTRIAL WORKERS OF THE WORLD,,,potentially reso
 National Nurses Organizing Committee,NATIONAL NURSES UNITED,,,potentially resolvable,train
 National Nurses Organizing Committee NNOC,NATIONAL NURSES UNITED,,,potentially resolvable,train
 NNOC,NATIONAL NURSES UNITED,,,potentially resolvable,train
-JOBS WITH JUSTICE,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Jobs With Justice,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Pennsylvania Workers Organizing Committee,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Fight for Philly,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-dddd,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Brooklyn Legal Services,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-BROOKLYN LEGAL SERVICES,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-THE LAW OFFICE OF RICHARD M. GREENSPAN PC,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Law Office of Richard M. Greenspan,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Richard M. Greenspan PC,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-CORNELL LABOR LAW CLINIC,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Cornell Labor Law Clinic,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-COLUMBUS SQUARE MANAGEMENT,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Columbus Square Management,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-HEALTHPLEX NORTH SHORE LIJ HEALTH SYSTEM,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-North Shore LIJ Health System,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Community Health Center,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-COMMUNITY HEALTH CENTER,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+Pennsylvania Workers Organizing Committee,,,,not in gazetteer,exclude
 AMERICAN FEDERATION OF TELEVISION AND RADIO ARTISTS,SAG-AFTRA,,,potentially resolvable,train
 American Federation of Television and Radio Artists,SAG-AFTRA,,,potentially resolvable,train
 AFTRA AFL-CIO,SAG-AFTRA,,,potentially resolvable,train
 AFTRA,SAG-AFTRA,,,potentially resolvable,train
-Ameriguard,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-AMERIGUARD,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Ameriguard Security,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+Ameriguard Security,,,,not a union,exclude
 Home Healthcare Workers of America,JOURNEYMEN AND ALLIED TRADES IND,,,potentially resolvable,train
 HOME HEALTHCARE WORKERS OF AMERICA,JOURNEYMEN AND ALLIED TRADES IND,,,potentially resolvable,train
 Home Healthcare Workers of America Local 1770,JOURNEYMEN AND ALLIED TRADES IND,1770.0,545429.0,,train
@@ -84542,8 +84399,8 @@ UPSEU Local 1222,JOURNEYMEN AND ALLIED TRADES IND,1222.0,540892.0,,train
 United Public Service Employees Union Local 1222,JOURNEYMEN AND ALLIED TRADES IND,1222.0,540892.0,,train
 United Professional Service Employees Union,JOURNEYMEN AND ALLIED TRADES IND,,,potentially resolvable,train
 United Professional Service Employees Union IUJAT,JOURNEYMEN AND ALLIED TRADES IND,,,potentially resolvable,test
-MVP Transportation,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-MVP TRANSPORTATION,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+MVP Transportation,,,,not a union,exclude
+MVP TRANSPORTATION,,,,not a union,exclude
 Local 87,COMMUNICATIONS WORKERS AFL-CIO,87.0,,not in gazetteer,exclude
 Local 153,,153.0,,unknown union,exclude
 LOCAL 608,COMMUNICATIONS WORKERS AFL-CIO,608.0,,not in gazetteer,exclude
@@ -84575,7 +84432,7 @@ Local 79,COMMUNICATIONS WORKERS AFL-CIO,79.0,,not in gazetteer,exclude
 Local 414,COMMUNICATIONS WORKERS AFL-CIO,414.0,,not in gazetteer,exclude
 Local 542,COMMUNICATIONS WORKERS AFL-CIO,542.0,,not in gazetteer,exclude
 Local 22,,22.0,,unknown union,exclude
-Local 23,COMMUNICATIONS WORKERS AFL-CIO,23.0,,potentially resolvable,exclude
+Local 23,,23.0,,unknown union,exclude
 LOCAL 469,COMMUNICATIONS WORKERS AFL-CIO,469.0,,not in gazetteer,exclude
 Local 619,COMMUNICATIONS WORKERS AFL-CIO,619.0,,not in gazetteer,exclude
 Local 90,COMMUNICATIONS WORKERS AFL-CIO,90.0,,not in gazetteer,exclude
@@ -84586,8 +84443,7 @@ Local 869,COMMUNICATIONS WORKERS AFL-CIO,869.0,,not in gazetteer,exclude
 Local 770,,770.0,,unknown union,exclude
 Local 718,,718.0,,unknown union,exclude
 Local 334,COMMUNICATIONS WORKERS AFL-CIO,334.0,,not in gazetteer,exclude
-CKAL 2307,COMMUNICATIONS WORKERS AFL-CIO,2307.0,,not in gazetteer,exclude
-Andy Allen 568,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+Andy Allen 568,,,,not a union,exclude
 BARRY DIXON 953,COMMUNICATIONS WORKERS AFL-CIO,953.0,,not in gazetteer,exclude
 Local 12 Union,COMMUNICATIONS WORKERS AFL-CIO,12.0,,not in gazetteer,exclude
 123 -,,123.0,,unknown union,exclude
@@ -84745,7 +84601,6 @@ LOCAL 32BJ,SERVICE EMPLOYEES,32.0,516823.0,,train
 Local 32BJ,SERVICE EMPLOYEES,32.0,516823.0,,train
 Local 32Bj,SERVICE EMPLOYEES,32.0,516823.0,,test
 FOP - 113,NATIONAL FRATERNAL ORDER OF POLICE,113.0,538148.0,,train
-Pellettieri Rabstein & Altman,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
 Local 450,COMMUNICATIONS WORKERS AFL-CIO,450.0,,not in gazetteer,exclude
 Local 812,,812.0,,unknown union,exclude
 Local 952,COMMUNICATIONS WORKERS AFL-CIO,952.0,,not in gazetteer,exclude
@@ -84785,10 +84640,8 @@ Local 341,,341.0,,unknown union,exclude
 Local 6,COMMUNICATIONS WORKERS AFL-CIO,6.0,,not in gazetteer,exclude
 LOCAL 6,COMMUNICATIONS WORKERS AFL-CIO,6.0,,not in gazetteer,exclude
 Local 501 AFL-CIO,COMMUNICATIONS WORKERS AFL-CIO,501.0,,not in gazetteer,exclude
-301 PHEBE COURT,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-/,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
 Ralph Buccitti 281,,281.0,,unknown union,exclude
-Amalgamated,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+Amalgamated,,,,not in gazetteer,exclude
 USA - 711A,"STEELWORKERS, AFL-CIO",711.0,533940.0,,train
 USA - 984,"STEELWORKERS, AFL-CIO",984.0,,potentially resolvable,train
 USA - 516,"STEELWORKERS, AFL-CIO",516.0,,potentially resolvable,train
@@ -84828,9 +84681,6 @@ Brotherhood of Locomotive Engineers and Trainmen,"LOCOMOTIVE ENGINEERS, IBT",,,p
 BLET,"LOCOMOTIVE ENGINEERS, IBT",,,potentially resolvable,train
 Motion Picture Studio Grips Local 80,STAGE AND PICTURE OPERATORS AFL-CIO,80.0,6114.0,,test
 Motion Picture Studio Grips Crafts Service and First Aid Local 80,STAGE AND PICTURE OPERATORS AFL-CIO,80.0,6114.0,,train
-T,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-t,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-F,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
 Local 501,COMMUNICATIONS WORKERS AFL-CIO,501.0,,not in gazetteer,exclude
 LOCAL 314,COMMUNICATIONS WORKERS AFL-CIO,314.0,,not in gazetteer,exclude
 Local 314,COMMUNICATIONS WORKERS AFL-CIO,314.0,,not in gazetteer,exclude
@@ -84867,8 +84717,6 @@ Robert A Smith 32BJ,,32.0,,unknown union,test
 Joseph Curtis Haynes 891,COMMUNICATIONS WORKERS AFL-CIO,891.0,,not in gazetteer,exclude
 Andrew Campeau 11,COMMUNICATIONS WORKERS AFL-CIO,11.0,,not in gazetteer,exclude
 Rich Craddock 199S,COMMUNICATIONS WORKERS AFL-CIO,199.0,,not in gazetteer,exclude
-1801 TURNPIKE STREET OPERATIONS LLC,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-MERIDIAN BRAANCH OF THE NAACP,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
 Local 802,,802.0,,unknown union,exclude
 Local 125,COMMUNICATIONS WORKERS AFL-CIO,125.0,,not in gazetteer,exclude
 LOCAL 670,,670.0,,unknown union,exclude
@@ -84936,17 +84784,16 @@ FOP - 222,NATIONAL FRATERNAL ORDER OF POLICE,222.0,,not in gazetteer,train
 SIUNA - MARINE FIREMENS UNION,SEAFARERS AFL-CIO,,,potentially resolvable,train
 UNITED HEALTHCARE WORKERS - WEST,SERVICE EMPLOYEES,,,potentially resolvable,train
 WPPW - 863,PULP AND PAPER WORKERS UBCJA,863.0,62032.0,,train
-"KFMB-TV, LLC",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
 Richard Harris 202,COMMUNICATIONS WORKERS AFL-CIO,202.0,,not in gazetteer,exclude
-Cindy Richardson 8,COMMUNICATIONS WORKERS AFL-CIO,8.0,,potentially resolvable,exclude
-"PHD, Inc. 1101",COMMUNICATIONS WORKERS AFL-CIO,1101.0,,potentially resolvable,exclude
-Pacific Southwest Bakery Drivers Coucil,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+Cindy Richardson 8,,8.0,,not a union,exclude
+"PHD, Inc. 1101",,1101.0,,not a union,exclude
+Pacific Southwest Bakery Drivers Coucil,,,,not in gazetteer,exclude
 LOCAL UNION 73,COMMUNICATIONS WORKERS AFL-CIO,73.0,,not in gazetteer,exclude
 Local 641 641,COMMUNICATIONS WORKERS AFL-CIO,641.0,,not in gazetteer,exclude
-UNION INSULAR DE TRAJADORES INDUSTRIALES Y CONSTRUCCIONES ELECTRICAS,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+UNION INSULAR DE TRAJADORES INDUSTRIALES Y CONSTRUCCIONES ELECTRICAS,,,,not in gazetteer,exclude
 "INDUSTRIAL PROFESSIONAL TECHNICAL WORKERS, INTERNATIONAL UNION AFFILIATED SIUNA, AFL-CIO",SEAFARERS AFL-CIO,,,potentially resolvable,train
-DREXEL POLICE ASSOCIATION,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-ELECTRICAL CONSTRUCTION WORKERS UNION,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+DREXEL POLICE ASSOCIATION,,,,not a union,exclude
+ELECTRICAL CONSTRUCTION WORKERS UNION,,,,not in gazetteer,exclude
 USA - 975L,"STEELWORKERS, AFL-CIO",975.0,505034.0,,train
 USA - 31L DISTRICT 11,"STEELWORKERS, AFL-CIO",31.0,14227.0,,train
 USA - 338,"STEELWORKERS, AFL-CIO",338.0,30675.0,,train
@@ -84975,7 +84822,6 @@ WPPW - 155,PULP AND PAPER WORKERS UBCJA,155.0,61866.0,,train
 "SIUNA, ATLANTIC, GULF, LAKES & INLAND WATERS DISTRICT/NMU, AFL-CIO",SEAFARERS AFL-CIO,,,potentially resolvable,train
 A T U - 580,TRANSIT UNION AFL-CIO,580.0,5022.0,,train
 TREASURES AND TICKET SELLERS LOCAL 857,STAGE AND PICTURE OPERATORS AFL-CIO,857.0,10093.0,,train
-CALL WITH LISTING IF NEEDED,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
 Stan Koniszewski 294,COMMUNICATIONS WORKERS AFL-CIO,294.0,,not in gazetteer,exclude
 OCAW - 7-389,"PACE, AFL-CIO",389.0,,not in gazetteer,train
 OCAW - 7-91,"PACE, AFL-CIO",91.0,,not in gazetteer,train
@@ -85015,13 +84861,11 @@ NNOC/NNU (No Local Identified),NATIONAL NURSES UNITED,,,potentially resolvable,t
 TRI-COUNTY BUILDING & CONSTRUCTION TRADES COUNCIL,BLDG AND CONSTRN TRADES DEPT AFL-CIO,,,potentially resolvable,train
 BINGHAMTON-ONEONTA AREA BUILDING & CONSTRUCTION TRADES COUNCIL,BLDG AND CONSTRN TRADES DEPT AFL-CIO,,,potentially resolvable,test
 "The Southeastern Massachusetts, Cape Cod and Islands Building Trades Council, AFL-CIO",BLDG AND CONSTRN TRADES DEPT AFL-CIO,,,potentially resolvable,train
-"Feinberg, Dumont & Brennan",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-NEW YORK AIR BRAKE CORPORATION,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-SAN FRANCISCO LABOR COUNCIL,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+SAN FRANCISCO LABOR COUNCIL,,,,not a union,exclude
 CONCESSION VENDORS UNION LOCAL 468,COMMUNICATIONS WORKERS AFL-CIO,468.0,,not in gazetteer,exclude
-Digital and Multimedia Workers Union(DMWU),COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Digital and Multimedia Workers Union (DMWU),COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-WORKERS HAVE RIGHTS TOO,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+Digital and Multimedia Workers Union(DMWU),,,,not in gazetteer,exclude
+Digital and Multimedia Workers Union (DMWU),,,,not in gazetteer,exclude
+WORKERS HAVE RIGHTS TOO,,,,not a union,exclude
 "Ampthill Rayon Workers, Inc., Local 992, International Brotherhood of DuPont Workers","DUPONT WKRS, INTL BROTHERHOOD IND",992.0,,not in gazetteer,train
 "Ampthill Rayon Workers, Inc., Local 992, International Brotherhood of Dupont Workers","DUPONT WKRS, INTL BROTHERHOOD IND",992.0,,not in gazetteer,train
 "Ampthill Rayon Workers Inc., Local 992, International Brotherhood of Dupont Workers","DUPONT WKRS, INTL BROTHERHOOD IND",992.0,,not in gazetteer,train
@@ -85030,7 +84874,7 @@ CJA - SO CA NEVADA REG CONF,CARPENTERS IND,,,potentially resolvable,train
 MULTI - REG. 5,COMMUNICATIONS WORKERS AFL-CIO,5.0,,not in gazetteer,exclude
 1199-J,SERVICE EMPLOYEES,1199.0,,potentially resolvable,train
 Local 265 Cemetery Workers & Groundskeepers,SERVICE EMPLOYEES,265.0,33181.0,,exclude
-NATIONAL UNION OF SECURITY OFFICERS & GUARDS (NUSOG),COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+NATIONAL UNION OF SECURITY OFFICERS & GUARDS (NUSOG),"INDUSTRIAL TRADE UNIONS, IUJAT",,517954,,exclude
 Transportation Communication Union Local #67 Unit 46,"TRANSPORTATION COMMUNICATIONS UNION/IAM, AFL-CIO",67.0,15897.0,,train
 USA - 76,"STEELWORKERS, AFL-CIO",76.0,6946.0,,train
 USA - 427,"STEELWORKERS, AFL-CIO",427.0,56723.0,,train
@@ -85067,15 +84911,14 @@ Gainesville Industrial Workers of the World,INDUSTRIAL WORKERS OF THE WORLD,,,po
 "The Industrial Workers of the World, San Francisco Bay Area Branch",INDUSTRIAL WORKERS OF THE WORLD,,,potentially resolvable,train
 DC1707 local205 now DC37 205,STATE COUNTY AND MUNI EMPLS AFL-CIO,205.0,507228.0,,train
 "DC 37, Local 95",STATE COUNTY AND MUNI EMPLS AFL-CIO,95.0,515913.0,,train
-Sheron Colman 83786,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+Sheron Colman 83786,,,,not a union,exclude
 Michael and Workman 58,COMMUNICATIONS WORKERS AFL-CIO,58.0,,not in gazetteer,exclude
 Douglas Day 31,COMMUNICATIONS WORKERS AFL-CIO,31.0,,not in gazetteer,exclude
 William Olsen 232-278,COMMUNICATIONS WORKERS AFL-CIO,232.0,,not in gazetteer,exclude
-Shannon Nafzger,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+Shannon Nafzger,,,,not a union,exclude
 "Ingrid Vendla District 77, Local 459",COMMUNICATIONS WORKERS AFL-CIO,459.0,,not in gazetteer,exclude
 ELECTRONICS AND SPACE TECHNICIANS LOCAL 1553,COMMUNICATIONS WORKERS AFL-CIO,1553.0,,not in gazetteer,exclude
-"Association Employees Union, c/o Carol Koenig, Esq.,Wylie, McBride, Platten, & Renner",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Prepetition,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+"Association Employees Union, c/o Carol Koenig, Esq.,Wylie, McBride, Platten, & Renner",,,,unknown union,exclude
 "INTERNATIONAL UNION OF NOVELTY AND PRODUCTION WORKERS LOCAL 148, AFL-CIO",NOVELTY AND PRODUCTION WKRS AFL-CIO,148.0,20902.0,,train
 USA - 885,"STEELWORKERS, AFL-CIO",885.0,24456.0,,train
 USA - 642-A DISTRICT 2,"STEELWORKERS, AFL-CIO",642.0,24905.0,,train
@@ -85114,14 +84957,10 @@ Metal Trades Council-,METAL TRADES DEPT AFL-CIO,,,potentially resolvable,train
 Bay Cities Metal Trades Council-N/A,METAL TRADES DEPT AFL-CIO,,,potentially resolvable,train
 "AMALGAMATED CLOTHING AND TEXTILE WORKERS UNION, LOCAL 2352",UNITE AFL-CIO,2352.0,513367.0,,test
 Karen Gowdy 1269,COMMUNICATIONS WORKERS AFL-CIO,1269.0,,not in gazetteer,exclude
-Allied Building Products,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"SAK Builders, Inc.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"CONTINENTAL TIRE, NORTH AMERICA",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
 National Treasury Employees Union-,TREASURY EMPLOYEES UNION IND,,,potentially resolvable,train
 United Healthcare Workers (West),SERVICE EMPLOYEES,,,potentially resolvable,train
 Atomic Trades and Labor Council-N/A,BLDG AND CONSTRN TRADES DEPT AFL-CIO,,,potentially resolvable,train
 "Atomic Trades and Labor Council Department, AFL-CIO",BLDG AND CONSTRN TRADES DEPT AFL-CIO,,,potentially resolvable,train
-/;/,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
 USA - 4 UNIT 90,"STEELWORKERS, AFL-CIO",4.0,,potentially resolvable,train
 USA - 40,"STEELWORKERS, AFL-CIO",40.0,,potentially resolvable,train
 USA - 784L,"STEELWORKERS, AFL-CIO",784.0,,potentially resolvable,train
@@ -85153,14 +84992,11 @@ Building Maintenance Employees Union 486,"INDUSTRIAL TRADE UNIONS, IUJAT",486.0,
 Susan Jansen 637,COMMUNICATIONS WORKERS AFL-CIO,637.0,,not in gazetteer,exclude
 Russell Medigovich II 104,COMMUNICATIONS WORKERS AFL-CIO,104.0,,not in gazetteer,exclude
 Kal Rohde 66,COMMUNICATIONS WORKERS AFL-CIO,66.0,,not in gazetteer,exclude
-S.D.M. of America,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-SDM of America,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Aggregate Industries- NE Region, Inc.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
 "Miscellaneous Warehousemen, Local 781",TEAMSTERS,781.0,16955.0,,train
 PRODUCTION WORKERS UNION OF CHICAGO AND VICINITY LOCAL 707,NATIONAL PRODUCTION WKRS UNION IND,707.0,1794.0,,train
-NATIONAL ELECTRICAL BENEFIT FUND (NEBF),COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-NYC Community Alliance for Workers Justice,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-DALLAS POLICE ASSOCIATION,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+NATIONAL ELECTRICAL BENEFIT FUND (NEBF),,,,not a union,exclude
+NYC Community Alliance for Workers Justice,,,,not a union,exclude
+DALLAS POLICE ASSOCIATION,,,,not a union,exclude
 BRICK AND CLAY WORKERS OF BESSEMER NO. 56,"STEELWORKERS, AFL-CIO",56.0,546453.0,,train
 Brick and Clay Workers of Bessemer No. 56,"STEELWORKERS, AFL-CIO",56.0,546453.0,,train
 USA - 493,"STEELWORKERS, AFL-CIO",493.0,,potentially resolvable,train
@@ -85187,12 +85023,8 @@ TRI-STATE BUILDING AND CONSTRUCTION TRADES COUNCIL,BLDG AND CONSTRN TRADES DEPT 
 LOCAL 147 L I U N A,LABORERS,147.0,2112.0,,train
 LOCAL 66 LUINA,LABORERS,66.0,26302.0,,train
 Wilmington DE MTS Area Local 152,"POSTAL WORKERS, AMERICAN, AFL-CIO",152.0,72175.0,,train
-"LEONARD CARDER, LLP",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"The Law Offices of Gary M. Gilbert & Associates, P.C.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"LAW OFFICE OF HARVEY S. MARS, LLC",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"NEW BAKERY COMPANY OF OHIO, INC. dba THE NEW BAKERY OF ZANESVILLE, LLC",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Humboldt Funerary Union,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Pacific North West Staff Union,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+Humboldt Funerary Union,,,,not in gazetteer,exclude
+Pacific North West Staff Union,,,,not in gazetteer,exclude
 "Association of Western Pulp and Paper Workers Union, Affiliated with the United Brotherhood of Carp",CARPENTERS IND,,,potentially resolvable,train
 "Local 618, Automotive, Petroleum, Allied Industries and Airline Employees",TEAMSTERS,618.0,28325.0,,test
 "Automotive, Petroleum, Allied Industries and Airline Employees Union Local No. 618",TEAMSTERS,618.0,28325.0,,train
@@ -85227,15 +85059,9 @@ Inlandboatman's Union of the Pacific,"INLANDBOATMEN, ILWU, AFL-CIO",,,potentiall
 "SCREEN ACTORS GUILD, HAWAII BRANCH",SAG-AFTRA,,,potentially resolvable,train
 Chocolate Workers Union Local 464,"BAKERY, TOBACCO AND GRAIN AFL-CIO",464.0,29156.0,,train
 Darren S. Hamann 114,COMMUNICATIONS WORKERS AFL-CIO,114.0,,not in gazetteer,exclude
-NEIL CARDOSO,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+NEIL CARDOSO,,,,not a union,exclude
 Edward Devine IV 369,,369.0,,unknown union,exclude
-Allied Universal,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Exide Technologies,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-FOX 2000/FOX ENTERTAINMENT GROUP,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"PROVOST * UMPHREY LAW FIRM, LLP",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Mid-Michigan Mechanical Contractors Association (3MCA),COMMUNICATIONS WORKERS AFL-CIO,3.0,,potentially resolvable,exclude
-Voces de la Frontera,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Ports America Chesapeake and Steamship Trade Association,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+Allied Universal,,,,not a union,exclude
 Local 298,COMMUNICATIONS WORKERS AFL-CIO,298.0,,not in gazetteer,exclude
 AFTNJ LOCAL 6308,TEACHERS AFL-CIO,6308.0,543878.0,,train
 USA - 30A,"STEELWORKERS, AFL-CIO",30.0,,potentially resolvable,train
@@ -85265,13 +85091,11 @@ Chuck Denny 488c,COMMUNICATIONS WORKERS AFL-CIO,488.0,,not in gazetteer,exclude
 David Scott Webster 1623,COMMUNICATIONS WORKERS AFL-CIO,1623.0,,not in gazetteer,exclude
 Dominick DeProspero 195T,,195.0,,unknown union,exclude
 Raymond Staton Jr. 147,COMMUNICATIONS WORKERS AFL-CIO,147.0,,not in gazetteer,exclude
-ALEUTIANS SECURITY AND ALLIED PERSONNEL,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Northern Alliance of Engineering Contractors,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Washington and Northern Idaho District Council-,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Special Deputy Marshals of America (SDMOA),COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-MICH. ASSOC. OF POLICE,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Memphis Police Association,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-SECURITY ENFORECEMENT WORKERS UNION,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+ALEUTIANS SECURITY AND ALLIED PERSONNEL,,,,not a union,exclude
+Washington and Northern Idaho District Council-,LABORERS,,66563,,exclude
+MICH. ASSOC. OF POLICE,,,,not a union,exclude
+Memphis Police Association,,,,not a union,exclude
+SECURITY ENFORECEMENT WORKERS UNION,,,,not in gazetteer,exclude
 "LOCAL 1, BROTHERHOOD OF UNION SUPPORT STAFF (BUSS)",COMMUNICATIONS WORKERS AFL-CIO,1.0,,not in gazetteer,exclude
 "BROTHERHOOD UNION SUPPORT STAFF, LOCAL 1",COMMUNICATIONS WORKERS AFL-CIO,1.0,,not in gazetteer,exclude
 "PUBLIC, PROFESSIONAL & OFFICE-CLERICAL EMPLOYEES AND DRIVERS LOCAL UNION NO. 763",OFFICE AND PROFESSIONAL EMPLS AFL-CIO,763.0,,not in gazetteer,train
@@ -85315,13 +85139,8 @@ Wine Liquor & Distillery Workers Union 1D,FOOD AND COMMERCIAL WKRS,1.0,12289.0,,
 "LOCAL 1-5025, P.A.C.E. (FORMERLY NIAGARA PLANT EMPLOYEES UNION)","PACE, AFL-CIO",5025.0,,not in gazetteer,train
 Vicky Smolik 2-197,COMMUNICATIONS WORKERS AFL-CIO,2.0,,not in gazetteer,exclude
 Scott Antonik 436A,,436.0,,unknown union,exclude
-Bob Loftus,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"The law firm of Mark J. Berkowitz, P.A.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"LEWIS, CLIFTON & NIKOLAIDIS",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Hamakua Coast Community FCU,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"S.D.M. OF AMERICA, INC.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"UTGR, INC. D/B/A TWIN RIVER CASINO",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-GENERAL BROTHERHOOD OF WORKERS OF AMERICAN APPAREL,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+Bob Loftus,,,,not a union,exclude
+GENERAL BROTHERHOOD OF WORKERS OF AMERICAN APPAREL,GENERAL BROTHERHOOD OF WORKERS OF AMERICAN APPAREL,,402,,exclude
 New Orleans Clerks and Checkers Union Local 1497,LONGSHOREMENS ASN AFL-CIO,1497.0,40553.0,,train
 CJA - SO CA NV RC,CARPENTERS IND,,,potentially resolvable,train
 District 1199,SERVICE EMPLOYEES,1199.0,69557.0,,train
@@ -85359,13 +85178,7 @@ SAG - COLORADO,SAG-AFTRA,,,potentially resolvable,train
 NUHHCE 1199C,SERVICE EMPLOYEES,1199.0,508557.0,,train
 "NATIONAL ORGANIZATIONAL OF INDUSTRIAL TRADE UNION, LOCAL 98-C","INDUSTRIAL TRADE UNIONS, IUJAT",98.0,,not in gazetteer,train
 "INTERNATIONAL UNION OF ELECTRICAL WORKERS, LOCAL 1140",ELECTRICAL WORKERS IUE AFL-CIO,1140.0,,not in gazetteer,train
-Catherine Melinda Kaufmann,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Cynthia Brick,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Burt Johnson,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Accurate Firestop,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Bio-Medical Applications of California, Inc.",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-"Levy Phillips, APC",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-United States Rugby Players Association,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+United States Rugby Players Association,,,,not in gazetteer,exclude
 THE PROJECTIONISTS OF THE ACADEMY OF MOTION PICTURE ARTS AND SCIENCES,STAGE AND PICTURE OPERATORS AFL-CIO,,,potentially resolvable,train
 INTERNATIONAL UNION OF PETROLEUM AND INDUSTRIAL WORKERS IUPIW,PETROLEUM WORKERS IND,,,potentially resolvable,train
 Local 136 Machinery Movers and Erectors,TEAMSTERS,136.0,,not in gazetteer,train
@@ -85388,11 +85201,9 @@ MEBA - DISTRICT 2,MARINE ENGINEERS AFL-CIO,2.0,,not in gazetteer,train
 "LOCAL 223, AMAL., INDUS., TOY & NOVELTY",NOVELTY AND PRODUCTION WKRS AFL-CIO,223.0,31101.0,,train
 "ENTERPRISE ASSOCIATION, METAL TRADES BRANCH, LOCAL 638",PLUMBERS AFL-CIO,638.0,35070.0,,train
 NYC Community Alliance for Worker Justice,,,,not a union,exclude
-Cassadaga Guardians of the Hill,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Feinberg Dumont and Brennan,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-PO BOX 2038,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-PO BOX 9066433,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Upstate New York Bakery Drivers and Industry Pension Fund,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+PO BOX 2038,,,,not a union,exclude
+PO BOX 9066433,,,,not a union,exclude
+Upstate New York Bakery Drivers and Industry Pension Fund,,,,not a union,exclude
 AGMA - ---STATUS JUN 3RD,AMERICAN GUILD OF MUSICAL ARTISTS AFL-CIO,,,potentially resolvable,train
 ACOPS-N/A,AMERICAN COALITION OF PUBLC SAFETY,,,potentially resolvable,train
 ACOPS Local 20,AMERICAN COALITION OF PUBLC SAFETY,20.0,516187.0,,train
@@ -85705,11 +85516,10 @@ ATDA,AMERICAN TRAIN DISPATCHERS,,,potentially resolvable,train
 NATIONAL STAFF ORGANIZATION-NEVADA,NATIONAL STAFF ORGANIZATION IND,,,potentially resolvable,train
 National Staff Organization,NATIONAL STAFF ORGANIZATION IND,,,potentially resolvable,train
 NSO,NATIONAL STAFF ORGANIZATION IND,,,potentially resolvable,train
-The AFL-CIO,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-pre-petition - union unknown,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Pre-Petition - unknown union,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-pre-petitiion,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-Unknown - no specific labor union,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+The AFL-CIO,,,,not a union,exclude
+pre-petition - union unknown,,,,unknown union,exclude
+Pre-Petition - unknown union,,,,unknown union,exclude
+Unknown - no specific labor union,,,,unknown union,exclude
 LOCAL 1957 COMMITTEE OF INTERNS AND RESIDENTS,SERVICE EMPLOYEES,1957.0,,not in gazetteer,train
 Committee of Interns and Residents,SERVICE EMPLOYEES,,,potentially resolvable,test
 CIR/SEIU,SERVICE EMPLOYEES,,,potentially resolvable,train
@@ -85718,10 +85528,10 @@ CIR/SEIU,SERVICE EMPLOYEES,,,potentially resolvable,train
 Metal Trades Department,METAL TRADES DEPT AFL-CIO,,,potentially resolvable,train
 "National Organization of Legal Services workers, United Human Services Workers 2",AUTO WORKERS AFL-CIO,2.0,,not in gazetteer,train
 NORTHERN KENTUCKY LEGAL SERVICES STAFF ASSOCIATION,AUTO WORKERS AFL-CIO,,,potentially resolvable,train
-Oregon School Employees Association,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-OREGON SCHOOL EMPLOYEES ASSOCIATION,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-National Rural Carriers Association,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
-NATIONAL RURAL CARRIERS ASSOCIATION,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,exclude
+Oregon School Employees Association,"STAFF UNION, OREGON SCHOOL",,516914,,exclude
+OREGON SCHOOL EMPLOYEES ASSOCIATION,"STAFF UNION, OREGON SCHOOL",,516914,,exclude
+National Rural Carriers Association,"LETTER CARRIERS, RURAL, IND",,502,,exclude
+NATIONAL RURAL CARRIERS ASSOCIATION,"LETTER CARRIERS, RURAL, IND",,502,,exclude
 National Staff Organization--Nevada ,NATIONAL STAFF ORGANIZATION IND,,,potentially resolvable,train
 UNITE - CHICAGO CENTER STATES JB,UNITE HERE,,,potentially resolvable,train
 Amalgamated Local 298,NOVELTY AND PRODUCTION WKRS AFL-CIO,298.0,44328.0,,train
@@ -86353,7 +86163,6 @@ NSO - TSO,NATIONAL STAFF ORGANIZATION IND,,,potentially resolvable,train
 NYSNA - UAN,NATIONAL NURSES UNITED,,38970.0,,train
 PACE - 7-0827 LAPORTE CITY IA,"PACE, AFL-CIO",827.0,,not in gazetteer,train
 PAP - 16,UNITED SERVICE WORKERS OF AMERICA,16.0,530166.0,,train
-PASS - PROFAIRWAYSYSTEM SPEC/AVN,,,,unknown union,train
 PGW - BA D ECK  610 944 8667,"SECURITY POLICE, FIRE PROF, IND",,,potentially resolvable,train
 PSEA - 1,PENNSYLVANIA STATE EDUCATION ASSN,1.0,,not in gazetteer,train
 SE - 4,ASSOCIATION OF AFSCME COUNCIL 4,4.0,541237.0,,train
@@ -88701,7 +88510,6 @@ UIWU - ,SEAFARERS AFL-CIO,,,potentially resolvable,train
 UIW - TPGWNAVI,SEAFARERS AFL-CIO,,,potentially resolvable,train
 UIW - AFL CIO,SEAFARERS AFL-CIO,,,potentially resolvable,train
 UIW-,SEAFARERS AFL-CIO,,,potentially resolvable,train
-UIW-West Coast Reg,SEAFARERS AFL-CIO,,,potentially resolvable,train
 UIWNA -,SEAFARERS AFL-CIO,,,potentially resolvable,train
 UIWNA-,SEAFARERS AFL-CIO,,,potentially resolvable,train
 UIWNA.-,SEAFARERS AFL-CIO,,,potentially resolvable,train
@@ -89266,7 +89074,6 @@ CMRJB 73,"WORKERS UNITED, SEIU",73.0,,potentially resolvable,train
 CMRJB 1812,"WORKERS UNITED, SEIU",1812.0,68360.0,,train
 CMRJB 124 129,"WORKERS UNITED, SEIU",124.0,,potentially resolvable,train
 CMRJB WU/SEIU N/A,"WORKERS UNITED, SEIU",,,potentially resolvable,train
-MID-ATLANTIC,"WORKERS UNITED, SEIU",,,potentially resolvable,train
 "MID-ATLANTIC REGIONAL JOINT BOARD, UNION OF NEEDLETRADES, INDUSTRIAL AND TEXTILE EMPLOYEES, LOCAL 74","WORKERS UNITED, SEIU",74.0,39172.0,,train
 "MID-ATLANTIC REGIONAL JOINT BOARD, UNION OF NEEDLETRADES, INDUSTRIAL AND TEXTILE EMPLOYEES, UNITE, A","WORKERS UNITED, SEIU",,,potentially resolvable,train
 "MID-ATLANTIC REGIONAL JOIINT BOARD, UNITE","WORKERS UNITED, SEIU",,,potentially resolvable,train
@@ -93642,7 +93449,6 @@ NSO - ASSOC STAFF ORGANIZATION,NATIONAL STAFF ORGANIZATION IND,,,potentially res
 NSO - OPSU,NATIONAL STAFF ORGANIZATION IND,,,potentially resolvable,train
 NSO - MPSO,NATIONAL STAFF ORGANIZATION IND,,,potentially resolvable,train
 NSO - NESA,NATIONAL STAFF ORGANIZATION IND,,,potentially resolvable,train
-NSO - NEW MEXICO,NATIONAL STAFF ORGANIZATION IND,,,potentially resolvable,train
 NSO - TEXAS ASSOCIATE STAFF ORG,NATIONAL STAFF ORGANIZATION IND,,,potentially resolvable,train
 NSO - PROF STAFF ASSOC,NATIONAL STAFF ORGANIZATION IND,,,potentially resolvable,train
 NSO - 06302004,NATIONAL STAFF ORGANIZATION IND,6302004.0,,not in gazetteer,train
@@ -93926,7 +93732,6 @@ Michigan Association of Police (MAP),MICHIGAN ASSOCIATION OF POLICE 911,,,potent
 Henry Ford Police Officer's Association Affiliated with Michigan Association of Police (MAP),MICHIGAN ASSOCIATION OF POLICE 911,,,potentially resolvable,train
 Henry Ford Police Officer's Association c/o Michigan Association of Police,MICHIGAN ASSOCIATION OF POLICE 911,,,potentially resolvable,train
 MAPE LOCAL 1601,MICHIGAN ASSOCIATION OF POLICE 911,1601.0,,not in gazetteer,train
-MAPE,MICHIGAN ASSOCIATION OF POLICE 911,,,potentially resolvable,train
 ANA - WASNA,"NURSES ASN, AMERICAN, IND",,,potentially resolvable,train
 ANA - MANA,"NURSES ASN, AMERICAN, IND",,,potentially resolvable,train
 ANA - OHNA,"NURSES ASN, AMERICAN, IND",,,potentially resolvable,train
@@ -95248,7 +95053,7 @@ PTE - 130,"ENGINEERS, PROF AND TECH, AFL-CIO",,,potentially resolvable,train
 "Local Union 514, Brotherhood of Amalgamated Trades (Island Hospitality Management V Inc. d/b/a Hampton Inn)",,514.0,,not in gazetteer,train
 "Montana Nurses Association, Local No. 32, Affiliated with the American Federation of Teachers Nurses and Health Professionals (AFTNHP)",,32.0,,not in gazetteer,train
 "KENTUCKY NURSES ASSOCIATION, LOCAL 104",,104.0,,not in gazetteer,train
-PENNSYLVANIA NURSES ASSOCIATION LOCAL 712,,712.0,,not in gazetteer,train
+PENNSYLVANIA NURSES ASSOCIATION LOCAL 712,PASNAP,712.0,542163,,train
 Montana Nurses Association Local 22,,22.0,,not in gazetteer,train
 MAINE STATE NURSES ASSOCIATION/NATIONAL NURSES ORGANIZING COMMITTEE (MSNA/CNA/NNOC) LOCAL 1982,,1982.0,,not in gazetteer,train
 "KENTUCKY NURSES ASSOCIATION, LOCAL UNION 111",,111.0,,not in gazetteer,train
@@ -95863,7 +95668,7 @@ James Donnen,,,,not a union,
 CHURCHILL LINEN SERVICE,,,,not a union,
 River North of Bradley Health & Rehabilitation Center,,,,not a union,
 STRATAS FOODS LLC,,,,not a union,
-The LCS COMS Assocation-,,,,not a union,
+The LCS COMS Assocation-,THE LITTORAL COMBAT SHIP CONTRACTOR OPERATIONS AND,,545972,,
 Con-way Freight Inc.,,,,not a union,
 Northwest Washington Rehabilitation Hospital,,,,not a union,
 VERIZON,,,,not a union,
@@ -95976,7 +95781,7 @@ MICHAEL C. MURPHY,,,,not a union,
 Willig,,,,not a union,
 Ira H Weinstock PC,,,,not a union,
 FCA US LLC,,,,not a union,
-Green River Valley Local,,,,not a union,
+Green River Valley Local,"POSTAL WORKERS, AMERICAN, AFL-CIO",,540972,,
 S J Automotive,,,,not a union,
 American Backflow and Fire Prevention,,,,not a union,
 TVI E/F -,,,,not a union,
@@ -96273,7 +96078,7 @@ Law Office of Henry F. Telfeian,,,,not a union,
 Arriba Las Vegas Worker Center,,,,not a union,
 Eisner & Dictor,,,,not a union,
 DEATS,,,,not a union,
-PEMSA,,,,not a union,
+PEMSA,FIRE FIGHTERS AFL-CIO,,544455,,
 Cargill Meat Solutions Corporation,,,,not a union,
 MARTIENS,,,,not a union,
 LSSNY,,,,not a union,
@@ -96285,7 +96090,7 @@ Venice of America,,,,not a union,
 WEST GULF MARITIME ASSOCIATION,,,,not a union,
 Weinberg,,,,not a union,
 WEINBERG,,,,not a union,
-The NewsGuild,,,,not a union,
+The NewsGuild,COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,
 LAW OFFICES OF R.J. BEZEMEK,,,,not a union,
 CENTER PLATE @ YANKEE STADIUM,,,,not a union,
 ROBERT STOOTS,,,,not a union,
@@ -96349,7 +96154,7 @@ Frontline Security Services,,,,not a union,
 RHCG Safety Corp.,,,,not a union,
 Colorado Symphony Association,,,,not a union,
 PURITY SERVICES,,,,not a union,
-NORTH DAKOTA UNITED,,,,not a union,
+NORTH DAKOTA UNITED,,,,not in gazetteer,
 UNIFOIL CORP.,,,,not a union,
 Kerneel Stewart,,,,not a union,
 Smithfield Foods,,,,not a union,
@@ -96422,7 +96227,7 @@ Arise Chicago,,,,not a union,
 ..,,,,not a union,
 "1801 TURNPIKE STREET OPERATIONS LLC, D/B/A SUTTON HILL CENTER",,,,not a union,
 41 TERRACED HILLS CIRCLE,,,,not a union,
-A.L.U.,,,,not a union,
+A.L.U.,TEAMSTERS,,547227,,
 AAI CORPORATION,,,,not a union,
 "ABF Freight System, Inc.",,,,not a union,
 ABLE SERVICE,,,,not a union,
@@ -96432,7 +96237,7 @@ ABLE SERVICE,,,,not a union,
 ADIT-,,,,not a union,
 "ADT SECURITY SERVICES, INC.",,,,not a union,
 ALLIANCE SAFETY ASSOCIATION,,,,not a union,
-ALU,,,,not a union,
+ALU,TEAMSTERS,,547227,,
 AMER,,,,not a union,
 "AMERICAN RED CROSS BLOOD SERVICES, CONNECTICUT REGION",,,,not a union,
 ANDREW PANICO,,,,not a union,
@@ -96458,7 +96263,7 @@ Alta Bates Summit Medical Center Ashby Campus,,,,not a union,
 "Altice Technical Service, a business division of CSC Holdings, LLC",,,,not a union,
 Amazon Delivery Drivers Coalition,,,,not a union,
 "American Backflow and Fire Prevention, Inc.",,,,not a union,
-American Coalition of Public Safety,,,,not a union,
+American Coalition of Public Safety,AMERICAN COALITION OF PUBLC SAFETY,,516547,,
 "American Security Programs, Inc.",,,,not a union,
 Andrew Brockett-Cartier,,,,not a union,
 "Archer, Byington, Glennon & Levine, LLP",,,,not a union,
@@ -96523,7 +96328,7 @@ COLONIAL STEEL METAL CORP,,,,not a union,
 "COLUMBO CONSTRUCTION COMPANY, INC.",,,,not a union,
 "COMMITTEE FOR RECOGNITION OF NURSING ACHIEVEMENT (""CRONA"")",,,,not a union,
 COMMITTEE FOR RECOGNITION OF NURSING ACHIEVEMENT (CRONA),,,,not a union,
-COMMITTEE FOR THE RECOGNITION OF NURSING ACHIEVEMENT (STANFORD UNIVERSITY HOSPITAL),,,,not a union,
+COMMITTEE FOR THE RECOGNITION OF NURSING ACHIEVEMENT (STANFORD UNIVERSITY HOSPITAL),COMMITTEE FOR RECOGNITION OF,,513802,,
 "COMMUNITY HEALTH SERVICES, INC.",,,,not a union,
 "COMMUNITY LEGAL SERVICES OF MID-FLORIDA, INC.",,,,not a union,
 "CONNERTON, RAY & SIMON",,,,not a union,
@@ -96641,7 +96446,7 @@ FFF,,,,not a union,
 "FRANK & ASSOCIATES, P.C.",,,,not a union,
 "FRANZEN GRPAHICS -OHIO, LLC",,,,not a union,
 FRASIER FRASIER,,,,not a union,
-Faculty Interest Committee of Ethical Culture Fieldston School,,,,not a union,
+Faculty Interest Committee of Ethical Culture Fieldston School,FACULTY INTEREST COMMITTEE OF ETHICAL CULTURE,,545229,,
 "Fadel & Beyer, LLC",,,,not a union,
 Fair Shot Texas PAC,,,,not a union,
 "Faulkner, Hoffman & Phillips, LLC",,,,not a union,
@@ -96716,8 +96521,8 @@ HIHFIRM,,,,not a union,
 "Health Care Operator, LLC and Hamlet Assisted Living Operator, LLc",,,,not a union,
 Health Care Pennsylvania,,,,not a union,
 "Heritage-WTI, Inc. d/b/a Heritage Thermal Services",,,,not a union,
-"Hermandad de Empleados de Oficina, Comercio y Ramas Anexas de Puerto Rico",,,,not a union,
-"Hermandad de Empleados de Oficina, Comercio y Ramas Anexas de Puerto Rico",,,,not a union,
+"Hermandad de Empleados de Oficina, Comercio y Ramas Anexas de Puerto Rico",,,,not in gazetteer,
+"Hermandad de Empleados de Oficina, Comercio y Ramas Anexas de Puerto Rico",,,,not in gazetteer,
 Hermandad de Guardias Seguridad de Vieques,,,,not a union,
 Holloman Ariel Targets Association,,,,not a union,
 "Hospital San Carlos, Inc. d/b/a Hospital San Carlos Borromeo",,,,not a union,
@@ -96727,7 +96532,7 @@ House Worker Center,,,,not a union,
 Hurley Medical Center Medical Technologist Organization,,,,not a union,
 ILLINOIS PIPE TRADES ADVANCEMENT & PROMOTION PROGRAM,,,,not a union,
 ILLINOIS PIPE TRADES ADVANCEMENT AND PROMOTION PROGRAM,,,,not a union,
-"INT'L ORG. OF MASTERS, MATES & PILOTS, GREAT LAKES & RIVERS MARITIME REGION",,,,not a union,
+"INT'L ORG. OF MASTERS, MATES & PILOTS, GREAT LAKES & RIVERS MARITIME REGION",MASTERS MATES AND PILOTS AFL-CIO,,162,,
 "INTERNATIONAL RESCUE COMMITTEE, INC.",,,,not a union,
 Icahn School of Medicine at Mount Sinai,,,,not a union,
 Independent Labor Resources,,,,not a union,
@@ -96779,7 +96584,7 @@ LAW OFFICE OF WENDY M. BITTNER,,,,not a union,
 "LEONARD CARDER,  LLP",,,,not a union,
 LEVY  RATNER,,,,not a union,
 "LEVY, RATNER & BEHROOZI, PC",,,,not a union,
-LEWIS & CLARK COLLEGE STAFF SUPPORT ASSN.,,,,not a union,
+LEWIS & CLARK COLLEGE STAFF SUPPORT ASSN.,TEACHERS AFL-CIO,,521627,,
 "LEWIS, CLIFTON, AND NIKOLAIDIS, P.C.",,,,not a union,
 "LICHTEN & BRIGHT, P.C.",,,,not a union,
 "LISA M. RONAYNE, SPECIAL ASSISTANT TO THE REGION DIRECTOR",,,,not a union,
@@ -96925,7 +96730,7 @@ PASS - PROFAIRWAYSYSTEM SPEC/AVN,,,,not a union,
 "PHILLIPS, RICHARD & RIND, PA",,,,not a union,
 "PLANNED SECURITY SERVICES, INC.",,,,not a union,
 PLYMPTON & ASSOCIATES,,,,not a union,
-POAM,,,,not a union,
+POAM,POLICE OFFICERS ASSOCIATION OF MICHIGAN,,544213,,
 "POLLY, J HALFKENNY",,,,not a union,
 PRE-PETITION,,,,not a union,
 PRHGSV -,,,,not a union,
@@ -97057,15 +96862,15 @@ Southeastern Michigan CRNA and Associates,,,,not a union,
 "Southeastern Paper Group, An Envoy Solutions Company",,,,not a union,
 Southern Arizonz VA Health A Health Csre 43tatalel pitlo]3[],,,,not a union,
 Southern Jobs Coalition,,,,not a union,
-Special Deputy Marshals of America,,,,not a union,
-Special Deputy Marshals of America (SDMA),,,,not a union,
-Special Deputy Marshals of America (SDMOA),,,,not a union,
-Stardust Family United,,,,not a union,
+Special Deputy Marshals of America,SPECIAL DEPUTY MARSHALS OF AMERICA,,416,,
+Special Deputy Marshals of America (SDMA),SPECIAL DEPUTY MARSHALS OF AMERICA,,416,,
+Special Deputy Marshals of America (SDMOA),SPECIAL DEPUTY MARSHALS OF AMERICA,,416,,
+Stardust Family United,,,,not in gazetteer,
 "Starwood Hotels & Resort Management Company, LLC, d/b/a The St. Regis Princeville Resort",,,,not a union,
 "Stephens Media Group - Watertown, LLC",,,,not a union,
 "Steve Trudell Entertainment, LLC",,,,not a union,
 "Streepy Lemonidis Consulting and Law Group, PLLC",,,,not a union,
-Strippers United Inc.,,,,not a union,
+Strippers United Inc.,,,,not in gazetteer,
 "Sweet and Associates, LLC",,,,not a union,
 "Sweet and Associates, LLC.",,,,not a union,
 "System Freight, Inc.",,,,not a union,
@@ -97080,7 +96885,7 @@ THE CULINARY CRAFT ASSOCIATION,,,,not a union,
 "THE KIND GRIND, INC. D/B/A RAO'S COFFEE",,,,not a union,
 "THE LAW OFFICE OF KIRSTEN DOOLITTLE, P.A.",,,,not a union,
 "THE LAW OFFICE OF RICHARD M. GREENSPAN, PC",,,,not a union,
-THE LCS COMS ASSOCIATION,,,,not a union,
+THE LCS COMS ASSOCIATION,THE LITTORAL COMBAT SHIP CONTRACTOR OPERATIONS AND,,545972,,
 THE MONTANA JOINT HEAVY/HIGHWAY COMMITTEE,,,,not a union,
 THE NATIONAL BAKETBALL REFEREES ASOCIATION,,,,not a union,
 "THE ROCKHILL GROUP, INC.",,,,not a union,
@@ -97102,7 +96907,7 @@ The Human Resources Administration,,,,not a union,
 "The Kelman Buescher Firm, PC",,,,not a union,
 The Labor Organizers,,,,not a union,
 "The Lillie Labor Law Firm, P.C.",,,,not a union,
-The McChord Association of Simulator Technicians  -,,,,not a union,
+The McChord Association of Simulator Technicians  -,,,,not in gazetteer,
 The New Mexican Committee,,,,not a union,
 "The Previant Law Firm, S.C.",,,,not a union,
 "The Rubin Employment Law Firm, P.C.",,,,not a union,
@@ -97138,7 +96943,7 @@ VNS - GREATER WOONSOCKET INDEP,,,,not a union,
 "Ventra Ionia Main, LLC",,,,not a union,
 "Virginia International Terminals, LLC",,,,not a union,
 "WALMART STORES, INC.",,,,not a union,
-WAREHOUSE PRODUCTION,,,,not a union,
+WAREHOUSE PRODUCTION,WAREHOUSE PRODUCTION SALES AND ALLIED,,544690,,
 "WASSERSTROM & SONS, INC.",,,,not a union,
 "WEINBERG,",,,,not a union,
 "WEINBERG, ROGER & ROSENFELD",,,,not a union,

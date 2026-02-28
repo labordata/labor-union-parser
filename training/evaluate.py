@@ -48,11 +48,14 @@ def compute_test_metrics():
     with open(SCRIPT_DIR / "data/training_examples.json") as f:
         all_examples = json.load(f)
 
+    def _is_union(ex):
+        return ex["records"] and ex.get("reason_missing_fnum") != "multi-union"
+
     union_examples = [
-        ex for ex in all_examples if ex["split"] == "test" and ex["records"]
+        ex for ex in all_examples if ex["split"] == "test" and _is_union(ex)
     ]
     non_union_examples = [
-        ex for ex in all_examples if ex["split"] == "test" and not ex["records"]
+        ex for ex in all_examples if ex["split"] == "test" and not _is_union(ex)
     ]
     n_union = len(union_examples)
     n_total = n_union + len(non_union_examples)

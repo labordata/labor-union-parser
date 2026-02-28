@@ -151,25 +151,30 @@ class UnionDataModule(L.LightningDataModule):
             all_examples = json.load(f)
 
         # Union: non-empty records; Non-union: empty records
+        # Multi-union filings are treated as non-union since they aren't
+        # a single identifiable union.
+        def _is_union(ex):
+            return ex["records"] and ex.get("reason_missing_fnum") != "multi-union"
+
         train_union = [
             ex["query"]
             for ex in all_examples
-            if ex["records"] and ex["split"] == "train"
+            if _is_union(ex) and ex["split"] == "train"
         ]
         test_union = [
             ex["query"]
             for ex in all_examples
-            if ex["records"] and ex["split"] in ("val", "test")
+            if _is_union(ex) and ex["split"] in ("val", "test")
         ]
         train_nonunion = [
             ex["query"]
             for ex in all_examples
-            if not ex["records"] and ex["split"] == "train"
+            if not _is_union(ex) and ex["split"] == "train"
         ]
         test_nonunion = [
             ex["query"]
             for ex in all_examples
-            if not ex["records"] and ex["split"] in ("val", "test")
+            if not _is_union(ex) and ex["split"] in ("val", "test")
         ]
 
         # Subsample union training examples if requested
