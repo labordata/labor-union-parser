@@ -218,10 +218,22 @@ class StructuredClassifierModule(L.LightningModule):
             )
 
     def configure_optimizers(self):
+        head_names = {
+            "heads.union_name",
+            "heads.desig_name",
+            "heads.f_num",
+            "pointer_heads.desig_num",
+            "pointer_heads.prefix",
+            "pointer_heads.suffix",
+            "pointer_none.desig_num",
+            "pointer_none.prefix",
+            "pointer_none.suffix",
+        }
         head_params = []
         other_params = []
         for name, param in self.model.named_parameters():
-            if name.startswith("heads."):
+            prefix = name.rsplit(".", 1)[0]
+            if prefix in head_names:
                 head_params.append(param)
             else:
                 other_params.append(param)
