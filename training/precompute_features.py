@@ -32,7 +32,6 @@ from labor_union_parser.scoring import (
     build_pointer_lookup,
     compute_record_features,
 )
-from labor_union_parser.tokenizer import smart_truncate_nonspace
 
 DATA_DIR = Path(__file__).parent / "data"
 EXAMPLES_PATH = DATA_DIR / "training_examples.json"
@@ -96,11 +95,6 @@ def precompute_to_memmaps(
     )
     np.save(split_dir / "target_fnums.npy", target_fnums)
 
-    # Pre-tokenize all queries for pointer field lookups
-    query_token_strings = [
-        [t["token"] for t in smart_truncate_nonspace(ex["query"])] for ex in examples
-    ]
-
     ds = StructuredDataset(examples, field_vocabs)
     loader = DataLoader(
         ds, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=0
@@ -113,6 +107,9 @@ def precompute_to_memmaps(
             mask = inputs["mask"].to(device)
             logits = model(char_ids, mask)
 
+            # Temperature-scaled log-softmax, same as extractor.py lines 368-370.
+            # Duplicated here because the extractor also needs log_probs for
+            # head predictions and field_scores beyond just record features.
             log_probs = {
                 f: F.log_softmax(logits[f] / temperatures[f], dim=-1) for f in FIELDS
             }
@@ -120,7 +117,7 @@ def precompute_to_memmaps(
             bs = char_ids.shape[0]
             features = compute_record_features(
                 log_probs,
-                query_token_strings[row : row + bs],
+                ds.token_strings[row : row + bs],
                 field_indices,
                 field_known,
                 pointer_val_to_indices,
