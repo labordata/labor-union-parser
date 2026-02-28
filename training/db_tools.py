@@ -118,6 +118,89 @@ def pick_best_fnum(matches, gaz_union, preferred_union):
     return matches[0]
 
 
+def pick_smart_fnum(db, matches, gaz, text):
+    """Disambiguate SMART f_nums using text keywords and filing metadata.
+
+    SMART has collisions between:
+    - plain_LU: sheet metal locals (LU, no unit_name or no 'TRANSPORT' in unit_name)
+    - transport_LU: former UTU locals (LU, 'TRANSPORTATION DIVISION' in unit_name)
+    - SLB: state legislative boards (state names in unit_name)
+    - GCA: general committees of adjustment (railroad names in unit_name)
+
+    Returns (fnum, confidence) where confidence is 'high' or 'low'.
+    """
+    t = text.lower()
+
+    # Classify each f_num
+    classified = []
+    for fnum in matches:
+        if fnum not in gaz:
+            continue
+        g = gaz[fnum][0]
+        desig_name = g.get("desig_name", "")
+        unit_row = db.execute(
+            "SELECT DISTINCT unit_name FROM lm_data "
+            "WHERE f_num = ? AND unit_name != ''",
+            (int(fnum),),
+        ).fetchone()
+        unit = unit_row[0] if unit_row else ""
+        has_transport = "TRANSPORT" in unit.upper()
+
+        if desig_name == "SLB":
+            label = "SLB"
+        elif desig_name == "GCA":
+            label = "GCA"
+        elif has_transport:
+            label = "transport_LU"
+        else:
+            label = "plain_LU"
+        classified.append((fnum, label, unit))
+
+    # Match text keywords to organizational type
+    is_sheet_metal = any(
+        kw in t for kw in ["sheet metal", "sheetmetal", "smw", "s.m.w", "smwia", "tin"]
+    )
+    is_transport = any(
+        kw in t
+        for kw in [
+            "transport",
+            "utu",
+            "trainmen",
+            "conductor",
+            "railroad",
+            "railway",
+            "transit",
+        ]
+    ) or re.search(r"\btd\b", t)
+    is_legislative = any(kw in t for kw in ["legislative", "slb"])
+    is_gca = any(kw in t for kw in ["general committee", "gca"])
+
+    # Pick based on keywords
+    if is_sheet_metal and not is_transport:
+        cands = [f for f, lbl, _ in classified if lbl == "plain_LU"]
+        if cands:
+            return cands[0], "high"
+    if is_transport and not is_sheet_metal:
+        cands = [f for f, lbl, _ in classified if lbl == "transport_LU"]
+        if cands:
+            return cands[0], "high"
+    if is_legislative:
+        cands = [f for f, lbl, _ in classified if lbl == "SLB"]
+        if cands:
+            return cands[0], "high"
+    if is_gca:
+        cands = [f for f, lbl, _ in classified if lbl == "GCA"]
+        if cands:
+            return cands[0], "high"
+
+    # Generic "SMART" — if there's only one plain_LU, pick it (most common case)
+    plain = [f for f, lbl, _ in classified if lbl == "plain_LU"]
+    if len(plain) == 1:
+        return plain[0], "low"
+
+    return None, None
+
+
 # ---------------------------------------------------------------------------
 # Setup: load gazetteer + labeled_data into SQLite
 # ---------------------------------------------------------------------------
@@ -796,14 +879,11 @@ def resolve_batch(union_name):
     """
     db = get_db()
 
-    # Load gazetteer f_nums and union_name lookup
-    gaz_fnums = set()
-    gaz_union = {}
-    for row in db.execute(
-        "SELECT DISTINCT f_num, union_name FROM gazetteer"
-    ).fetchall():
-        gaz_fnums.add(str(row[0]))
-        gaz_union[str(row[0])] = row[1]
+    # Load full gazetteer for disambiguation (e.g. SMART desig_name)
+    with open(GAZETTEER_PATH) as f:
+        gaz = json.load(f)
+    gaz_fnums = set(gaz.keys())
+    gaz_union = {k: v[0]["union_name"] for k, v in gaz.items()}
 
     # Load unresolved entries for this union
     unresolved = db.execute(
@@ -866,23 +946,45 @@ def resolve_batch(union_name):
                     )
                 )
             elif len(matches) > 1:
-                # Ambiguous — prefer f_num whose gazetteer name matches current label
-                resolved_fnum = pick_best_fnum(matches, gaz_union, union_name)
-                resolved_union = gaz_union.get(resolved_fnum, union_name)
-                proposals.append(
-                    (
-                        "resolve-ambiguous",
-                        text,
-                        {
-                            "rowid": rowid,
-                            "f_num": resolved_fnum,
-                            "union_name": resolved_union,
-                            "desig_num": desig_num,
-                            "all_fnums": matches,
-                            "old_reason": reason,
-                        },
+                # Try SMART-specific disambiguation
+                smart_fnum, smart_conf = pick_smart_fnum(db, matches, gaz, text)
+                if smart_fnum and smart_conf == "high":
+                    resolved_union = gaz_union.get(smart_fnum, union_name)
+                    proposals.append(
+                        (
+                            "resolve",
+                            text,
+                            {
+                                "rowid": rowid,
+                                "f_num": smart_fnum,
+                                "union_name": resolved_union,
+                                "desig_num": desig_num,
+                                "old_reason": reason,
+                            },
+                        )
                     )
-                )
+                else:
+                    # Ambiguous — prefer f_num matching current label
+                    resolved_fnum = (
+                        smart_fnum
+                        if smart_fnum
+                        else pick_best_fnum(matches, gaz_union, union_name)
+                    )
+                    resolved_union = gaz_union.get(resolved_fnum, union_name)
+                    proposals.append(
+                        (
+                            "resolve-ambiguous",
+                            text,
+                            {
+                                "rowid": rowid,
+                                "f_num": resolved_fnum,
+                                "union_name": resolved_union,
+                                "desig_num": desig_num,
+                                "all_fnums": matches,
+                                "old_reason": reason,
+                            },
+                        )
+                    )
             else:
                 proposals.append(
                     (
@@ -971,22 +1073,43 @@ def resolve_batch(union_name):
                     )
                 )
             elif len(matches) > 1:
-                resolved_fnum = pick_best_fnum(matches, gaz_union, union_name)
-                resolved_union = gaz_union.get(resolved_fnum, union_name)
-                proposals.append(
-                    (
-                        "resolve-ambiguous",
-                        text,
-                        {
-                            "rowid": rowid,
-                            "f_num": resolved_fnum,
-                            "union_name": resolved_union,
-                            "desig_num": n,
-                            "all_fnums": matches,
-                            "old_reason": reason,
-                        },
+                smart_fnum, smart_conf = pick_smart_fnum(db, matches, gaz, text)
+                if smart_fnum and smart_conf == "high":
+                    resolved_union = gaz_union.get(smart_fnum, union_name)
+                    proposals.append(
+                        (
+                            "resolve",
+                            text,
+                            {
+                                "rowid": rowid,
+                                "f_num": smart_fnum,
+                                "union_name": resolved_union,
+                                "desig_num": n,
+                                "old_reason": reason,
+                            },
+                        )
                     )
-                )
+                else:
+                    resolved_fnum = (
+                        smart_fnum
+                        if smart_fnum
+                        else pick_best_fnum(matches, gaz_union, union_name)
+                    )
+                    resolved_union = gaz_union.get(resolved_fnum, union_name)
+                    proposals.append(
+                        (
+                            "resolve-ambiguous",
+                            text,
+                            {
+                                "rowid": rowid,
+                                "f_num": resolved_fnum,
+                                "union_name": resolved_union,
+                                "desig_num": n,
+                                "all_fnums": matches,
+                                "old_reason": reason,
+                            },
+                        )
+                    )
             else:
                 proposals.append(
                     ("unresolvable", text, {"rowid": rowid, "reason": reason})
