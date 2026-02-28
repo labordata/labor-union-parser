@@ -10,7 +10,6 @@ split sizes) that train_scoring_layer.py needs.
 """
 
 import json
-import math
 from pathlib import Path
 
 import click
@@ -25,14 +24,13 @@ from train_structured_classifier import (
 
 from labor_union_parser.classifier import (
     FIELDS,
-    MAX_TOKENS,
     POINTER_FIELDS,
     StructuredClassifier,
 )
 from labor_union_parser.scoring import (
-    POINTER_NOT_FOUND_LOG_PROB,
     build_gazetteer_matrix,
     build_pointer_lookup,
+    compute_record_features,
 )
 from labor_union_parser.tokenizer import smart_truncate_nonspace
 
@@ -76,19 +74,30 @@ def precompute_per_field(
     batch_size,
     device,
 ):
+    """Precompute per-field log-prob features using the shared scoring function.
+
+    Feature layout from compute_record_features (B, R, 12):
+        [lp_union, lp_desig, lp_fnum, lp_designum, lp_prefix, lp_suffix,
+         unk_union, unk_desig, unk_fnum, nf_designum, nf_prefix, nf_suffix]
+
+    We slice columns 0-5 into per-field arrays keyed by ALL_LP_FIELDS order.
+    """
     ds = StructuredDataset(examples, field_vocabs)
     loader = DataLoader(
         ds, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=0
     )
 
+    # Pre-tokenize all queries for pointer field lookups
     query_token_strings = []
     for ex in examples:
         tokens = smart_truncate_nonspace(ex["query"])
         query_token_strings.append([t["token"] for t in tokens])
 
-    non_fnum_fields = [f for f in FIELDS if f != "f_num"]
-    all_field_scores = {f: [] for f in non_fnum_fields}
-    all_fnum_lp = []
+    # Feature column indices matching ALL_LP_FIELDS order:
+    # union_name=0, desig_name=1, f_num=2, desig_num=3, prefix=4, suffix=5
+    field_col = {f: i for i, f in enumerate(ALL_LP_FIELDS)}
+
+    all_features = []  # list of (bs, R, 12) numpy arrays
 
     example_idx = 0
     with torch.no_grad():
@@ -102,49 +111,32 @@ def precompute_per_field(
             }
 
             bs = char_ids.shape[0]
-            for i in range(bs):
-                for f in non_fnum_fields:
-                    if f not in POINTER_FIELDS:
-                        field_lp = log_probs[f][i][field_indices[f]]
-                        vocab_size = log_probs[f].shape[-1]
-                        floor_lp = -math.log(vocab_size)
-                        field_lp = torch.where(field_known[f], field_lp, floor_lp)
-                        all_field_scores[f].append(field_lp.cpu().numpy())
-                    else:
-                        query_toks = query_token_strings[example_idx]
-                        lp = log_probs[f][i]
-                        tok_to_pos = {}
-                        for pos, tok in enumerate(query_toks):
-                            if tok and tok not in tok_to_pos:
-                                tok_to_pos[tok] = pos
-                        field_scores = torch.full(
-                            (n_records,), POINTER_NOT_FOUND_LOG_PROB[f], device=device
-                        )
-                        none_idx = pointer_none_indices[f]
-                        if len(none_idx) > 0:
-                            field_scores[none_idx] = lp[MAX_TOKENS]
-                        val_to_idx = pointer_val_to_indices[f]
-                        for tok, pos in tok_to_pos.items():
-                            rec_indices = val_to_idx.get(tok)
-                            if rec_indices is not None:
-                                field_scores[rec_indices] = lp[pos]
-                        all_field_scores[f].append(field_scores.cpu().numpy())
+            batch_token_strings = query_token_strings[example_idx : example_idx + bs]
 
-                fnum_lp = log_probs["f_num"][i][field_indices["f_num"]]
-                fnum_vocab_size = log_probs["f_num"].shape[-1]
-                fnum_floor = -math.log(fnum_vocab_size)
-                fnum_lp = torch.where(field_known["f_num"], fnum_lp, fnum_floor)
-                all_fnum_lp.append(fnum_lp.cpu().numpy())
+            features = compute_record_features(
+                log_probs,
+                batch_token_strings,
+                field_indices,
+                field_known,
+                pointer_val_to_indices,
+                pointer_none_indices,
+                n_records,
+            )  # (bs, R, 12)
 
-                example_idx += 1
+            all_features.append(features.cpu().numpy())
+            example_idx += bs
 
             if example_idx % 1024 < batch_size:
                 print(f"    {example_idx}/{len(examples)}", flush=True)
 
+    # Concatenate all batches → (N, R, 12)
+    stacked = np.concatenate(all_features, axis=0)
+
+    # Slice into per-field arrays
     field_arrays = {}
-    for f in non_fnum_fields:
-        field_arrays[f] = np.stack(all_field_scores[f])
-    field_arrays["f_num"] = np.stack(all_fnum_lp)
+    for f in ALL_LP_FIELDS:
+        field_arrays[f] = stacked[:, :, field_col[f]]
+
     return field_arrays
 
 
