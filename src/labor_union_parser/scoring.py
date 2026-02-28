@@ -9,7 +9,7 @@ from collections import defaultdict
 
 import torch
 
-from .classifier import FIELDS, POINTER_FIELDS
+from .classifier import FIELDS, MAX_TOKENS, POINTER_FIELDS
 
 # Per-field fallback log-prob when record value not found in query text.
 POINTER_NOT_FOUND_LOG_PROB = {
@@ -115,3 +115,94 @@ def build_pointer_lookup(records_list, field):
     }
     none_indices = torch.tensor(none_indices, dtype=torch.long)
     return value_to_indices, none_indices
+
+
+def compute_record_features(
+    log_probs,
+    token_strings_batch,
+    field_indices,
+    field_known,
+    pointer_val_to_indices,
+    pointer_none_indices,
+    n_records,
+):
+    """Compute per-(query, record) feature vectors for gazetteer scoring.
+
+    Args:
+        log_probs: dict of field -> (B, n_classes) temperature-scaled log-prob tensors
+        token_strings_batch: list of list of str, query token strings per batch item
+        field_indices: dict of classification field -> (R,) index tensor
+        field_known: dict of classification field -> (R,) bool tensor
+        pointer_val_to_indices: dict of pointer field -> {str: tensor of record indices}
+        pointer_none_indices: dict of pointer field -> tensor of record indices
+        n_records: int, number of gazetteer records (R)
+
+    Returns:
+        features: (B, R, 12) tensor with layout:
+            [lp_union, lp_desig, lp_fnum, lp_designum, lp_prefix, lp_suffix,
+             unk_union, unk_desig, unk_fnum, nf_designum, nf_prefix, nf_suffix]
+    """
+    device = log_probs["union_name"].device
+    B = len(token_strings_batch)
+    R = n_records
+
+    # Classification fields: lp where known, 0 where unknown
+    cls_fields = ("union_name", "desig_name", "f_num")
+    lp_cls = []  # features 0, 1, 2
+    unk_cls = []  # features 6, 7, 8
+    for f in cls_fields:
+        field_lp = log_probs[f][:, field_indices[f]]  # (B, R)
+        known = field_known[f]  # (R,)
+        lp_cls.append(torch.where(known, field_lp, torch.zeros_like(field_lp)))
+        unk_cls.append((~known).float().expand(B, -1))
+
+    # Pointer fields: lp where found, 0 where not-found
+    ptr_fields = ("desig_num", "prefix", "suffix")
+    lp_ptr = []  # features 3, 4, 5
+    nf_ptr = []  # features 9, 10, 11
+
+    for f in ptr_fields:
+        field_scores = torch.zeros(B, R, device=device)
+        is_not_found = torch.ones(B, R, device=device)
+
+        none_idx = pointer_none_indices[f]
+        if len(none_idx) > 0:
+            field_scores[:, none_idx] = log_probs[f][:, MAX_TOKENS].unsqueeze(1)
+            is_not_found[:, none_idx] = 0.0
+
+        val_to_idx = pointer_val_to_indices[f]
+        all_batch_idx = []
+        all_rec_idx = []
+        all_positions = []
+
+        for i, query_toks in enumerate(token_strings_batch):
+            tok_to_pos = {}
+            for pos, tok in enumerate(query_toks):
+                if tok and tok not in tok_to_pos:
+                    tok_to_pos[tok] = pos
+            for tok, pos in tok_to_pos.items():
+                rec_indices = val_to_idx.get(tok)
+                if rec_indices is not None:
+                    n = len(rec_indices)
+                    all_batch_idx.append(torch.full((n,), i, dtype=torch.long))
+                    all_rec_idx.append(rec_indices)
+                    all_positions.append((i, pos, n))
+
+        if all_batch_idx:
+            bi = torch.cat(all_batch_idx)
+            ri = torch.cat(all_rec_idx).to(device)
+            vals = torch.empty(bi.shape[0], device=device)
+            offset = 0
+            for i, pos, n in all_positions:
+                vals[offset : offset + n] = log_probs[f][i, pos]
+                offset += n
+            field_scores[bi, ri] = vals
+            is_not_found[bi, ri] = 0.0
+
+        lp_ptr.append(field_scores)
+        nf_ptr.append(is_not_found)
+
+    # Stack into (B, R, 12)
+    all_features = lp_cls + lp_ptr + unk_cls + nf_ptr
+    features = torch.stack(all_features, dim=2)  # (B, R, 12)
+    return features

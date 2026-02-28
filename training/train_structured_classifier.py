@@ -218,8 +218,19 @@ class StructuredClassifierModule(L.LightningModule):
             )
 
     def configure_optimizers(self):
+        head_params = []
+        other_params = []
+        for name, param in self.model.named_parameters():
+            if name.startswith("heads."):
+                head_params.append(param)
+            else:
+                other_params.append(param)
         optimizer = torch.optim.AdamW(
-            self.model.parameters(), lr=self.lr, weight_decay=0.01
+            [
+                {"params": other_params, "weight_decay": 0.01},
+                {"params": head_params, "weight_decay": 1.0},
+            ],
+            lr=self.lr,
         )
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
             optimizer, T_max=self.trainer.max_epochs
@@ -241,7 +252,8 @@ class StructuredDataModule(L.LightningDataModule):
 
         splits = {"train": [], "val": [], "test": []}
         for ex in all_examples:
-            splits[ex["split"]].append(ex)
+            if ex["records"]:
+                splits[ex["split"]].append(ex)
 
         self.field_vocabs = build_field_vocabs(splits["train"])
         self.field_sizes = {f: len(v) for f, v in self.field_vocabs.items()}
@@ -329,6 +341,7 @@ def main(epochs, batch_size, lr, d_model, n_layers):
         monitor="val_mean_acc",
         mode="max",
         save_top_k=1,
+        enable_version_counter=False,
     )
 
     # Train
@@ -337,6 +350,7 @@ def main(epochs, batch_size, lr, d_model, n_layers):
         callbacks=[checkpoint_cb],
         gradient_clip_val=1.0,
         enable_progress_bar=True,
+        default_root_dir=DATA_DIR,
     )
     trainer.fit(module, dm)
 

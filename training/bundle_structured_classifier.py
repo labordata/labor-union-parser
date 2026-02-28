@@ -18,15 +18,7 @@ WEIGHTS_DIR = Path(__file__).parent.parent / "src" / "labor_union_parser" / "wei
 
 def main():
     # Load Lightning checkpoint
-    # Find the latest versioned checkpoint
-    ckpt_files = sorted(
-        DATA_DIR.glob("structured_classifier-v*.ckpt"),
-        key=lambda p: p.stat().st_mtime,
-    )
-    if ckpt_files:
-        ckpt_path = ckpt_files[-1]
-    else:
-        ckpt_path = DATA_DIR / "structured_classifier.ckpt"
+    ckpt_path = DATA_DIR / "structured_classifier.ckpt"
     print(f"Loading checkpoint: {ckpt_path.name}")
     ckpt = torch.load(ckpt_path, weights_only=False)
 

@@ -32,11 +32,32 @@ from labor_union_parser import Extractor
 extractor = Extractor()
 result = extractor.extract("SEIU Local 1199")
 print(result)
-# {'is_union': True, 'union_score': 0.9997, 'union_name': 'SERVICE EMPLOYEES',
-#  'desig_name': 'LU', 'desig_num': '1199', 'prefix': '', 'suffix': '',
-#  'f_num': 509111, 'match_found': True, 'match_score': 0.4496, 'conflicts': [],
-#  'field_scores': {'union_name': 0.9996, 'desig_name': 0.9651,
-#   'f_num': 0.4144, 'desig_num': 0.9999, 'prefix': 0.9975, 'suffix': 0.9985}}
+<!--[[[cog
+import pprint
+from labor_union_parser import Extractor
+
+result = Extractor().extract("SEIU Local 1199")
+for line in pprint.pformat(result, width=72).splitlines():
+    cog.outl(f"# {line}")
+]]]-->
+# {'conflicts': [],
+#  'desig_name': 'LU',
+#  'desig_num': '1199',
+#  'f_num': 543235,
+#  'field_scores': {'desig_name': 0.8863651752471924,
+#                   'desig_num': 0.9985641837120056,
+#                   'f_num': 0.5405167937278748,
+#                   'prefix': 0.9999574422836304,
+#                   'suffix': 0.9908127188682556,
+#                   'union_name': 0.9999861717224121},
+#  'is_union': True,
+#  'match_found': True,
+#  'match_score': 0.5042665004730225,
+#  'prefix': '',
+#  'suffix': '',
+#  'union_name': 'SERVICE EMPLOYEES',
+#  'union_score': 0.9999850392341614}
+<!--[[[end]]]-->
 ```
 
 For batch processing, use `extract_batch` which processes texts in parallel for better throughput:
@@ -85,8 +106,18 @@ labor-union-parser unions.csv -c union_name -o results.csv
 
 # Process from stdin
 echo "SEIU Local 1199" | labor-union-parser --no-header
-# text,pred_is_union,...,pred_f_num,pred_match_found,pred_match_score,...,score_suffix
-# SEIU Local 1199,True,...,509111,True,0.4496,...,0.9985
+<!--[[[cog
+import subprocess
+result = subprocess.run(
+    'echo "SEIU Local 1199" | labor-union-parser --no-header',
+    shell=True, capture_output=True, text=True
+)
+for line in result.stdout.strip().splitlines():
+    cog.outl(line)
+]]]-->
+text,pred_is_union,pred_union_score,pred_union_name,pred_desig_name,pred_desig_num,pred_prefix,pred_suffix,pred_f_num,pred_match_found,pred_match_score,pred_conflicts,score_union_name,score_desig_name,score_f_num,score_desig_num,score_prefix,score_suffix
+SEIU Local 1199,True,1.0000,SERVICE EMPLOYEES,LU,1199,,,543235,True,0.5042665004730225,,1.0000,0.8864,0.5405,0.9986,1.0000,0.9908
+<!--[[[end]]]-->
 ```
 
 ## Output Fields
@@ -186,7 +217,7 @@ Input: "SEIU Local 1199"
 │  Stage 2: Structured Classifier + Gazetteer       │
 │                                                   │
 │  CharCNN per token → RoPE Transformer →           │
-│  Per-field classification & pointer heads          │
+│  Per-field classification & pointer heads         │
 │                                                   │
 │  Learned linear combination of per-field          │
 │  log-probs across ~44K gazetteer records          │
@@ -256,20 +287,50 @@ softmax probability of that record.
 
 ### Performance
 
-End-to-end on held-out test data (7,160 union examples
+<!--[[[cog
+import sys; sys.path.insert(0, "training")
+from evaluate import compute_test_metrics, SCORE_FIELDS
+
+m = compute_test_metrics()
+
+total_errors = m['wrong_matches'] + m['false_negatives'] + m['false_match_no_fnum'] + m['false_positives']
+total_correct = m['n_scored'] - total_errors
+accuracy = total_correct / m['n_scored']
+
+cog.outl(f"End-to-end on held-out test data ({m['n_scored']:,} examples")
+cog.outl("scored against the full 44K-record gazetteer):")
+cog.outl("")
+cog.outl("| Metric | Score |")
+cog.outl("|--------|-------|")
+cog.outl(f"| Accuracy | {accuracy:.1%} |")
+cog.outl(f"| Wrong match (union, wrong f_num) | {m['wrong_matches']} |")
+cog.outl(f"| False negatives (union missed) | {m['false_negatives']} |")
+cog.outl("")
+cog.outl(f"Per-field accuracy on test set ({m['n_is_union']:,} union examples with is_union=True):")
+cog.outl("")
+cog.outl("| Field | Accuracy |")
+cog.outl("|-------|----------|")
+for f in SCORE_FIELDS:
+    if f == "f_num":
+        continue
+    cog.outl(f"| `{f}` | {m['field_accuracy'][f]:.1%} |")
+]]]-->
+End-to-end on held-out test data (7,831 examples
 scored against the full 44K-record gazetteer):
 
 | Metric | Score |
 |--------|-------|
-| Wrong match (union, wrong f_num) | 100 |
-| False negatives (union missed) | 1 |
+| Accuracy | 97.4% |
+| Wrong match (union, wrong f_num) | 113 |
+| False negatives (union missed) | 0 |
 
-Per-field accuracy on test set (7,159 union examples with is_union=True):
+Per-field accuracy on test set (9,509 union examples with is_union=True):
 
 | Field | Accuracy |
 |-------|----------|
-| `union_name` | 99.1% |
-| `desig_name` | 99.3% |
-| `desig_num` | 99.7% |
+| `union_name` | 98.4% |
+| `desig_name` | 99.1% |
+| `desig_num` | 99.1% |
 | `prefix` | 97.5% |
-| `suffix` | 96.6% |
+| `suffix` | 96.7% |
+<!--[[[end]]]-->

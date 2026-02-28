@@ -10,11 +10,9 @@ from pathlib import Path
 import click
 import lightning as L
 import numpy as np
-import pandas as pd
 import torch
 import torch.nn.functional as F
 from sklearn.metrics import accuracy_score, roc_auc_score, roc_curve
-from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 
 from labor_union_parser.char_cnn import CharacterCNN, tokenize_to_chars
@@ -139,30 +137,48 @@ class UnionDataModule(L.LightningDataModule):
         self.seed = seed
 
     def setup(self, stage=None):
-        df = pd.read_csv(DATA_DIR / "labeled_data.csv")
-        union_df = df[~df["aff_abbr"].isin(["UNK"])]
+        import json
+        import random
 
-        union_sample = union_df.sample(
-            n=min(self.n_union_samples, len(union_df)), random_state=self.seed
+        with open(DATA_DIR / "training_examples.json") as f:
+            all_examples = json.load(f)
+
+        # Union: non-empty records; Non-union: empty records
+        train_union = [
+            ex["query"]
+            for ex in all_examples
+            if ex["records"] and ex["split"] == "train"
+        ]
+        test_union = [
+            ex["query"]
+            for ex in all_examples
+            if ex["records"] and ex["split"] in ("val", "test")
+        ]
+        train_nonunion = [
+            ex["query"]
+            for ex in all_examples
+            if not ex["records"] and ex["split"] == "train"
+        ]
+        test_nonunion = [
+            ex["query"]
+            for ex in all_examples
+            if not ex["records"] and ex["split"] in ("val", "test")
+        ]
+
+        # Subsample union training examples if needed
+        if len(train_union) > self.n_union_samples:
+            rng = random.Random(self.seed)
+            train_union = rng.sample(train_union, self.n_union_samples)
+
+        print(f"Union examples: {len(train_union)} train, {len(test_union)} test")
+        print(
+            f"Non-union examples: {len(train_nonunion)} train, {len(test_nonunion)} test"
         )
-        union_texts = union_sample["text"].tolist()
 
-        nonunion_df = pd.read_csv(DATA_DIR / "nonunion_examples.csv")
-        nonunion_texts = nonunion_df["text"].tolist()
-
-        print(f"Union examples: {len(union_texts)}")
-        print(f"Non-union examples: {len(nonunion_texts)}")
-
-        all_texts = union_texts + nonunion_texts
-        all_labels = [1] * len(union_texts) + [0] * len(nonunion_texts)
-
-        train_texts, test_texts, train_labels, test_labels = train_test_split(
-            all_texts,
-            all_labels,
-            test_size=0.2,
-            random_state=self.seed,
-            stratify=all_labels,
-        )
+        train_texts = train_union + train_nonunion
+        train_labels = [1] * len(train_union) + [0] * len(train_nonunion)
+        test_texts = test_union + test_nonunion
+        test_labels = [1] * len(test_union) + [0] * len(test_nonunion)
 
         self.train_ds = UnionDataset(train_texts, train_labels)
         self.test_ds = UnionDataset(test_texts, test_labels)

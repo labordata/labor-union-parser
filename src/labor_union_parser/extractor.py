@@ -20,6 +20,7 @@ from .scoring import (
     _normalize_pointer_value,
     build_gazetteer_matrix,
     build_pointer_lookup,
+    compute_record_features,
 )
 from .tokenizer import smart_truncate_nonspace
 
@@ -236,78 +237,20 @@ class Extractor:
 
         Returns list of (top_record_idx, top_score) per query.
         """
-        w = self.scoring_weight  # (12,)
         B = len(token_strings_batch)
         R = self.n_records
 
-        # --- Build per-field log-prob arrays and indicators ---
-        # Classification fields: lp where known, 0 where unknown
-        # Unknown indicators: 1 where unknown, 0 where known
-        cls_fields = ("union_name", "desig_name", "f_num")
-        lp_cls = []  # will be features 0, 1, 2
-        unk_cls = []  # will be features 6, 7, 8
-        for f in cls_fields:
-            field_lp = log_probs[f][:, self.field_indices[f]]  # (B, R)
-            known = self.field_known[f]  # (R,)
-            lp_cls.append(torch.where(known, field_lp, torch.zeros_like(field_lp)))
-            unk_cls.append((~known).float().expand(B, -1))
+        features = compute_record_features(
+            log_probs,
+            token_strings_batch,
+            self.field_indices,
+            self.field_known,
+            self.pointer_val_to_indices,
+            self.pointer_none_indices,
+            R,
+        )  # (B, R, 12)
 
-        # Pointer fields: lp where found, 0 where not-found
-        # Not-found indicators: 1 where not-found, 0 where found
-        ptr_fields = ("desig_num", "prefix", "suffix")
-        lp_ptr = []  # will be features 3, 4, 5
-        nf_ptr = []  # will be features 9, 10, 11
-
-        for f in ptr_fields:
-            # Start with not-found for all records
-            field_scores = torch.zeros(B, R, device=self.device)
-            is_not_found = torch.ones(B, R, device=self.device)
-
-            # Records with None value: use the "none" position log-prob
-            none_idx = self.pointer_none_indices[f]
-            if len(none_idx) > 0:
-                field_scores[:, none_idx] = log_probs[f][:, MAX_TOKENS].unsqueeze(1)
-                is_not_found[:, none_idx] = 0.0
-
-            # Records with string values: scatter from query token positions
-            val_to_idx = self.pointer_val_to_indices[f]
-            all_batch_idx = []
-            all_rec_idx = []
-            all_positions = []
-
-            for i, query_toks in enumerate(token_strings_batch):
-                tok_to_pos = {}
-                for pos, tok in enumerate(query_toks):
-                    if tok and tok not in tok_to_pos:
-                        tok_to_pos[tok] = pos
-                for tok, pos in tok_to_pos.items():
-                    rec_indices = val_to_idx.get(tok)
-                    if rec_indices is not None:
-                        n = len(rec_indices)
-                        all_batch_idx.append(torch.full((n,), i, dtype=torch.long))
-                        all_rec_idx.append(rec_indices)
-                        all_positions.append((i, pos, n))
-
-            if all_batch_idx:
-                bi = torch.cat(all_batch_idx)
-                ri = torch.cat(all_rec_idx).to(self.device)
-                vals = torch.empty(bi.shape[0], device=self.device)
-                offset = 0
-                for i, pos, n in all_positions:
-                    vals[offset : offset + n] = log_probs[f][i, pos]
-                    offset += n
-                field_scores[bi, ri] = vals
-                is_not_found[bi, ri] = 0.0
-
-            lp_ptr.append(field_scores)
-            nf_ptr.append(is_not_found)
-
-        # --- Compute score as dot product with weight vector ---
-        # Instead of materializing (B, R, 12), compute weighted sum directly
-        scores = torch.zeros(B, R, device=self.device)
-        for i, feat in enumerate(lp_cls + lp_ptr + unk_cls + nf_ptr):
-            scores += w[i] * feat
-        scores += self.scoring_bias
+        scores = (features * self.scoring_weight).sum(dim=2) + self.scoring_bias
 
         # Append null bias column → (B, R+1)
         null_col = torch.full((B, 1), self.null_bias, device=self.device)

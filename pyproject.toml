@@ -12,7 +12,7 @@ labor-union-parser = "labor_union_parser.cli:main"
 
 [project.optional-dependencies]
 train = ["pandas", "scikit-learn", "lightning"]
-dev = ["pytest", "pre-commit", "black", "ruff"]
+dev = ["pytest", "pre-commit", "black", "ruff", "cogapp"]
 
 [build-system]
 requires = ["setuptools>=61.0"]
