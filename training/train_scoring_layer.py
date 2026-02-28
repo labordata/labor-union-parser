@@ -196,8 +196,7 @@ def fit_scoring_temperature(
     scoring_model.eval()
     n_split = len(split_target_fnums)
 
-    # Build target indices: for each query, which record index is correct?
-    # (pick highest-scoring correct record if multiple share the same fnum)
+    # Accumulate scores for all queries
     all_scores = []
     with torch.no_grad():
         for chunk_start in tqdm(
