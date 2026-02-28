@@ -37,13 +37,21 @@ DATA_DIR = Path(__file__).parent / "data"
 EXAMPLES_PATH = DATA_DIR / "training_examples.json"
 FEATURES_DIR = DATA_DIR / "precomputed_features"
 
-CLASSIFICATION_FIELDS = ["union_name", "desig_name", "f_num"]
-POINTER_FIELD_LIST = ["desig_num", "prefix", "suffix"]
-ALL_LP_FIELDS = CLASSIFICATION_FIELDS + POINTER_FIELD_LIST
-
-# Column indices into the (B, R, 12) feature tensor from compute_record_features,
-# matching ALL_LP_FIELDS order.
-FEATURE_COLS = [i for i, _ in enumerate(ALL_LP_FIELDS)]
+# Feature column names matching compute_record_features (B, R, 12) layout.
+FEATURE_NAMES = [
+    "lp_union",
+    "lp_desig",
+    "lp_fnum",
+    "lp_designum",
+    "lp_prefix",
+    "lp_suffix",
+    "unk_union",
+    "unk_desig",
+    "unk_fnum",
+    "nf_designum",
+    "nf_prefix",
+    "nf_suffix",
+]
 
 NULL_TARGET_REASONS = {"not in gazetteer", "unknown union"}
 
@@ -81,9 +89,9 @@ def precompute_to_memmaps(
     n_queries = len(examples)
 
     memmaps = {}
-    for f in ALL_LP_FIELDS:
-        path = split_dir / f"{f}.npy"
-        memmaps[f] = np.memmap(
+    for name in FEATURE_NAMES:
+        path = split_dir / f"{name}.npy"
+        memmaps[name] = np.memmap(
             path, dtype=np.float32, mode="w+", shape=(n_queries, n_records)
         )
 
@@ -125,9 +133,9 @@ def precompute_to_memmaps(
                 n_records,
             )  # (bs, R, 12)
 
-            batch_np = features[:, :, FEATURE_COLS].cpu().numpy()
-            for i, f in enumerate(ALL_LP_FIELDS):
-                memmaps[f][row : row + bs] = batch_np[:, :, i]
+            batch_np = features.cpu().numpy()  # (bs, R, 12)
+            for col, name in enumerate(FEATURE_NAMES):
+                memmaps[name][row : row + bs] = batch_np[:, :, col]
 
             row += bs
             if row % 1024 < batch_size:
@@ -224,10 +232,7 @@ def main(batch_size):
         "fnum_train_counts": fnum_train_counts,
         "split_sizes": {s: len(splits[s]) for s in ("train", "val", "test")},
     }
-    # Save field_known as numpy arrays
     FEATURES_DIR.mkdir(parents=True, exist_ok=True)
-    for f in field_known:
-        np.save(FEATURES_DIR / f"field_known_{f}.npy", field_known[f].numpy())
     with open(FEATURES_DIR / "metadata.json", "w") as f:
         json.dump(metadata, f)
     print(f"Saved metadata to {FEATURES_DIR / 'metadata.json'}", flush=True)

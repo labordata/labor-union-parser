@@ -18,30 +18,24 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from labor_union_parser.scoring import POINTER_NOT_FOUND_LOG_PROB
-
 DATA_DIR = Path(__file__).parent / "data"
 EXAMPLES_PATH = DATA_DIR / "training_examples.json"
 FEATURES_DIR = DATA_DIR / "precomputed_features"
 
-CLASSIFICATION_FIELDS = ["union_name", "desig_name", "f_num"]
-POINTER_FIELD_LIST = ["desig_num", "prefix", "suffix"]
-ALL_LP_FIELDS = CLASSIFICATION_FIELDS + POINTER_FIELD_LIST
-
+# Feature column names — must match precompute_features.py / compute_record_features layout.
 FEATURE_NAMES = [
-    "lp_union_name",
-    "lp_desig_name",
-    "lp_f_num",
-    "lp_desig_num",
+    "lp_union",
+    "lp_desig",
+    "lp_fnum",
+    "lp_designum",
     "lp_prefix",
     "lp_suffix",
-    "unk_union_name",
-    "unk_desig_name",
-    "unk_f_num",
-    "notfound_desig_num",
-    "notfound_prefix",
-    "notfound_suffix",
-    "log_fnum_count",
+    "unk_union",
+    "unk_desig",
+    "unk_fnum",
+    "nf_designum",
+    "nf_prefix",
+    "nf_suffix",
 ]
 N_FEATURES = len(FEATURE_NAMES)
 
@@ -50,28 +44,9 @@ N_FEATURES = len(FEATURE_NAMES)
 # Models
 # ---------------------------------------------------------------------------
 
-# Feature column layout:
-# 0-5: log-probs (union_name, desig_name, f_num, desig_num, prefix, suffix)
-# 6-8: unknown indicators (union_name, desig_name, f_num)
-# 9-11: not-found indicators (desig_num, prefix, suffix)
-# 12: log1p(fnum_count)
-
-PENALTY_NAMES = [
-    "unk_union",
-    "unk_desig",
-    "unk_fnum",
-    "nf_designum",
-    "nf_prefix",
-    "nf_suffix",
-]
-
-
-N_SCORING_FEATURES = 12  # 6 lp + 3 unk + 3 nf (no count)
-SCORING_IDX = list(range(12))  # first 12 of the 13-feature vector
-
 
 class ScoringLayer(nn.Module):
-    """Linear scorer over 12 features (no count) + learnable null bias.
+    """Linear scorer over 12 features + learnable null bias.
 
     score = w · [lp_fields, unk_indicators, nf_indicators] + bias
 
@@ -84,7 +59,7 @@ class ScoringLayer(nn.Module):
 
     def __init__(self):
         super().__init__()
-        self.linear = nn.Linear(N_SCORING_FEATURES, 1)
+        self.linear = nn.Linear(N_FEATURES, 1)
         # Initialize from best blended-fnum run (k collapsed → linear)
         with torch.no_grad():
             self.linear.weight[0] = torch.tensor(
@@ -108,15 +83,21 @@ class ScoringLayer(nn.Module):
         self.null_bias = nn.Parameter(torch.tensor(self.linear.bias[0].item()))
 
     def forward(self, x):
-        return self.linear(x[:, :, SCORING_IDX])
+        return self.linear(x)
 
 
-def load_field_memmaps(split_name, n_queries, n_records):
+def load_feature_memmaps(split_name, n_queries, n_records):
+    """Load precomputed feature memmaps for a split.
+
+    Returns:
+        memmaps: dict of feature_name -> (n_queries, n_records) memmap
+        target_fnums: (n_queries,) array of target f_nums (-1 for null)
+    """
     split_dir = FEATURES_DIR / split_name
     memmaps = {}
-    for f in ALL_LP_FIELDS:
-        memmaps[f] = np.memmap(
-            split_dir / f"{f}.npy",
+    for name in FEATURE_NAMES:
+        memmaps[name] = np.memmap(
+            split_dir / f"{name}.npy",
             dtype=np.float32,
             mode="r",
             shape=(n_queries, n_records),
@@ -125,55 +106,16 @@ def load_field_memmaps(split_name, n_queries, n_records):
     return memmaps, target_fnums
 
 
-# ---------------------------------------------------------------------------
-# Feature processing & mining
-# ---------------------------------------------------------------------------
-
-
-def process_chunk_fields(field_arrays, field_known):
-    for f in CLASSIFICATION_FIELDS:
-        unknown_mask = np.logical_not(field_known[f].numpy())
-        field_arrays[f] = np.where(unknown_mask, 0.0, field_arrays[f]).astype(
-            np.float32
-        )
-
-    not_found_arrays = {}
-    for f in POINTER_FIELD_LIST:
-        not_found = np.float32(POINTER_NOT_FOUND_LOG_PROB[f])
-        is_nf = field_arrays[f] == not_found
-        not_found_arrays[f] = is_nf.astype(np.float32)
-        field_arrays[f] = np.where(is_nf, 0.0, field_arrays[f]).astype(np.float32)
-    return not_found_arrays
-
-
-def assemble_features_from_fields(
-    field_arrays,
-    not_found_arrays,
-    unknown_indicators_np,
-    fnum_log_counts_np,
-    query_indices,
-):
-    mb = len(query_indices)
-    n_records = field_arrays[CLASSIFICATION_FIELDS[0]].shape[1]
-    features = np.empty((mb, n_records, N_FEATURES), dtype=np.float32)
-
-    for col, f in enumerate(ALL_LP_FIELDS):
-        features[:, :, col] = field_arrays[f][query_indices]
-    for col, f in enumerate(CLASSIFICATION_FIELDS):
-        features[:, :, 6 + col] = unknown_indicators_np[f]
-    for col, f in enumerate(POINTER_FIELD_LIST):
-        features[:, :, 9 + col] = not_found_arrays[f][query_indices]
-    features[:, :, 12] = fnum_log_counts_np
-    return features
+def load_feature_chunk(memmaps, chunk_slice):
+    """Load a chunk of features as a (chunk, R, 12) numpy array."""
+    arrays = [np.array(memmaps[name][chunk_slice]) for name in FEATURE_NAMES]
+    return np.stack(arrays, axis=2)
 
 
 def eval_from_memmaps(
     scoring_model,
     split_memmaps,
     split_target_fnums,
-    field_known,
-    unknown_indicators_np,
-    fnum_log_counts_np,
     record_fnums_array,
     device,
     chunk_size=128,
@@ -189,18 +131,7 @@ def eval_from_memmaps(
             chunk_slice = slice(chunk_start, chunk_end)
             n_chunk = chunk_end - chunk_start
 
-            chunk_fields = {
-                f: np.array(split_memmaps[f][chunk_slice]) for f in ALL_LP_FIELDS
-            }
-            chunk_found = process_chunk_fields(chunk_fields, field_known)
-
-            feat_np = assemble_features_from_fields(
-                chunk_fields,
-                chunk_found,
-                unknown_indicators_np,
-                fnum_log_counts_np,
-                np.arange(n_chunk),
-            )
+            feat_np = load_feature_chunk(split_memmaps, chunk_slice)
             real_scores = scoring_model(torch.from_numpy(feat_np).to(device)).squeeze(
                 -1
             )
@@ -208,7 +139,6 @@ def eval_from_memmaps(
             null_col = scoring_model.null_bias.expand(n_chunk, 1)
             scores = torch.cat([real_scores, null_col], dim=1)
             all_preds.append(scores.argmax(dim=1).cpu().numpy())
-            del chunk_fields, chunk_found
 
     preds = np.concatenate(all_preds)
     pred_is_null = preds == n_records
@@ -253,9 +183,6 @@ def fit_scoring_temperature(
     scoring_model,
     split_memmaps,
     split_target_fnums,
-    field_known,
-    unknown_indicators_np,
-    fnum_log_counts_np,
     record_fnums_array,
     device,
     chunk_size=128,
@@ -275,18 +202,7 @@ def fit_scoring_temperature(
             chunk_slice = slice(chunk_start, chunk_end)
             n_chunk = chunk_end - chunk_start
 
-            chunk_fields = {
-                f: np.array(split_memmaps[f][chunk_slice]) for f in ALL_LP_FIELDS
-            }
-            chunk_found = process_chunk_fields(chunk_fields, field_known)
-
-            feat_np = assemble_features_from_fields(
-                chunk_fields,
-                chunk_found,
-                unknown_indicators_np,
-                fnum_log_counts_np,
-                np.arange(n_chunk),
-            )
+            feat_np = load_feature_chunk(split_memmaps, chunk_slice)
             real_scores = scoring_model(torch.from_numpy(feat_np).to(device)).squeeze(
                 -1
             )
@@ -294,7 +210,6 @@ def fit_scoring_temperature(
             null_col = scoring_model.null_bias.expand(n_chunk, 1).to(device)
             scores = torch.cat([real_scores, null_col], dim=1)
             all_scores.append(scores.cpu())
-            del chunk_fields, chunk_found
 
     all_scores = torch.cat(all_scores, dim=0)  # (N, R+1)
 
@@ -350,9 +265,6 @@ def train_scoring_lbfgs(
     scoring,
     train_memmaps,
     train_target_fnums,
-    field_known,
-    unknown_indicators_np,
-    fnum_log_counts_np,
     record_fnums_array,
     corruption_masks,
     null_mask,
@@ -374,20 +286,17 @@ def train_scoring_lbfgs(
     effective_targets[null_mask] = -1
     target_fnums_t = torch.from_numpy(effective_targets)
 
-    # Pre-build corrupted record-level arrays
-    c_unk = {f: unknown_indicators_np[f].copy() for f in CLASSIFICATION_FIELDS}
-    c_unk["f_num"][corruption_masks["fnum"]] = 1.0
-    c_unk["union_name"][corruption_masks["union"]] = 1.0
-    c_unk["desig_name"][corruption_masks["desig"]] = 1.0
-    c_log_counts = fnum_log_counts_np.copy()
-    c_log_counts[corruption_masks["fnum"]] = 0.0
-
     optimizer = torch.optim.LBFGS(
         scoring.parameters(), lr=1.0, max_iter=20, history_size=20
     )
     call_count = [0]
 
     n_chunks = (n_train + chunk_size - 1) // chunk_size
+
+    # Feature column indices for corruption
+    # Layout: [lp_union=0, lp_desig=1, lp_fnum=2, ..., unk_union=6, unk_desig=7, unk_fnum=8, ...]
+    LP_UNION, LP_DESIG, LP_FNUM = 0, 1, 2
+    UNK_UNION, UNK_DESIG, UNK_FNUM = 6, 7, 8
 
     def closure():
         optimizer.zero_grad()
@@ -398,20 +307,17 @@ def train_scoring_lbfgs(
             n_chunk = end - start
             chunk_slice = slice(start, end)
 
-            chunk_fields = {
-                f: np.array(train_memmaps[f][chunk_slice]) for f in ALL_LP_FIELDS
-            }
-            chunk_found = process_chunk_fields(chunk_fields, field_known)
+            feat_np = load_feature_chunk(train_memmaps, chunk_slice)
 
-            # Apply corruption to lp fields
-            chunk_fields["f_num"][:, corruption_masks["fnum"]] = 0.0
-            chunk_fields["union_name"][:, corruption_masks["union"]] = 0.0
-            chunk_fields["desig_name"][:, corruption_masks["desig"]] = 0.0
+            # Apply corruption: zero lp columns, set unk indicators to 1
+            feat_np[:, corruption_masks["fnum"], LP_FNUM] = 0.0
+            feat_np[:, corruption_masks["fnum"], UNK_FNUM] = 1.0
+            feat_np[:, corruption_masks["union"], LP_UNION] = 0.0
+            feat_np[:, corruption_masks["union"], UNK_UNION] = 1.0
+            feat_np[:, corruption_masks["desig"], LP_DESIG] = 0.0
+            feat_np[:, corruption_masks["desig"], UNK_DESIG] = 1.0
 
-            feat_np = assemble_features_from_fields(
-                chunk_fields, chunk_found, c_unk, c_log_counts, np.arange(n_chunk)
-            )
-            feat_t = torch.from_numpy(feat_np[:, :, :N_SCORING_FEATURES]).float()
+            feat_t = torch.from_numpy(feat_np).float()
             real_scores = scoring(feat_t).squeeze(-1)
             null_col = scoring.null_bias.expand(n_chunk, 1)
             scores = torch.cat([real_scores, null_col], dim=1)
@@ -484,13 +390,6 @@ def main(chunk_size, n_outer, train_sample):
 
     print(f"Gazetteer: {n_records} records", flush=True)
 
-    # Load field_known from saved numpy arrays
-    field_known = {}
-    for f in CLASSIFICATION_FIELDS:
-        field_known[f] = torch.from_numpy(
-            np.load(FEATURES_DIR / f"field_known_{f}.npy")
-        )
-
     # ── Derived arrays ──
     fnum_log_counts_np = np.zeros(n_records, dtype=np.float32)
     idx = 0
@@ -501,18 +400,14 @@ def main(chunk_size, n_outer, train_sample):
             fnum_log_counts_np[idx] = lc
             idx += 1
 
-    unknown_indicators_np = {}
-    for f in CLASSIFICATION_FIELDS:
-        unknown_indicators_np[f] = np.logical_not(field_known[f].numpy()).astype(
-            np.float32
-        )
-
     # ── Load memmaps ──
-    train_memmaps, train_target_fnums = load_field_memmaps("train", n_train, n_records)
-    val_memmaps, val_target_fnums = load_field_memmaps(
+    train_memmaps, train_target_fnums = load_feature_memmaps(
+        "train", n_train, n_records
+    )
+    val_memmaps, val_target_fnums = load_feature_memmaps(
         "val", split_sizes["val"], n_records
     )
-    test_memmaps, test_target_fnums = load_field_memmaps(
+    test_memmaps, test_target_fnums = load_feature_memmaps(
         "test", split_sizes["test"], n_records
     )
 
@@ -571,7 +466,9 @@ def main(chunk_size, n_outer, train_sample):
     rng = np.random.RandomState(seed=42)
     if train_sample and train_sample < n_train:
         sample_idx = np.sort(rng.choice(n_train, size=train_sample, replace=False))
-        sub_memmaps = {f: np.array(train_memmaps[f][sample_idx]) for f in ALL_LP_FIELDS}
+        sub_memmaps = {
+            name: np.array(train_memmaps[name][sample_idx]) for name in FEATURE_NAMES
+        }
         sub_target_fnums = train_target_fnums[sample_idx]
         n_sub = train_sample
         print(f"\nSubsampled {n_sub}/{n_train} training queries", flush=True)
@@ -603,9 +500,6 @@ def main(chunk_size, n_outer, train_sample):
         scoring=scoring,
         train_memmaps=sub_memmaps,
         train_target_fnums=sub_target_fnums,
-        field_known=field_known,
-        unknown_indicators_np=unknown_indicators_np,
-        fnum_log_counts_np=fnum_log_counts_np,
         record_fnums_array=record_fnums_array,
         corruption_masks=corruption_masks,
         null_mask=null_mask,
@@ -627,9 +521,6 @@ def main(chunk_size, n_outer, train_sample):
             scoring,
             split_memmaps,
             split_targets,
-            field_known,
-            unknown_indicators_np,
-            fnum_log_counts_np,
             record_fnums_array,
             cpu,
         )
@@ -648,9 +539,6 @@ def main(chunk_size, n_outer, train_sample):
         scoring,
         val_memmaps,
         val_target_fnums,
-        field_known,
-        unknown_indicators_np,
-        fnum_log_counts_np,
         record_fnums_array,
         cpu,
     )
