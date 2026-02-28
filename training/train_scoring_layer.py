@@ -2,7 +2,7 @@
 """Train a scoring layer on precomputed features.
 
 Assumes precompute_features.py has already been run to produce
-per-field log-prob memmaps in training/data/precomputed_features/.
+per-feature memmaps in training/data/precomputed_features/.
 
 Trains a ScoringLayer with LBFGS and cross-entropy loss over gazetteer
 records whose f_num appears in some training example.
@@ -61,7 +61,7 @@ class ScoringLayer(nn.Module):
     def __init__(self):
         super().__init__()
         self.linear = nn.Linear(N_FEATURES, 1)
-        # Initialize from best blended-fnum run (k collapsed → linear)
+        # Warm-start from previous best weights
         with torch.no_grad():
             self.linear.weight[0] = torch.tensor(
                 [
