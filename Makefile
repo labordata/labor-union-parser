@@ -41,7 +41,6 @@ $(WEIGHTS_DIR)/scoring_layer.pt : $(PRECOMPUTED_SENTINEL) \
 $(PRECOMPUTED_SENTINEL) : $(WEIGHTS_DIR)/structured_classifier.pt \
                           $(DATA_DIR)/temperatures.json \
                           $(DATA_DIR)/training_examples.json
-	rm -rf $(DATA_DIR)/precomputed_features
 	python training/precompute_features.py
 	touch $@
 

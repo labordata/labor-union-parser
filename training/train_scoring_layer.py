@@ -1,18 +1,11 @@
 #!/usr/bin/env python3
 """Train a scoring layer on precomputed features.
 
-Loads the frozen structured classifier, computes log-probs per field,
-then trains a ScoringLayer with cross-entropy loss over gazetteer
-records whose f_num appears in some training example (~17K records,
-filtered from the full ~44K gazetteer).
+Assumes precompute_features.py has already been run to produce
+per-field log-prob memmaps in training/data/precomputed_features/.
 
-Train on the train split with bootstrap corruption for f_num features.
-Evaluate on val and test splits separately (full scoring).
-
-Memory strategy:
-  - Per-field log-prob arrays are written to numpy memmaps on disk.
-  - Training reads memmaps on-the-fly in chunks, scoring all records.
-  - Val/test per-field arrays are loaded from memmaps per minibatch.
+Trains a ScoringLayer with LBFGS and cross-entropy loss over gazetteer
+records whose f_num appears in some training example.
 """
 
 import json
@@ -24,25 +17,8 @@ import click
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torch.utils.data import DataLoader
-from train_structured_classifier import (
-    StructuredDataset,
-    collate_fn,
-)
 
-from labor_union_parser.classifier import (
-    FIELDS,
-    MAX_TOKENS,
-    POINTER_FIELDS,
-    StructuredClassifier,
-)
-from labor_union_parser.scoring import (
-    POINTER_NOT_FOUND_LOG_PROB,
-    build_gazetteer_matrix,
-    build_pointer_lookup,
-)
-from labor_union_parser.tokenizer import smart_truncate_nonspace
+from labor_union_parser.scoring import POINTER_NOT_FOUND_LOG_PROB
 
 DATA_DIR = Path(__file__).parent / "data"
 EXAMPLES_PATH = DATA_DIR / "training_examples.json"
@@ -69,7 +45,6 @@ FEATURE_NAMES = [
 ]
 N_FEATURES = len(FEATURE_NAMES)
 
-PRECOMPUTE_CHUNK = 2048
 
 # ---------------------------------------------------------------------------
 # Models
@@ -136,151 +111,6 @@ class ScoringLayer(nn.Module):
         return self.linear(x[:, :, SCORING_IDX])
 
 
-# ---------------------------------------------------------------------------
-# Precompute helpers
-# ---------------------------------------------------------------------------
-
-
-def load_classifier(ckpt, device):
-    model = StructuredClassifier(
-        field_sizes=ckpt["field_sizes"],
-        d_model=ckpt["d_model"],
-        n_heads=4,
-        n_layers=ckpt["n_layers"],
-        ff_dim=ckpt["d_model"] * 2,
-        dropout=0.0,
-    ).to(device)
-    model.load_state_dict(ckpt["model_state"])
-    model.eval()
-    return model
-
-
-def precompute_per_field(
-    model,
-    examples,
-    field_vocabs,
-    field_indices,
-    field_known,
-    pointer_val_to_indices,
-    pointer_none_indices,
-    temperatures,
-    n_records,
-    batch_size,
-    device,
-):
-    ds = StructuredDataset(examples, field_vocabs)
-    loader = DataLoader(
-        ds, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=0
-    )
-
-    query_token_strings = []
-    for ex in examples:
-        tokens = smart_truncate_nonspace(ex["query"])
-        query_token_strings.append([t["token"] for t in tokens])
-
-    non_fnum_fields = [f for f in FIELDS if f != "f_num"]
-    all_field_scores = {f: [] for f in non_fnum_fields}
-    all_fnum_lp = []
-
-    example_idx = 0
-    with torch.no_grad():
-        for inputs, _ in loader:
-            char_ids = inputs["char_ids"].to(device)
-            mask = inputs["mask"].to(device)
-            logits = model(char_ids, mask)
-
-            log_probs = {
-                f: F.log_softmax(logits[f] / temperatures[f], dim=-1) for f in FIELDS
-            }
-
-            bs = char_ids.shape[0]
-            for i in range(bs):
-                for f in non_fnum_fields:
-                    if f not in POINTER_FIELDS:
-                        field_lp = log_probs[f][i][field_indices[f]]
-                        vocab_size = log_probs[f].shape[-1]
-                        floor_lp = -math.log(vocab_size)
-                        field_lp = torch.where(field_known[f], field_lp, floor_lp)
-                        all_field_scores[f].append(field_lp.cpu().numpy())
-                    else:
-                        query_toks = query_token_strings[example_idx]
-                        lp = log_probs[f][i]
-                        tok_to_pos = {}
-                        for pos, tok in enumerate(query_toks):
-                            if tok and tok not in tok_to_pos:
-                                tok_to_pos[tok] = pos
-                        field_scores = torch.full(
-                            (n_records,), POINTER_NOT_FOUND_LOG_PROB[f], device=device
-                        )
-                        none_idx = pointer_none_indices[f]
-                        if len(none_idx) > 0:
-                            field_scores[none_idx] = lp[MAX_TOKENS]
-                        val_to_idx = pointer_val_to_indices[f]
-                        for tok, pos in tok_to_pos.items():
-                            rec_indices = val_to_idx.get(tok)
-                            if rec_indices is not None:
-                                field_scores[rec_indices] = lp[pos]
-                        all_field_scores[f].append(field_scores.cpu().numpy())
-
-                fnum_lp = log_probs["f_num"][i][field_indices["f_num"]]
-                fnum_vocab_size = log_probs["f_num"].shape[-1]
-                fnum_floor = -math.log(fnum_vocab_size)
-                fnum_lp = torch.where(field_known["f_num"], fnum_lp, fnum_floor)
-                all_fnum_lp.append(fnum_lp.cpu().numpy())
-
-                example_idx += 1
-
-            if example_idx % 1024 < batch_size:
-                print(f"    {example_idx}/{len(examples)}", flush=True)
-
-    field_arrays = {}
-    for f in non_fnum_fields:
-        field_arrays[f] = np.stack(all_field_scores[f])
-    field_arrays["f_num"] = np.stack(all_fnum_lp)
-    return field_arrays
-
-
-def precompute_to_memmaps(
-    model, examples, split_name, n_records, precompute_args, batch_size
-):
-    split_dir = FEATURES_DIR / split_name
-    split_dir.mkdir(parents=True, exist_ok=True)
-    n_queries = len(examples)
-
-    memmaps = {}
-    for f in ALL_LP_FIELDS:
-        path = split_dir / f"{f}.npy"
-        memmaps[f] = np.memmap(
-            path, dtype=np.float32, mode="w+", shape=(n_queries, n_records)
-        )
-
-    target_fnums = np.array(
-        [
-            int(ex["records"][0]["f_num"]) if ex["f_num"] != -100 else -1
-            for ex in examples
-        ]
-    )
-    np.save(split_dir / "target_fnums.npy", target_fnums)
-
-    for chunk_start in range(0, n_queries, PRECOMPUTE_CHUNK):
-        chunk_end = min(chunk_start + PRECOMPUTE_CHUNK, n_queries)
-        chunk_arrays = precompute_per_field(
-            model=model,
-            examples=examples[chunk_start:chunk_end],
-            n_records=n_records,
-            batch_size=batch_size,
-            **precompute_args,
-        )
-        for f in ALL_LP_FIELDS:
-            memmaps[f][chunk_start:chunk_end] = chunk_arrays[f]
-        del chunk_arrays
-        print(f"  {chunk_end}/{n_queries}", flush=True)
-
-    for mm in memmaps.values():
-        mm.flush()
-    print(f"  Saved to {split_dir}", flush=True)
-
-
 def load_field_memmaps(split_name, n_queries, n_records):
     split_dir = FEATURES_DIR / split_name
     memmaps = {}
@@ -293,16 +123,6 @@ def load_field_memmaps(split_name, n_queries, n_records):
         )
     target_fnums = np.load(split_dir / "target_fnums.npy")
     return memmaps, target_fnums
-
-
-def features_exist(split_name):
-    split_dir = FEATURES_DIR / split_name
-    if not split_dir.exists():
-        return False
-    for f in ALL_LP_FIELDS:
-        if not (split_dir / f"{f}.npy").exists():
-            return False
-    return (split_dir / "target_fnums.npy").exists()
 
 
 # ---------------------------------------------------------------------------
@@ -639,90 +459,39 @@ def train_scoring_lbfgs(
 
 
 @click.command()
-@click.option("--batch-size", default=256, help="Batch size for precompute")
 @click.option("--chunk-size", default=128, help="Queries per training chunk")
-@click.option("--n-outer", default=10, help="Number of LBFGS outer steps")
+@click.option("--n-outer", default=5, help="Number of LBFGS outer steps")
 @click.option(
     "--train-sample",
     default=15000,
     help="Subsample training queries for LBFGS (0 = use all)",
 )
-def main(batch_size, chunk_size, n_outer, train_sample):
-    device = torch.accelerator.current_accelerator() or torch.device("cpu")
-    print(f"Device: {device}", flush=True)
-
+def main(chunk_size, n_outer, train_sample):
     weights_dir = (
         Path(__file__).parent.parent / "src" / "labor_union_parser" / "weights"
     )
-    ckpt = torch.load(
-        weights_dir / "structured_classifier.pt",
-        weights_only=False,
-        map_location=device,
-    )
 
-    field_vocabs = ckpt["field_vocabs"]
-    fnum_to_records = ckpt["gazetteer"]
+    # ── Load metadata from precomputed features ──
+    with open(FEATURES_DIR / "metadata.json") as f:
+        metadata = json.load(f)
 
-    fnum_train_counts = ckpt["fnum_train_counts"]
+    n_records = metadata["n_records"]
+    record_fnums_array = np.array(metadata["record_fnums"])
+    fnum_to_records = metadata["fnum_to_records"]
+    fnum_train_counts = metadata["fnum_train_counts"]
+    split_sizes = metadata["split_sizes"]
+    n_train = split_sizes["train"]
 
-    # Load examples
-    with open(EXAMPLES_PATH) as f:
-        all_examples = json.load(f)
-
-    NULL_TARGET_REASONS = {"not in gazetteer", "unknown union"}
-
-    splits = {}
-    for split in ("train", "val", "test"):
-        splits[split] = [
-            ex
-            for ex in all_examples
-            if ex["records"]
-            and ex["split"] == split
-            and (
-                ex["f_num"] != -100
-                or ex.get("reason_missing_fnum") in NULL_TARGET_REASONS
-            )
-        ]
-
-    for split in ("train", "val", "test"):
-        null_count = sum(1 for ex in splits[split] if ex["f_num"] == -100)
-        print(
-            f"  {split}: {len(splits[split])} ({null_count} null targets)",
-            flush=True,
-        )
-    n_train = len(splits["train"])
-
-    # ── Filter gazetteer to f_nums with training examples ──
-    full_size = sum(len(recs) for recs in fnum_to_records.values())
-    fnum_to_records = {
-        fnum: recs
-        for fnum, recs in fnum_to_records.items()
-        if fnum_train_counts.get(str(fnum), 0) > 0
-    }
-    filtered_size = sum(len(recs) for recs in fnum_to_records.values())
-    print(
-        f"\nFiltered gazetteer: {filtered_size}/{full_size} records "
-        f"({len(fnum_to_records)} f_nums with examples)",
-        flush=True,
-    )
-
-    field_indices, field_known, record_fnums_list, records_list = (
-        build_gazetteer_matrix(fnum_to_records, field_vocabs)
-    )
-    n_records = len(record_fnums_list)
-    record_fnums_array = np.array(record_fnums_list)
     print(f"Gazetteer: {n_records} records", flush=True)
 
-    field_indices_dev = {f: t.to(device) for f, t in field_indices.items()}
-    field_known_dev = {f: t.to(device) for f, t in field_known.items()}
-
-    pointer_val_to_indices = {}
-    pointer_none_indices = {}
-    for f in POINTER_FIELDS:
-        pointer_val_to_indices[f], pointer_none_indices[f] = build_pointer_lookup(
-            records_list, f
+    # Load field_known from saved numpy arrays
+    field_known = {}
+    for f in CLASSIFICATION_FIELDS:
+        field_known[f] = torch.from_numpy(
+            np.load(FEATURES_DIR / f"field_known_{f}.npy")
         )
 
+    # ── Derived arrays ──
     fnum_log_counts_np = np.zeros(n_records, dtype=np.float32)
     idx = 0
     for fnum, recs in fnum_to_records.items():
@@ -738,54 +507,30 @@ def main(batch_size, chunk_size, n_outer, train_sample):
             np.float32
         )
 
-    # ── Load temperatures ──
-    with open(DATA_DIR / "temperatures.json") as f:
-        temperatures = json.load(f)
-    print(f"Temperatures: {temperatures}", flush=True)
-
-    # ── Precompute to disk ──
-    precompute_args = dict(
-        field_vocabs=field_vocabs,
-        field_indices=field_indices_dev,
-        field_known=field_known_dev,
-        pointer_val_to_indices=pointer_val_to_indices,
-        pointer_none_indices=pointer_none_indices,
-        temperatures=temperatures,
-        device=device,
-    )
-
-    classifier = None
-    for split_name in ("train", "val", "test"):
-        if features_exist(split_name):
-            print(f"\n{split_name}: features exist, skipping", flush=True)
-        else:
-            if classifier is None:
-                classifier = load_classifier(ckpt, device)
-            print(
-                f"\nPrecomputing {split_name} ({len(splits[split_name])} examples)...",
-                flush=True,
-            )
-            precompute_to_memmaps(
-                model=classifier,
-                examples=splits[split_name],
-                split_name=split_name,
-                n_records=n_records,
-                precompute_args=precompute_args,
-                batch_size=batch_size,
-            )
-    del classifier
-
     # ── Load memmaps ──
     train_memmaps, train_target_fnums = load_field_memmaps("train", n_train, n_records)
     val_memmaps, val_target_fnums = load_field_memmaps(
-        "val", len(splits["val"]), n_records
+        "val", split_sizes["val"], n_records
     )
     test_memmaps, test_target_fnums = load_field_memmaps(
-        "test", len(splits["test"]), n_records
+        "test", split_sizes["test"], n_records
     )
 
     # ── Per-record corruption probabilities (e^{-k} based on training counts) ──
-    # Each gazetteer record gets its own union/desig corruption prob
+    with open(EXAMPLES_PATH) as f:
+        all_examples = json.load(f)
+
+    NULL_TARGET_REASONS = {"not in gazetteer", "unknown union"}
+    train_examples = [
+        ex
+        for ex in all_examples
+        if ex["records"]
+        and ex["split"] == "train"
+        and (
+            ex["f_num"] != -100 or ex.get("reason_missing_fnum") in NULL_TARGET_REASONS
+        )
+    ]
+
     union_counts = Counter()
     desig_counts = Counter()
     fnum_to_union = {}
@@ -793,7 +538,7 @@ def main(batch_size, chunk_size, n_outer, train_sample):
     for fnum, recs in fnum_to_records.items():
         fnum_to_union[int(fnum)] = recs[0].get("union_name", "")
         fnum_to_desig[int(fnum)] = recs[0].get("desig_name", "")
-    for ex in splits["train"]:
+    for ex in train_examples:
         if ex["f_num"] == -100:
             continue
         fnum = ex["records"][0]["f_num"]
@@ -847,9 +592,7 @@ def main(batch_size, chunk_size, n_outer, train_sample):
     )
 
     # ── Pre-bake null mask (deterministic) ──
-    # For each training query with a real target, flip to null with prob 0.15
     null_mask = rng.random(n_sub) < 0.15
-    # Queries already null (target == -1) stay null regardless
     null_mask = null_mask | (sub_target_fnums == -1)
     print(f"Null mask: {int(null_mask.sum())}/{n_sub} queries", flush=True)
 

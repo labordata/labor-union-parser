@@ -26,3 +26,4 @@ training/data/gazetteer.json
 training/data/opdr.db
 training/data/factored_scoring_errors_test.csv
 training/data/pipeline_errors.csv
+training/data/temperatures.json
