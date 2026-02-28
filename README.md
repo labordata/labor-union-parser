@@ -43,20 +43,20 @@ for line in pprint.pformat(result, width=72).splitlines():
 # {'conflicts': [],
 #  'desig_name': 'LU',
 #  'desig_num': '1199',
-#  'f_num': 516569,
-#  'field_scores': {'desig_name': 0.8226500153541565,
-#                   'desig_num': 0.9992030262947083,
-#                   'f_num': 0.39868733286857605,
-#                   'prefix': 0.9999760389328003,
-#                   'suffix': 0.9995836615562439,
-#                   'union_name': 0.999906063079834},
+#  'f_num': 543235,
+#  'field_scores': {'desig_name': 0.8863651752471924,
+#                   'desig_num': 0.9985641837120056,
+#                   'f_num': 0.5405167937278748,
+#                   'prefix': 0.9999574422836304,
+#                   'suffix': 0.9908127188682556,
+#                   'union_name': 0.9999861717224121},
 #  'is_union': True,
 #  'match_found': True,
-#  'match_score': 0.33174464106559753,
+#  'match_score': 0.5042665004730225,
 #  'prefix': '',
 #  'suffix': '',
 #  'union_name': 'SERVICE EMPLOYEES',
-#  'union_score': 0.9997227191925049}
+#  'union_score': 0.9999850392341614}
 <!--[[[end]]]-->
 ```
 
@@ -116,7 +116,7 @@ for line in result.stdout.strip().splitlines():
     cog.outl(line)
 ]]]-->
 text,pred_is_union,pred_union_score,pred_union_name,pred_desig_name,pred_desig_num,pred_prefix,pred_suffix,pred_f_num,pred_match_found,pred_match_score,pred_conflicts,score_union_name,score_desig_name,score_f_num,score_desig_num,score_prefix,score_suffix
-SEIU Local 1199,True,0.9997,SERVICE EMPLOYEES,LU,1199,,,516569,True,0.33174464106559753,,0.9999,0.8227,0.3987,0.9992,1.0000,0.9996
+SEIU Local 1199,True,1.0000,SERVICE EMPLOYEES,LU,1199,,,543235,True,0.5042665004730225,,1.0000,0.8864,0.5405,0.9986,1.0000,0.9908
 <!--[[[end]]]-->
 ```
 
@@ -315,22 +315,22 @@ for f in SCORE_FIELDS:
         continue
     cog.outl(f"| `{f}` | {m['field_accuracy'][f]:.1%} |")
 ]]]-->
-End-to-end on held-out test data (7,687 examples
+End-to-end on held-out test data (7,831 examples
 scored against the full 44K-record gazetteer):
 
 | Metric | Score |
 |--------|-------|
-| Accuracy | 98.2% |
+| Accuracy | 97.4% |
 | Wrong match (union, wrong f_num) | 113 |
-| False negatives (union missed) | 2 |
+| False negatives (union missed) | 0 |
 
-Per-field accuracy on test set (9,486 union examples with is_union=True):
+Per-field accuracy on test set (9,509 union examples with is_union=True):
 
 | Field | Accuracy |
 |-------|----------|
 | `union_name` | 98.4% |
-| `desig_name` | 99.0% |
-| `desig_num` | 99.0% |
-| `prefix` | 97.6% |
+| `desig_name` | 99.1% |
+| `desig_num` | 99.1% |
+| `prefix` | 97.5% |
 | `suffix` | 96.7% |
 <!--[[[end]]]-->
