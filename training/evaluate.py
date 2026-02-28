@@ -11,7 +11,6 @@ import json
 from pathlib import Path
 
 import pandas as pd
-from tqdm import tqdm
 
 from labor_union_parser import Extractor
 from labor_union_parser.scoring import _normalize_pointer_value
@@ -28,7 +27,24 @@ SCRIPT_DIR = Path(__file__).parent
 BATCH_SIZE = 256
 
 
-def main():
+SCORE_FIELDS = [
+    "union_name",
+    "desig_name",
+    "f_num",
+    "desig_num",
+    "prefix",
+    "suffix",
+]
+
+
+def compute_test_metrics():
+    """Run extractor on test split and return metrics dict.
+
+    Returns dict with keys:
+        n_scored, wrong_matches, false_negatives, false_match_no_fnum,
+        false_positives, n_is_union, field_accuracy (dict field -> float),
+        union_errors (list), false_positive_errors (list)
+    """
     with open(SCRIPT_DIR / "data/training_examples.json") as f:
         all_examples = json.load(f)
 
@@ -39,38 +55,21 @@ def main():
         ex for ex in all_examples if ex["split"] == "test" and not ex["records"]
     ]
     n_union = len(union_examples)
-    n_non_union = len(non_union_examples)
-    n_total = n_union + n_non_union
-    print(f"Test: {n_union} union, {n_non_union} non-union")
+    n_total = n_union + len(non_union_examples)
 
     extractor = Extractor()
 
-    # --- Run extractor on all test examples ---
     all_texts = [ex["query"] for ex in union_examples + non_union_examples]
     all_results = []
-    pbar = tqdm(total=len(all_texts))
     for batch in itertools.batched(all_texts, BATCH_SIZE):
-        batch = list(batch)
-        all_results.extend(extractor.extract_batch(batch))
-        pbar.update(len(batch))
-    pbar.close()
+        all_results.extend(extractor.extract_batch(list(batch)))
 
     union_results = all_results[:n_union]
     non_union_results = all_results[n_union:]
 
     true_fnums = [ex["records"][0]["f_num"] for ex in union_examples]
-    score_fields = [
-        "union_name",
-        "desig_name",
-        "f_num",
-        "desig_num",
-        "prefix",
-        "suffix",
-    ]
 
-    # --- Union errors: is_union=False OR wrong f_num ---
-    # "potentially resolvable" examples (known union, unknown f_num) are excluded
-    # from error counts — we can't say the match is wrong.
+    # --- Union errors ---
     union_errors = []
     for ex, true_fnum, result in zip(union_examples, true_fnums, union_results):
         text = ex["query"]
@@ -99,7 +98,7 @@ def main():
                 "pred_union_name": result["union_name"],
             }
             fs = result.get("field_scores", {})
-            for f in score_fields:
+            for f in SCORE_FIELDS:
                 val = fs.get(f)
                 row[f"score_{f}"] = f"{val:.4f}" if val is not None else ""
             union_errors.append(row)
@@ -110,13 +109,13 @@ def main():
         1 for e in union_errors if e["type"] == "false_match_no_fnum"
     )
 
-    # --- Non-union errors: is_union=True ---
-    false_positives = []
+    # --- Non-union errors ---
+    false_positive_errors = []
     for text, result in zip(
         [ex["query"] for ex in non_union_examples], non_union_results
     ):
         if result["is_union"]:
-            false_positives.append(
+            false_positive_errors.append(
                 {
                     "type": "false_positive",
                     "text": text[:80],
@@ -127,9 +126,9 @@ def main():
                 }
             )
 
-    # --- Per-field accuracy (union examples where is_union=True, skip -100 fields) ---
-    field_correct = {f: 0 for f in score_fields}
-    n_is_union_per = {f: 0 for f in score_fields}
+    # --- Per-field accuracy ---
+    field_correct = {f: 0 for f in SCORE_FIELDS}
+    n_is_union_per = {f: 0 for f in SCORE_FIELDS}
     n_is_union = 0
     for ex, result in zip(union_examples, union_results):
         if not result["is_union"]:
@@ -154,30 +153,66 @@ def main():
             if pred == true:
                 field_correct[f] += 1
 
-    # --- Summary ---
     n_potentially_resolvable = sum(
         1
         for ex in union_examples
         if ex.get("reason_missing_fnum") == "potentially resolvable"
     )
     n_scored = n_total - n_potentially_resolvable
-    total_errors = len(union_errors) + len(false_positives)
+
+    field_accuracy = {}
+    for f in SCORE_FIELDS:
+        ft = n_is_union_per[f]
+        field_accuracy[f] = field_correct[f] / ft if ft else 0
+
+    return {
+        "n_scored": n_scored,
+        "wrong_matches": wrong_matches,
+        "false_negatives": false_negatives,
+        "false_match_no_fnum": false_match_no_fnum,
+        "false_positives": len(false_positive_errors),
+        "n_is_union": n_is_union,
+        "field_accuracy": field_accuracy,
+        "union_errors": union_errors,
+        "false_positive_errors": false_positive_errors,
+        "union_examples": union_examples,
+        "union_results": union_results,
+        "non_union_results": non_union_results,
+        "true_fnums": true_fnums,
+    }
+
+
+def main():
+    m = compute_test_metrics()
+
+    union_examples = m["union_examples"]
+    union_results = m["union_results"]
+    non_union_results = m["non_union_results"]
+    true_fnums = m["true_fnums"]
+    union_errors = m["union_errors"]
+    false_positive_errors = m["false_positive_errors"]
+    n_scored = m["n_scored"]
+    total_errors = len(union_errors) + len(false_positive_errors)
     total_correct = n_scored - total_errors
+    n_union = len(union_examples)
+    n_non_union = len(non_union_results)
+
+    print(f"Test: {n_union} union, {n_non_union} non-union")
 
     print(
         f"\nEnd-to-end: {total_correct}/{n_scored} = {total_correct / n_scored:.4f} "
-        f"({total_errors} errors, {n_potentially_resolvable} potentially resolvable excluded)"
+        f"({total_errors} errors)"
     )
-    print(f"  False negatives (union, is_union=False): {false_negatives}")
-    print(f"  Wrong match (union, is_union=True, wrong f_num): {wrong_matches}")
-    print(f"  False match on no-fnum examples: {false_match_no_fnum}")
-    print(f"  False positives (non-union, is_union=True): {len(false_positives)}")
+    print(f"  False negatives (union, is_union=False): {m['false_negatives']}")
+    print(f"  Wrong match (union, is_union=True, wrong f_num): {m['wrong_matches']}")
+    print(f"  False match on no-fnum examples: {m['false_match_no_fnum']}")
+    print(f"  False positives (non-union, is_union=True): {m['false_positives']}")
 
-    print(f"\nPer-field accuracy ({n_is_union} union examples with is_union=True):")
-    for f in score_fields:
-        ft = n_is_union_per[f]
-        acc = field_correct[f] / ft if ft else 0
-        print(f"  {f:>12s}: {field_correct[f]}/{ft} = {acc:.4f}")
+    print(
+        f"\nPer-field accuracy ({m['n_is_union']} union examples with is_union=True):"
+    )
+    for f in SCORE_FIELDS:
+        print(f"  {f:>12s}: {m['field_accuracy'][f]:.4f}")
 
     # --- match_found breakdown (only examples with known f_num) ---
     null_total = 0
@@ -245,13 +280,6 @@ def main():
             f"{not_union:>5d} not_union"
         )
 
-    if false_positives:
-        print("\nFalse positives:")
-        for fp in false_positives:
-            print(
-                f"  {fp['text'][:60]}  -> {fp['pred_union_name']} (match_score={fp['match_score']})"
-            )
-
     # --- Precision/recall at match_score thresholds ---
     # A prediction is "accepted" if is_union=True AND match_score >= threshold
     # True positive: union example accepted with correct f_num
@@ -290,7 +318,7 @@ def main():
         )
 
     # --- Save error details ---
-    all_errors = union_errors + false_positives
+    all_errors = union_errors + false_positive_errors
     if all_errors:
         pd.DataFrame(all_errors).to_csv(
             SCRIPT_DIR / "data/pipeline_errors.csv", index=False
