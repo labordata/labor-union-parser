@@ -17,6 +17,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 from train_structured_classifier import (
     StructuredDataset,
     collate_fn,
@@ -110,7 +111,7 @@ def precompute_to_memmaps(
 
     row = 0
     with torch.no_grad():
-        for inputs, _ in loader:
+        for inputs, _ in tqdm(loader, desc=f"  {split_name}"):
             char_ids = inputs["char_ids"].to(device)
             mask = inputs["mask"].to(device)
             logits = model(char_ids, mask)
@@ -138,12 +139,9 @@ def precompute_to_memmaps(
                 memmaps[name][row : row + bs] = batch_np[:, :, col]
 
             row += bs
-            if row % 1024 < batch_size:
-                print(f"  {row}/{n_queries}", flush=True)
 
     for mm in memmaps.values():
         mm.flush()
-    print(f"  Saved to {split_dir}", flush=True)
 
 
 @click.command()

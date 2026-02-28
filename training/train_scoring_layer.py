@@ -17,6 +17,7 @@ import click
 import numpy as np
 import torch
 import torch.nn as nn
+from tqdm import tqdm
 
 DATA_DIR = Path(__file__).parent / "data"
 EXAMPLES_PATH = DATA_DIR / "training_examples.json"
@@ -126,7 +127,9 @@ def eval_from_memmaps(
     all_preds = []
 
     with torch.no_grad():
-        for chunk_start in range(0, n_split, chunk_size):
+        for chunk_start in tqdm(
+            range(0, n_split, chunk_size), desc="  eval", leave=False
+        ):
             chunk_end = min(chunk_start + chunk_size, n_split)
             chunk_slice = slice(chunk_start, chunk_end)
             n_chunk = chunk_end - chunk_start
@@ -197,7 +200,9 @@ def fit_scoring_temperature(
     # (pick highest-scoring correct record if multiple share the same fnum)
     all_scores = []
     with torch.no_grad():
-        for chunk_start in range(0, n_split, chunk_size):
+        for chunk_start in tqdm(
+            range(0, n_split, chunk_size), desc="  scores", leave=False
+        ):
             chunk_end = min(chunk_start + chunk_size, n_split)
             chunk_slice = slice(chunk_start, chunk_end)
             n_chunk = chunk_end - chunk_start
@@ -291,8 +296,6 @@ def train_scoring_lbfgs(
     )
     call_count = [0]
 
-    n_chunks = (n_train + chunk_size - 1) // chunk_size
-
     # Feature column indices for corruption
     # Layout: [lp_union=0, lp_desig=1, lp_fnum=2, ..., unk_union=6, unk_desig=7, unk_fnum=8, ...]
     LP_UNION, LP_DESIG, LP_FNUM = 0, 1, 2
@@ -302,7 +305,11 @@ def train_scoring_lbfgs(
         optimizer.zero_grad()
         total_loss = 0.0
 
-        for chunk_idx, start in enumerate(range(0, n_train, chunk_size)):
+        for start in tqdm(
+            range(0, n_train, chunk_size),
+            desc=f"  closure {call_count[0] + 1:3d}",
+            leave=False,
+        ):
             end = min(start + chunk_size, n_train)
             n_chunk = end - start
             chunk_slice = slice(start, end)
@@ -338,16 +345,9 @@ def train_scoring_lbfgs(
             total_loss += loss.item()
             del feat_np, feat_t, real_scores, scores
 
-            if (chunk_idx + 1) % 100 == 0:
-                print(
-                    f"    chunk {chunk_idx + 1}/{n_chunks}",
-                    end="\r",
-                    flush=True,
-                )
-
         call_count[0] += 1
         print(
-            f"  closure {call_count[0]:3d}: loss={total_loss/n_train:.4f}    ",
+            f"  closure {call_count[0]:3d}: loss={total_loss/n_train:.4f}",
             flush=True,
         )
         return torch.tensor(total_loss / n_train)
