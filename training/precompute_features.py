@@ -42,7 +42,9 @@ CLASSIFICATION_FIELDS = ["union_name", "desig_name", "f_num"]
 POINTER_FIELD_LIST = ["desig_num", "prefix", "suffix"]
 ALL_LP_FIELDS = CLASSIFICATION_FIELDS + POINTER_FIELD_LIST
 
-PRECOMPUTE_CHUNK = 2048
+# Column indices into the (B, R, 12) feature tensor from compute_record_features,
+# matching ALL_LP_FIELDS order.
+FEATURE_COLS = [i for i, _ in enumerate(ALL_LP_FIELDS)]
 
 NULL_TARGET_REASONS = {"not in gazetteer", "unknown union"}
 
@@ -61,87 +63,19 @@ def load_classifier(ckpt, device):
     return model
 
 
-def precompute_per_field(
+def precompute_to_memmaps(
     model,
     examples,
+    split_name,
+    n_records,
     field_vocabs,
     field_indices,
     field_known,
     pointer_val_to_indices,
     pointer_none_indices,
     temperatures,
-    n_records,
     batch_size,
     device,
-):
-    """Precompute per-field log-prob features using the shared scoring function.
-
-    Feature layout from compute_record_features (B, R, 12):
-        [lp_union, lp_desig, lp_fnum, lp_designum, lp_prefix, lp_suffix,
-         unk_union, unk_desig, unk_fnum, nf_designum, nf_prefix, nf_suffix]
-
-    We slice columns 0-5 into per-field arrays keyed by ALL_LP_FIELDS order.
-    """
-    ds = StructuredDataset(examples, field_vocabs)
-    loader = DataLoader(
-        ds, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=0
-    )
-
-    # Pre-tokenize all queries for pointer field lookups
-    query_token_strings = []
-    for ex in examples:
-        tokens = smart_truncate_nonspace(ex["query"])
-        query_token_strings.append([t["token"] for t in tokens])
-
-    # Feature column indices matching ALL_LP_FIELDS order:
-    # union_name=0, desig_name=1, f_num=2, desig_num=3, prefix=4, suffix=5
-    field_col = {f: i for i, f in enumerate(ALL_LP_FIELDS)}
-
-    all_features = []  # list of (bs, R, 12) numpy arrays
-
-    example_idx = 0
-    with torch.no_grad():
-        for inputs, _ in loader:
-            char_ids = inputs["char_ids"].to(device)
-            mask = inputs["mask"].to(device)
-            logits = model(char_ids, mask)
-
-            log_probs = {
-                f: F.log_softmax(logits[f] / temperatures[f], dim=-1) for f in FIELDS
-            }
-
-            bs = char_ids.shape[0]
-            batch_token_strings = query_token_strings[example_idx : example_idx + bs]
-
-            features = compute_record_features(
-                log_probs,
-                batch_token_strings,
-                field_indices,
-                field_known,
-                pointer_val_to_indices,
-                pointer_none_indices,
-                n_records,
-            )  # (bs, R, 12)
-
-            all_features.append(features.cpu().numpy())
-            example_idx += bs
-
-            if example_idx % 1024 < batch_size:
-                print(f"    {example_idx}/{len(examples)}", flush=True)
-
-    # Concatenate all batches → (N, R, 12)
-    stacked = np.concatenate(all_features, axis=0)
-
-    # Slice into per-field arrays
-    field_arrays = {}
-    for f in ALL_LP_FIELDS:
-        field_arrays[f] = stacked[:, :, field_col[f]]
-
-    return field_arrays
-
-
-def precompute_to_memmaps(
-    model, examples, split_name, n_records, precompute_args, batch_size
 ):
     split_dir = FEATURES_DIR / split_name
     split_dir.mkdir(parents=True, exist_ok=True)
@@ -162,19 +96,45 @@ def precompute_to_memmaps(
     )
     np.save(split_dir / "target_fnums.npy", target_fnums)
 
-    for chunk_start in range(0, n_queries, PRECOMPUTE_CHUNK):
-        chunk_end = min(chunk_start + PRECOMPUTE_CHUNK, n_queries)
-        chunk_arrays = precompute_per_field(
-            model=model,
-            examples=examples[chunk_start:chunk_end],
-            n_records=n_records,
-            batch_size=batch_size,
-            **precompute_args,
-        )
-        for f in ALL_LP_FIELDS:
-            memmaps[f][chunk_start:chunk_end] = chunk_arrays[f]
-        del chunk_arrays
-        print(f"  {chunk_end}/{n_queries}", flush=True)
+    # Pre-tokenize all queries for pointer field lookups
+    query_token_strings = [
+        [t["token"] for t in smart_truncate_nonspace(ex["query"])] for ex in examples
+    ]
+
+    ds = StructuredDataset(examples, field_vocabs)
+    loader = DataLoader(
+        ds, batch_size=batch_size, shuffle=False, collate_fn=collate_fn, num_workers=0
+    )
+
+    row = 0
+    with torch.no_grad():
+        for inputs, _ in loader:
+            char_ids = inputs["char_ids"].to(device)
+            mask = inputs["mask"].to(device)
+            logits = model(char_ids, mask)
+
+            log_probs = {
+                f: F.log_softmax(logits[f] / temperatures[f], dim=-1) for f in FIELDS
+            }
+
+            bs = char_ids.shape[0]
+            features = compute_record_features(
+                log_probs,
+                query_token_strings[row : row + bs],
+                field_indices,
+                field_known,
+                pointer_val_to_indices,
+                pointer_none_indices,
+                n_records,
+            )  # (bs, R, 12)
+
+            batch_np = features[:, :, FEATURE_COLS].cpu().numpy()
+            for i, f in enumerate(ALL_LP_FIELDS):
+                memmaps[f][row : row + bs] = batch_np[:, :, i]
+
+            row += bs
+            if row % 1024 < batch_size:
+                print(f"  {row}/{n_queries}", flush=True)
 
     for mm in memmaps.values():
         mm.flush()
@@ -276,16 +236,6 @@ def main(batch_size):
     print(f"Saved metadata to {FEATURES_DIR / 'metadata.json'}", flush=True)
 
     # ── Precompute to disk ──
-    precompute_args = dict(
-        field_vocabs=field_vocabs,
-        field_indices=field_indices_dev,
-        field_known=field_known_dev,
-        pointer_val_to_indices=pointer_val_to_indices,
-        pointer_none_indices=pointer_none_indices,
-        temperatures=temperatures,
-        device=device,
-    )
-
     classifier = load_classifier(ckpt, device)
     for split_name in ("train", "val", "test"):
         print(
@@ -297,8 +247,14 @@ def main(batch_size):
             examples=splits[split_name],
             split_name=split_name,
             n_records=n_records,
-            precompute_args=precompute_args,
+            field_vocabs=field_vocabs,
+            field_indices=field_indices_dev,
+            field_known=field_known_dev,
+            pointer_val_to_indices=pointer_val_to_indices,
+            pointer_none_indices=pointer_none_indices,
+            temperatures=temperatures,
             batch_size=batch_size,
+            device=device,
         )
     del classifier
 
