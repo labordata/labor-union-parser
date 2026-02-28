@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Precompute per-field log-prob features for the scoring layer.
+"""Precompute record features for the scoring layer.
 
 Loads the bundled structured classifier and temperatures, runs forward
-passes on train/val/test splits, and writes per-field numpy memmaps
+passes on train/val/test splits, and writes per-feature numpy memmaps
 to training/data/precomputed_features/{train,val,test}/.
 
-Also saves metadata (record_fnums, field_known, fnum_to_records mapping,
-split sizes) that train_scoring_layer.py needs.
+Also saves metadata (record_fnums, fnum_to_records mapping, split sizes)
+that train_scoring_layer.py needs.
 """
 
 import json
