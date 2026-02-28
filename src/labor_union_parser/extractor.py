@@ -90,7 +90,7 @@ class Extractor:
     def __init__(
         self,
         device: str | None = None,
-        union_threshold: float = 0.9,
+        union_threshold: float = 0.55,
     ):
         if device is None:
             self.device = torch.accelerator.current_accelerator(
