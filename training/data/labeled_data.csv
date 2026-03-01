@@ -209,7 +209,7 @@ USW District 7-03403-82,"STEELWORKERS, AFL-CIO",3403.0,27801.0,,train
 USW-7-507-14,"STEELWORKERS, AFL-CIO",507.0,3005.0,,train
 Teamsters Local 247,TEAMSTERS,247.0,28810.0,,train
 AFSCME Council 65 1647-8,STATE COUNTY AND MUNI EMPLS AFL-CIO,1647.0,545297.0,,train
-International Brotherhood of Teamsters #2,TEAMSTERS,2.0,,potentially resolvable,train
+International Brotherhood of Teamsters #2,TEAMSTERS,2.0,,ambiguous,train
 AFSCME District Council 47,STATE COUNTY AND MUNI EMPLS AFL-CIO,47.0,514329.0,,train
 IUPAT-246,PAINTERS AFL-CIO,246.0,23481.0,,train
 USW District 11-9349-01,"STEELWORKERS, AFL-CIO",9349.0,537080.0,,train
@@ -478,7 +478,7 @@ USW-7237-1,"STEELWORKERS, AFL-CIO",7237.0,65097.0,,train
 "Retail, Wholesale, and Department Store Union 110","RETAIL WHOLESALE, DC, UFCW",110.0,15044.0,,train
 United Steelworkers 9059,"STEELWORKERS, AFL-CIO",9059.0,514143.0,,train
 OPEIU Local 42,OFFICE AND PROFESSIONAL EMPLS AFL-CIO,42.0,50137.0,,train
-IBT Local 727,TEAMSTERS,727.0,,potentially resolvable,train
+IBT Local 727,TEAMSTERS,727.0,,ambiguous,train
 Glaziers-27,PAINTERS AFL-CIO,27.0,28012.0,,train
 LIUNA Local 681,LABORERS,681.0,16147.0,,train
 AFSCME-2568,STATE COUNTY AND MUNI EMPLS AFL-CIO,2568.0,514628.0,,train
@@ -598,7 +598,7 @@ INTERNATIONAL UNION OF OPERATING ENGINEERS 137,"ENGINEERS, OPERATING, AFL-CIO",1
 IUOE-450,"ENGINEERS, OPERATING, AFL-CIO",450.0,41238.0,,train
 United Steelworkers International Union 5024-2,"STEELWORKERS, AFL-CIO",5024.0,28489.0,,train
 "United Electrical, Radio and Machine Workers of America (UE) 274",ELECTRICAL WORKERS UE IND,274.0,34072.0,,train
-"Teamsters Local 166 and 853 166, 853",TEAMSTERS,,,potentially resolvable,train
+"Teamsters Local 166 and 853 166, 853",TEAMSTERS,,,multi-local,train
 Michigan Regional Council of Carpenters 1004,CARPENTERS IND,1004.0,540489.0,,train
 USW District 11-9460-03,"STEELWORKERS, AFL-CIO",9460.0,542243.0,,train
 IBT-493,TEAMSTERS,493.0,12610.0,,train
@@ -846,7 +846,7 @@ IBT-346,TEAMSTERS,346.0,26071.0,,train
 "United Electrical, Radio and Machine Workers of America 506 & 618",ELECTRICAL WORKERS UE IND,,,potentially resolvable,train
 "United Union of Roofers, Waterproofers, & Allied Workers 11",ROOFERS AFL-CIO,11.0,18962.0,,test
 "United Steelworkers, AFL-CIO•CLC  –  District 2 12075-**","STEELWORKERS, AFL-CIO",12075.0,35853.0,,train
-"Teamsters Local 853 166,186,683,853,986",TEAMSTERS,,,potentially resolvable,train
+"Teamsters Local 853 166,186,683,853,986",TEAMSTERS,,,multi-local,train
 UFCW 2013,FOOD AND COMMERCIAL WKRS,2013.0,60069.0,,train
 USW Local 912-1,"STEELWORKERS, AFL-CIO",912.0,71283.0,,train
 USW-105-02,"STEELWORKERS, AFL-CIO",105.0,,ambiguous,train
@@ -866,7 +866,7 @@ USW Local 2695-14,"STEELWORKERS, AFL-CIO",2695.0,13769.0,,train
 "Int. Bro. of Boilermakers, Iron Ship Builders, Blacksmiths, Forgers & Helpers 85",BOILERMAKERS AFL-CIO,85.0,13048.0,,train
 IAMAW-W-364,MACHINISTS AFL-CIO,364.0,531744.0,,train
 Int'l Association of Machinists and AW DL776 2121,MACHINISTS AFL-CIO,2121.0,16638.0,,train
-Teamsters 38,TEAMSTERS,38.0,,potentially resolvable,train
+Teamsters 38,TEAMSTERS,38.0,23943,,train
 CMRJB 99,"WORKERS UNITED, SEIU",99.0,,ambiguous,train
 IBEW Local 428,ELECTRICAL WORKERS IBEW AFL-CIO,428.0,34225.0,,train
 United Steelworkers 1465,"STEELWORKERS, AFL-CIO",1465.0,510279.0,,train
@@ -988,7 +988,7 @@ IUOE Local 295,"ENGINEERS, OPERATING, AFL-CIO",295.0,57476.0,,train
 TEAMSTERS 542,TEAMSTERS,542.0,38722.0,,train
 USW 9517-04,"STEELWORKERS, AFL-CIO",9517.0,545433.0,,train
 "Delaware Public Employees, Council 81, AFSCME, AFL-CIO 3898",STATE COUNTY AND MUNI EMPLS AFL-CIO,3898.0,526897.0,,train
-International Brotherhood Of Teamsters 2,TEAMSTERS,2.0,,potentially resolvable,train
+International Brotherhood Of Teamsters 2,TEAMSTERS,2.0,,ambiguous,train
 IBT 682,TEAMSTERS,682.0,36648.0,,train
 DC3 2015,PAINTERS AFL-CIO,2015.0,545397.0,,train
 USW Local 2-628,"STEELWORKERS, AFL-CIO",628.0,1222.0,,train
@@ -1040,7 +1040,7 @@ WU Rochester Regional Jt Bd-51,"WORKERS UNITED, SEIU",51.0,544887.0,,train
 SEIU Local 2015 2015,SERVICE EMPLOYEES,2015.0,545348.0,,train
 USW-372,"STEELWORKERS, AFL-CIO",372.0,35281.0,,train
 Building Material Teamsters-282,TEAMSTERS,282.0,9185.0,,train
-IBT-75,TEAMSTERS,75.0,,potentially resolvable,train
+IBT-75,TEAMSTERS,75.0,13688,,train
 Glaziers District Council 82 Local 1324,PAINTERS AFL-CIO,1324.0,34836.0,,train
 IAM&AW 735,MACHINISTS AFL-CIO,735.0,22628.0,,train
 IAMAW-2908,MACHINISTS AFL-CIO,2908.0,540057.0,,train
@@ -1725,7 +1725,7 @@ UFCW  2013,FOOD AND COMMERCIAL WKRS,2013.0,60069.0,,train
 United Electrical Radio Machine Workers of America 735,ELECTRICAL WORKERS UE IND,735.0,6008.0,,train
 United Steel Workers 176,"STEELWORKERS, AFL-CIO",176.0,,ambiguous,train
 IAMAW District 9 Local 313 660,MACHINISTS AFL-CIO,,,multi-local,train
-IBT-41,TEAMSTERS,41.0,,potentially resolvable,train
+IBT-41,TEAMSTERS,41.0,,ambiguous,train
 United Steelworkers 1852-18,"STEELWORKERS, AFL-CIO",1852.0,28254.0,,train
 "International Union, United Automobile, Aerospace and Agriculture Implement Workers of America 129",AUTO WORKERS AFL-CIO,129.0,27374.0,,train
 "Iron Workers District Council 66, 84, 135, 263, 482",IRON WORKERS AFL-CIO,,,potentially resolvable,train
@@ -1865,7 +1865,7 @@ United Auto Workers 2056,AUTO WORKERS AFL-CIO,2056.0,512288.0,,train
 IBT-745,TEAMSTERS,745.0,39230.0,,train
 IAMAW-971,MACHINISTS AFL-CIO,971.0,43159.0,,train
 United Steelworkers 2695-14,"STEELWORKERS, AFL-CIO",2695.0,13769.0,,train
-IBT-38 231,TEAMSTERS,38.0,,potentially resolvable,train
+IBT-38 231,TEAMSTERS,38.0,,multi-local,train
 Plumbers Union 690,PLUMBERS AFL-CIO,690.0,34585.0,,train
 IATSE-756,STAGE AND PICTURE OPERATORS AFL-CIO,756.0,49873.0,,train
 USW 13-522,"STEELWORKERS, AFL-CIO",522.0,24581.0,,train
@@ -1906,7 +1906,7 @@ Communications Workers of America  7777,COMMUNICATIONS WORKERS AFL-CIO,7777.0,36
 IUOE-15-15A,"ENGINEERS, OPERATING, AFL-CIO",15.0,17061.0,,train
 IUOE Local 825,"ENGINEERS, OPERATING, AFL-CIO",825.0,12429.0,,train
 OPEIU 8,OFFICE AND PROFESSIONAL EMPLS AFL-CIO,8.0,26712.0,,train
-Teamsters 25,TEAMSTERS,25.0,,potentially resolvable,train
+Teamsters 25,TEAMSTERS,25.0,,ambiguous,train
 "Teamsters Truck Drivers Union, Local 407",TEAMSTERS,407.0,11109.0,,train
 USW Local 4842,"STEELWORKERS, AFL-CIO",4842.0,14149.0,,train
 USW-8-14187,"STEELWORKERS, AFL-CIO",14187.0,3169.0,,train
@@ -1916,7 +1916,7 @@ District Council 82/Local Union 106 106,PAINTERS AFL-CIO,106.0,36490.0,,train
 USW International Union 00449,"STEELWORKERS, AFL-CIO",449.0,29881.0,,train
 United Steelworkers 1259-04,"STEELWORKERS, AFL-CIO",1259.0,19830.0,,train
 "NY-NJ Regional Joint Board, Workers United 132","WORKERS UNITED, SEIU",132.0,52979.0,,train
-International Brotherhood of Teamsters 40,TEAMSTERS,40.0,,potentially resolvable,train
+International Brotherhood of Teamsters 40,TEAMSTERS,40.0,,ambiguous,train
 "Sheet Metal, Air, Rail and Transportation 88","SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",88.0,41388.0,,train
 USW -9189-12,"STEELWORKERS, AFL-CIO",9189.0,517356.0,,train
 IAMAW District Lodge 947 Local 311,MACHINISTS AFL-CIO,311.0,40639.0,,test
@@ -2042,7 +2042,7 @@ BCTGM Local 83,"BAKERY, TOBACCO AND GRAIN AFL-CIO",83.0,516560.0,,train
 "Retail Delivery Drivers, Driver-Salesmen,Helpers And Auto Truck Drivers Local Union 2785 2785",TEAMSTERS,2785.0,34030.0,,train
 USW-14310-12,"STEELWORKERS, AFL-CIO",14310.0,10745.0,,train
 International Brotherhood of Electrical Workers 98,ELECTRICAL WORKERS IBEW AFL-CIO,98.0,1938.0,,train
-IBT-727,TEAMSTERS,727.0,,potentially resolvable,train
+IBT-727,TEAMSTERS,727.0,,ambiguous,train
 UNITED STEELWORKERS 2705,"STEELWORKERS, AFL-CIO",2705.0,17380.0,,train
 USW-01138-,"STEELWORKERS, AFL-CIO",1138.0,10843,,train
 UAW Local 1149,AUTO WORKERS AFL-CIO,1149.0,56614.0,,train
@@ -2121,7 +2121,7 @@ USW AFL-CIO CLC District 10 Local 22L,"STEELWORKERS, AFL-CIO",22.0,35808.0,,trai
 AFM 7,MUSICIANS AFL-CIO,7.0,33271.0,,train
 IAMAW 4,MACHINISTS AFL-CIO,4.0,,ambiguous,train
 IAM Lodge 1414/ IBEW Local 1245/ OE No. 3,,,,multi-union,train
-IBT -162 & 305,TEAMSTERS,,,potentially resolvable,train
+IBT -162 & 305,TEAMSTERS,,,multi-local,train
 UAW-1416,AUTO WORKERS AFL-CIO,1416.0,66540.0,,train
 USW-378/377,"STEELWORKERS, AFL-CIO",,,ambiguous,train
 IUPAT District Council 91 156,PAINTERS AFL-CIO,156.0,9634.0,,train
@@ -2337,7 +2337,7 @@ USW 9517-06,"STEELWORKERS, AFL-CIO",9517.0,545433.0,,train
 IBT-986,TEAMSTERS,986.0,15379.0,,train
 "Teamsters, Chauffeurs & 627",TEAMSTERS,627.0,45528.0,,train
 CWA-9423,COMMUNICATIONS WORKERS AFL-CIO,9423.0,4134.0,,train
-IBT-40,TEAMSTERS,40.0,,potentially resolvable,train
+IBT-40,TEAMSTERS,40.0,,ambiguous,train
 USW-4447-05,"STEELWORKERS, AFL-CIO",4447.0,40511.0,,train
 United Association of Plumbers & Steamfitters 73,PLUMBERS AFL-CIO,73.0,517753.0,,train
 "Dallas-Fort Worth Professional Musicians' Association, Local 72-147 American Federation of Musicians 72-147",MUSICIANS AFL-CIO,72.0,24572.0,,train
@@ -2731,7 +2731,7 @@ EAS Council of Carpenters 255,CARPENTERS IND,255.0,544505.0,,train
 IBT-962,TEAMSTERS,962.0,36804.0,,train
 IUE-CWA 717,COMMUNICATIONS WORKERS AFL-CIO,717.0,1897.0,,train
 Boilermakers 482,BOILERMAKERS AFL-CIO,482.0,509164.0,,train
-IBT-25,TEAMSTERS,25.0,,potentially resolvable,train
+IBT-25,TEAMSTERS,25.0,,ambiguous,train
 IAMAW 1010,MACHINISTS AFL-CIO,1010.0,29873.0,,train
 Teamsters-70,TEAMSTERS,70.0,10997.0,,train
 USW 00645,"STEELWORKERS, AFL-CIO",645.0,23856.0,,train
@@ -2750,7 +2750,7 @@ UAW-2320,AUTO WORKERS AFL-CIO,2320.0,531724,,train
 Teamsters Local Union 243,TEAMSTERS,243.0,30804.0,,train
 UA-85,PLUMBERS AFL-CIO,85.0,40102.0,,train
 USW-1994,"STEELWORKERS, AFL-CIO",1994.0,526702.0,,train
-IBT 38,TEAMSTERS,38.0,,potentially resolvable,train
+IBT 38,TEAMSTERS,38.0,23943,,train
 "Upstate New York Operating Engineers 158, District 832","ENGINEERS, OPERATING, AFL-CIO",832.0,48960.0,,train
 IATSE & IATSE/USA-161 52 600 700 764 798,STAGE AND PICTURE OPERATORS AFL-CIO,,,potentially resolvable,train
 USW-1-716,"STEELWORKERS, AFL-CIO",716.0,69530.0,,train
@@ -3003,7 +3003,7 @@ CWA-7901,COMMUNICATIONS WORKERS AFL-CIO,7901.0,46444.0,,train
 Chicago Regional Council of Carpenters 1027,CARPENTERS IND,1027.0,516602.0,,train
 USW Local 7202,"STEELWORKERS, AFL-CIO",7202.0,64876.0,,train
 IBEW Local 51 51,ELECTRICAL WORKERS IBEW AFL-CIO,51.0,11356.0,,train
-"Bay Area Building Material Teamsters-853, 315",TEAMSTERS,,,potentially resolvable,train
+"Bay Area Building Material Teamsters-853, 315",TEAMSTERS,,,multi-local,train
 USW  -15009-05/06,"STEELWORKERS, AFL-CIO",,,ambiguous,train
 UAW 4,AUTO WORKERS AFL-CIO,4.0,39309.0,,train
 IBEW 578,ELECTRICAL WORKERS IBEW AFL-CIO,578.0,19608.0,,train
@@ -3083,7 +3083,7 @@ TEAMSTERS LOCAL UNION 491,TEAMSTERS,491.0,16605.0,,train
 Teamsters Local Union No. 50 50,TEAMSTERS,50.0,11444.0,,train
 RWDSU-566,"RETAIL WHOLESALE, DC, UFCW",566.0,32505.0,,train
 BCTGM-232,"BAKERY, TOBACCO AND GRAIN AFL-CIO",232.0,42601,,train
-IBT 25,TEAMSTERS,25.0,,potentially resolvable,train
+IBT 25,TEAMSTERS,25.0,,ambiguous,train
 American Federation of Musicians 148-462,MUSICIANS AFL-CIO,148.0,3834.0,,train
 USW District 12 Sub-District 3-330-05,"STEELWORKERS, AFL-CIO",330.0,30655.0,,train
 INTERNATIONAL UNION OF OPERATING ENGINEERS 324,"ENGINEERS, OPERATING, AFL-CIO",324.0,19088.0,,train
@@ -3161,7 +3161,7 @@ International Brotherhood of Electrical Workers 199,ELECTRICAL WORKERS IBEW AFL-
 USW-2-389,"STEELWORKERS, AFL-CIO",389.0,35385.0,,train
 United Steelworkers 200,"STEELWORKERS, AFL-CIO",200.0,,ambiguous,train
 Local Union 513 Operating Engineers 513,"ENGINEERS, OPERATING, AFL-CIO",513.0,39895.0,,train
-International Brotherhood of Teamsters 25,TEAMSTERS,25.0,,potentially resolvable,train
+International Brotherhood of Teamsters 25,TEAMSTERS,25.0,,ambiguous,train
 Plumbers & Steamfitters UA Local 43 43,PLUMBERS AFL-CIO,43.0,32241.0,,train
 IBT Local 533,TEAMSTERS,533.0,14938.0,,train
 UAW-12 55 70 125 472 647 710 9,AUTO WORKERS AFL-CIO,,,multi-local,train
@@ -3200,7 +3200,7 @@ Workers United 1148,"WORKERS UNITED, SEIU",1148.0,,ambiguous,train
 IAMAW-26,MACHINISTS AFL-CIO,26.0,542651.0,,train
 CWA-3871,COMMUNICATIONS WORKERS AFL-CIO,3871.0,65360.0,,train
 United Steelworkers 08823-12,"STEELWORKERS, AFL-CIO",8823.0,512887.0,,train
-Teamster 727,TEAMSTERS,727.0,,potentially resolvable,train
+Teamster 727,TEAMSTERS,727.0,,ambiguous,train
 USW 7054-04,"STEELWORKERS, AFL-CIO",7054.0,64126.0,,train
 Laborers Local 681,LABORERS,681.0,16147.0,,train
 UAW International Union 845,AUTO WORKERS AFL-CIO,845.0,66502.0,,train
@@ -3271,7 +3271,7 @@ UFT Local 2,TEACHERS AFL-CIO,2.0,63924,,train
 International Brotherhood of Boilermakers 363,BOILERMAKERS AFL-CIO,363.0,7046.0,,train
 Plumbers & Steamfitters  434,PLUMBERS AFL-CIO,434.0,540784.0,,train
 Communications Workers of America - District 2-13 2204,COMMUNICATIONS WORKERS AFL-CIO,2204.0,2673.0,,train
-Intl. Brotherhood of Teamsters 983 & 483,TEAMSTERS,,,potentially resolvable,train
+Intl. Brotherhood of Teamsters 983 & 483,TEAMSTERS,,,multi-local,train
 USW District 4 Local 4-00406-10,"STEELWORKERS, AFL-CIO",406.0,22461.0,,test
 IBEW-1837,ELECTRICAL WORKERS IBEW AFL-CIO,1837.0,42350.0,,train
 Steamfitters-420,PLUMBERS AFL-CIO,420.0,1114.0,,train
@@ -3401,7 +3401,7 @@ International Brotherhood of Teamsters 50,TEAMSTERS,50.0,11444.0,,train
 Teamsters Local Union 690,TEAMSTERS,690.0,1070.0,,train
 ILWU-142,LONGSHORE AND WAREHOUSE UNION,142.0,,potentially resolvable,train
 Boilermakers Local Lodge 85 85,BOILERMAKERS AFL-CIO,85.0,13048.0,,train
-International Brotherhood of Teamsters 87,TEAMSTERS,87.0,,potentially resolvable,train
+International Brotherhood of Teamsters 87,TEAMSTERS,87.0,,ambiguous,train
 IAMAW District 5 760,MACHINISTS AFL-CIO,760.0,11029.0,,train
 IAMAW-291,MACHINISTS AFL-CIO,291.0,26634.0,,train
 USW-1976,"STEELWORKERS, AFL-CIO",1976.0,59469.0,,train
@@ -3883,7 +3883,7 @@ North Atlantic States Regional Council of Carpenters 51,CARPENTERS IND,51.0,3272
 American Federation of Government Employees 1206,GOVERNMENT EMPLOYEES AFGE AFL-CIO,1206.0,540734.0,,train
 USW 6982-02,"STEELWORKERS, AFL-CIO",6982.0,63735.0,,train
 USW District 8 Sub-District 6 Local 14614-F8,"STEELWORKERS, AFL-CIO",14614.0,51950.0,,train
-Teamsters Local 853 853/624/315,TEAMSTERS,,,potentially resolvable,test
+Teamsters Local 853 853/624/315,TEAMSTERS,,,multi-local,test
 Carpenters Industrial Council-3091,CARPENTERS IND,3091.0,38339.0,,train
 IBEW-112,ELECTRICAL WORKERS IBEW AFL-CIO,112.0,22596.0,,train
 USW District 4-4-107-16,"STEELWORKERS, AFL-CIO",107.0,,ambiguous,train
@@ -3956,7 +3956,7 @@ IBEW-524,ELECTRICAL WORKERS IBEW AFL-CIO,524.0,26742.0,,train
 UAW-2488,AUTO WORKERS AFL-CIO,2488.0,530382.0,,train
 United Steelworkers 3199-14,"STEELWORKERS, AFL-CIO",3199.0,12807.0,,train
 IAMAW-1349,MACHINISTS AFL-CIO,1349.0,16490.0,,train
-IBT-38,TEAMSTERS,38.0,,potentially resolvable,train
+IBT-38,TEAMSTERS,38.0,23943,,train
 UA-393,PLUMBERS AFL-CIO,393.0,28029.0,,train
 Unite Here-54,UNITE HERE,54.0,71117.0,,train
 International Alliance of Theatrical Stage Employees (IATSE) 19,STAGE AND PICTURE OPERATORS AFL-CIO,19.0,43332.0,,train
@@ -4125,7 +4125,7 @@ USW-14919,"STEELWORKERS, AFL-CIO",14919.0,64153.0,,train
 ICWUC/UFCW-68,FOOD AND COMMERCIAL WKRS,68.0,15319.0,,train
 USW-06967-10,"STEELWORKERS, AFL-CIO",6967.0,63558.0,,train
 International Brotherhood of Teamsters 710,TEAMSTERS,710.0,28039.0,,train
-IBT-243/580,TEAMSTERS,,,potentially resolvable,train
+IBT-243/580,TEAMSTERS,,,multi-local,train
 IBT 517,TEAMSTERS,517.0,20397.0,,train
 IAM District 26 62A,MACHINISTS AFL-CIO,62.0,543922.0,,train
 Roofers Union Local  91,ROOFERS AFL-CIO,91.0,31927.0,,train
@@ -4194,7 +4194,7 @@ Teamsters Local 627,TEAMSTERS,627.0,45528.0,,train
 Workers United 1997,"WORKERS UNITED, SEIU",1997.0,540787.0,,train
 "ASPIRUS IRONWOOD HOSPITAL EMPLOYEES' UNIT OF LOCAL 992, AFSCME COUNCIL 25, AFL-CIO 992",STATE COUNTY AND MUNI EMPLS AFL-CIO,992.0,508982.0,,train
 Western States Regional Joint Board-3,"WORKERS UNITED, SEIU",3.0,,ambiguous,train
-IBT-87,TEAMSTERS,87.0,,potentially resolvable,train
+IBT-87,TEAMSTERS,87.0,,ambiguous,train
 NYNPU-2/ISE,"ENGINEERS, PROF AND TECH, AFL-CIO",2.0,540556.0,,train
 ATU Local 758,TRANSIT UNION AFL-CIO,758.0,540008.0,,train
 HPAE AFT/AFL-CIO-5106,TEACHERS AFL-CIO,5106.0,546329.0,,train
@@ -4220,7 +4220,7 @@ UNITED STEELWORKERS INTERNATIONAL UNION 1375-14,"STEELWORKERS, AFL-CIO",1375.0,1
 United Steelworkers International Union 1327-01,"STEELWORKERS, AFL-CIO",1327.0,,ambiguous,train
 International Longshoremen's Association 2038,LONGSHOREMENS ASN AFL-CIO,2038.0,516947.0,,train
 USW-2632-25,"STEELWORKERS, AFL-CIO",2632.0,24986.0,,train
-Teamsters 41,TEAMSTERS,41.0,,potentially resolvable,train
+Teamsters 41,TEAMSTERS,41.0,,ambiguous,train
 USW-7-00209-11,"STEELWORKERS, AFL-CIO",209.0,11695,,train
 Unite Here-737,UNITE HERE,737.0,68519.0,,train
 USW Local 9-0590,"STEELWORKERS, AFL-CIO",590.0,62015.0,,train
@@ -4621,7 +4621,7 @@ United Steelworkers 1426-01,"STEELWORKERS, AFL-CIO",1426.0,530093.0,,train
 International Union of Operating Engineers 312,"ENGINEERS, OPERATING, AFL-CIO",312.0,39603.0,,train
 USW -9832,"STEELWORKERS, AFL-CIO",9832.0,544497.0,,train
 IAMAW Local 794,MACHINISTS AFL-CIO,794.0,4075.0,,train
-INTERNATIONAL BROTHERHOOD OF TEAMSTERS 41,TEAMSTERS,41.0,,potentially resolvable,train
+INTERNATIONAL BROTHERHOOD OF TEAMSTERS 41,TEAMSTERS,41.0,,ambiguous,train
 IBT Local 773,TEAMSTERS,773.0,23562.0,,train
 SMART 20,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",20.0,,ambiguous,train
 USW Local 7-1,"STEELWORKERS, AFL-CIO",1.0,40269.0,,train
@@ -5248,7 +5248,7 @@ Daniel D. Gorman 342,,342.0,,unknown union,train
 Carpenters Industrial Council-2851,CARPENTERS IND,2851.0,10060.0,,train
 RWDSU/UFCW 220,"RETAIL WHOLESALE, DC, UFCW",220.0,46973.0,,train
 SEIU/UHWE 1199,SERVICE EMPLOYEES,1199.0,31847.0,,test
-International Brotherhood of Teamsters Local Union No.  243/580,TEAMSTERS,,,potentially resolvable,train
+International Brotherhood of Teamsters Local Union No.  243/580,TEAMSTERS,,,multi-local,train
 Communications Workers of America 1133,COMMUNICATIONS WORKERS AFL-CIO,1133.0,529191.0,,train
 USW-14734-5,"STEELWORKERS, AFL-CIO",14734.0,28532.0,,train
 Unite Here 54,UNITE HERE,54.0,71117.0,,train
@@ -5587,7 +5587,7 @@ UAW 174,AUTO WORKERS AFL-CIO,174.0,39071,,train
 Construction & General Laborers'-464,LABORERS,464.0,25285.0,,train
 International Union of Operating Engineers 406,"ENGINEERS, OPERATING, AFL-CIO",406.0,22326.0,,train
 "Utility Workers Union of America, AFL-CIO-477",UTILITY WORKERS AFL-CIO,477.0,,potentially resolvable,train
-Teamsters 70/87/137/150/166/186/315/431/630/665/683/848/856/853/952/986/2785 70/87/137/150/166/186/315/431/630/665/848/853/856,TEAMSTERS,,,potentially resolvable,train
+Teamsters 70/87/137/150/166/186/315/431/630/665/683/848/856/853/952/986/2785 70/87/137/150/166/186/315/431/630/665/848/853/856,TEAMSTERS,,,multi-local,train
 IUOE 351,"ENGINEERS, OPERATING, AFL-CIO",351.0,41283.0,,train
 "International Union, United Automobile, Aerospace And Agricultural Implement Workers of America, UAW 974-9",AUTO WORKERS AFL-CIO,974.0,42814.0,,train
 IAMAW Local 725,MACHINISTS AFL-CIO,725.0,530879.0,,train
@@ -5605,7 +5605,7 @@ IAMAW-709,MACHINISTS AFL-CIO,709.0,56174.0,,train
 "Licensed Ushers and Ticket Takers Local Union 176, Service Employees International Union 176",SERVICE EMPLOYEES,176.0,,potentially resolvable,train
 IAM&AW-751-C,MACHINISTS AFL-CIO,751.0,34977.0,,train
 Teamsters 191,TEAMSTERS,191.0,32953.0,,train
-IBT Council 10-633,TEAMSTERS,633.0,,potentially resolvable,train
+IBT Council 10-633,TEAMSTERS,633.0,,multi-local,train
 "CWA-4322,4470, 4471, 4473, 4474, 4475",COMMUNICATIONS WORKERS AFL-CIO,,,multi-local,train
 IAMAW Local 447,MACHINISTS AFL-CIO,447.0,15451.0,,train
 Western States Regional Joint Board 1089,"WORKERS UNITED, SEIU",1089.0,71240.0,,train
@@ -6109,7 +6109,7 @@ UNITED STEELWORKERS INTERNATIONAL UNION 2332-01,"STEELWORKERS, AFL-CIO",2332.0,1
 United Steelworkers Union 17,"STEELWORKERS, AFL-CIO",17.0,,ambiguous,train
 International Brotherhood of Electrical Workers 77,ELECTRICAL WORKERS IBEW AFL-CIO,77.0,29101.0,,train
 INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS 94,ELECTRICAL WORKERS IBEW AFL-CIO,94.0,41429.0,,train
-GPLDC-32/727,TEAMSTERS,,,potentially resolvable,train
+GPLDC-32/727,TEAMSTERS,,,multi-local,train
 United Steelworkers 11-1457-01,"STEELWORKERS, AFL-CIO",1457.0,68440.0,,train
 NCCRC-180,CARPENTERS IND,180.0,33149.0,,train
 IBT-443,TEAMSTERS,443.0,35774.0,,train
@@ -6129,7 +6129,7 @@ General Chauffeurs Salesdrivers and Helpers Local 330,TEAMSTERS,330.0,40100.0,,t
 TEAMSTERS 5,TEAMSTERS,5.0,38170.0,,train
 IUPAT DISTRICT COUNCIL 78 MULTIPLE,PAINTERS AFL-CIO,78.0,540828.0,,train
 "United Steel, Paper & Forestry, Manufacturing, Energy, Allied Industrial & Service Workers I 12-578","STEELWORKERS, AFL-CIO",578.0,40259.0,,train
-"Teamsters Locals 166, 186, 630, 683, and 853 166, 186, 630, 683, and 853",TEAMSTERS,,,potentially resolvable,train
+"Teamsters Locals 166, 186, 630, 683, and 853 166, 186, 630, 683, and 853",TEAMSTERS,,,multi-local,train
 United Steelworkers International Union 2-148-02,"STEELWORKERS, AFL-CIO",148.0,42330.0,,train
 IAMAW-480,MACHINISTS AFL-CIO,480.0,16747.0,,train
 IBEW-2,ELECTRICAL WORKERS IBEW AFL-CIO,2.0,,potentially resolvable,train
@@ -6161,7 +6161,7 @@ UNITED STEELWORKERS 8042-08,"STEELWORKERS, AFL-CIO",8042.0,70002.0,,train
 United Steelworkers 2635-17,"STEELWORKERS, AFL-CIO",2635.0,24988.0,,train
 CWA  7901,COMMUNICATIONS WORKERS AFL-CIO,7901.0,46444.0,,train
 UAW 362 Unit 4,AUTO WORKERS AFL-CIO,362.0,39703.0,,train
-IBT Local 2,TEAMSTERS,2.0,,potentially resolvable,train
+IBT Local 2,TEAMSTERS,2.0,,ambiguous,train
 NCSRCC-1348,CARPENTERS IND,1348.0,66899.0,,train
 OPEIU Local 12 12,OFFICE AND PROFESSIONAL EMPLS AFL-CIO,12.0,1696.0,,train
 International Brotherhood of Electrical Workers AFL-CIO 1430,ELECTRICAL WORKERS IBEW AFL-CIO,1430.0,52067.0,,train
@@ -6350,7 +6350,7 @@ CWA 6174,COMMUNICATIONS WORKERS AFL-CIO,6174.0,34828.0,,train
 UFCW 1564,FOOD AND COMMERCIAL WKRS,1564.0,36220.0,,train
 IUPAT -1144,PAINTERS AFL-CIO,1144.0,25750.0,,train
 USW-1165,"STEELWORKERS, AFL-CIO",1165.0,,ambiguous,train
-International Brotherhood of Teamsters 186/683/890/986,TEAMSTERS,,,potentially resolvable,train
+International Brotherhood of Teamsters 186/683/890/986,TEAMSTERS,,,multi-local,train
 "USW International Union 4-291, 365, 1247","STEELWORKERS, AFL-CIO",,,ambiguous,train
 United Steelworkers 9777-85,"STEELWORKERS, AFL-CIO",9777.0,541687.0,,test
 Highway Truck Drivers and Helpers Local (International Brotherhood of Teamsters) 107,TEAMSTERS,107.0,33820.0,,train
@@ -6503,7 +6503,7 @@ Northern California District Council of Laborers 270,LABORERS,270.0,22527.0,,tra
 UAW 566,AUTO WORKERS AFL-CIO,566.0,60474.0,,test
 AMALGAMATED TRANSIT UNION 1177,TRANSIT UNION AFL-CIO,1177.0,9183.0,,train
 Int'l Association of Machinists and Aerospace Workers DL776 2121,MACHINISTS AFL-CIO,2121.0,16638.0,,train
-IBT Local Multi 191 443 493 559 677,TEAMSTERS,,,potentially resolvable,train
+IBT Local Multi 191 443 493 559 677,TEAMSTERS,,,multi-local,train
 UNITED STEELWORKERS 1408-78,"STEELWORKERS, AFL-CIO",1408.0,,ambiguous,train
 AFSCME Council 31-3273,STATE COUNTY AND MUNI EMPLS AFL-CIO,3273.0,544755.0,,train
 AFGE-170,GOVERNMENT EMPLOYEES AFGE AFL-CIO,170.0,542290.0,,train
@@ -6661,7 +6661,7 @@ SEIU-263,SERVICE EMPLOYEES,263.0,23356.0,,train
 Radio Television Broadcast Engineers / IBEW-1212,ELECTRICAL WORKERS IBEW AFL-CIO,1212.0,23713.0,,train
 United Steelworkers 13-447-12,"STEELWORKERS, AFL-CIO",447.0,39519.0,,train
 Internaitonal Union of Operating Engineers 95,"ENGINEERS, OPERATING, AFL-CIO",95.0,37173.0,,train
-Teamsters 28,TEAMSTERS,28.0,,potentially resolvable,train
+Teamsters 28,TEAMSTERS,28.0,1459,,train
 IBEW 0659,ELECTRICAL WORKERS IBEW AFL-CIO,659.0,38373.0,,train
 "Minnesota Newspaper & Communications Guild, TNG-CWA 37002",COMMUNICATIONS WORKERS AFL-CIO,37002.0,21764.0,,train
 CWA AFL-CIO-83711,COMMUNICATIONS WORKERS AFL-CIO,83711.0,541253.0,,train
@@ -6706,7 +6706,7 @@ United Auto Workers 342,AUTO WORKERS AFL-CIO,342.0,59269.0,,train
 UAW-2335,AUTO WORKERS AFL-CIO,2335.0,540327.0,,train
 United Steelworkers 2-00430,"STEELWORKERS, AFL-CIO",430.0,48794.0,,train
 IUPAT District Council 91-460,PAINTERS AFL-CIO,460.0,4103.0,,train
-Teamsters Local 50/347,TEAMSTERS,,,potentially resolvable,train
+Teamsters Local 50/347,TEAMSTERS,,,multi-local,train
 IBT-270,TEAMSTERS,270.0,37852.0,,train
 United Steelworkers 5652-05,"STEELWORKERS, AFL-CIO",5652.0,30102.0,,train
 IAM District Lodge 26 147,MACHINISTS AFL-CIO,147.0,11875.0,,train
@@ -7026,7 +7026,7 @@ UFCW  Local 21,FOOD AND COMMERCIAL WKRS,21.0,543341.0,,train
 AFGE NCFLL-648,GOVERNMENT EMPLOYEES AFGE AFL-CIO,648.0,502016.0,,train
 USW-1138-03-04,"STEELWORKERS, AFL-CIO",1138.0,509031,,train
 AFSCME Council 31 Local 1244,STATE COUNTY AND MUNI EMPLS AFL-CIO,1244.0,547219.0,,train
-Teamsters 120 & 238,TEAMSTERS,,,potentially resolvable,train
+Teamsters 120 & 238,TEAMSTERS,,,multi-local,train
 USW Local 00466L-02,"STEELWORKERS, AFL-CIO",466.0,43591.0,,train
 United Steelworkers 1471,"STEELWORKERS, AFL-CIO",1471.0,65004.0,,train
 United Union of Roofers Waterproofers and Allied Workers 20,ROOFERS AFL-CIO,20.0,37447.0,,train
@@ -7072,7 +7072,7 @@ IBEW 2337,ELECTRICAL WORKERS IBEW AFL-CIO,2337.0,69034.0,,train
 IAMAW-1471,MACHINISTS AFL-CIO,1471.0,38535.0,,train
 UNITED STEELWORKERS INTERNATIONAL UNION 781,"STEELWORKERS, AFL-CIO",781.0,55654.0,,train
 IBEW 58,ELECTRICAL WORKERS IBEW AFL-CIO,58.0,24247.0,,test
-IBT Local 601/948,TEAMSTERS,,,potentially resolvable,train
+IBT Local 601/948,TEAMSTERS,,39153,,train
 UAW Local 997-10,AUTO WORKERS AFL-CIO,997.0,11921.0,,train
 Teamsters  533,TEAMSTERS,533.0,14938.0,,train
 IAMAW-1484,MACHINISTS AFL-CIO,1484.0,23349.0,,train
@@ -7299,7 +7299,7 @@ Teamsters District Council 2 747M,TEAMSTERS,747.0,540115.0,,train
 OPEIU-502,OFFICE AND PROFESSIONAL EMPLS AFL-CIO,502.0,511590.0,,train
 UAW-120,AUTO WORKERS AFL-CIO,120.0,64682.0,,train
 USW District 4 Local 4-00406-29,"STEELWORKERS, AFL-CIO",406.0,22461.0,,train
-Teamsters 42,TEAMSTERS,42.0,,potentially resolvable,train
+Teamsters 42,TEAMSTERS,42.0,,ambiguous,train
 UAW Local 5960,AUTO WORKERS AFL-CIO,5960.0,515160.0,,train
 USW Local 9545,"STEELWORKERS, AFL-CIO",9545.0,545222.0,,train
 IBEW-1671,ELECTRICAL WORKERS IBEW AFL-CIO,1671.0,29113.0,,train
@@ -7420,7 +7420,7 @@ IAM & AW Machinists Automotive Trades  1101,MACHINISTS AFL-CIO,1101.0,29596.0,,t
 Teamsters 600,TEAMSTERS,600.0,26065.0,,train
 IATSE Local 631,STAGE AND PICTURE OPERATORS AFL-CIO,631.0,34398.0,,train
 IAMAW 1420,MACHINISTS AFL-CIO,1420.0,31013.0,,train
-Teamsters Union 727,TEAMSTERS,727.0,,potentially resolvable,train
+Teamsters Union 727,TEAMSTERS,727.0,,ambiguous,train
 SHEET METAL WORKERS INTERNATIONAL ASSOCIATION  55,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",55.0,544142,,train
 IUOE Local 137,"ENGINEERS, OPERATING, AFL-CIO",137.0,34679.0,,train
 IBEW-2222,ELECTRICAL WORKERS IBEW AFL-CIO,2222.0,68568.0,,train
@@ -7633,7 +7633,7 @@ United Steelworkers 9-00007.01,"STEELWORKERS, AFL-CIO",7.0,542074.0,,train
 USW 2-42,"STEELWORKERS, AFL-CIO",42.0,,ambiguous,test
 IAMAW-2,MACHINISTS AFL-CIO,2.0,20286,,train
 CMRJB WU/SEIU 225,"WORKERS UNITED, SEIU",225.0,,ambiguous,train
-Teamsters-727,TEAMSTERS,727.0,,potentially resolvable,train
+Teamsters-727,TEAMSTERS,727.0,,ambiguous,train
 "Musicians Union of Las Vegas Local 369 AFM, AFL-CIO/CLC 369",MUSICIANS AFL-CIO,369.0,55551.0,,train
 AFSCME-3464 Council 31,STATE COUNTY AND MUNI EMPLS AFL-CIO,3464.0,542984.0,,train
 NTEU Chapter 150-N/A,TREASURY EMPLOYEES UNION IND,150.0,503181.0,,train
@@ -7814,7 +7814,7 @@ IBEW-0558,ELECTRICAL WORKERS IBEW AFL-CIO,558.0,7369.0,,train
 UBC-1098,CARPENTERS IND,1098.0,17160.0,,train
 IAM&AW District #34 804,MACHINISTS AFL-CIO,804.0,30059.0,,train
 United Steelworkers 2002-24,"STEELWORKERS, AFL-CIO",2002.0,7040.0,,train
-IBT Local 243/580-243,TEAMSTERS,,,potentially resolvable,train
+IBT Local 243/580-243,TEAMSTERS,,,multi-local,train
 IUOE-68-68A-68B-68C-68D,"ENGINEERS, OPERATING, AFL-CIO",68.0,3188.0,,train
 "District No. 10, IAMAW 516",MACHINISTS AFL-CIO,516.0,24622.0,,train
 International Union of Operating Engineers 18,"ENGINEERS, OPERATING, AFL-CIO",18.0,39040.0,,train
@@ -7878,7 +7878,7 @@ USW-4-00107-18,"STEELWORKERS, AFL-CIO",107.0,48297.0,,train
 International Brotherhood of Teamsters 688,TEAMSTERS,688.0,25471.0,,train
 LIUNA Great Plains District Council-231,LABORERS,231.0,24139.0,,train
 The International Alliance of Theatrical Stage Employees 10,STAGE AND PICTURE OPERATORS AFL-CIO,10.0,,potentially resolvable,train
-"Teamsters Local 317, 294 & 687",TEAMSTERS,,,potentially resolvable,test
+"Teamsters Local 317, 294 & 687",TEAMSTERS,,,multi-local,test
 IBB- Shipyard Workers Union 1998,BOILERMAKERS AFL-CIO,1998.0,542169.0,,train
 Utilities Workers Union of America 116,UTILITY WORKERS AFL-CIO,116.0,15812.0,,train
 "Western States Regional Joint Board, Workers United 1089","WORKERS UNITED, SEIU",1089.0,71240.0,,train
@@ -7899,7 +7899,7 @@ BNG/CWA -31026,COMMUNICATIONS WORKERS AFL-CIO,31026.0,32193.0,,train
 Plumbers and Steamfitters 400,PLUMBERS AFL-CIO,400.0,540864.0,,train
 IUOE Local 474,"ENGINEERS, OPERATING, AFL-CIO",474.0,3583.0,,train
 IATSE 205,STAGE AND PICTURE OPERATORS AFL-CIO,205.0,12184.0,,train
-IBT Local 243/580,TEAMSTERS,,,potentially resolvable,train
+IBT Local 243/580,TEAMSTERS,,,multi-local,train
 IAM & AW Local Lodge 1101 1101,MACHINISTS AFL-CIO,1101.0,29596.0,,train
 IBT Local 402,TEAMSTERS,402.0,23486.0,,train
 INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS 369,ELECTRICAL WORKERS IBEW AFL-CIO,369.0,22469.0,,train
@@ -8506,7 +8506,7 @@ TEAMSTERS 986,TEAMSTERS,986.0,15379.0,,train
 International Longshoremen Association - Boatmen 1438,LONGSHOREMENS ASN AFL-CIO,1438.0,39735.0,,train
 Roofers-69,ROOFERS AFL-CIO,69.0,37818.0,,train
 Utility Workers Union of America 419,UTILITY WORKERS AFL-CIO,419.0,20855.0,,test
-IBT Local 371 722,TEAMSTERS,,,potentially resolvable,train
+IBT Local 371 722,TEAMSTERS,,,multi-local,train
 AFSCME Council 31 2399-2,STATE COUNTY AND MUNI EMPLS AFL-CIO,2399.0,543294.0,,train
 IBEW-6,ELECTRICAL WORKERS IBEW AFL-CIO,6.0,,potentially resolvable,train
 Local 2336 IAMAW/ DL4 2336,MACHINISTS AFL-CIO,2336.0,66256.0,,train
@@ -9051,7 +9051,7 @@ USW-14965,"STEELWORKERS, AFL-CIO",14965.0,70009.0,,train
 Teamsters  728,TEAMSTERS,728.0,35292.0,,train
 UE-766,ELECTRICAL WORKERS UE IND,766.0,66655.0,,train
 International Brotherhood of Electrical Workers 1317,ELECTRICAL WORKERS IBEW AFL-CIO,1317.0,516267.0,,train
-International Brotherhood of Teamsters Local 243/580 243,TEAMSTERS,,,potentially resolvable,train
+International Brotherhood of Teamsters Local 243/580 243,TEAMSTERS,,,multi-local,train
 IBT-20 C 44,TEAMSTERS,20.0,8580.0,,train
 International Union of Operating Engineers 302,"ENGINEERS, OPERATING, AFL-CIO",302.0,40284.0,,train
 Eastern Millwright Regional Council 1163,CARPENTERS IND,1163.0,56131.0,,train
@@ -9408,7 +9408,7 @@ USW 8-719,"STEELWORKERS, AFL-CIO",719.0,544234.0,,train
 SEIU-16,SERVICE EMPLOYEES,16.0,1476.0,,train
 United Steelworkers 14372-06,"STEELWORKERS, AFL-CIO",14372.0,1811.0,,train
 UNITED STEELWORKERS INTERNATIONAL UNION 13029,"STEELWORKERS, AFL-CIO",13029.0,25201.0,,train
-Teamsters Union 2,TEAMSTERS,2.0,,potentially resolvable,train
+Teamsters Union 2,TEAMSTERS,2.0,,ambiguous,train
 United Sea Food Workers Union  359,FOOD AND COMMERCIAL WKRS,359.0,20100.0,,train
 UAW-2901,AUTO WORKERS AFL-CIO,2901.0,541976.0,,train
 IBT Local 697,TEAMSTERS,697.0,25932.0,,test
@@ -9839,7 +9839,7 @@ IAMAW 821,MACHINISTS AFL-CIO,821.0,23986.0,,train
 USW Local 8851-07,"STEELWORKERS, AFL-CIO",8851.0,512947.0,,train
 Internationa Guard Union of America Local-159,GUARDS IND,159.0,547084.0,,train
 SMART-105,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",105.0,,ambiguous,test
-IBT-633,TEAMSTERS,633.0,,potentially resolvable,train
+IBT-633,TEAMSTERS,633.0,32565,,train
 Truck Drivers Local Union 299,TEAMSTERS,299.0,34784.0,,train
 ICWU/UFCW-436-C,FOOD AND COMMERCIAL WKRS,436.0,25131.0,,train
 International Association of Machinists and Aerospace Workers 2210,MACHINISTS AFL-CIO,2210.0,36626.0,,train
@@ -9948,7 +9948,7 @@ United Steelworkers 11-937,"STEELWORKERS, AFL-CIO",937.0,29209.0,,train
 ILWU 63 OCU,LONGSHORE AND WAREHOUSE UNION,63.0,526833.0,,train
 "Hotel, Restaurant & Club Employees and Bartenders Union 6",UNITE HERE,6.0,28501.0,,train
 International Association of Struct. Iron Workers-536,IRON WORKERS AFL-CIO,536.0,22815.0,,train
-Teamsters Downstate Illinois Construction Industry Negotiating Committee Local 371/26/627/722,TEAMSTERS,,,potentially resolvable,train
+Teamsters Downstate Illinois Construction Industry Negotiating Committee Local 371/26/627/722,TEAMSTERS,,,multi-local,train
 USW District 4-397-16,"STEELWORKERS, AFL-CIO",397.0,22606.0,,test
 United Steelworkers 5652-06,"STEELWORKERS, AFL-CIO",5652.0,30102.0,,train
 BCTGM  International Local 102,"BAKERY, TOBACCO AND GRAIN AFL-CIO",102.0,,ambiguous,train
@@ -10509,7 +10509,7 @@ International Brotherhood of Boilermakers Local 92 92,BOILERMAKERS AFL-CIO,92.0,
 Keystone Mountain Lakes Regional Council-205,CARPENTERS IND,205.0,545523.0,,train
 "USW, AFL-CIO, CLC-530-04","STEELWORKERS, AFL-CIO",530.0,67318,,train
 BSOIW-393,IRON WORKERS AFL-CIO,393.0,12940.0,,train
-Teamsters Union 7,TEAMSTERS,7.0,,potentially resolvable,train
+Teamsters Union 7,TEAMSTERS,7.0,24668,,train
 UE-642,ELECTRICAL WORKERS UE IND,642.0,543887.0,,train
 United Steelworkers 13558,"STEELWORKERS, AFL-CIO",13558.0,8483.0,,train
 OPEIU  9,OFFICE AND PROFESSIONAL EMPLS AFL-CIO,9.0,11712.0,,train
@@ -10773,7 +10773,7 @@ IBB-D-414,BOILERMAKERS AFL-CIO,414.0,57549.0,,train
 USW-3403-32,"STEELWORKERS, AFL-CIO",3403.0,27801.0,,train
 DISTRICT COUNCIL 3 2014,PAINTERS AFL-CIO,2014.0,545396.0,,train
 IBEW-2295,ELECTRICAL WORKERS IBEW AFL-CIO,2295.0,67723.0,,train
-International Brotherhood of Teamsters 41,TEAMSTERS,41.0,,potentially resolvable,train
+International Brotherhood of Teamsters 41,TEAMSTERS,41.0,,ambiguous,train
 BCTGM 103-g,"BAKERY, TOBACCO AND GRAIN AFL-CIO",103.0,17937.0,,train
 Amalgamated Transit Union 1614,TRANSIT UNION AFL-CIO,1614.0,530436.0,,train
 AFSCME Council 65 105 #32,STATE COUNTY AND MUNI EMPLS AFL-CIO,105.0,54164.0,,train
@@ -10807,7 +10807,7 @@ IAFF-I-92,FIRE FIGHTERS AFL-CIO,92.0,502703.0,,train
 Rochester Regional Joint Board 2607,"WORKERS UNITED, SEIU",2607.0,540227.0,,train
 USW 565,"STEELWORKERS, AFL-CIO",565.0,59980.0,,train
 Communications Workers of America 7906,COMMUNICATIONS WORKERS AFL-CIO,7906.0,30444.0,,train
-International Brotherhood of Teamsters 727,TEAMSTERS,727.0,,potentially resolvable,train
+International Brotherhood of Teamsters 727,TEAMSTERS,727.0,,ambiguous,train
 UNITED STEELWORKERS 11-578-17,"STEELWORKERS, AFL-CIO",578.0,23471.0,,train
 Operative Plasterers & Cement Masons  514,PLASTERERS AND CEMENT MASONS AFL-CIO,514.0,36368.0,,train
 Workers United-2548,"WORKERS UNITED, SEIU",2548.0,530308.0,,train
@@ -11536,7 +11536,7 @@ IATSE AFL-CIO Local 1,STAGE AND PICTURE OPERATORS AFL-CIO,1.0,44938.0,,train
 International Brotherhood of Electrical Workers 413,ELECTRICAL WORKERS IBEW AFL-CIO,413.0,8744.0,,train
 PPF -597,PLUMBERS AFL-CIO,597.0,16412.0,,train
 GCC/IBT 705-S,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,705.0,56148.0,,train
-IBT 279 & 627,TEAMSTERS,,,potentially resolvable,train
+IBT 279 & 627,TEAMSTERS,,,multi-local,train
 Communications Workers of America 7476,COMMUNICATIONS WORKERS AFL-CIO,7476.0,66722.0,,train
 "RI Council 94 AFSCME, AFL-CIO",STATE COUNTY AND MUNI EMPLS AFL-CIO,94.0,542672.0,,train
 IAMAW District 15 Local 264,MACHINISTS AFL-CIO,264.0,22251.0,,train
@@ -11590,7 +11590,7 @@ International Association of Machinist and Aero Space Workers 57,MACHINISTS AFL-
 UAW Local 79-2,AUTO WORKERS AFL-CIO,79.0,14925.0,,train
 International Union of Operating Engineers Local 150,"ENGINEERS, OPERATING, AFL-CIO",150.0,31860.0,,train
 "Ohio Association of Public School Employees/AFSCME, Local 4/AFL-CIO 333",STATE COUNTY AND MUNI EMPLS AFL-CIO,333.0,,not in gazetteer,train
-"Teamsters Joint (Including Locals 179, 301, 330, 673, 705, 731, 786) Council 25",TEAMSTERS,,,potentially resolvable,test
+"Teamsters Joint (Including Locals 179, 301, 330, 673, 705, 731, 786) Council 25",TEAMSTERS,,,multi-local,test
 United Steel Paper and Forestry Rubber Manufacturing Energy/AFL-CIO-158-03,"STEELWORKERS, AFL-CIO",158.0,19515.0,,train
 USW 5886,"STEELWORKERS, AFL-CIO",5886.0,28991.0,,train
 IBT District Council 2-747M,TEAMSTERS,747.0,540115.0,,train
@@ -11706,7 +11706,7 @@ USW District 4 Local 00318-11,"STEELWORKERS, AFL-CIO",318.0,32980.0,,train
 ufcw 135,FOOD AND COMMERCIAL WKRS,135.0,517319.0,,train
 IAMAW 2531,MACHINISTS AFL-CIO,2531.0,70815.0,,train
 Motion Picture Studio Mechanics/IATSE 52,STAGE AND PICTURE OPERATORS AFL-CIO,52.0,29299.0,,train
-IBT-2,TEAMSTERS,2.0,,potentially resolvable,train
+IBT-2,TEAMSTERS,2.0,,ambiguous,train
 IUOE Local 428,"ENGINEERS, OPERATING, AFL-CIO",428.0,40109.0,,train
 "International Association of Machinists and Aerospace Workers, District 65 1580",MACHINISTS AFL-CIO,1580.0,10077.0,,train
 USW-4-00107-07,"STEELWORKERS, AFL-CIO",107.0,48297.0,,train
@@ -11719,9 +11719,9 @@ AFM-16-248,MUSICIANS AFL-CIO,16.0,11717.0,,train
 SPFPA-653,"SECURITY POLICE, FIRE PROF, IND",653.0,545024.0,,train
 IBT-577,TEAMSTERS,577.0,16751.0,,train
 "Council 65, American Federation of State, County, and Municipal Employees, MNLPNA, AFL-CIO 105",STATE COUNTY AND MUNI EMPLS AFL-CIO,105.0,54164.0,,train
-"Teamsters Locals 166, 186, 630, 683, and 853  166, 186, 630, 683, and 853",TEAMSTERS,,,potentially resolvable,train
+"Teamsters Locals 166, 186, 630, 683, and 853  166, 186, 630, 683, and 853",TEAMSTERS,,,multi-local,train
 IBT-114,TEAMSTERS,114.0,37069.0,,train
-Teamsters 70/87/137/150/166/186/315/431/630/665/683/848/853/,TEAMSTERS,,,potentially resolvable,train
+Teamsters 70/87/137/150/166/186/315/431/630/665/683/848/853/,TEAMSTERS,,,multi-local,train
 IUPAT DC 7 770,PAINTERS AFL-CIO,770.0,48684.0,,train
 IBEW 1002,ELECTRICAL WORKERS IBEW AFL-CIO,1002.0,7122.0,,train
 International Brotherhood of Teamsters 445,TEAMSTERS,445.0,27514.0,,train
@@ -11755,7 +11755,7 @@ United Auto Workers 904,AUTO WORKERS AFL-CIO,904.0,63138.0,,train
 IAM-218,MACHINISTS AFL-CIO,218.0,20555.0,,train
 American Federation of Government Employees (AFGE) 0788,GOVERNMENT EMPLOYEES AFGE AFL-CIO,788.0,543769.0,,train
 USW-1-243-8,"STEELWORKERS, AFL-CIO",243.0,42050,,train
-Teamsters 166/186/683/848/853/986 166/186/683/848/853/986,TEAMSTERS,,,potentially resolvable,train
+Teamsters 166/186/683/848/853/986 166/186/683/848/853/986,TEAMSTERS,,,multi-local,train
 United Steelworkers (USW) 9507,"STEELWORKERS, AFL-CIO",9507.0,543151.0,,train
 International Union of Operating Engineers 103,"ENGINEERS, OPERATING, AFL-CIO",103.0,27204.0,,train
 United Steelworkers 1408-08,"STEELWORKERS, AFL-CIO",1408.0,66542,,train
@@ -11876,7 +11876,7 @@ IAMAW District 8 Local 2293,MACHINISTS AFL-CIO,2293.0,64969.0,,train
 Teamsters-279,TEAMSTERS,279.0,9315.0,,train
 WU NY-NJ Regional Jt Bd-1338,"WORKERS UNITED, SEIU",1338.0,51290.0,,train
 USW District 4 Local 00318-04,"STEELWORKERS, AFL-CIO",318.0,32980.0,,train
-Teamsters 166/853 166/853,TEAMSTERS,,,potentially resolvable,train
+Teamsters 166/853 166/853,TEAMSTERS,,,multi-local,train
 IAMAW 97,MACHINISTS AFL-CIO,97.0,501502,,train
 UGSOA-313,"GOVERNMENT SECURITY OFFICERS, IND",313.0,545275.0,,train
 USW-00504,"STEELWORKERS, AFL-CIO",504.0,,ambiguous,train
@@ -12186,7 +12186,7 @@ IAMAW-147 D L 26,MACHINISTS AFL-CIO,147.0,11875.0,,train
 USW-13558,"STEELWORKERS, AFL-CIO",13558.0,8483.0,,train
 AFGE-3696,GOVERNMENT EMPLOYEES AFGE AFL-CIO,3696.0,511953.0,,train
 IBT Local 722,TEAMSTERS,722.0,33333.0,,train
-Teamsters Union 628 & 1414,TEAMSTERS,,,potentially resolvable,train
+Teamsters Union 628 & 1414,TEAMSTERS,,,multi-local,train
 United Steelworkers 9777-58,"STEELWORKERS, AFL-CIO",9777.0,541687.0,,train
 Workers United-1716,"WORKERS UNITED, SEIU",1716.0,67886.0,,train
 UFCW 342,FOOD AND COMMERCIAL WKRS,342.0,,ambiguous,train
@@ -12225,7 +12225,7 @@ IUPAT District Council 16-913,PAINTERS AFL-CIO,913.0,50876.0,,train
 IATSE-69,STAGE AND PICTURE OPERATORS AFL-CIO,69.0,20072.0,,train
 Plumbers & Steamfitters-33,PLUMBERS AFL-CIO,33.0,26728.0,,train
 United Construction Trades & Industrial Union Local 621-A,UNITED CONSTRUCTION TRADES AND INDUSTRIAL,621.0,542558.0,,train
-Teamsters 633,TEAMSTERS,633.0,,potentially resolvable,train
+Teamsters 633,TEAMSTERS,633.0,32565,,train
 USW-05163-03,"STEELWORKERS, AFL-CIO",5163.0,12316.0,,train
 Sheet Metal Workers 441,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",441.0,28601.0,,train
 AFM Local 77,MUSICIANS AFL-CIO,77.0,5324.0,,train
@@ -12370,7 +12370,7 @@ Sheet Metal Workers-63,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",63.0,
 United Food & Commercial Workers 1459,FOOD AND COMMERCIAL WKRS,1459.0,24770.0,,test
 Iron workers Regional Shop local Union 853,IRON WORKERS AFL-CIO,853.0,545828.0,,train
 IAMAW Local 2525,MACHINISTS AFL-CIO,2525.0,70826.0,,train
-Teamsters Local 727,TEAMSTERS,727.0,,potentially resolvable,train
+Teamsters Local 727,TEAMSTERS,727.0,,ambiguous,train
 Heat and Frost Insulators and Allied Workers 36,INSULATORS AFL-CIO,36.0,42886.0,,train
 IAMAW AFL-CIO Local 8,MACHINISTS AFL-CIO,8.0,546950,,train
 UNITED STEELWORKERS 00381-27,"STEELWORKERS, AFL-CIO",381.0,2463.0,,train
@@ -12789,7 +12789,7 @@ SEIU Local 1199 UHWE,SERVICE EMPLOYEES,1199.0,31847.0,,train
 IAMAW 48 49 District 8,MACHINISTS AFL-CIO,48.0,19745.0,,train
 USW -00017,"STEELWORKERS, AFL-CIO",17.0,,ambiguous,train
 Laborers 264 and 1290,LABORERS,,,potentially resolvable,train
-Teamsters-28,TEAMSTERS,28.0,,potentially resolvable,train
+Teamsters-28,TEAMSTERS,28.0,1459,,train
 International Union of Operating Engineers 624,"ENGINEERS, OPERATING, AFL-CIO",624.0,21164.0,,train
 Plumbers & Pipefitters Local 15,PLUMBERS AFL-CIO,15.0,7489.0,,train
 PLASTERERS & CEMENT MASONS (OPCMIA) AREA 75 692,PLASTERERS AND CEMENT MASONS AFL-CIO,692.0,530002.0,,train
@@ -13012,7 +13012,7 @@ IATSE 600,STAGE AND PICTURE OPERATORS AFL-CIO,600.0,22852.0,,train
 United Steelworkers 1259-05,"STEELWORKERS, AFL-CIO",1259.0,19830.0,,train
 International Association of Machinists and Aerospace Workers 906,MACHINISTS AFL-CIO,906.0,60448.0,,train
 IBT Local 984,TEAMSTERS,984.0,37480.0,,train
-Teamsters Local 315/853/890/2785 315/853/890/2785,TEAMSTERS,,,potentially resolvable,train
+Teamsters Local 315/853/890/2785 315/853/890/2785,TEAMSTERS,,,multi-local,train
 United Steelworkers Local 9-0566,"STEELWORKERS, AFL-CIO",566.0,,ambiguous,train
 IAMAW-2495,MACHINISTS AFL-CIO,2495.0,69519.0,,train
 USW 4907-02,"STEELWORKERS, AFL-CIO",4907.0,11526.0,,test
@@ -13066,11 +13066,11 @@ TNG/NGNY-31003,COMMUNICATIONS WORKERS AFL-CIO,31003.0,3705.0,,train
 USW-6521-04/12/13,"STEELWORKERS, AFL-CIO",,,ambiguous,train
 international Brotherhood of Electrical Workers 86,ELECTRICAL WORKERS IBEW AFL-CIO,86.0,46952.0,,train
 USW-285-**,"STEELWORKERS, AFL-CIO",285.0,,ambiguous,train
-Teamsters 727,TEAMSTERS,727.0,,potentially resolvable,train
+Teamsters 727,TEAMSTERS,727.0,,ambiguous,train
 USW-09777-06,"STEELWORKERS, AFL-CIO",9777.0,541687.0,,train
 IATSE Stagehand Union-17,STAGE AND PICTURE OPERATORS AFL-CIO,17.0,18925.0,,train
 IAMAW-1886,MACHINISTS AFL-CIO,1886.0,41553.0,,train
-Teamsters - IBT 727,TEAMSTERS,727.0,,potentially resolvable,train
+Teamsters - IBT 727,TEAMSTERS,727.0,,ambiguous,train
 USW-7-848,"STEELWORKERS, AFL-CIO",848.0,517833.0,,train
 LIUNA-660 662 955,LABORERS,,,potentially resolvable,train
 SEIU-105,SERVICE EMPLOYEES,105.0,,potentially resolvable,train
@@ -13299,7 +13299,7 @@ News Guild of New York /CWA-31003,COMMUNICATIONS WORKERS AFL-CIO,31003.0,3705.0,
 Southern Region Workers United 2448,"WORKERS UNITED, SEIU",2448.0,541256.0,,train
 USW International Union 12012-09,"STEELWORKERS, AFL-CIO",12012.0,44023.0,,train
 Art Directors Guild  IATSE Local 800,STAGE AND PICTURE OPERATORS AFL-CIO,800.0,48974.0,,train
-"Teamsters Local 166 and 853 166,853",TEAMSTERS,,,potentially resolvable,train
+"Teamsters Local 166 and 853 166,853",TEAMSTERS,,,multi-local,train
 USW 9148-03,"STEELWORKERS, AFL-CIO",9148.0,517471.0,,train
 International Association of Machinists and Aerospace Workers 1969,MACHINISTS AFL-CIO,1969.0,37238.0,,train
 United Brotherhood Of Carpenters And Joiners Of America 2153,CARPENTERS IND,2153.0,506643.0,,train
@@ -13414,7 +13414,7 @@ United Steelworkers 134L-4,"STEELWORKERS, AFL-CIO",134.0,29886.0,,train
 CMRJB-335,"WORKERS UNITED, SEIU",335.0,19557.0,,train
 United Electrical Radio & Machine Workers of America-262,ELECTRICAL WORKERS UE IND,262.0,31182.0,,train
 "United Electrical, Radio & Machine Workers of America 625",ELECTRICAL WORKERS UE IND,625.0,13232.0,,train
-IBT Local 633,TEAMSTERS,633.0,,potentially resolvable,train
+IBT Local 633,TEAMSTERS,633.0,32565,,train
 IUPAT-86,PAINTERS AFL-CIO,86.0,45027.0,,train
 OPEIU 9,OFFICE AND PROFESSIONAL EMPLS AFL-CIO,9.0,11712.0,,train
 IBEW  124,ELECTRICAL WORKERS IBEW AFL-CIO,124.0,37202.0,,train
@@ -13923,7 +13923,7 @@ IUE-CWA-717,COMMUNICATIONS WORKERS AFL-CIO,717.0,1897.0,,train
 UAW-1968,AUTO WORKERS AFL-CIO,1968.0,509277.0,,train
 "Glaziers, Architectural Metal & Glassworkers  188",PAINTERS AFL-CIO,188.0,36324.0,,train
 OPCMIA-797,PLASTERERS AND CEMENT MASONS AFL-CIO,797.0,41298.0,,train
-Teamsters Local Union No. 243/580 243,TEAMSTERS,,,potentially resolvable,train
+Teamsters Local Union No. 243/580 243,TEAMSTERS,,,multi-local,train
 IATSE 868,STAGE AND PICTURE OPERATORS AFL-CIO,868.0,,potentially resolvable,train
 BAC Local 5,BRICKLAYERS AFL-CIO,5.0,,potentially resolvable,train
 Teamsterts 631,TEAMSTERS,631.0,2927.0,,train
@@ -14074,7 +14074,7 @@ IATSE United Scenic Artists Local 829,STAGE AND PICTURE OPERATORS AFL-CIO,829.0,
 USW Local 13585,"STEELWORKERS, AFL-CIO",13585.0,44005.0,,train
 IBT 631,TEAMSTERS,631.0,2927.0,,train
 USW-1750,"STEELWORKERS, AFL-CIO",1750.0,38480.0,,train
-Teamsters 2,TEAMSTERS,2.0,,potentially resolvable,train
+Teamsters 2,TEAMSTERS,2.0,,ambiguous,train
 Plumbers and Steamfitters 81,PLUMBERS AFL-CIO,81.0,546446.0,,train
 RWDSU-1096,"RETAIL WHOLESALE, DC, UFCW",1096.0,61670.0,,train
 BSOIW -832,IRON WORKERS AFL-CIO,832.0,508657.0,,test
@@ -14084,7 +14084,7 @@ International Brotherhood of Electrical Workers 352,ELECTRICAL WORKERS IBEW AFL-
 IBT Local 890,TEAMSTERS,890.0,4180.0,,train
 Bay Area Medical Center Employees Union 3305,STATE COUNTY AND MUNI EMPLS AFL-CIO,3305.0,533817.0,,train
 OPEIU-459,OFFICE AND PROFESSIONAL EMPLS AFL-CIO,459.0,71162.0,,train
-TEAMSTERS-2,TEAMSTERS,2.0,,potentially resolvable,train
+TEAMSTERS-2,TEAMSTERS,2.0,,ambiguous,train
 IBT 439,TEAMSTERS,439.0,14236.0,,train
 Sheet Metal Workers'-66,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",66.0,521660.0,,train
 Baltimore Stagehands - IATSE-19,STAGE AND PICTURE OPERATORS AFL-CIO,19.0,43332.0,,train
@@ -14197,7 +14197,7 @@ USF Part Time Faculty Association AFT/CFT #6590,TEACHERS AFL-CIO,6590.0,545975.0
 AFGE-1030,GOVERNMENT EMPLOYEES AFGE AFL-CIO,1030.0,542308.0,,train
 SMWIA-100,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",100.0,515603,,train
 "International Brotherhood of Electrical Workers (IBEW) 647, 750",ELECTRICAL WORKERS IBEW AFL-CIO,,,potentially resolvable,train
-IBT-JC 28,TEAMSTERS,28.0,,potentially resolvable,train
+IBT-JC 28,TEAMSTERS,28.0,1459,,train
 IAMAW Local 23,MACHINISTS AFL-CIO,23.0,24574.0,,train
 DC3-203,PAINTERS AFL-CIO,203.0,21307.0,,train
 OPEIU 22,OFFICE AND PROFESSIONAL EMPLS AFL-CIO,22.0,542890.0,,train
@@ -14224,7 +14224,7 @@ WU Rochester Regional Jt Bd-221,"WORKERS UNITED, SEIU",221.0,56266.0,,train
 NY-NJ Joint Board - Workers United-158,"WORKERS UNITED, SEIU",158.0,43945,,train
 USW-14636,"STEELWORKERS, AFL-CIO",14636.0,12045.0,,train
 Amalgamated Transit Union  1625,TRANSIT UNION AFL-CIO,1625.0,533941.0,,train
-Teamsters Local Union 727,TEAMSTERS,727.0,,potentially resolvable,train
+Teamsters Local Union 727,TEAMSTERS,727.0,,ambiguous,train
 CMRJB-1818,"WORKERS UNITED, SEIU",1818.0,69857.0,,train
 UAW-2562,AUTO WORKERS AFL-CIO,2562.0,533754.0,,train
 "IBEW, AFL-CIO 1245",ELECTRICAL WORKERS IBEW AFL-CIO,1245.0,36759.0,,train
@@ -14654,7 +14654,7 @@ IAMAW District Lodge 190 Local 1584,MACHINISTS AFL-CIO,1584.0,538110.0,,train
 United Steelworkers 2635-05,"STEELWORKERS, AFL-CIO",2635.0,24988.0,,train
 "United Electrical, Radio and Machine Workers of Am-221",ELECTRICAL WORKERS UE IND,221.0,537073.0,,train
 UAW-838 Unit 16,AUTO WORKERS AFL-CIO,838.0,2232.0,,test
-IBT-986/848/495,TEAMSTERS,,,potentially resolvable,train
+IBT-986/848/495,TEAMSTERS,,,multi-local,train
 Laborers/Southern California District Council of Laborers-300,LABORERS,300.0,24909.0,,train
 IBT Local 601,TEAMSTERS,601.0,39153.0,,train
 UAW Region 1D,AUTO WORKERS AFL-CIO,1.0,529027.0,,train
@@ -14855,7 +14855,7 @@ UE-1004,ELECTRICAL WORKERS UE IND,1004.0,542377.0,,train
 IBT-344,TEAMSTERS,344.0,36973.0,,train
 International Union of Operating Engineers   624,"ENGINEERS, OPERATING, AFL-CIO",624.0,21164.0,,train
 USW District 10 Council 44-286,"STEELWORKERS, AFL-CIO",286.0,13014,,test
-IBT 633,TEAMSTERS,633.0,,potentially resolvable,train
+IBT 633,TEAMSTERS,633.0,32565,,train
 USW-12-591,"STEELWORKERS, AFL-CIO",591.0,19853.0,,train
 OPCMIA 21,PLASTERERS AND CEMENT MASONS AFL-CIO,21.0,35443.0,,train
 IATSE  38,STAGE AND PICTURE OPERATORS AFL-CIO,38.0,,potentially resolvable,train
@@ -14972,7 +14972,7 @@ USW  -333,"STEELWORKERS, AFL-CIO",333.0,,ambiguous,train
 IATSE-39,STAGE AND PICTURE OPERATORS AFL-CIO,39.0,31437.0,,train
 AFGE-3954,GOVERNMENT EMPLOYEES AFGE AFL-CIO,3954.0,526779.0,,train
 IATSE/MPEG Local 700,STAGE AND PICTURE OPERATORS AFL-CIO,700.0,541305.0,,train
-IBT-7,TEAMSTERS,7.0,,potentially resolvable,train
+IBT-7,TEAMSTERS,7.0,24668,,train
 United Steelworkers 2-00389,"STEELWORKERS, AFL-CIO",389.0,35385.0,,train
 United Steelworkers 13-103,"STEELWORKERS, AFL-CIO",103.0,,ambiguous,train
 USW-4933,"STEELWORKERS, AFL-CIO",4933.0,29670.0,,train
@@ -15308,7 +15308,7 @@ Carpenters Industrial Council UBC-8222,CARPENTERS IND,8222.0,29114.0,,train
 USW-220,"STEELWORKERS, AFL-CIO",220.0,,ambiguous,test
 IATSE-11,STAGE AND PICTURE OPERATORS AFL-CIO,11.0,8813.0,,train
 BCTGM 103,"BAKERY, TOBACCO AND GRAIN AFL-CIO",103.0,,ambiguous,train
-"Teamsters Locals 70, 87,150,166,186, 683, 853, 848, and 986-166, 186, 683, 853, 848, &",TEAMSTERS,,,potentially resolvable,train
+"Teamsters Locals 70, 87,150,166,186, 683, 853, 848, and 986-166, 186, 683, 853, 848, &",TEAMSTERS,,,multi-local,train
 United Steelworkers  9014-16,"STEELWORKERS, AFL-CIO",9014.0,513623.0,,train
 IBT 236,TEAMSTERS,236.0,37965.0,,train
 SEIU 205,SERVICE EMPLOYEES,205.0,66535.0,,test
@@ -15412,7 +15412,7 @@ Southwest Regional Council of Carpenters-1607,CARPENTERS IND,1607.0,21799,,train
 International Alliance of Theatrical Employees 205,STAGE AND PICTURE OPERATORS AFL-CIO,205.0,12184.0,,train
 UBCJA Local 4-166,CARPENTERS IND,166.0,37674.0,,train
 IAMAW AFL-CIO -Lodge 77,MACHINISTS AFL-CIO,77.0,531830,,train
-International Brotherhood of Teamsters 2,TEAMSTERS,2.0,,potentially resolvable,train
+International Brotherhood of Teamsters 2,TEAMSTERS,2.0,,ambiguous,train
 international brotherhood of electrical workers 2326,ELECTRICAL WORKERS IBEW AFL-CIO,2326.0,68380.0,,train
 IUBAC 18,BRICKLAYERS AFL-CIO,18.0,,potentially resolvable,train
 UFSPSO 250,SERVICE EMPLOYEES,250.0,7760.0,,train
@@ -15983,7 +15983,7 @@ CIC-2832,CARPENTERS IND,2832.0,18185.0,,train
 NORTHERN CALIFORNIA DISTRICT COUNCIL OF LABORERS/LOCAL 261 261,LABORERS,261.0,35872.0,,train
 Plumbers & Steamfitters UA Local #486,PLUMBERS AFL-CIO,486.0,526810.0,,train
 IBEW Local 1249,ELECTRICAL WORKERS IBEW AFL-CIO,1249.0,26594.0,,train
-Teamsters 166/186/630/683/853 166/186/630/683/853,TEAMSTERS,,,potentially resolvable,train
+Teamsters 166/186/630/683/853 166/186/630/683/853,TEAMSTERS,,,multi-local,train
 USW-8936,"STEELWORKERS, AFL-CIO",8936.0,514633.0,,train
 Creamery Employees and Drivers Union 517,TEAMSTERS,517.0,20397.0,,train
 International Britherhood of Boilermakers 647,BOILERMAKERS AFL-CIO,647.0,15657.0,,train
@@ -16282,7 +16282,7 @@ UNITED FOOD & COMMERCIAL WORKERS UNION 27,FOOD AND COMMERCIAL WKRS,27.0,,ambiguo
 PAT Local 513,PAINTERS AFL-CIO,513.0,3129.0,,train
 United Steelworkers 884,"STEELWORKERS, AFL-CIO",884.0,,ambiguous,test
 United Steelworkers 1899-10,"STEELWORKERS, AFL-CIO",1899.0,542667.0,,test
-"Teamsters Local:70,87,137,150,166,186,315,431,630,665,683,848,853,856,952,986,2785 70, 87, 137 ,150,166,186,683,853,986,2785",TEAMSTERS,,,potentially resolvable,train
+"Teamsters Local:70,87,137,150,166,186,315,431,630,665,683,848,853,856,952,986,2785 70, 87, 137 ,150,166,186,683,853,986,2785",TEAMSTERS,,,multi-local,train
 INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS (IBEW) 0051,ELECTRICAL WORKERS IBEW AFL-CIO,51.0,11356.0,,train
 Laborers' District Council of Western Pennsylvania-419,LABORERS,419.0,5725.0,,train
 USW AFL-CIO CLC-155-03,"STEELWORKERS, AFL-CIO",155.0,,ambiguous,train
@@ -16885,7 +16885,7 @@ UAW Local 440,AUTO WORKERS AFL-CIO,440.0,19456.0,,train
 USW-9-01418,"STEELWORKERS, AFL-CIO",1418.0,507542.0,,test
 United Steelworkers 9014-12,"STEELWORKERS, AFL-CIO",9014.0,513623.0,,train
 Central Iowa Sheet Metal Workers 45,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",45.0,28019.0,,train
-International Brotherhood of Teamsters 38,TEAMSTERS,38.0,,potentially resolvable,train
+International Brotherhood of Teamsters 38,TEAMSTERS,38.0,23943,,train
 Musicians Association of St. Louis 2-197,MUSICIANS AFL-CIO,2.0,47147.0,,train
 AFGE-2326,GOVERNMENT EMPLOYEES AFGE AFL-CIO,2326.0,505353.0,,train
 United Food and Commercial Workers Union-23,FOOD AND COMMERCIAL WKRS,23.0,31826,,train
@@ -17110,7 +17110,7 @@ LOCAL 46 METALLIC LATHERS UNION & REINFORCING IRONWORKERS OF NY CITY & VICINITY,
 IAM District 8,MACHINISTS AFL-CIO,8.0,37215.0,,train
 "NATIONAL ASSOCIATION OF BROADCAST EMPLOYEES AND TECHNICIANS - CWA, AFL-CIO A/W COMMUNICATION WORKERS",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
 "Communications Workers of America, Local 7901, AFL-CIO",COMMUNICATIONS WORKERS AFL-CIO,7901.0,46444.0,,train
-TEAMSTERS LOCAL NO. 727,TEAMSTERS,727.0,,potentially resolvable,train
+TEAMSTERS LOCAL NO. 727,TEAMSTERS,727.0,,ambiguous,train
 "UNITE HERE, AFL-CIO, CLC A/W UNION OF NEEDLETRADES, INDUSTRICAL AND TEXTILE EMPLOYEES",UNITE HERE,,,potentially resolvable,train
 United Food and Commercial Workers Union Local 538,FOOD AND COMMERCIAL WKRS,538.0,39252.0,,train
 "LOCAL 1031, UNITED SERVICE WORKERS UNION, IUJAT","UNITED SERVICE WORKERS UNION, IUJAT",1031.0,543825.0,,train
@@ -17491,7 +17491,7 @@ Teamsters Local  Union No. 839 affiliated with the International Brotherhood of 
 IBEW Local  136,ELECTRICAL WORKERS IBEW AFL-CIO,136.0,15763.0,,train
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union (Steel Workers), Local 9130-3","STEELWORKERS, AFL-CIO",9130.0,516792.0,,train
 "UNITED SERVICE WORKERS UNION, INTERNATIONAL UNION OF JOURNEYMEN AND ALLIED TRADES","UNITED SERVICE WORKERS UNION, IUJAT",,,potentially resolvable,train
-"CHAUFFEURS TEAMSTERS AND HELPERS, LOCAL 633 OF NEW HAMPSHIRE A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,633.0,,potentially resolvable,train
+"CHAUFFEURS TEAMSTERS AND HELPERS, LOCAL 633 OF NEW HAMPSHIRE A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,633.0,32565,,train
 "International Brotherhood of Electrical Workers (IBEW), Local 134",ELECTRICAL WORKERS IBEW AFL-CIO,134.0,35399.0,,train
 "Service Employee International Union,  Local 87",SERVICE EMPLOYEES,87.0,34951.0,,train
 "International Association of Machinists and Aerospace Workers, Local 2741",MACHINISTS AFL-CIO,2741.0,516023.0,,test
@@ -17940,7 +17940,7 @@ Association of Teachers Training Actors (ATTA),TEACHERS AFL-CIO,,,not in gazette
 "ELECTRONIC AND SPACE TECHNICIANS, LOCAL 1553, UNITED BROTHERHOOD OF CARPENTERS AND JOINERS OF AMERIC",CARPENTERS IND,1553.0,22383.0,,train
 AMERICAN POSTAL WORKERS UNION (APWU)  OAKLAND LOCAL 78,"POSTAL WORKERS, AMERICAN, AFL-CIO",78.0,511364.0,,train
 Teamsters Local 838,TEAMSTERS,838.0,42299.0,,train
-Teamsters Local 633,TEAMSTERS,633.0,,potentially resolvable,train
+Teamsters Local 633,TEAMSTERS,633.0,32565,,train
 PLUMBERS STEAMFITTERS UNION  LOCAL 228,PLUMBERS AFL-CIO,228.0,46443.0,,train
 "International Longshoremen Association, Local 1411",LONGSHOREMENS ASN AFL-CIO,1411.0,52551.0,,train
 Teamsters Local No. 238,TEAMSTERS,238.0,6334.0,,train
@@ -18394,7 +18394,7 @@ American Postal Workers Union #174,"POSTAL WORKERS, AMERICAN, AFL-CIO",174.0,507
 "DETROIT DISTRICT AREA, AMERICAN POSTAL WORKERS UNION (APWU), AFL-CIO","POSTAL WORKERS, AMERICAN, AFL-CIO",,,potentially resolvable,train
 "TEAMSTERS LOCAL UNION NO. 396, AW ITB",TEAMSTERS,396.0,21509.0,,train
 "LOCAL 389, INTERNATIONAL UNION, UNITED AUTOMOIBLE, AEROSPACE AND AGRICULTURAL IMPLEMENT WORKERS OF AMERICA (UAW), AFL-CIO",AUTO WORKERS AFL-CIO,389.0,5091.0,,train
-Teamsters Union No. 727,TEAMSTERS,727.0,,potentially resolvable,train
+Teamsters Union No. 727,TEAMSTERS,727.0,,ambiguous,train
 MINK Pipe Trades,PLUMBERS AFL-CIO,,,potentially resolvable,train
 IATSE Local 115,STAGE AND PICTURE OPERATORS AFL-CIO,115.0,9674.0,,train
 International Brotherhood of Electrical Workers Local 759,ELECTRICAL WORKERS IBEW AFL-CIO,759.0,9673.0,,train
@@ -18731,7 +18731,7 @@ APWU NBA,"POSTAL WORKERS, AMERICAN, AFL-CIO",,,potentially resolvable,train
 "PACKAGE AND GENERAL UTILITY DRIVERS, TEAMSTERS LOCAL UNION 396, INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,396.0,21509.0,,train
 IRONWORKERS UNION LOCAL 172,IRON WORKERS AFL-CIO,172.0,13276.0,,test
 "International Brotherhood of Electrical Workers, Local 768",ELECTRICAL WORKERS IBEW AFL-CIO,768.0,5661.0,,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, CHAUFFEURS, AND HELPERS OF AMERICA, LOCAL UNION NO. 633",TEAMSTERS,633.0,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, CHAUFFEURS, AND HELPERS OF AMERICA, LOCAL UNION NO. 633",TEAMSTERS,633.0,32565,,train
 "LOCAL 6445, UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND S","STEELWORKERS, AFL-CIO",6445.0,56175.0,,train
 "Nations Capital Southern MD Area Local 140, American Postal Workers Union, AFL-CIO","POSTAL WORKERS, AMERICAN, AFL-CIO",140.0,509337.0,,train
 "UNITED STEELWORKERS USW, LOCAL 6860","STEELWORKERS, AFL-CIO",6860.0,62968.0,,train
@@ -18750,7 +18750,7 @@ Communications Workers of America (CWA) Local 1168,COMMUNICATIONS WORKERS AFL-CI
 SERVICE EMPLOYEES INTERNATIONAL UNION (SEIU),SERVICE EMPLOYEES,,,potentially resolvable,train
 UA LOCAL 38,PLUMBERS AFL-CIO,38.0,35601.0,,train
 "General Teamsters Local Union 589, affiliated with International Brotherhood of Teamsters",TEAMSTERS,589.0,42242.0,,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, CHAUFFEURS AND HELPERS LOCAL UNION  NO. 633",TEAMSTERS,633.0,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, CHAUFFEURS AND HELPERS LOCAL UNION  NO. 633",TEAMSTERS,633.0,32565,,train
 UFCW Local 1996,FOOD AND COMMERCIAL WKRS,1996.0,540249.0,,train
 "PIKES PEAK MUSICIANS ASSOCIATION, LOCAL 154",MUSICIANS AFL-CIO,154.0,44991.0,,train
 INTERNATIONAL BROTHERHOOD OF TEAMSTERS JOINT COUNCIL NO. 41,TEAMSTERS,41.0,7381.0,,train
@@ -19547,7 +19547,7 @@ International Brotherhood of Teamsters Local No. 952,TEAMSTERS,952.0,34503.0,,tr
 "Local Union # 18, International Association of Sheet Metal, Air, Rail and Transportation Workers","SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",18.0,512905.0,,train
 "Amalgamated Transit Union, Local 1385, AFL-CIO",TRANSIT UNION AFL-CIO,1385.0,47278.0,,train
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union Local 5652","STEELWORKERS, AFL-CIO",5652.0,30102.0,,train
-Teamsters District Council 2,TEAMSTERS,2.0,,potentially resolvable,train
+Teamsters District Council 2,TEAMSTERS,2.0,,ambiguous,train
 BOILERMAKERS CEMENT DIVISION LODGE D-6,BOILERMAKERS AFL-CIO,6.0,18938.0,,train
 "United Steel, Paper, Forestry, Rubber Manufacturing, Energy, Allied Industrial, and Service Workers","STEELWORKERS, AFL-CIO",,,ambiguous,train
 INT'L UNION SECURITY POLICE FIRE PROFESSIONALS OF AMERICA,"SECURITY POLICE, FIRE PROF, IND",,,potentially resolvable,train
@@ -19623,7 +19623,7 @@ Nebraska Postal Workers Union,"POSTAL WORKERS, AMERICAN, AFL-CIO",,,potentially 
 Security Officers of America,"SECURITY POLICE, FIRE PROF, IND",,,potentially resolvable,test
 "UNITED STEELWORKERS DISTRICT 7, LOCAL 1066","STEELWORKERS, AFL-CIO",1066.0,14140.0,,test
 "INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 384, AFL-CIO",TEAMSTERS,384.0,11689.0,,train
-"Teamsters Local 456, 1.B.T.",TEAMSTERS,,,potentially resolvable,train
+"Teamsters Local 456, 1.B.T.",TEAMSTERS,,,multi-local,train
 "IBEW, 10TH DISTRICT",ELECTRICAL WORKERS IBEW AFL-CIO,10.0,,potentially resolvable,train
 CARPENTERS LOCAL 1,CARPENTERS IND,1.0,29151.0,,train
 United Steelworkers Local 9241,"STEELWORKERS, AFL-CIO",9241.0,528600.0,,train
@@ -19776,7 +19776,7 @@ Union of UNITE HERE Staff,UNION OF UNITE HERE STAFF,,544263.0,,train
 "International Union of Operating Engineers, Local 99 a/w International Union of Operating Engineers, AFL-CIO, CLC","ENGINEERS, OPERATING, AFL-CIO",99.0,14608.0,,train
 "International Association of Machinists and Aerospace Workers, AFL-CIO (IAM), Local Lodge 698",MACHINISTS AFL-CIO,698.0,1728.0,,train
 LOCAL 683 INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS,ELECTRICAL WORKERS IBEW AFL-CIO,683.0,47161.0,,train
-Teamsters Local 633 of New Hampshire,TEAMSTERS,633.0,,potentially resolvable,train
+Teamsters Local 633 of New Hampshire,TEAMSTERS,633.0,32565,,train
 "SEIU 775, affiliated with Service Employees International Union",SERVICE EMPLOYEES,775.0,542433.0,,train
 SEATTLE AREA PLUMBING & PIPEFITTING JOURNEYMAN & APPRENTICESHIP TRNG COMMITTEE,PLUMBERS AFL-CIO,,,potentially resolvable,train
 "LOCAL 1199, SEIU, NEW YORK'S  HEALTH & HUMAN SERVICES UNION, AFL-CIO",SERVICE EMPLOYEES,1199.0,31847.0,,train
@@ -20145,7 +20145,7 @@ AMALGAMATED TRANSIT UNION LOCAL # 1433,TRANSIT UNION AFL-CIO,1433.0,39792.0,,tra
 "UNITE HERE WESTERN STATE REGIONAL JOINT BOARD, LOCAL 14Z",UNITE HERE,14.0,8345.0,,train
 APWU Local 28,"POSTAL WORKERS, AMERICAN, AFL-CIO",28.0,91673.0,,train
 "UNITED STEELWORKERS OF AMERICA, LOCAL 9014, AFL-CIO","STEELWORKERS, AFL-CIO",9014.0,513623.0,,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 633",TEAMSTERS,633.0,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 633",TEAMSTERS,633.0,32565,,train
 "United Food & Commercial Workers Union, Local 1625",FOOD AND COMMERCIAL WKRS,1625.0,33089.0,,train
 "AMERICAN FEDERATION OF STATE, COUNTY & MUNICIPAL EMPLOYEES, COUNCIL 96",STATE COUNTY AND MUNI EMPLS AFL-CIO,96.0,540431.0,,train
 AFGE Local 2463,GOVERNMENT EMPLOYEES AFGE AFL-CIO,2463.0,505024.0,,train
@@ -20242,7 +20242,7 @@ LABORER'S LOCAL UNION #393,LABORERS,393.0,2110.0,,train
 "INTERNATIONAL ASSOCIATION OF MACHINISTS & AEROSPACE WORKERS, LOCAL 126, AFL-CIO",MACHINISTS AFL-CIO,126.0,39031.0,,train
 "UNITED STEELWORKERS OF AMERICA, LOCAL 1024","STEELWORKERS, AFL-CIO",1024.0,65496.0,,train
 TEAMSTERS LOCAL NO. 174,TEAMSTERS,174.0,7715.0,,train
-"TRUCK DRIVERS, CHAUFFEURS AND HELPERS UNION NO. 42, A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,42.0,,potentially resolvable,train
+"TRUCK DRIVERS, CHAUFFEURS AND HELPERS UNION NO. 42, A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,42.0,,ambiguous,train
 Communications Workers of America and its Locals 3672,COMMUNICATIONS WORKERS AFL-CIO,3672.0,62617.0,,train
 "Chauffeurs, Teamsters & Helpers Local Union No. 414",TEAMSTERS,414.0,17875.0,,train
 International Brotherhood of Teamsters Local 671,TEAMSTERS,671.0,23964.0,,train
@@ -20709,7 +20709,7 @@ INTERNATIONAL UNION OF BRICKLAYERS & ALLIED CRAFTWORKERS DISTRICT COUNCIL NO. 1,
 "INTERNATIONAL UNION OF OPERATING ENGINEERS, LOCAL 318","ENGINEERS, OPERATING, AFL-CIO",318.0,21088.0,,train
 "UNITED BROTHERHOOD OF CARPENTERS AND JOINERS OF AMERICA, LOCAL 409, AFL-CIO",CARPENTERS IND,409.0,519384.0,,train
 INTERNATIONAL UNION SECURITY POLICE AND FIRE PROFESSIONALS OF AMERICA LOCAL 540 (SPFPA),"SECURITY POLICE, FIRE PROF, IND",540.0,519316.0,,train
-Teamster Local 727,TEAMSTERS,727.0,,potentially resolvable,train
+Teamster Local 727,TEAMSTERS,727.0,,ambiguous,train
 "PROFESSIONAL, CLERICAL AND MISCELLANEOUS EMPLOYEES, TEAMSTERS, LOCAL 995 AFFILIATED WITH INTERNATION",TEAMSTERS,995.0,66774.0,,test
 "LOCAL 1199, SOFT DRINKS DRIVERS & HELPERS, VENDING DRIVERS & ALLIED WORKERS & EMPLOYEES, AFFILIATED WITH INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,1199.0,28369.0,,train
 "United Union of Roofers, Waterproofers and Allied Workers, Local 136, AFL-CIO",ROOFERS AFL-CIO,136.0,15315.0,,train
@@ -21131,7 +21131,7 @@ IBEW Local 465,ELECTRICAL WORKERS IBEW AFL-CIO,465.0,22853.0,,train
 IRONWORKERS LOCAL 732,IRON WORKERS AFL-CIO,732.0,46822.0,,train
 LABORERSÆ INTERNATIONAL UNION OF NORTH AMERICA LOCAL 561,LABORERS,561.0,1378.0,,train
 Teamster 728,TEAMSTERS,728.0,35292.0,,test
-"CHAUFFEURS, WAREHOUSEMEN AND HELPERS OF AMERICA LOCAL UNION NO. 633, A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,633.0,,potentially resolvable,train
+"CHAUFFEURS, WAREHOUSEMEN AND HELPERS OF AMERICA LOCAL UNION NO. 633, A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,633.0,32565,,train
 1199 SEIU Pension & Benefits,SERVICE EMPLOYEES,1199.0,,ambiguous,train
 "INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 922, (IBT)",TEAMSTERS,922.0,37260.0,,train
 "UPTE-CWA ""UPTE"" LOCAL 7(UNIVERSITY PROFESSIONAL AND TECHNICAL EMPLOYEES)",COMMUNICATIONS WORKERS AFL-CIO,7.0,12590.0,,train
@@ -21908,7 +21908,7 @@ United Steel Workers Local 13214,"STEELWORKERS, AFL-CIO",13214.0,20112.0,,train
 International Association of Machinists & Aerospace Workers District W24,MACHINISTS AFL-CIO,24.0,,potentially resolvable,train
 Communications Workers of America Local 4250,COMMUNICATIONS WORKERS AFL-CIO,4250.0,11302.0,,train
 "INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL UNION NO. 202",TEAMSTERS,202.0,26719.0,,train
-"CHAUFFEURS, TEAMSTERS & HELPERS, LOCAL UNION NO. 633 OF NEW HAMPSHIRE, A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,633.0,,potentially resolvable,train
+"CHAUFFEURS, TEAMSTERS & HELPERS, LOCAL UNION NO. 633 OF NEW HAMPSHIRE, A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,633.0,32565,,train
 "INTERNATIONAL BROTHERHOOD OF TEAMSTERS, CHAUFFEURS, WAREHOUSEMEN AND HELPERS OF AMERICA, LOCAL 767",TEAMSTERS,767.0,16816.0,,train
 "INTERNATIONAL ASSOCIATION OF MACHINISTS AND AEROSPACE WORKERS, LOCAL 47",MACHINISTS AFL-CIO,47.0,3195.0,,train
 "INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL UNION 173, AFL-CIO, CLC",TEAMSTERS,173.0,10653.0,,train
@@ -22572,7 +22572,7 @@ UAW LOCAL UNION 122,AUTO WORKERS AFL-CIO,122.0,11155.0,,train
 "GRAPHIC COMMUNICATIONS CONFERENCE/IBT, LOCAL 612M, AFL-CIO",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,612.0,521560.0,,train
 "INTERNATIONAL ASSOCIATION OF MACHINISTS & AEROSPACE WORKERS, AFL-CIO, DISTRICT LODGE W 1",MACHINISTS AFL-CIO,1.0,547276,,train
 "COMMUNICATIONS WORKERS OF AMERICA, LOCAL 3640",COMMUNICATIONS WORKERS AFL-CIO,3640.0,541952.0,,train
-International Brotherhood of Teamsters Joint Council 10 on Behalf of Teamsters Local 633,TEAMSTERS,633.0,,potentially resolvable,train
+International Brotherhood of Teamsters Joint Council 10 on Behalf of Teamsters Local 633,TEAMSTERS,633.0,,multi-local,train
 "ASBESTOS, LEAD & HAZARDOUS WASTE LABORERS' LOCAL L78",LABORERS,78.0,540382.0,,test
 "LOCAL 433, INTERNATIONAL ASSOCIATION OF BRIDGE, STRUCTURAL, ORNAMENTAL AND REINFORCING IRON WORKERS",IRON WORKERS AFL-CIO,433.0,34224.0,,train
 PLUMBERS LOCAL 55,PLUMBERS AFL-CIO,55.0,11734.0,,train
@@ -23880,7 +23880,7 @@ National Postal Workers Union (APWU),"POSTAL WORKERS, AMERICAN, AFL-CIO",,,poten
 AMERICAN POSTAL WORKERS UNION  NEW YORK METRO AREA APWU,"POSTAL WORKERS, AMERICAN, AFL-CIO",,506753,,train
 "Washington-Baltimore Newspaper Guild, Local 32035",COMMUNICATIONS WORKERS AFL-CIO,32035.0,38522.0,,train
 United Steel Paper and Forestry Rubber Manufacturing Energy Allied Industrical and Service Workers Local 711T,"STEELWORKERS, AFL-CIO",711.0,504940.0,,train
-Teamsters Local 633 of NH,TEAMSTERS,633.0,,potentially resolvable,train
+Teamsters Local 633 of NH,TEAMSTERS,633.0,32565,,train
 Ironworkers Local Union 377,IRON WORKERS AFL-CIO,377.0,30069.0,,train
 "UNITED STEEL WORKERS, LOCAL 895","STEELWORKERS, AFL-CIO",895.0,64213,,train
 "International Association of Bridge, Structural, Ornamental & Reinforcing Iron Workers",IRON WORKERS AFL-CIO,,,potentially resolvable,train
@@ -23901,7 +23901,7 @@ International Guards Union of America Local #172,GUARDS IND,172.0,546778.0,,trai
 "INTERNATIONAL ASSOCIATION OF MACHINISTS AND AEROSPACE WORKERS, LOCAL LODGE 1377",MACHINISTS AFL-CIO,1377.0,12226.0,,train
 TEAMSTERS LOCAL UNION 776,TEAMSTERS,776.0,22656.0,,train
 ILA AFL-CIO Local Union Number 1694,LONGSHOREMENS ASN AFL-CIO,1694.0,,potentially resolvable,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, A/W CHAUFFEURS, TEAMSTERS AND HELPERS LOCAL UNION NO. 633",TEAMSTERS,633.0,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, A/W CHAUFFEURS, TEAMSTERS AND HELPERS LOCAL UNION NO. 633",TEAMSTERS,633.0,32565,,train
 "INT'L UNION, SECURITY, POLICE & FIRE PROF OF AMERICA","SECURITY POLICE, FIRE PROF, IND",,,potentially resolvable,train
 "NATIONAL ORGANIZATION OF LEGAL SERVICES WORKERS, UAW LOCAL 2320, AFL-CIO",AUTO WORKERS AFL-CIO,2320.0,531724.0,,train
 CHICAGO AND MIDWEST REGIONAL JOINT BOARD LOCAL 2721,"WORKERS UNITED, SEIU",2721.0,544262.0,,train
@@ -24072,7 +24072,7 @@ UNITED FOOD AND COMMERCIAL WORKERS INTERNATIONAL UNION LOCAL 342,FOOD AND COMMER
 COMMUNICATIONS WORKERS OF AMERICA LOCAL 6450,COMMUNICATIONS WORKERS AFL-CIO,6450.0,24331.0,,train
 "HEALTH PROFESSIONAL AND ALLIED EMPLOYEES, LOCAL 5147",TEACHERS AFL-CIO,5147.0,543950.0,,train
 AMALGAMATED TRANSIT UNION LOCAL 639,TRANSIT UNION AFL-CIO,639.0,544931.0,,train
-Teamsters local 727,TEAMSTERS,727.0,,potentially resolvable,train
+Teamsters local 727,TEAMSTERS,727.0,,ambiguous,train
 "Laborers International Union North America, Local 483, affiliated with AFL-CIO",LABORERS,483.0,542860.0,,train
 international Brotherhood of Teamster Local 988,TEAMSTERS,988.0,65379.0,,train
 "LOCAL 670, RWDSU, AFL-CIO","RETAIL WHOLESALE, DC, UFCW",670.0,52198.0,,train
@@ -24321,7 +24321,7 @@ Carpenters Local 505,CARPENTERS IND,505.0,537431.0,,train
 "International Union of Painters and Allied Trades, Local 156",PAINTERS AFL-CIO,156.0,9634.0,,train
 United Auto Workers Local 9025,AUTO WORKERS AFL-CIO,9025.0,544300.0,,train
 "TEAMSTERS, LOCAL 17",TEAMSTERS,17.0,25769.0,,train
-"International Brotherhood of Teamsters, Chauffeurs, and Helpers Local Union 633 of NH",TEAMSTERS,633.0,,potentially resolvable,train
+"International Brotherhood of Teamsters, Chauffeurs, and Helpers Local Union 633 of NH",TEAMSTERS,633.0,32565,,train
 "International Brotherhood of Electrical Workers, Local 1613",ELECTRICAL WORKERS IBEW AFL-CIO,1613.0,4384.0,,train
 "General Teamsters, Chauffeurs and Helpers Local Union 249",TEAMSTERS,249.0,28815.0,,train
 "LABORERS INTERNATIONAL UNION OF NORTH AMERICA, LOCAL 702",LABORERS,702.0,543430.0,,train
@@ -25071,7 +25071,7 @@ LOCAL 653 INT'L UNION UAW,AUTO WORKERS AFL-CIO,653.0,6151.0,,train
 "INTERNATIONAL ALLIANCE OF THEATRICAL & STAGE EMPLOYEES, LOCAL 107 (IATSE LOCAL107)",STAGE AND PICTURE OPERATORS AFL-CIO,107.0,5783.0,,train
 Pacific Northwest Regional Council of Carpenters Local Union No. 2949,CARPENTERS IND,2949.0,7450.0,,train
 "AMERICAN POSTAL WORKERS UNION, CLEVELAND AREA LOCAL","POSTAL WORKERS, AMERICAN, AFL-CIO",,,potentially resolvable,train
-TEAMSTERS LOCALS 117 AND 174,TEAMSTERS,,,potentially resolvable,train
+TEAMSTERS LOCALS 117 AND 174,TEAMSTERS,,,multi-local,train
 "SECURITY, POLICE AND FIRE PROFESSIONALS OF AMERICA","SECURITY POLICE, FIRE PROF, IND",,,potentially resolvable,train
 TEAMSTERS LOCAL UNION NO. 688,TEAMSTERS,688.0,25471.0,,train
 NEWSPAPER AND PERIODIC DRIVERS AND HELPERS TEAMSTERS' UNION LOCAL 921,TEAMSTERS,921.0,33389.0,,train
@@ -25921,7 +25921,7 @@ Teamsters Local Union #630,TEAMSTERS,630.0,34093.0,,train
 INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL UNION NO 270,TEAMSTERS,270.0,37852.0,,train
 APWU Local 0524,"POSTAL WORKERS, AMERICAN, AFL-CIO",524.0,71613.0,,train
 "International Alliance of Theatrical Stage Employees, Moving Picture Technicians, Artists and Allied Crafts of the United States, its Territories and Canada AFL-CIO CLC",STAGE AND PICTURE OPERATORS AFL-CIO,,,potentially resolvable,test
-TEAMSTERS LOCAL UNION NO. 727,TEAMSTERS,727.0,,potentially resolvable,train
+TEAMSTERS LOCAL UNION NO. 727,TEAMSTERS,727.0,,ambiguous,train
 "Local 1076, Laborers' International Union of North America (LiUNA!), AFL-CIO",LABORERS,1076.0,14989.0,,train
 "LOCAL 1510, BOILERMAKERS, AFL-CIO",BOILERMAKERS AFL-CIO,1510.0,509503.0,,train
 SERVICE EMPLOYEES INTERNATIONAL UNION HEALTH CARE FLORIDA,SERVICE EMPLOYEES,,,potentially resolvable,train
@@ -27811,7 +27811,7 @@ SEIU Healthcare Minnesota & Iowa,SERVICE EMPLOYEES,,,potentially resolvable,trai
 "RETAIL, WHOLESALE AND DEPARTMENT STORE UNION, LOCAL 379, AFL-CIO","RETAIL WHOLESALE, DC, UFCW",379.0,36929.0,,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCAL 2154, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,2154.0,62321.0,,train
 IBEW Local 0876,ELECTRICAL WORKERS IBEW AFL-CIO,876.0,4425.0,,train
-TEAMSTERS LOCAL 727,TEAMSTERS,727.0,,potentially resolvable,train
+TEAMSTERS LOCAL 727,TEAMSTERS,727.0,,ambiguous,train
 "International Brotherhood of Electrical Workers, Local No. 415",ELECTRICAL WORKERS IBEW AFL-CIO,415.0,29549.0,,train
 "CHAUFFEURS, TEAMSTERS AND HELPERS LOCAL UNION NO. 491, INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,491.0,16605.0,,train
 "TEAMSTERS LOCAL UNION NO. 630, FOOD INDUSTRIAL & BEVERAGE WAREHOUSE, DRIVERS AND CLERICAL EMPLOYEES, INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,630.0,34093.0,,train
@@ -29293,7 +29293,7 @@ BALTIMORE/WASHINGTON LABORERS' DISTRICT COUNCIL,LABORERS,,,potentially resolvabl
 "LOCAL 15, IAM",MACHINISTS AFL-CIO,15.0,,ambiguous,train
 "International Association of Machinists and Aerospace Workers, Local Lodge 773",MACHINISTS AFL-CIO,773.0,61277.0,,test
 "Local 799C,  International Chemical Workers Union Council of the United Food and Commercial Workers Union (ICWUC/UFCW), AFL-CIO, CLC",FOOD AND COMMERCIAL WKRS,799.0,54075.0,,train
-"CHAUFFEURS, TEAMSTERS AND HELPERS LOCAL UNION 633 OF NEW HAMPSHIRE A/W INTERNATIONAL BROTHERHOOD OF",TEAMSTERS,633.0,,potentially resolvable,test
+"CHAUFFEURS, TEAMSTERS AND HELPERS LOCAL UNION 633 OF NEW HAMPSHIRE A/W INTERNATIONAL BROTHERHOOD OF",TEAMSTERS,633.0,32565,,test
 Industrial Division - Communications Workers of America (IUE-CWA),COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
 LOCAL 164 TEAMSTERS,TEAMSTERS,164.0,33285.0,,train
 TEAMSTERS LOCAL 17,TEAMSTERS,17.0,25769.0,,train
@@ -29322,7 +29322,7 @@ Industrial Division of the Communications Workers of America (IUE-CWA),COMMUNICA
 "American Postal Workers Union, Local Union No. 7","POSTAL WORKERS, AMERICAN, AFL-CIO",7.0,92523.0,,train
 International Longshoremen's Association Local 2038,LONGSHOREMENS ASN AFL-CIO,2038.0,516947.0,,train
 Smart Local 110 Sheet Metal Workers Union,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",110.0,2417.0,,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 633, AFL-CIO",TEAMSTERS,633.0,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 633, AFL-CIO",TEAMSTERS,633.0,32565,,train
 UNITE HERE CHICAGO & MIDWEST REGIONAL JOINT BOARD,UNITE HERE,,,potentially resolvable,train
 TEAMSTERS LOCAL UNION NO. 249,TEAMSTERS,249.0,28815.0,,train
 Local 342 UFCW,FOOD AND COMMERCIAL WKRS,342.0,,ambiguous,train
@@ -29386,7 +29386,7 @@ LOCAL 1205 INTERNATIONAL  BROTHERHOOD OF TEAMSTERS,TEAMSTERS,1205.0,23458.0,,tra
 "LOCAL 714, IBT",TEAMSTERS,714.0,6375.0,,train
 "National Federation of Federal Employees-International Association of Machinists, NFFE-IAM","FED EMPL NFFE, DIST 1, IAM, AFL-CIO",,,potentially resolvable,train
 "INTERNATIONAL BROTHERHOOD OF BOILERMAKERS, LOCAL LODGE 193, AFL-CIO",BOILERMAKERS AFL-CIO,193.0,6176.0,,train
-INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL UNION NO. 633,TEAMSTERS,633.0,,potentially resolvable,train
+INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL UNION NO. 633,TEAMSTERS,633.0,32565,,train
 "International Alliance of Theatrical Stage Employees, Local 64",STAGE AND PICTURE OPERATORS AFL-CIO,64.0,28832.0,,train
 "International Brotherhood of Electrical Workers, Local Union 158",ELECTRICAL WORKERS IBEW AFL-CIO,158.0,55042.0,,train
 "Local 243, International Brotherhood of Teamsters",TEAMSTERS,243.0,30804.0,,train
@@ -29477,7 +29477,7 @@ United Auto Workers Local 600,AUTO WORKERS AFL-CIO,600.0,13030.0,,train
 ALASKA REGIONAL COUNCIL OF CARPENTERS,CARPENTERS IND,,,potentially resolvable,train
 ATU Local 752,TRANSIT UNION AFL-CIO,752.0,5776.0,,train
 "Mid-America Carpenters Regional Council, affiliated with the United Brotherhood of Carpenters and Joiners of Illinois",CARPENTERS IND,,,potentially resolvable,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, CHAUFFEURS AND HELPERS LOCAL UNION NO. 633 OF NEW HAMPSHIRE",TEAMSTERS,633.0,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, CHAUFFEURS AND HELPERS LOCAL UNION NO. 633 OF NEW HAMPSHIRE",TEAMSTERS,633.0,32565,,train
 "United Food and Commercial Workers International Union, Local 152",FOOD AND COMMERCIAL WKRS,152.0,543600.0,,train
 "OFFICE AND PROFESSIONAL EMPLOYEES UNION, LOCAL 98",OFFICE AND PROFESSIONAL EMPLS AFL-CIO,98.0,62056.0,,train
 Teamsters Local No. 992,TEAMSTERS,992.0,14787.0,,train
@@ -30231,7 +30231,7 @@ TEAMSTERS UNION LOCAL 986,TEAMSTERS,986.0,15379.0,,test
 AMERICAN POSTAL WORKERS UNION TRI-COUNTY OHIO AREA LOCAL,"POSTAL WORKERS, AMERICAN, AFL-CIO",,509449,,train
 "UAW, LOCAL 2300",AUTO WORKERS AFL-CIO,2300.0,514445.0,,train
 UAW Local 435,AUTO WORKERS AFL-CIO,435.0,2423.0,,train
-Amazon Labor Union - IBT Local 1,TEAMSTERS,1.0,,potentially resolvable,train
+Amazon Labor Union - IBT Local 1,TEAMSTERS,1.0,,ambiguous,train
 "Health Care, Professional, Technical, Office, Warehouse & Mail Order Employees Union affiliated with the International Brotherhood of Teamsters, Local 743",TEAMSTERS,743.0,34094.0,,train
 "MERCHANDISE DRIVERS LOCAL NO. 641, IBT",TEAMSTERS,641.0,21998.0,,train
 "American Postal Workers Union, Local 089","POSTAL WORKERS, AMERICAN, AFL-CIO",89.0,92026.0,,train
@@ -30748,7 +30748,7 @@ Teamsters Local Union No. 30 A/W International Brotherhood of Teamsters,TEAMSTER
 OHIO NURSES ASSOCIATON (ONA) A/W AMERICAN NURSES ASSOCIATION (ANA) AND THE NATIONAL FEDERATION OF NU,TEACHERS AFL-CIO,,40094.0,,train
 "Service Employees International Union, Local 500, a/w Service Employees International Union, CTW, CLC",SERVICE EMPLOYEES,500.0,542923.0,,train
 United Steelworkers Local Union 9612,"STEELWORKERS, AFL-CIO",9612.0,544673.0,,train
-"TEAMSTERS DISTRICT COUNCIL NO. 2, INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,2.0,,potentially resolvable,train
+"TEAMSTERS DISTRICT COUNCIL NO. 2, INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,2.0,,ambiguous,train
 International Association of Sheet Metal Air Rail Transportation (SMART) Workers Union,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",,,ambiguous,train
 International Union of Painters and Allied Trades Local 1293,PAINTERS AFL-CIO,1293.0,5992.0,,train
 "AMERICAN POSTAL WORKERS UNION, MANCHESTER AREA LOCAL 230","POSTAL WORKERS, AMERICAN, AFL-CIO",230.0,72475.0,,train
@@ -30876,7 +30876,7 @@ GCC/IBT LOCAL 612M,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,612.0,5215
 United Food and Commercial Workers Local 101,FOOD AND COMMERCIAL WKRS,101.0,529964.0,,train
 "The International Chemical Workers Union Council of the United Food & Commercial Workers Union, AFL-CIO, CLC",FOOD AND COMMERCIAL WKRS,,,potentially resolvable,train
 "INTERNATIONAL ASSOCIATION OF MACHINISTS AND AEROSPACE WORKERS, LOCAL LODGE 598",MACHINISTS AFL-CIO,598.0,62602.0,,train
-"Chauffeurs, Teamsters & Helpers Local Union No. 633 a/w International Brotherhood of Teamsters",TEAMSTERS,633.0,,potentially resolvable,train
+"Chauffeurs, Teamsters & Helpers Local Union No. 633 a/w International Brotherhood of Teamsters",TEAMSTERS,633.0,32565,,train
 "TEAMSTERS, CHAUFFEURS, WAREHOUSEMEN AND HELPERS LOCAL UNION NO. 631",TEAMSTERS,631.0,2927.0,,train
 United Food and Commercial Workers Union Local 464A,FOOD AND COMMERCIAL WKRS,464.0,2373.0,,test
 "INTERNATIONAL ASSOCIATION OF MACHINISTS AND AEROSPACE WORKERS DISTRICT LODGE 15, AFL-CIO",MACHINISTS AFL-CIO,15.0,7879.0,,train
@@ -30965,7 +30965,7 @@ Operative Plasterers and Cement Masons Local 797,PLASTERERS AND CEMENT MASONS AF
 LOCAL UNION 342 IBEW,ELECTRICAL WORKERS IBEW AFL-CIO,342.0,517631.0,,train
 LOCAL 1922 IBEW,ELECTRICAL WORKERS IBEW AFL-CIO,1922.0,39260.0,,train
 "THE UTILITY WORKERS OF AMERICA LOCAL 380, AFL-CIO",UTILITY WORKERS AFL-CIO,380.0,51934.0,,train
-"AMALGAMATED LITHOGRAPHERS OF AMERICA, LOCAL 1-L, IBT",TEAMSTERS,1.0,,potentially resolvable,train
+"AMALGAMATED LITHOGRAPHERS OF AMERICA, LOCAL 1-L, IBT",TEAMSTERS,1.0,,ambiguous,train
 "United Food and Commercial Workers Union, Local 1262",FOOD AND COMMERCIAL WKRS,1262.0,51552.0,,train
 "INTERNATIONAL BROTHERHOOD OF BOILERMAKERS, IRON SHIP BUILDERS, BLACKSMITHS, FORGERS & HELPERS, LODGE",BOILERMAKERS AFL-CIO,,,potentially resolvable,train
 "United Automobile Aerospace and Agricultural Implement Workers of America, UAW",AUTO WORKERS AFL-CIO,,,potentially resolvable,train
@@ -31667,7 +31667,7 @@ STEELWORKERS LOCAL 885,"STEELWORKERS, AFL-CIO",885.0,24456.0,,train
 "International Association of Longshoremen, Local 1410",LONGSHOREMENS ASN AFL-CIO,1410.0,,potentially resolvable,train
 NORTH CENTRAL STATES REGIONAL COUNCIL OF CARPENTERS WISCONSIN OF THE UNITED BROTHERHOOD OF CARPENTER,CARPENTERS IND,,,potentially resolvable,train
 "International Union of Electronic, Electrical, Salaried, Machine and Furniture Workers AFL-CIO (IUE) - Communications Workers of America, AFL-CIO (CWA), IUE-CWA International",COMMUNICATIONS WORKERS AFL-CIO,,,potentially resolvable,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, CHAUFFEURS AND HELPERS LOCAL UNION NO. 633",TEAMSTERS,633.0,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, CHAUFFEURS AND HELPERS LOCAL UNION NO. 633",TEAMSTERS,633.0,32565,,train
 International Brotherhood of Electrical Workers Local Union 1996,ELECTRICAL WORKERS IBEW AFL-CIO,1996.0,51582.0,,train
 International Brotherhood of Teamsters Local 560,TEAMSTERS,560.0,21915.0,,train
 "International Brotherhood of Boilermakers, Local Lodge D-421",BOILERMAKERS AFL-CIO,421.0,58153.0,,train
@@ -31764,7 +31764,7 @@ LOCAL 93 RWDSU,"RETAIL WHOLESALE, DC, UFCW",93.0,22541.0,,train
 "UAW, LOCAL 122",AUTO WORKERS AFL-CIO,122.0,11155.0,,train
 "IBT, LOCAL 853",TEAMSTERS,853.0,20870.0,,train
 BOILERMAKERS LOCAL LODGE 101,BOILERMAKERS AFL-CIO,101.0,36042.0,,train
-"Teamsters, Local 727",TEAMSTERS,727.0,,potentially resolvable,train
+"Teamsters, Local 727",TEAMSTERS,727.0,,ambiguous,train
 USW Local #662L,"STEELWORKERS, AFL-CIO",662.0,58375.0,,train
 LOCAL  817 THEATRICAL TEAMSTERS,TEAMSTERS,817.0,48200.0,,train
 "INTERNATIONAL UNION, UNITED AUTOMOBILE, AERSPACE & AGRICULTURAL IMPLEMENT WORKERS OF AMERICA, UAW, R",AUTO WORKERS AFL-CIO,,,potentially resolvable,train
@@ -33870,7 +33870,7 @@ INTERNATIONAL BROTHERHOOD OF TEAMSTERS NEWSPAPER MAGAZINE EMPLOYEES UNION LOCAL 
 United Steelworkers Local 7796,"STEELWORKERS, AFL-CIO",7796.0,68189.0,,train
 "International Brotherhood of Electrical Workers, Local 659",ELECTRICAL WORKERS IBEW AFL-CIO,659.0,38373.0,,train
 "Eastern Atlantic States Regional Council of Carpenters, Local 197",CARPENTERS IND,197.0,545486.0,,train
-"CHAUFFEURS, WAREHOUSEMEN AND HELPERS OF AMERICA LOCAL UNION NO. 633 OF NEW HAMPSHIRE, A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,633.0,,potentially resolvable,train
+"CHAUFFEURS, WAREHOUSEMEN AND HELPERS OF AMERICA LOCAL UNION NO. 633 OF NEW HAMPSHIRE, A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,633.0,32565,,train
 "International Brotherhood of Teamsters (IBT), Local Union  No. 89",TEAMSTERS,89.0,20926.0,,train
 UNITED FOOD & COMMERCIAL WORKERS UNION LOCAL 1262,FOOD AND COMMERCIAL WKRS,1262.0,51552.0,,train
 "TEAMSTERS, CHAUFFEURS & HELPERS UNION, LOCAL NO. 650",TEAMSTERS,650.0,16618.0,,train
@@ -34141,7 +34141,7 @@ INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS LOCAL UNION #245 A/W INTERNATION
 SHEET METAL WORKERS LOCAL 15,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",15.0,516617.0,,train
 "Local 659, International Union, United Automobile, Aerospace and Agricultural Implement Workers of America (UAW), AFL-CIO",AUTO WORKERS AFL-CIO,659.0,6333.0,,train
 "PACKAGE & GENERAL UTILITY DRIVERS, TEAMSTERS LOCAL UNION 396, INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,396.0,21509.0,,train
-Teamsters Union Local 633,TEAMSTERS,633.0,,potentially resolvable,train
+Teamsters Union Local 633,TEAMSTERS,633.0,32565,,train
 UAW Local 2020,AUTO WORKERS AFL-CIO,2020.0,511471.0,,train
 "AMALGAMATED TRANSIT UNION (ATU),  LOCAL 1091, AFL-CIO",TRANSIT UNION AFL-CIO,1091.0,12007.0,,train
 "International Union, Security, Police & Fire Professionals of America SPFPA and its Amalgamated LU 444","SECURITY POLICE, FIRE PROF, IND",444.0,543333.0,,train
@@ -36005,7 +36005,7 @@ TEAMSTERS LOCAL UNION #639,TEAMSTERS,639.0,11839.0,,train
 "Waste Material Recycling and General Industrial Laborers Local Union 108, LIUNA, AFL-CIO",LABORERS,108.0,541709.0,,train
 "INTERNATIONAL UNION OF OPERATING ENGINEERS, LOCAL 18","ENGINEERS, OPERATING, AFL-CIO",18.0,39040.0,,train
 Laborers Union Local 75,LABORERS,75.0,6062.0,,train
-INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 633 AND THE TEAMSTERS BREWERY AND SOFT DRINK DIVISION IN WASHINGTON DC,TEAMSTERS,633.0,,potentially resolvable,train
+INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 633 AND THE TEAMSTERS BREWERY AND SOFT DRINK DIVISION IN WASHINGTON DC,TEAMSTERS,633.0,32565,,train
 "TEAMSTERS, LOCAL 61",TEAMSTERS,61.0,13418.0,,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS LOCAL 210, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,210.0,17518.0,,test
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union, AFL-CIO and USW Local 563","STEELWORKERS, AFL-CIO",563.0,521576,,train
@@ -36434,7 +36434,7 @@ SERVICE WORKERS UNITED - UNITE HERE,SERVICE EMPLOYEES,,,potentially resolvable,t
 OPEIU- Local 153,OFFICE AND PROFESSIONAL EMPLS AFL-CIO,153.0,19065.0,,train
 ROCHESTER REGIONAL JOINT BOARD,"WORKERS UNITED, SEIU",,,potentially resolvable,test
 United Food & Commercial Workers Local 75,FOOD AND COMMERCIAL WKRS,75.0,544266.0,,train
-TEAMSTERS LOCAL 125/295 INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,,,potentially resolvable,train
+TEAMSTERS LOCAL 125/295 INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,,,multi-local,train
 "Amalgamated Transit Union, Local 1700, AFL-CIO",TRANSIT UNION AFL-CIO,1700.0,540160.0,,train
 "OFFICE AND PROFESSIONAL EMPLOYEES INTERNATIONAL UNION, LOCAL 19, AFL-CIO & CLC",OFFICE AND PROFESSIONAL EMPLS AFL-CIO,19.0,25644.0,,train
 "Santa Barbara, CA SCF Aera Local American Postal Workers Union, [APWU] AFL-CIO","POSTAL WORKERS, AMERICAN, AFL-CIO",,,potentially resolvable,test
@@ -37834,7 +37834,7 @@ APWU 604-605,"POSTAL WORKERS, AMERICAN, AFL-CIO",604.0,513126.0,,train
 "SOUTHERN CALIFORNIA MEDIA GUILD, A NEWSPAPER GUILD - COMMUNICATION WORKERS OF AMERICA, LOCAL 9400, A",COMMUNICATIONS WORKERS AFL-CIO,9400.0,517316.0,,train
 APWU Local 0381,"POSTAL WORKERS, AMERICAN, AFL-CIO",381.0,506234.0,,train
 "UNITED GOVERNMENT SECURITY OFFICERS OF AMERICA, LOCAL #024","GOVERNMENT SECURITY OFFICERS, IND",24.0,529954.0,,train
-TEAMSTERS DISTRICT COUNCIL NO. 2,TEAMSTERS,2.0,,potentially resolvable,train
+TEAMSTERS DISTRICT COUNCIL NO. 2,TEAMSTERS,2.0,,ambiguous,train
 Local 153 Office of Professional Employees International Union AFL CIO,OFFICE AND PROFESSIONAL EMPLS AFL-CIO,153.0,19065.0,,train
 Amalgamated Transit Union Local 1764 a/w Amalgamated Transit Union AFL-CIO/CLC,TRANSIT UNION AFL-CIO,1764.0,544061.0,,train
 SOUTHERN CALIFORNIA DISTRICT COUNCIL OF LABORERS AND ITS AFFILIATED LOCALS,LABORERS,,,potentially resolvable,test
@@ -38041,7 +38041,7 @@ TWIN CITIES MUSICIANS' UNION LOCAL 70-33,MUSICIANS AFL-CIO,70.0,15632.0,,train
 "IBEW, LOCAL NO. 1362",ELECTRICAL WORKERS IBEW AFL-CIO,1362.0,20760.0,,train
 "International Brotherhood of Teamsters (IBT), Local Union No. 406",TEAMSTERS,406.0,29589.0,,train
 "SHEET METAL WORKERS' INTERNATIONAL ASSOCIATION, LOCAL UNION #12, AFL-CIO","SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",12.0,43400.0,,train
-INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 633,TEAMSTERS,633.0,,potentially resolvable,train
+INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 633,TEAMSTERS,633.0,32565,,train
 "International Brotherhood of Electrical Workers, Local Union 222",ELECTRICAL WORKERS IBEW AFL-CIO,222.0,533799.0,,train
 LABORERS' LOCAL UNION NO. 894 A/W LABORERS INTERNATIONAL UNION OF NORTH AMERICA,LABORERS,894.0,1105.0,,train
 "Road Sprinkler Fitters Union No. 669, United Association, AFL-CIO",PLUMBERS AFL-CIO,669.0,59937.0,,train
@@ -38186,7 +38186,7 @@ SHEET METAL WORKERS INTERNATIONAL ASSOCIATION LOCAL UNION #83,"SHEET METAL, AIR,
 "COMMUNICATIONS WORKERS OF AMERICA, LOCAL UNION 6202",COMMUNICATIONS WORKERS AFL-CIO,6202.0,43632.0,,train
 "United Food and Commercial Workers Union, Local 75(Campbell Soup Supply Company)",FOOD AND COMMERCIAL WKRS,75.0,544266.0,,train
 "Local 436, International Union of Electronic, Electrical, Salaried, Machine and Furniture Workers af",COMMUNICATIONS WORKERS AFL-CIO,436.0,521570.0,,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 727, AFL-CIO, CLC",TEAMSTERS,727.0,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 727, AFL-CIO, CLC",TEAMSTERS,727.0,,ambiguous,train
 "International Association of Sheet Metal, Air, Rail and Transportation Workers, AFL-CIO, Local No. 44","SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",44.0,516867.0,,train
 "WOODFRAME LOCAL 723, NEW ENGLAND REGIONAL COUNCIL OF CARPENTERS",CARPENTERS IND,723.0,529377.0,,train
 INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS UNION NO. 733,ELECTRICAL WORKERS IBEW AFL-CIO,733.0,41119.0,,test
@@ -38262,7 +38262,7 @@ INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL UNION 687,TEAMSTERS,687.0,39042.0,,
 INTL BROHD OF ELECTRICAL WORKERS LOCAL UNION 1055,ELECTRICAL WORKERS IBEW AFL-CIO,1055.0,8302.0,,train
 "United Food and Commercial Workers, Wine, Distillery & Allied Workers, Local 186D",FOOD AND COMMERCIAL WKRS,186.0,61171.0,,train
 "Plumbers, Steamfitters and Service Mechanics Local Union 50",PLUMBERS AFL-CIO,50.0,37153.0,,train
-International Brotherhood of Teamsters Local 211/205,TEAMSTERS,,,potentially resolvable,train
+International Brotherhood of Teamsters Local 211/205,TEAMSTERS,,,multi-local,train
 "AMALGAMATED TRANSIT UNION, LOCAL 1027, AFL-CIO/CLC",TRANSIT UNION AFL-CIO,1027.0,542165.0,,train
 "TEAMSTERS LOCAL UNION NO. 114, AFFILIATED WITH THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS, AFL-CIO",TEAMSTERS,114.0,37069.0,,train
 "International Brotherhood of Electrical  Workers, Local 518",ELECTRICAL WORKERS IBEW AFL-CIO,518.0,42787.0,,train
@@ -39683,7 +39683,7 @@ IBEW Local Union 760,ELECTRICAL WORKERS IBEW AFL-CIO,760.0,3704.0,,train
 UGSOA and its Local 19,"GOVERNMENT SECURITY OFFICERS, IND",19.0,543302.0,,train
 Laborer's International Union of North America (LIUNA),LABORERS,,,potentially resolvable,train
 INTERNATIONAL ASSOCIATION OF HEAT & FROST INSULATORS & ALLIED WORKERS LOCAL NO. 73,INSULATORS AFL-CIO,73.0,31404.0,,train
-"CHAUFFEURS, TEAMSTERS & HELPERS, LOCAL UNION NO. 633 OF NEW HAMPSHIRE, A/W INTERNATIONAL BROTHERHOOD",TEAMSTERS,633.0,,potentially resolvable,train
+"CHAUFFEURS, TEAMSTERS & HELPERS, LOCAL UNION NO. 633 OF NEW HAMPSHIRE, A/W INTERNATIONAL BROTHERHOOD",TEAMSTERS,633.0,32565,,train
 "Local 507S, Graphic Communications Conference of the International Brotherhood of Teamsters (GCC/IBT",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,507.0,7096.0,,train
 "LOCAL 668, SERVICE EMPLOYEES INTERNATIONAL UNION, AFL-CIO, CLC",SERVICE EMPLOYEES,668.0,505025.0,,train
 Heavy Construction Laborers' Local 663,LABORERS,663.0,42741.0,,train
@@ -40471,7 +40471,7 @@ Service Employees International Union Local 87 (SEIU Local 87),SERVICE EMPLOYEES
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION, LOCAL 1856","STEELWORKERS, AFL-CIO",1856.0,60243.0,,test
 "United Steelworkers of America, Local 1013","STEELWORKERS, AFL-CIO",1013.0,,ambiguous,train
 APWU Charlotte Area Local 0375,"POSTAL WORKERS, AMERICAN, AFL-CIO",375.0,506001.0,,train
-"CHAUFFEURS, TEAMSTERS AND HELPERS LOCAL UNION NO. 633 OF NEW HAMPSHIRE, A/W INTERNATIONAL BROTHERHOO",TEAMSTERS,633.0,,potentially resolvable,train
+"CHAUFFEURS, TEAMSTERS AND HELPERS LOCAL UNION NO. 633 OF NEW HAMPSHIRE, A/W INTERNATIONAL BROTHERHOO",TEAMSTERS,633.0,32565,,train
 UNITED STEELWORKERS OF AMERICA LOCAL 228,"STEELWORKERS, AFL-CIO",228.0,,ambiguous,train
 IAM 751,MACHINISTS AFL-CIO,751.0,,ambiguous,train
 "INTERNATIONAL UNION, SECURITY, POLICE AND FIRE PROFESSIONALS OF AMERICA (SPFPA) AND ITS LOCAL NO.127","SECURITY POLICE, FIRE PROF, IND",127.0,8789.0,,train
@@ -40763,7 +40763,7 @@ TEAMSTERS UNION LOCAL 102,TEAMSTERS,102.0,28724.0,,train
 "International Alliance of Theatrical Stage Employees, Local 720, AFL-CIO",STAGE AND PICTURE OPERATORS AFL-CIO,720.0,23251.0,,train
 "UNITED AUTOMOBILE, AEROSPACE & AGRICULTURAL IMPLEMENT WORKERS OF AMERICA INTERNATIONAL UNION, AFL-CIO, LOCAL 287 (GENERAL MOTORS)",AUTO WORKERS AFL-CIO,287.0,8758.0,,train
 Teamsters Local 294,TEAMSTERS,294.0,42415.0,,train
-"International Brotherhood of Teamsters Joint Council 10, Local Union #25",TEAMSTERS,25.0,,potentially resolvable,train
+"International Brotherhood of Teamsters Joint Council 10, Local Union #25",TEAMSTERS,25.0,,multi-local,train
 "AMERICAN POSTAL WORKERS UNION, LOCAL 112","POSTAL WORKERS, AMERICAN, AFL-CIO",112.0,513331.0,,train
 SHEET METAL WORKERS UNION LOCAL # 25 NNJ -- SMART,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",25.0,528288,,train
 "International Brotherhood of Electrical Workers, Local 1340, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,1340.0,2993.0,,train
@@ -43151,7 +43151,7 @@ International Brotherhood of Electrical Workers Local 400,ELECTRICAL WORKERS IBE
 "LOCAL UNION 851, IBT",TEAMSTERS,851.0,68051.0,,train
 LOCAL 375 INT'L UNION UAW,AUTO WORKERS AFL-CIO,375.0,5904.0,,train
 "American Federation of Government Employees, Local 2344, AFL-CIO (AFGE),",GOVERNMENT EMPLOYEES AFGE AFL-CIO,2344.0,502251.0,,train
-International Brotherhood of Teamsters Union Local 633,TEAMSTERS,633.0,,potentially resolvable,train
+International Brotherhood of Teamsters Union Local 633,TEAMSTERS,633.0,32565,,train
 INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL UNION 988,TEAMSTERS,988.0,65379.0,,train
 "INDUSTRIAL TECHNICAL PROFESSIONAL EMPLOYEES UNION, LOCAL 4873 OPEIU, AFL-CIO",OFFICE AND PROFESSIONAL EMPLS AFL-CIO,4873.0,530913.0,,test
 "LABORERS' INTERNATIONAL UNION OF NORTH AMERICA, LOCAL 609",LABORERS,609.0,4015.0,,train
@@ -43533,7 +43533,7 @@ Apwu local 390,"POSTAL WORKERS, AMERICAN, AFL-CIO",390.0,87678.0,,train
 "American Postal Workers Union, [APWU] Sacramento Area Local","POSTAL WORKERS, AMERICAN, AFL-CIO",,,potentially resolvable,train
 UNITED STEELWORKERS LOCAL 193,"STEELWORKERS, AFL-CIO",193.0,,ambiguous,train
 ICWUC/UFCW Legal Department,FOOD AND COMMERCIAL WKRS,,,potentially resolvable,train
-International Brotherhood of Teamsters Joint Council 10 on Behalf of IBT Local Union 25,TEAMSTERS,25.0,,potentially resolvable,train
+International Brotherhood of Teamsters Joint Council 10 on Behalf of IBT Local Union 25,TEAMSTERS,25.0,,multi-local,train
 American Postal Workers Union #566,"POSTAL WORKERS, AMERICAN, AFL-CIO",566.0,72120.0,,train
 "THE UNITED ELECTRICAL, RADIO AND MACHINE WORKERS OF AMERICA (UE), LOCAL 1004",ELECTRICAL WORKERS UE IND,1004.0,542377.0,,test
 "INTERNATIONAL UNION, SPFPA","SECURITY POLICE, FIRE PROF, IND",,,potentially resolvable,train
@@ -45231,7 +45231,7 @@ UNITED STEELWORKERS OF AMERICA LOCAL 322,"STEELWORKERS, AFL-CIO",322.0,35336.0,,
 "UNIóN GENERAL DE TRABAJADORES, LOCAL 1199 SEIU",SERVICE EMPLOYEES,1199.0,516409.0,,train
 TEAMSTERS LOCAL UNION NO 705,TEAMSTERS,705.0,43508.0,,train
 "Union de Tronquistas de Puerto Rico, Teamsters Local 901",TEAMSTERS,901.0,48892.0,,train
-"TEAMSTERS, DISTRICT COUNCIL NUMBER 2",TEAMSTERS,2.0,,potentially resolvable,train
+"TEAMSTERS, DISTRICT COUNCIL NUMBER 2",TEAMSTERS,2.0,,ambiguous,train
 "INT'L ASSOCIATION OF MACHINISTS & AEROSPACE WORKERS, LOCAL LODGE 131",MACHINISTS AFL-CIO,131.0,516762.0,,train
 GCC/IBT LOCAL 1B,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,1.0,514008.0,,train
 USW Local 15024-Unit 78,"STEELWORKERS, AFL-CIO",15024.0,70272.0,,train
@@ -45349,7 +45349,7 @@ INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 2010,TEAMSTERS,2010.0,545887.0,,tra
 "NEW YORK METRO AREA POSTAL UNION, LOCAL 10, APWU","POSTAL WORKERS, AMERICAN, AFL-CIO",10.0,506753.0,,train
 INTERNATIONAL LONGSHOREMENS ASSOCIATION LOCAL 1242 & PMTA,LONGSHOREMENS ASN AFL-CIO,1242.0,,potentially resolvable,train
 "International Association of Machinists and Aerospace Workers, Local 568",MACHINISTS AFL-CIO,568.0,10656.0,,train
-International Brotherhood of Teamsters Local Union 727,TEAMSTERS,727.0,,potentially resolvable,train
+International Brotherhood of Teamsters Local Union 727,TEAMSTERS,727.0,,ambiguous,train
 "SERVICE EMPLOYEES INTERNATIONAL UNION, AFL-CIO, SEIU CENTRAL STATES BUILDING SERVICE COUNCIL",SERVICE EMPLOYEES,,,potentially resolvable,train
 "International Union, United Automobile Aerospace and Agriculltural Implement Workers of America- UAW and its Local 2232",AUTO WORKERS AFL-CIO,2232.0,542765.0,,train
 UNITED GOVERNMENT SECURITY OFFICERS OF AMERICA LOCAL 295,"GOVERNMENT SECURITY OFFICERS, IND",295.0,546847.0,,train
@@ -46191,7 +46191,7 @@ CMRJB Workers United,"WORKERS UNITED, SEIU",,,potentially resolvable,train
 "LOCAL 106, INTERNATIONAL UNION OF OPERATING ENGINEERS","ENGINEERS, OPERATING, AFL-CIO",106.0,17173.0,,train
 "UNITED FOOD AND COMMERCIAL WORKERS UNION, LOCAL NO. 880 A/W UFCW INTERNATIONAL UNION",FOOD AND COMMERCIAL WKRS,880.0,10330.0,,train
 "UNITED STEELWORKERS OF AMERICA, LOCAL UNION 4545, AFL-CIO-CLC","STEELWORKERS, AFL-CIO",4545.0,30195.0,,train
-"TEAMSTERS, LOCAL 633",TEAMSTERS,633.0,,potentially resolvable,train
+"TEAMSTERS, LOCAL 633",TEAMSTERS,633.0,32565,,train
 "IBEW, LOCAL UNION 2303 A/W INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,2303.0,512261.0,,train
 "BAKERY & FOOD WORKERS, LOCAL 21, RETAIL, WHOLESALE AND DEPARTMENT STORE UNION, UFCW","RETAIL WHOLESALE, DC, UFCW",21.0,30341.0,,train
 PIPE TRADES ASSOCIATION AND UA LOCAL 440,PLUMBERS AFL-CIO,440.0,29139.0,,train
@@ -46321,7 +46321,7 @@ United Auto Workers Local 1201,AUTO WORKERS AFL-CIO,1201.0,62547.0,,train
 "IBEW, LOCAL UNION 2337, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,2337.0,69034.0,,train
 "CARWASH WORKERS ORGANIZING COMMITTEE, USW","STEELWORKERS, AFL-CIO",,,ambiguous,train
 AFSCME LOCAL 3558,STATE COUNTY AND MUNI EMPLS AFL-CIO,3558.0,537373.0,,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, CHAUFFEURS, AND HELPERS LOCAL UNION NO. 633",TEAMSTERS,633.0,,potentially resolvable,test
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, CHAUFFEURS, AND HELPERS LOCAL UNION NO. 633",TEAMSTERS,633.0,32565,,test
 "PENNSYLVANIA SOCIAL SERVICES UNION LOCAL 668, SEIU",SERVICE EMPLOYEES,668.0,505025.0,,train
 SERVICE EMPLOYEES INTERNATIONAL UNION LOCAL 535,SERVICE EMPLOYEES,535.0,505448.0,,train
 Sheet Meatal Air Rail Transportation (SMART),"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",,,ambiguous,train
@@ -47243,7 +47243,7 @@ TEAMSTERS LOCAL 85  AFL-CIO,TEAMSTERS,85.0,25724.0,,train
 "Local 261-G, Bakery, Confectionary, Tobacco Workers and Grain Millers, AFL-CIO-CLC","BAKERY, TOBACCO AND GRAIN AFL-CIO",261.0,17240.0,,train
 "International Brotherhood of Teamsters, Food* Industrial & Beverage Warehouse, Drivers and Clerical Employees, Local 630",TEAMSTERS,630.0,34093.0,,train
 "International Association of Machinists and Aerospace Workers, AFL-CIO (IAM), Local 37",MACHINISTS AFL-CIO,37.0,36292,,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 633 OF NEW HAMPSHIRE",TEAMSTERS,633.0,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 633 OF NEW HAMPSHIRE",TEAMSTERS,633.0,32565,,train
 Utility Workers Union of America UWUA Local 223,UTILITY WORKERS AFL-CIO,223.0,,potentially resolvable,train
 "LOCAL 86, UNITED DAIRY WORKERS (RWDSU)","RETAIL WHOLESALE, DC, UFCW",86.0,41288.0,,train
 TEAMSTERS LOCAL UNION NO. 377 a/w INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,377.0,39225.0,,train
@@ -47310,7 +47310,7 @@ INDIANA STATE PIPE TRADES ASSOC. & U.A. LOCAL 166,PLUMBERS AFL-CIO,166.0,35313.0
 "Ohio Nurses Association, AFT Local 5903 a/w American Federation of Teachers, AFL-CIO",TEACHERS AFL-CIO,5903.0,543444.0,,train
 "United Food and Commercial Workers International Union, Local 1439",FOOD AND COMMERCIAL WKRS,1439.0,34163.0,,train
 SEIU 1199 NJ,SERVICE EMPLOYEES,1199.0,542822.0,,train
-INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 633 OF NH,TEAMSTERS,633.0,,potentially resolvable,train
+INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 633 OF NH,TEAMSTERS,633.0,32565,,train
 International Brotherhood of Electrical Workers Local No. 38,ELECTRICAL WORKERS IBEW AFL-CIO,38.0,8427.0,,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS UNION, LOCAL 357",ELECTRICAL WORKERS IBEW AFL-CIO,357.0,38815.0,,train
 "Local 687, Michigan Regional Council of Carpenters",CARPENTERS IND,687.0,540493.0,,train
@@ -47399,7 +47399,7 @@ International Union of Operating Engineers Local 101,"ENGINEERS, OPERATING, AFL-
 "Local 1909, International Longshoremen's Association",LONGSHOREMENS ASN AFL-CIO,1909.0,515233.0,,train
 "OHIO STATE ASSOCIATION OF PLUMBERS AND PIPEFITTERS, UNITED ASSOCIATION OF JOURNEYMEN AND APPRENTICES",PLUMBERS AFL-CIO,,,potentially resolvable,train
 "Local 283, International Brotherhood of Teamsters (IBT)",TEAMSTERS,283.0,22549.0,,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL UNION 727, AFL-CIO",TEAMSTERS,727.0,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL UNION 727, AFL-CIO",TEAMSTERS,727.0,,ambiguous,train
 "UNITED FOOD AND COMMERCIAL WORKERS INTERNATIONAL UNION, LOCAL 540",FOOD AND COMMERCIAL WKRS,540.0,41547.0,,train
 "American Postal Workers Union, AFL-CIO Tri-County Area, Local 0423","POSTAL WORKERS, AMERICAN, AFL-CIO",423.0,507194.0,,train
 Metropolitan Regional Council of Carpenters,CARPENTERS IND,,,potentially resolvable,train
@@ -47741,7 +47741,7 @@ INTERNATIONAL GUARD UNION OF AMERICA LOCAL 147,GUARDS IND,147.0,543324.0,,train
 "Devereux Staff Association, NYSUT, AFT, NEA, AFL-CIO",TEACHERS AFL-CIO,,546397.0,,train
 United Food and Commercial Workers Local 1360,FOOD AND COMMERCIAL WKRS,1360.0,16920.0,,train
 "International Brotherhood of Electrical Workers, Local 48, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,48.0,33435.0,,train
-TEAMSTERS LOCAL  UNION 727,TEAMSTERS,727.0,,potentially resolvable,train
+TEAMSTERS LOCAL  UNION 727,TEAMSTERS,727.0,,ambiguous,train
 INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL UNION NO. 703,TEAMSTERS,703.0,22671.0,,train
 "United Steel Workers Union, District 9 Local 1465","STEELWORKERS, AFL-CIO",1465.0,510279.0,,test
 International Brotherhood of Electrical Workers Local Union 245,ELECTRICAL WORKERS IBEW AFL-CIO,245.0,13025.0,,train
@@ -48274,7 +48274,7 @@ TEAMSTERS LOCAL 997,TEAMSTERS,997.0,504930.0,,train
 "INTERNATIONAL ASSOCIATION OF MACHINISTS & AEROSPACE WORKERS, AFL/CIO, DL 54, LL 2798",MACHINISTS AFL-CIO,2798.0,529141.0,,train
 "Soft Drink and Brewery Workers Union, Local 812 IBT",TEAMSTERS,812.0,1620.0,,train
 "United Brotherhood of Carpenters, Local 283",CARPENTERS IND,283.0,22756.0,,train
-Teamsters Local Union No. 727,TEAMSTERS,727.0,,potentially resolvable,train
+Teamsters Local Union No. 727,TEAMSTERS,727.0,,ambiguous,train
 "ILA, LOCAL 1740",LONGSHOREMENS ASN AFL-CIO,1740.0,39038.0,,train
 SEIU LOCAL 1021,SERVICE EMPLOYEES,1021.0,543658.0,,train
 "UNITED HEALTHCARE WORKERS-WEST, SERVICE EMPLOYEES INTERNATIOONAL UNION",SERVICE EMPLOYEES,,,potentially resolvable,train
@@ -49090,7 +49090,7 @@ International Longshoremen's Association Independent Local 1402,LONGSHOREMENS AS
 UNITED STEELWORKERS OF AMERICA (USWA) DISTRICT #11,"STEELWORKERS, AFL-CIO",11.0,43113.0,,train
 "Unite Here, Local 11",UNITE HERE,11.0,507066.0,,train
 "STATIONARY ENGINEERS LOCAL 39, INTERNATIONAL UNION OF OPERATING ENGINEERS","ENGINEERS, OPERATING, AFL-CIO",39.0,39532.0,,train
-IBT JOINT COUCIL NO. 25,TEAMSTERS,25.0,,potentially resolvable,train
+IBT JOINT COUCIL NO. 25,TEAMSTERS,25.0,,ambiguous,train
 "UNITED ELECTRICAL, RADIO AND MACHINE WORKERS OF AMERICA, LOCAL 610",ELECTRICAL WORKERS UE IND,610.0,16942.0,,train
 "LOCAL 659, REG. 1C UAW",AUTO WORKERS AFL-CIO,659.0,6333.0,,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCAL UNION 776",ELECTRICAL WORKERS IBEW AFL-CIO,776.0,27437.0,,train
@@ -49926,7 +49926,7 @@ United Government Security Officers of America Local 31,"GOVERNMENT SECURITY OFF
 "SOUTHERN CALIFORNIA DISTRICT COUNCIL, AND ITS AFFILIATED LOCALS, LABORERS' INTERNATIONAL UNION OF NO",LABORERS,,,potentially resolvable,train
 UNITED FOOD AND COMMERCIAL WORKERS UNION LOCAL NO. 1059,FOOD AND COMMERCIAL WKRS,1059.0,23709.0,,train
 "Service Employees International Union, United Healthcare Workers, West",SERVICE EMPLOYEES,,,potentially resolvable,train
-INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL UNION 633,TEAMSTERS,633.0,,potentially resolvable,train
+INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL UNION 633,TEAMSTERS,633.0,32565,,train
 "UNITED STEELWORKERS OF AMERICA, LOCAL 2354-4","STEELWORKERS, AFL-CIO",2354.0,12345.0,,train
 "BAKERY, CONFECTIONERY, TOBACCO WORKERS AND GRAIN MILLERS INTERNATIONAL UNION LOCAL NO. 348, AFL-CIO","BAKERY, TOBACCO AND GRAIN AFL-CIO",348.0,,ambiguous,test
 "Local 480-483, American Postal Workers Union (APUW), AFL-CIO","POSTAL WORKERS, AMERICAN, AFL-CIO",480.0,91859.0,,test
@@ -50090,7 +50090,7 @@ OPERATIVE PLASTERERS AND CEMENT MASONS INTERNATIONAL ASSOCIATION LOCAL 909,PLAST
 UNITE HERE Local 631,UNITE HERE,631.0,54154.0,,train
 "Service Employees International Union, District 1199 WKO",SERVICE EMPLOYEES,1199.0,69557.0,,train
 CARPENTERS LOCAL 1185,CARPENTERS IND,1185.0,20920.0,,train
-"CHAUFFEURS, WAREHOUSEMEN AND HELPERS LOCAL 633 OF NEW HAMPSHIRE, A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,633.0,,potentially resolvable,train
+"CHAUFFEURS, WAREHOUSEMEN AND HELPERS LOCAL 633 OF NEW HAMPSHIRE, A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,633.0,32565,,train
 "BAKERY, CONFECTIONERY, & TOBACCO WORKERS INTERNATIONAL UNION, LOCAL 103, AFL-CIO","BAKERY, TOBACCO AND GRAIN AFL-CIO",103.0,,ambiguous,train
 "INTERNATIONAL ASSOCIATION OF BRIDGE, STRUCTURAL, ORNAMENTAL AND REINFORCING IRONWORKERS, AFL-CIO",IRON WORKERS AFL-CIO,,,potentially resolvable,train
 "UNITED ELECTRICAL, RADIO & MACHINE WORKERS UNION OF AMERICA, (UE), LOCAL 404",ELECTRICAL WORKERS UE IND,404.0,59468.0,,train
@@ -50130,7 +50130,7 @@ Iron Workers Local 15,IRON WORKERS AFL-CIO,15.0,33302.0,,train
 LOCAL 1957 SEIU,SERVICE EMPLOYEES,1957.0,,not in gazetteer,train
 APWU Local 67,"POSTAL WORKERS, AMERICAN, AFL-CIO",67.0,72015.0,,test
 APWU Portland Maine Area Local #458,"POSTAL WORKERS, AMERICAN, AFL-CIO",458.0,506124.0,,train
-Teamsters Union Local 727,TEAMSTERS,727.0,,potentially resolvable,train
+Teamsters Union Local 727,TEAMSTERS,727.0,,ambiguous,train
 "Teamsters, Local 853",TEAMSTERS,853.0,20870.0,,train
 "COMMUNICATIONS WORKERS OF AMERICA, LOCAL 3617",COMMUNICATIONS WORKERS AFL-CIO,3617.0,60375.0,,train
 "INTERNATIONAL ASSOCIATION OF MACHINISTS AND AEROSPACE WORKERS, AFL/CIO, DISTRICT LODGE 54, LOCAL LODGE 1471",MACHINISTS AFL-CIO,1471.0,38535.0,,train
@@ -50876,7 +50876,7 @@ IAEP R12-152,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,152.0,546530.0,,train
 Plumbers and Steamfitters Local 33,PLUMBERS AFL-CIO,33.0,26728.0,,train
 "INTL BROHD OF TEAMSTERS, LOCAL 177",TEAMSTERS,177.0,9355.0,,train
 Massachusetts and Northern New England Laborers' District Council,LABORERS,,,potentially resolvable,test
-INTERNATIONAL BROTHERHOOD OF TEAMSTERS JOINT COUNCIL 10 ON BEHALF OF IBT LOCAL UNION 25,TEAMSTERS,25.0,,potentially resolvable,train
+INTERNATIONAL BROTHERHOOD OF TEAMSTERS JOINT COUNCIL 10 ON BEHALF OF IBT LOCAL UNION 25,TEAMSTERS,25.0,,multi-local,train
 "BAKERY, CONFECTIONARY, TOBACCO WORKERS AND GRAIN MILLERS INTERNATIONAL UNION","BAKERY, TOBACCO AND GRAIN AFL-CIO",,,potentially resolvable,train
 The Hawaii Nurses Association OPEIU Local 50,OFFICE AND PROFESSIONAL EMPLS AFL-CIO,50.0,53662.0,,train
 "MACHINISTS DISTRICT LODGE 160, LOCAL LODGE 1350",MACHINISTS AFL-CIO,1350.0,1880.0,,train
@@ -52162,7 +52162,7 @@ Unite Here Local 17!,UNITE HERE,17.0,,potentially resolvable,train
 "Oregon Federation of Nurses and Health Professionals (OFNHP), AFT Local 5017, AFL-CIO",TEACHERS AFL-CIO,5017.0,514640.0,,train
 "United Government Security Officers of America, International Union, and its Local 223","GOVERNMENT SECURITY OFFICERS, IND",223.0,543909.0,,train
 "SERVICE EMPLOYEES INTERNATIONAL UNION,  LOCAL 415",SERVICE EMPLOYEES,415.0,530920.0,,train
-TEAMSTERS UNION LOCAL 633,TEAMSTERS,633.0,,potentially resolvable,train
+TEAMSTERS UNION LOCAL 633,TEAMSTERS,633.0,32565,,train
 Office and Professional Employees International Union Local 29 AFL-CIO,OFFICE AND PROFESSIONAL EMPLS AFL-CIO,29.0,16408.0,,train
 Uaw,AUTO WORKERS AFL-CIO,,,potentially resolvable,train
 "Industrial, Technical & Professional Employees Union (ITPE) Union, AFL-CIO, a/w OPEIU as Local 4873",OFFICE AND PROFESSIONAL EMPLS AFL-CIO,4873.0,530913.0,,train
@@ -52772,7 +52772,7 @@ LABORERS LOCAL 341,LABORERS,341.0,16646.0,,train
 "GENERAL TEAMSTERS AND FOOD PROCESSING, LOCAL 87, IBT",TEAMSTERS,87.0,39861.0,,train
 "INTERNATIONAL ASSOCIATION OF MACHINISTS AND AEROSPACE WORKERS, AFL-CIO, DISTRICT LODGE 34",MACHINISTS AFL-CIO,34.0,17207.0,,train
 United Steelworkers of America ALF-CIO Local 2693,"STEELWORKERS, AFL-CIO",2693.0,38491.0,,train
-"Newspaper, Newsprint, Magazine and Film Delivery Drivers, Helpers and Handlers, a/w The International Brotherhood of Teamsters and its Local Union No. 211/205 of Allegheny Co.",TEAMSTERS,,,potentially resolvable,train
+"Newspaper, Newsprint, Magazine and Film Delivery Drivers, Helpers and Handlers, a/w The International Brotherhood of Teamsters and its Local Union No. 211/205 of Allegheny Co.",TEAMSTERS,,,multi-local,train
 TEAMSTERS LOCAL UNION NO. 326,TEAMSTERS,326.0,65291.0,,train
 BAC LOCAL 5 OKLAHOMA/ARKANSAS/TEXAS AND THE INT'L UNION OF BRICKLAYERS AND ALLIED CRAFTWORKERS,BRICKLAYERS AFL-CIO,5.0,531844.0,,train
 "Union General de Trabajadores, Local 1199, (SEIU)",SERVICE EMPLOYEES,1199.0,516409.0,,train
@@ -53525,7 +53525,7 @@ APWU-American Postal Workers Union- Local 238,"POSTAL WORKERS, AMERICAN, AFL-CIO
 "UNITED AUTOMOBILE, AEROSPACE, AGRICULTURAL IMPLEMENT WORKERS OF AMERICA, LOCAL UNION NO. 1887",AUTO WORKERS AFL-CIO,1887.0,6781.0,,train
 "LOCAL #1, SEIU",SERVICE EMPLOYEES,1.0,23715.0,,train
 International Brotherhood of Electrical Workers Local 222,ELECTRICAL WORKERS IBEW AFL-CIO,222.0,533799.0,,train
-TEAMSTER LOCAL UNION NO. 727,TEAMSTERS,727.0,,potentially resolvable,train
+TEAMSTER LOCAL UNION NO. 727,TEAMSTERS,727.0,,ambiguous,train
 TEAMSTERS NATIONAL FREIGHT INDUSTRY NEGOTIATING COMMITTEE,TEAMSTERS,,,potentially resolvable,train
 "UNITED FOOD AND COMMERCIAL WORKERS UNION, LOCAL 328",FOOD AND COMMERCIAL WKRS,328.0,,ambiguous,train
 "United Government Security Officers of America, International Union, Local No. 11","GOVERNMENT SECURITY OFFICERS, IND",11.0,,potentially resolvable,train
@@ -54421,7 +54421,7 @@ Western States Regional Joint Board Local 289,"WORKERS UNITED, SEIU",289.0,,ambi
 Laborers District Council of the Metropolitan Area of Philadelphia and Vicinity,LABORERS,,,potentially resolvable,train
 "Media Guild of the West, TNG-CWA 39213, AFL-CIO",COMMUNICATIONS WORKERS AFL-CIO,39213.0,546327.0,,train
 "INTERNATIONAL ASSOCIATION OF MACHINIST AND AEROSPACE WORKERS, DISTRICT LODGE NO. 725, AFL-CIO",MACHINISTS AFL-CIO,725.0,530879.0,,train
-Teamsters Locals 87,TEAMSTERS,87.0,,potentially resolvable,train
+Teamsters Locals 87,TEAMSTERS,87.0,,ambiguous,train
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION, LOCAL 7898","STEELWORKERS, AFL-CIO",7898.0,68961.0,,train
 "GENERAL TRUCK DRIVERS, WAREHOUSEMEN, HELPERS, SALES AND SERVICE AND CASINO EMPLOYEES, TEAMSTERS LOCA",TEAMSTERS,,,potentially resolvable,train
 "NATIONAL POSTAL MAIL HANDLERS UNION, a Division of LIUNA, AFL-CIO, Local 329","POSTAL MAIL HANDLERS, LIUNA",329.0,512137.0,,train
@@ -55091,7 +55091,7 @@ Biondi Labor Union of Essential Staff/New York State United Teachers,TEACHERS AF
 "UNITED GOVERNMENT SECURITY OFFICERS OF AMERICA, LOCAL 218","GOVERNMENT SECURITY OFFICERS, IND",218.0,543799.0,,train
 "Sheet Metal, Air, Rail and Transportation Union Local No. 66","SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",66.0,521660.0,,train
 UNITED STEELWORKERS UNION LOCAL 272,"STEELWORKERS, AFL-CIO",272.0,44219,,train
-"International Brotherhood of Teamsters, Local 633",TEAMSTERS,633.0,,potentially resolvable,train
+"International Brotherhood of Teamsters, Local 633",TEAMSTERS,633.0,32565,,train
 "General Teamsters, State of Arizona, Local Union 104, an affiliate of International Brotherhood of Teamsters, AFL-CIO",TEAMSTERS,104.0,4987.0,,train
 UNITED AUTO WORKERS LOCAL 1608,AUTO WORKERS AFL-CIO,1608.0,67286.0,,train
 "IAM, AFL-CIO",MACHINISTS AFL-CIO,,,potentially resolvable,train
@@ -55144,7 +55144,7 @@ UAW LOCAL 531,AUTO WORKERS AFL-CIO,531.0,5996.0,,train
 "APWU, LOCAL 119","POSTAL WORKERS, AMERICAN, AFL-CIO",119.0,92589.0,,train
 "LOCAL 2500, INTERNATIONAL UNION, UAW",AUTO WORKERS AFL-CIO,2500.0,514642.0,,train
 "Bakery, Confectionary, Tobacco Workers, and Grain Millers International Union local 372-A","BAKERY, TOBACCO AND GRAIN AFL-CIO",372.0,69291.0,,train
-"INTERNATION BROTHERHOOD OF TEAMSTERS, LOCAL 727",TEAMSTERS,727.0,,potentially resolvable,train
+"INTERNATION BROTHERHOOD OF TEAMSTERS, LOCAL 727",TEAMSTERS,727.0,,ambiguous,train
 ATU Local 1181,TRANSIT UNION AFL-CIO,1181.0,29994.0,,train
 The United Steelworkers Heavy Highway Local 14693,"STEELWORKERS, AFL-CIO",14693.0,29062.0,,train
 United Steelworkers Local 1123,"STEELWORKERS, AFL-CIO",1123.0,,ambiguous,train
@@ -56441,7 +56441,7 @@ WORKERS UNITE AFFILIATED WITH SEIU,"WORKERS UNITED, SEIU",,,potentially resolvab
 "COMMUNICATIONS WORKERS OF AMERICA, LOCAL 4354, AFL-CIO",COMMUNICATIONS WORKERS AFL-CIO,4354.0,69252.0,,train
 ATU Amalgamated Transit Union Local 1756,TRANSIT UNION AFL-CIO,1756.0,543810.0,,train
 CARPENTERS UNION LOCAL  22,CARPENTERS IND,22.0,518971.0,,train
-INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 633 OF NEW HAMPSHIRE,TEAMSTERS,633.0,,potentially resolvable,train
+INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 633 OF NEW HAMPSHIRE,TEAMSTERS,633.0,32565,,train
 North Central States Regional Council of Carp,CARPENTERS IND,,,potentially resolvable,train
 "International Brotherhood of Teamsters and its subordinate units, the Teamsters Amazon Division, the Teamsters Amazon National Negotiating Committee, Teamsters Local 396",TEAMSTERS,396.0,21509.0,,train
 "SECURITY, POLICE AND FIRE PROFESSIONALS OF AMERICA (SPFPA) LOCAL 267","SECURITY POLICE, FIRE PROF, IND",267.0,514704.0,,train
@@ -57383,7 +57383,7 @@ International Union of Operating Engineers Local 624,"ENGINEERS, OPERATING, AFL-
 "United States Security Officers of America, Local #53","SECURITY POLICE, FIRE PROF, IND",53.0,545276.0,,train
 "UNITED STEEL. PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKE","STEELWORKERS, AFL-CIO",,,ambiguous,train
 "Maine Service Employees Association, Local 1989",SERVICE EMPLOYEES,1989.0,540704.0,,train
-Amazon Labor Union- IBT Local 1,TEAMSTERS,1.0,,potentially resolvable,train
+Amazon Labor Union- IBT Local 1,TEAMSTERS,1.0,,ambiguous,train
 "INTERNATIONAL UNION, SECURITY, POLICE AND FIRE PROFESSIONALS OF AMERICA, (SPFPA) AND ITS LOCAL 109","SECURITY POLICE, FIRE PROF, IND",109.0,7169.0,,train
 INTERNATIONAL LONGSHOREMEN ASSOCIATION LOCAL 1752,LONGSHOREMENS ASN AFL-CIO,1752.0,4963.0,,train
 UNITED STEELWORKERS LOCAL 5050,"STEELWORKERS, AFL-CIO",5050.0,544476.0,,train
@@ -57634,7 +57634,7 @@ Teamsters General Union Local No. 346,TEAMSTERS,346.0,26071.0,,train
 "New England Health Care Workers Union, SEIU, District 1199",SERVICE EMPLOYEES,1199.0,513846.0,,train
 "International Brotherhood of Electrical Workers, Local Union 342",ELECTRICAL WORKERS IBEW AFL-CIO,342.0,517631.0,,train
 SEIU Local 668 (Scranton Public Library),SERVICE EMPLOYEES,668.0,505025.0,,train
-Teamster Union Local 727,TEAMSTERS,727.0,,potentially resolvable,train
+Teamster Union Local 727,TEAMSTERS,727.0,,ambiguous,train
 "United Food and Commercial Workers International Union, CLC (UFCW) 23D",FOOD AND COMMERCIAL WKRS,23.0,31826.0,,train
 "The International Union of Operating Engineers of Chicago, Illinois and Vicinity No. 399","ENGINEERS, OPERATING, AFL-CIO",399.0,28035.0,,train
 "DISTRICT 1199W/UNITED PROFESSIONALS FOR QUALITY HEALTH CARE, SEIU, AFL-CIO, CLC",SERVICE EMPLOYEES,1199.0,31847.0,,train
@@ -58396,7 +58396,7 @@ PROFESSIONAL ASSOCIATION FOR COURT SECURITY OFFICERS NORTHERN DISTRICT OF TEXAS,
 UAW LOCAL UNION NO. 2379,AUTO WORKERS AFL-CIO,2379.0,541456.0,,train
 "Local 2790, United Brotherhood of Carpenters & Joiners of America",CARPENTERS IND,2790.0,544570.0,,train
 "USW, LOCAL 8228-73","STEELWORKERS, AFL-CIO",8228.0,71222.0,,train
-"Chauffeurs, Teamsters and Helpers Local Union 633 of NH",TEAMSTERS,633.0,,potentially resolvable,train
+"Chauffeurs, Teamsters and Helpers Local Union 633 of NH",TEAMSTERS,633.0,32565,,train
 Teamsters Union Local No. 962 affiliated with International Brotherhood of Teamsters,TEAMSTERS,962.0,36804.0,,train
 CARPENTERS LOCAL 180,CARPENTERS IND,180.0,33149.0,,train
 New York State Laborers Organizing Fund,LABORERS,,,potentially resolvable,train
@@ -58966,7 +58966,7 @@ SEIU1199,SERVICE EMPLOYEES,1199.0,,potentially resolvable,train
 "Local 467 Unit 4, United Automobile, Aerospace and Agricultural Implement Workers of America (UAW), AFL-CIO",AUTO WORKERS AFL-CIO,467.0,23920.0,,train
 "BAKERY, CONFECTIONERY, TOBACCO, WORKERS AND GRAIN MILLERS (BCTGM) LOCAL 68","BAKERY, TOBACCO AND GRAIN AFL-CIO",68.0,12542.0,,train
 Oregon Federation of Nurses and Healthcare Professionals,TEACHERS AFL-CIO,,514640.0,,train
-International Brotherhood of Teamsters Local 633,TEAMSTERS,633.0,,potentially resolvable,train
+International Brotherhood of Teamsters Local 633,TEAMSTERS,633.0,32565,,train
 Laborers Local 1310 - International Union of North America,LABORERS,1310.0,544304.0,,train
 TEAMSTERS FIRST STUDENT NATIONAL NEGOTIATING COMMITTEE,TEAMSTERS,,,potentially resolvable,train
 United Food and Commercial Workers Local 75,FOOD AND COMMERCIAL WKRS,75.0,544266.0,,train
@@ -59005,7 +59005,7 @@ AFSCME New Jersey Counsel 63,STATE COUNTY AND MUNI EMPLS AFL-CIO,63.0,545799.0,,
 "UNITED STEELWORKERS OF AMERICA, LOCAL 8511","STEELWORKERS, AFL-CIO",8511.0,509075.0,,train
 "TEAMSTERS LOCAL UNION NO. 957, AFFILIATED WITH THE INTERNATIONAL BORTHERHOOD OF TEAMSTERS, AFL-CIO",TEAMSTERS,957.0,2881.0,,train
 "INTERNATIONAL UNION OF OPERATING ENGINEERS, LOCAL 18-S","ENGINEERS, OPERATING, AFL-CIO",18.0,39040.0,,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, CHAUFFEURS, WAREHOUSEMEN AND HELPERS OF AMERICA, LOCAL 633",TEAMSTERS,633.0,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, CHAUFFEURS, WAREHOUSEMEN AND HELPERS OF AMERICA, LOCAL 633",TEAMSTERS,633.0,32565,,train
 "SOCIETY OF PROFESSIONAL ENGINEERING EMPLOYEES IN AEROSPACE, IFPTE LOCAL 2001","ENGINEERS, PROF AND TECH, AFL-CIO",2001.0,43598.0,,train
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCAL UNION NO. 45, AFL-CIO",ELECTRICAL WORKERS IBEW AFL-CIO,45.0,44073.0,,train
 "Theatrical Wardrobe Union, IATSE Local 768, International Alliance of Theatrical Stage Employees, Moving Picture Technicians, Artists & Allied Crafts of the U.S. & Canada",STAGE AND PICTURE OPERATORS AFL-CIO,768.0,11363.0,,train
@@ -59729,7 +59729,7 @@ BROTHERHOOD OF MAINTENANCE OF WAY EMPLOYEES DIVISION-IBT ATSFF SYSTEM FEDERATION
 "IAM, AEROLODGE 834",MACHINISTS AFL-CIO,834.0,24004.0,,train
 "Local  2659, United Steel, Paper and Foresty, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union (USW), AFL-CIO-CLC","STEELWORKERS, AFL-CIO",2659.0,28920.0,,train
 "The Greater Pennsylvania Regional Council of Carpenters of the United Brotherhood of Carpenters and Joiners of America, Local Union 86",CARPENTERS IND,86.0,543095.0,,train
-International Brotherhood of Teamsters IBT LU 25,TEAMSTERS,25.0,,potentially resolvable,train
+International Brotherhood of Teamsters IBT LU 25,TEAMSTERS,25.0,,ambiguous,train
 INTERNATIONAL OF PAINTERS AND ALLIED TRADES LOCAL 1310,PAINTERS AFL-CIO,1310.0,16214.0,,train
 "International Brotherhood of Teamsters, Local 745",TEAMSTERS,745.0,39230.0,,train
 SEIU Healthcare MO-KS,SERVICE EMPLOYEES,,,potentially resolvable,train
@@ -60012,7 +60012,7 @@ INTL BROTHERHOOD OF ELECTRICAL WORKERS LOCAL UNION #343,ELECTRICAL WORKERS IBEW 
 PACIFIC NORTHWEST REGIONAL COUNCIL OF CARPENTERS,CARPENTERS IND,,,potentially resolvable,test
 Amalgamated Transit Union (ATU),TRANSIT UNION AFL-CIO,,,potentially resolvable,train
 "International Union of Bricklayers and Allied Craftworkers Local 1 Maryland, Virginia, DC",BRICKLAYERS AFL-CIO,1.0,526728.0,,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS,  LOCAL 727",TEAMSTERS,727.0,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS,  LOCAL 727",TEAMSTERS,727.0,,ambiguous,train
 AFSCME LOCAL 829,STATE COUNTY AND MUNI EMPLS AFL-CIO,829.0,516997.0,,train
 United Food and commercial workers Union Local 881,FOOD AND COMMERCIAL WKRS,881.0,515066.0,,train
 ILA Local #1414,LONGSHOREMENS ASN AFL-CIO,1414.0,9926.0,,train
@@ -61387,7 +61387,7 @@ Central Puget Sound Carpenters Local 30,CARPENTERS IND,30.0,544538.0,,train
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union, AFL-CIO, and its Local 1865","STEELWORKERS, AFL-CIO",1865.0,,ambiguous,train
 BCTGM Local 10G,"BAKERY, TOBACCO AND GRAIN AFL-CIO",10.0,17903.0,,train
 Local 1102 RWDSU * UFCW,"RETAIL WHOLESALE, DC, UFCW",1102.0,12614.0,,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL UNION NO. 633 OF NH",TEAMSTERS,633.0,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL UNION NO. 633 OF NH",TEAMSTERS,633.0,32565,,train
 "AMERICAN FEDERATION OF STATE, COUNTY AND MUNICIPAL EMPLOYEES, LOCAL 217",STATE COUNTY AND MUNI EMPLS AFL-CIO,217.0,541675.0,,train
 LOUISIANA CARPENTERS REGIONAL COUNCIL LOCAL # 1098,CARPENTERS IND,1098.0,17160.0,,train
 "GRAPHICS COMMUNICATIONS CONF., IBT",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,,,potentially resolvable,train
@@ -63270,7 +63270,7 @@ UFCW LOCAL 770,FOOD AND COMMERCIAL WKRS,770.0,517385,,train
 International Association of Machinists and Aerospace Workers Local Lodge 1061,MACHINISTS AFL-CIO,1061.0,24852.0,,train
 "DISTRICT 1199, THE HEALTH CARE AND SOCIAL SERVICE UNION, SEIU,  AFL-CIO",SERVICE EMPLOYEES,1199.0,516569.0,,train
 "INTERNATIONAL ASSOCIATION OF MACHINISTS & AEROSPACE WORKERS, LOCAL LODGE 1998",MACHINISTS AFL-CIO,1998.0,502246.0,,train
-International Brotherhood of Teamsters Local Union No.727,TEAMSTERS,727.0,,potentially resolvable,train
+International Brotherhood of Teamsters Local Union No.727,TEAMSTERS,727.0,,ambiguous,train
 "UA PLUMBERS, PIPEFITTERS, LOCAL UNION 295, AFL-CIO",PLUMBERS AFL-CIO,295.0,39008.0,,train
 AMERICAN POSTAL WORKERS UNION/ FAYETTEVILLE AREA LOCAL UNION # 984,"POSTAL WORKERS, AMERICAN, AFL-CIO",984.0,71937.0,,train
 WHOLESALE & RETAIL FOOD DISTRIBUTION TEAMSTER LOCAL 63 INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,63.0,508852.0,,train
@@ -64461,7 +64461,7 @@ American Postal Workers Union AMAL#32,"POSTAL WORKERS, AMERICAN, AFL-CIO",32.0,9
 OFFICE & PROFESSIONAL EMPLOYEES INTERNAITONAL UNION (OPEIU) LOCAL #153,OFFICE AND PROFESSIONAL EMPLS AFL-CIO,153.0,19065.0,,train
 "SECURITY POLICE & FIRE PROFESSIONALS OF AMERICA, LOCAL 501","SECURITY POLICE, FIRE PROF, IND",501.0,542062.0,,train
 IUPAT Local 1974 Drywall Tapers & Pointers Union,PAINTERS AFL-CIO,1974.0,70469.0,,train
-"International Brotherhood of Teamsters, Local 727",TEAMSTERS,727.0,,potentially resolvable,train
+"International Brotherhood of Teamsters, Local 727",TEAMSTERS,727.0,,ambiguous,train
 "United Food and Commercial Workers Union, (UFCW) Local 227, AFL-CIO-CLC",FOOD AND COMMERCIAL WKRS,227.0,24915,,train
 "INTERNATIONAL LONGSHOREMEN'S ASSOCIATION, LOCAL 2061",LONGSHOREMENS ASN AFL-CIO,2061.0,542813.0,,train
 "International Federation of Professional and Technical Engineers, Local 149","ENGINEERS, PROF AND TECH, AFL-CIO",149.0,34576.0,,test
@@ -65223,7 +65223,7 @@ INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS LOCAL UNION NO. 20,ELECTRICAL WO
 "LOC. 95, DIST COUNCIL 1707, ET AL. AFSCME AFL-CIO",STATE COUNTY AND MUNI EMPLS AFL-CIO,95.0,515913.0,,train
 LOCAL 345 IBEW,ELECTRICAL WORKERS IBEW AFL-CIO,345.0,17025.0,,train
 "United Food & Commercial Workers International Union, Local 328",FOOD AND COMMERCIAL WKRS,328.0,,ambiguous,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS BAKERY AND LAUNDRY CONFERENCE, ON BEHALF OF ALL AFFECTED LABOR ORGANIZATIONS INCLUDING TEAMSTERS LOCAL NOS. 52 AND 926",TEAMSTERS,,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS BAKERY AND LAUNDRY CONFERENCE, ON BEHALF OF ALL AFFECTED LABOR ORGANIZATIONS INCLUDING TEAMSTERS LOCAL NOS. 52 AND 926",TEAMSTERS,,,multi-local,train
 New Orleans Clerks and Checkers Union ILA Local 1497,LONGSHOREMENS ASN AFL-CIO,1497.0,40553.0,,train
 Local 738 UAW Unit #1,AUTO WORKERS AFL-CIO,738.0,20602.0,,train
 "SEIU, Local 32BJ, Service Employees International Union, CTW, CLC",SERVICE EMPLOYEES,32.0,516823.0,,train
@@ -65681,7 +65681,7 @@ International Association of Heat and Frost Insulators and Asbestos Workers Loca
 American Postal Workers Union Area Local 1070,"POSTAL WORKERS, AMERICAN, AFL-CIO",1070.0,86046.0,,train
 "United Food & Commercial Workers Union, Local 5",FOOD AND COMMERCIAL WKRS,5.0,,ambiguous,train
 UNITED ASSOCIATION OF JOURNEYMEN & APPRENTICES OF THE PLUMBING & PIPEFITTERS INDUSTRY OF THE U.S. &,PLUMBERS AFL-CIO,,,potentially resolvable,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, CHAUFFEURS WAREHOUSEMEN  AND HELPERS LOCAL UNION  NO 633",TEAMSTERS,633.0,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, CHAUFFEURS WAREHOUSEMEN  AND HELPERS LOCAL UNION  NO 633",TEAMSTERS,633.0,32565,,train
 "BREWERY, SODA AND MINERAL WATER BOTTLERS LOCAL UNION 896, INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,896.0,30466.0,,train
 UNITED STEEL WORKERS LOCAL 7772-01,"STEELWORKERS, AFL-CIO",7772.0,68049.0,,train
 "AMERICAN POSTAL WORKERS UNION, LOCAL 2502","POSTAL WORKERS, AMERICAN, AFL-CIO",2502.0,72311.0,,train
@@ -66117,7 +66117,7 @@ INTERNATIONAL UNION OF OPERATING ENGINEERS LOCAL #49,"ENGINEERS, OPERATING, AFL-
 USW LOCAL 9506,"STEELWORKERS, AFL-CIO",9506.0,543307.0,,test
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION, LOCAL 4372","STEELWORKERS, AFL-CIO",4372.0,15361.0,,train
 "INTERNATIONAL UNION, UNITED AUTOMOBILE, AEROSPACE AND AGRICULTURAL IMPLEMENT WORKERS OF AMERICA, LOCAL 1219, UAW",AUTO WORKERS AFL-CIO,1219.0,9177.0,,train
-Teamsters District Council No. 2,TEAMSTERS,2.0,,potentially resolvable,train
+Teamsters District Council No. 2,TEAMSTERS,2.0,,ambiguous,train
 TEAMSTERS LOCAL 480 AFFILIATED WITH THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,480.0,63169.0,,train
 "International Union of Operating Engineers Local 95, AFL-CIO","ENGINEERS, OPERATING, AFL-CIO",95.0,37173.0,,train
 "AMERICAN POSTAL WORKER'S UNION, PADUCAH LOCAL 2500","POSTAL WORKERS, AMERICAN, AFL-CIO",2500.0,506364.0,,train
@@ -66758,7 +66758,7 @@ United Steelworkers Local 1259-10,"STEELWORKERS, AFL-CIO",1259.0,19830.0,,train
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING,  ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION, LOCAL 8183, AFL-CIO, CLC","STEELWORKERS, AFL-CIO",8183.0,70900.0,,test
 PLUMBERS AND STEAMFITTER LOCAL 198,PLUMBERS AFL-CIO,198.0,3618.0,,train
 TEAMSTERS LOCAL UNION #682,TEAMSTERS,682.0,36648.0,,train
-Teamsters Local Union No. 727 Health and Welfare Fund,TEAMSTERS,727.0,,potentially resolvable,train
+Teamsters Local Union No. 727 Health and Welfare Fund,TEAMSTERS,727.0,,ambiguous,train
 "SEIU Healthcare Pennsylvania, CTW, CLC",SERVICE EMPLOYEES,,,potentially resolvable,train
 "Laborers'  International Union of North America, Local No. 17",LABORERS,17.0,47525.0,,train
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union, AFL-CIO, CLC, Local #291M","STEELWORKERS, AFL-CIO",291.0,,ambiguous,train
@@ -67294,7 +67294,7 @@ TEAMSTERS LOCAL 293,TEAMSTERS,293.0,13201.0,,train
 "International Union of Bricklayers and Allied Craftworkers, Local No. 4 California",BRICKLAYERS AFL-CIO,4.0,36863.0,,train
 "UNITE-HERE, LOCAL 17",UNITE HERE,17.0,,potentially resolvable,train
 "AMERICAN POSTAL WORKERS UNION, WHEELING AREA LOCAL","POSTAL WORKERS, AMERICAN, AFL-CIO",,,potentially resolvable,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 633, AFL-CIO",TEAMSTERS,633.0,,potentially resolvable,test
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 633, AFL-CIO",TEAMSTERS,633.0,32565,,test
 Teamsters Local No. 463,TEAMSTERS,463.0,5506.0,,train
 "EAST BAY AUTOMOTIVE MACHINISTS LODGE NO. 1173, DISTRICT LODGE 190",MACHINISTS AFL-CIO,1173.0,5757.0,,train
 CWA Union Local 3611,COMMUNICATIONS WORKERS AFL-CIO,3611.0,35693.0,,train
@@ -67322,7 +67322,7 @@ UGSOA LOCAL 28,"GOVERNMENT SECURITY OFFICERS, IND",28.0,529396.0,,test
 "PLUMBERS AND PIPEFITTERS LOCAL 342, AFL-CIO",PLUMBERS AFL-CIO,342.0,33320.0,,train
 "Sheet Metal, Air, Rail & Transportation (SMART), Local Union No. 88","SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",88.0,41388.0,,train
 "Civil Service Employees Association, Inc., Local 1000, AFSCME, AFL-CIO",STATE COUNTY AND MUNI EMPLS AFL-CIO,1000.0,515614.0,,train
-International Brotherhood of Teamsters Local 727,TEAMSTERS,727.0,,potentially resolvable,train
+International Brotherhood of Teamsters Local 727,TEAMSTERS,727.0,,ambiguous,train
 "AMERICAN POSTAL WORKERS, LOCAL 2233","POSTAL WORKERS, AMERICAN, AFL-CIO",2233.0,505855.0,,train
 "AMERICAN POSTAL WORKERS INTERNATIONAL UNION, AFL-CIO (United States Postal Service)","POSTAL WORKERS, AMERICAN, AFL-CIO",,,potentially resolvable,train
 UFCW 367,FOOD AND COMMERCIAL WKRS,367.0,27121.0,,train
@@ -67454,7 +67454,7 @@ International Brotherhood of Electrical Workers AFL-CIO Local 1347,ELECTRICAL WO
 "SEIU 1199, New Jersey",SERVICE EMPLOYEES,1199.0,542822.0,,train
 "Local 42, Office and Professional Employees International  Union, (OPEIU),AFL-CIO",OFFICE AND PROFESSIONAL EMPLS AFL-CIO,42.0,50137.0,,train
 "International Chemical Workers Union Council, United Food and Commercial Workers, Local 900C",FOOD AND COMMERCIAL WKRS,900.0,69724.0,,train
-"Teamsters Union Locals 81,174, 231, 252, 324, 483, 589, 690, 760, 763, 839, and 962, and Teamsters Local 174",TEAMSTERS,,,potentially resolvable,train
+"Teamsters Union Locals 81,174, 231, 252, 324, 483, 589, 690, 760, 763, 839, and 962, and Teamsters Local 174",TEAMSTERS,,,multi-local,train
 "Workers United, Chicago and Midwest Regional Joint Board (CMRJB)","WORKERS UNITED, SEIU",,,potentially resolvable,train
 IBEW LOCAL NO. 347,ELECTRICAL WORKERS IBEW AFL-CIO,347.0,19803.0,,train
 "LOCAL 1102, MICHIGAN REGIONAL COUNCIL OF CARPENTERS AND MILLWRIGHTS",CARPENTERS IND,1102.0,40006.0,,train
@@ -68283,7 +68283,7 @@ IATSE LOCAL 748,STAGE AND PICTURE OPERATORS AFL-CIO,748.0,542719.0,,train
 "IBEW, LOCAL 380",ELECTRICAL WORKERS IBEW AFL-CIO,380.0,27341.0,,train
 "UNITED FOOD AND COMMERCIAL WORKERS, LOCAL 1101",FOOD AND COMMERCIAL WKRS,1101.0,38981.0,,test
 "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS, LOCAL UNION 1873",ELECTRICAL WORKERS IBEW AFL-CIO,1873.0,49605.0,,train
-International Brotherhood of Teamsters Local Union No. 727,TEAMSTERS,727.0,,potentially resolvable,train
+International Brotherhood of Teamsters Local Union No. 727,TEAMSTERS,727.0,,ambiguous,train
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers, Local 550","STEELWORKERS, AFL-CIO",550.0,,ambiguous,train
 "UNITED GOVERNMENT SECURITY OFFICERS OF AMERICA, INT'L UNION AND ITS LOCAL 401","GOVERNMENT SECURITY OFFICERS, IND",401.0,542721.0,,train
 "International Guards Union of America, Local 131",GUARDS IND,131.0,530392.0,,train
@@ -68649,7 +68649,7 @@ The Southwest Regional Council of Carpenters,CARPENTERS IND,,,potentially resolv
 SEIU LOCAL 26,SERVICE EMPLOYEES,26.0,20339.0,,train
 "INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 344, AFL-CIO",TEAMSTERS,344.0,36973.0,,train
 "International Brotherhood of Teamsters, AFL-CIO, Local Union No. 71",TEAMSTERS,71.0,27210.0,,train
-INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL UNION NO. 727,TEAMSTERS,727.0,,potentially resolvable,train
+INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL UNION NO. 727,TEAMSTERS,727.0,,ambiguous,train
 International Association of Machinists & Aerospace Union #2018,MACHINISTS AFL-CIO,2018.0,545705.0,,train
 "General Teamsters (Excluding Mailers), State of Arizona, Local Union 104, and affiliate of the Inter",TEAMSTERS,104.0,4987.0,,test
 TEAMSTERS LOCAL 706,TEAMSTERS,706.0,17041.0,,train
@@ -76168,29 +76168,29 @@ NEW YORK NEWSPAPER PRINTING PRESSMEN'S UNION NO.2,PRINTING PACKAGING & PRODUCTIO
 "TEAMSTERS LOCAL NO. 11, INTERNATIONAL BROTHERHOOD OF TEAMSTERS, AFL-CIO",TEAMSTERS,11.0,62025.0,,train
 "Local 705-S, Graphic Communications Conference/International Brotherhood of Teamsters (IBT), District Council 3",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,705.0,56148.0,,train
 Teamsters Local Union No. 100 Affiliated with the International Brotherhood of Teamsters,TEAMSTERS,100.0,32509.0,,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCALS 853, 386 AND 431",TEAMSTERS,,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCALS 853, 386 AND 431",TEAMSTERS,,,multi-local,train
 Teamsters Local Union No. 2,TEAMSTERS,2.0,1364.0,,train
 "International Brotherhood of Teamsters, Local 1129; Teamsters Brewery, Beverage and Allied Trades of Bartow and Floyd Counties of Georgia",TEAMSTERS,1129.0,530702.0,,train
 TEAMSTERS UNION LOCAL #2 IBT,TEAMSTERS,2.0,1364.0,,train
 "Truck Drivers, Chauffeurs and Helpers Local Union No. 11, affiliated with the International Brotherhood of Teamsters",TEAMSTERS,11.0,62025.0,,train
-Teamsters Local Union No. 40/52,TEAMSTERS,,,potentially resolvable,train
+Teamsters Local Union No. 40/52,TEAMSTERS,,,multi-local,train
 Local Union No. 6 of the International Brotherhood of Teamsters,TEAMSTERS,6.0,5879.0,,train
 "General Teamsters, Local Union No. 26, Champaign, Illinois and Vicinity a/w International Brotherhood of Teamsters",TEAMSTERS,26.0,21922.0,,train
-TEAMSTER DISTRICT COUNCIL NO.2,TEAMSTERS,2.0,,potentially resolvable,train
+TEAMSTER DISTRICT COUNCIL NO.2,TEAMSTERS,2.0,,ambiguous,train
 "TEAMSTERS DISTRICT COUNCIL #2, INTERNATIONAL BROTHERHOOD OF TEAMSTERS, GRAPHIC COMMUNICATIONS CONFERENCE",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,2.0,44243.0,,train
 "Teamsters Automotive, Chauffeurs, Parts, Garage, Office Clerical, Airline, Healthcare, Petroleum Industry, Produce, Bakery and Industrial Workers, within Western Pennsylvania and Joint Council #40, Local Union No. 926, affiliated with International Brotherhood of Teamsters",TEAMSTERS,926.0,19807.0,,train
 Teamsters Joint Council No. 3,TEAMSTERS,3.0,512068.0,,train
 Teamsters Union Local 2,TEAMSTERS,2.0,1364.0,,train
-"TEAMSTERS LOCAL 386, 431, AND 853",TEAMSTERS,,,potentially resolvable,train
+"TEAMSTERS LOCAL 386, 431, AND 853",TEAMSTERS,,,multi-local,train
 "LOCAL 13, GRAPHIC COMMUNICATIONS CONFERENCE OF THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS (IBT)",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,13.0,,potentially resolvable,train
 TEAMSTERS LOCAL NO. 6,TEAMSTERS,6.0,5879.0,,train
 GCC/IBT Local705s DC3,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,705.0,56148.0,,train
 Teamsters Local Union #2,TEAMSTERS,2.0,1364.0,,train
-TEAMSTERS LOCALS 853 & 386,TEAMSTERS,,,potentially resolvable,train
+TEAMSTERS LOCALS 853 & 386,TEAMSTERS,,,multi-local,train
 "Teamsters Local Union No. 2 of Great Falls, MT, affiliated with the International Brotherhood of Tea",TEAMSTERS,2.0,1364.0,,train
 "Teamsters Local No. 2, affiliated with the International Brotherhood of Teamsters",TEAMSTERS,2.0,1364.0,,train
 "Teamsters Local No. 14, General Sale Drivers, Delivery Drivers and Representing the Public Sector, Affiliated with International Brotherhood of Teamsters",TEAMSTERS,14.0,33295.0,,train
-Local 2 IBT,TEAMSTERS,2.0,,potentially resolvable,train
+Local 2 IBT,TEAMSTERS,2.0,,ambiguous,train
 "Local 550-M of District Council 3, Graphic Communications Conference, International Brotherhood of Teamsters (IBT)",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,550.0,45644.0,,train
 "LOCAL UNION NO. 135, CHAUFFEURS, TEAMSTERS, WAREHOUSEMEN AND HELPERS INDIANAPOLIS, INDIANA AND AIRLINE EMPLOYEES IN THE STATE OF INDIANA A/W THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,135.0,9836.0,,train
 "FREIGHT DRIVERS, DOCKWORKERS AND HELPERS LOCAL UNION NO. 24 A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,24.0,22571.0,,train
@@ -76203,7 +76203,7 @@ TEAMSTERS LOCAL #20 A/W THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,20.
 Teamsters Local Union No. 2 affiliated with International Brotherhood of Teamsters,TEAMSTERS,2.0,1364.0,,train
 Teamsters Local Union No. 20 affiliated with the International Brotherhood of Teamsters,TEAMSTERS,20.0,8580.0,,train
 "Teamsters Local Union No. 20, affiliated with the International Brotherhood of Teamsters",TEAMSTERS,20.0,8580.0,,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 853, 386 & 431",TEAMSTERS,,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 853, 386 & 431",TEAMSTERS,,,multi-local,train
 Teamsters Local Union No. 110 a/w International Brotherhood of Teamsters,TEAMSTERS,110.0,12194.0,,train
 TEAMSTERS LOCAL 120 - MOVED ONLY AT BLAINE ADDRESS NOT ST. PAUL,TEAMSTERS,120.0,1526.0,,train
 "TEAMSTERS DISTRICT COUNCIL LOCAL NO. 2, INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,2.0,1364.0,,train
@@ -76214,14 +76214,14 @@ TEAMSTERS LOCAL 24 A/W INTERNATIONAL BROTHEROOD OF TEAMSTERS,TEAMSTERS,24.0,2257
 "LOCAL UNION NO. 135, CHAUFFEURS, TEAMSTERS, WAREHOUSEMEN AND HELPERS, INDIANAPOLIS, INDIANA AND AIRLINE EMPLOYEES IN THE STATE OF INDIANA A/W THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,135.0,9836.0,,train
 Teamsters Local Union No. 52 a/w International Brotherhood of Teamsters,TEAMSTERS,52.0,39065.0,,train
 BREWERS AND MALTSTERS LOCAL UNION NO 6 A/W IBT AFL-CIO,TEAMSTERS,6.0,5879.0,,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 1",TEAMSTERS,1.0,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 1",TEAMSTERS,1.0,,ambiguous,train
 New York Local 2N GCC/IBT,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,2.0,,potentially resolvable,train
-"TEAMSTERS 81, 274, 231, 252, 324, 483, 589, 690, 760, 839, 962",TEAMSTERS,,,potentially resolvable,train
-"TEAMSTERS, DISTRICT COUNCIL #2",TEAMSTERS,2.0,,potentially resolvable,train
-TEAMSTERS LOCAL 116 & 120,TEAMSTERS,,,potentially resolvable,train
+"TEAMSTERS 81, 274, 231, 252, 324, 483, 589, 690, 760, 839, 962",TEAMSTERS,,,multi-local,train
+"TEAMSTERS, DISTRICT COUNCIL #2",TEAMSTERS,2.0,,ambiguous,train
+TEAMSTERS LOCAL 116 & 120,TEAMSTERS,,,multi-local,train
 "International Brotherhood of Teamsters Local 17, affiliated with the International Brotherhood  of T",TEAMSTERS,17.0,25769.0,,test
 TEAMSTERS LOCAL NO. 5 AFFILIATED WITH THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,5.0,38170.0,,train
-"General Teamsters, Warehouse Employees, Law Enforcement and Public Employees, Food Processing and Cannery Workers, of Whatcom, San Juan, Skagit, and Island Counties, Washington, including Food Processing, Cannery Workers and Warehousemen in the Cities of Stanwood, Arlington, Snohomish and Monroe in Snohomish County, Washington, Local 231 (General Teamsters Local 231)",TEAMSTERS,,,potentially resolvable,train
+"General Teamsters, Warehouse Employees, Law Enforcement and Public Employees, Food Processing and Cannery Workers, of Whatcom, San Juan, Skagit, and Island Counties, Washington, including Food Processing, Cannery Workers and Warehousemen in the Cities of Stanwood, Arlington, Snohomish and Monroe in Snohomish County, Washington, Local 231 (General Teamsters Local 231)",TEAMSTERS,,18395,,train
 "TEAMSTERS JOINT COUNCIL 10 NEW ENGLAND, A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,10.0,29242.0,,train
 "LOCAL UNION NO. 135, CHAUFFEURS, TEAMSTERS, WAREHOUSEMEN AND HELPERS INDIANAPOLIS, INDIANA AND INDIANA AIRLINE EMPLOYEES IN THE STATE OF INDIANA A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,135.0,9836.0,,train
 "Chauffeurs, Teamsters and Helpers Local Union No. 175, affiliated with the International Brotherhood of Teamsters, Chauffeurs, Warehousemen and Helpers of America",TEAMSTERS,175.0,1608.0,,train
@@ -76236,9 +76236,9 @@ TEAMSTERS LOCAL 24 AW INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,24.0,2257
 "TEAMSTERS LOCAL UNION NO. 43, AFFILIATED WITH THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS, AFL-CIO",TEAMSTERS,43.0,21917.0,,train
 "Teamsters Union Local No. 2, affiliated with the International Brotherhood of Teamsters",TEAMSTERS,2.0,1364.0,,train
 "Teamsters Local Union No. 2 of Great Falls, MT, affiliated with the International Brotherhood of Teamsters",TEAMSTERS,2.0,1364.0,,train
-"TEAMSTERS LOCALS 117, 38, 174, 252, 313, AND 589",TEAMSTERS,,,potentially resolvable,train
+"TEAMSTERS LOCALS 117, 38, 174, 252, 313, AND 589",TEAMSTERS,,,multi-local,train
 "LOCAL UNION NO. 135, CHAUFFEURS, TEAMSTERS, WAREHOUSEMEN AND HELPERS INDIANAPOLIS, IN AND AIRLINE EMPLOYEES IN THE STATE OF INDIANA A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,135.0,9836.0,,train
-"EASTERN AND SOUTHERN REGION OF TEAMSTERS, LOCAL UNIONS 61, 71, 171, ET AL",TEAMSTERS,,,potentially resolvable,train
+"EASTERN AND SOUTHERN REGION OF TEAMSTERS, LOCAL UNIONS 61, 71, 171, ET AL",TEAMSTERS,,,multi-local,train
 "Teamsters No. Local 104, an affiliate of the International Brotherhood of Teamsters, General Teamsters (Excluding Mailers), State of Arizona",TEAMSTERS,104.0,4987.0,,train
 "UNITE HERE, Local 7, AFL-CIO; International Union of Operating Engineers, Local 37, AFL-CIO; International Brotherhood of Teamsters Local 355; and United Automobile, Aerospace, and Agricultural Implement Workers of America, AFL-CIO; joint unions collectively known as The National Gaming Workers Coalition",,,,multi-union,train
 "Teamsters, Chauffeurs, Warehousemen and Helpers Local Union No. 20, affiliated with the International Brotherhood of Teamsters",TEAMSTERS,20.0,8580.0,,train
@@ -76247,11 +76247,11 @@ TEAMSTERS LOCAL 24 AW INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,24.0,2257
 GENERAL TEAMSTERS LOCAL UNION NO. 162 AFFILIATED WITH INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,162.0,2370.0,,train
 Teamsters Local No. 24 a/w International Brotherhood of Teamsters,TEAMSTERS,24.0,22571.0,,train
 Teamsters Joint Council 3,TEAMSTERS,3.0,512068.0,,train
-"International Brotherhood of Teamsters, Local Nos. 117, 231, and 252",TEAMSTERS,,,potentially resolvable,train
+"International Brotherhood of Teamsters, Local Nos. 117, 231, and 252",TEAMSTERS,,,multi-local,train
 "Teamsters Local 572, Joint Council 42",TEAMSTERS,572.0,24471.0,,train
 "INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 2",TEAMSTERS,2.0,1364.0,,train
 "International Brotherhood of Teamsters (IBT), Local 5",TEAMSTERS,5.0,38170.0,,train
-"Teamsters Local Union Nos. 179, 301, 330, 673, 731, and 786, joint representative",TEAMSTERS,,,potentially resolvable,train
+"Teamsters Local Union Nos. 179, 301, 330, 673, 731, and 786, joint representative",TEAMSTERS,,,multi-local,train
 "Teamsters, Chauffeurs, Warehousemen & Helpers and Professional, Clerical, Public and Miscellaneous Employees, Local Union No. 533 of Donner & The Tahoe Basin, Reno and Northern Nevada, I.B.T.",TEAMSTERS,533.0,14938.0,,train
 Teamsters Local #2,TEAMSTERS,2.0,1364.0,,train
 General Teamsters Local Union No. 26 Champaign Illinois and Vicinity,TEAMSTERS,26.0,21922.0,,train
@@ -76261,27 +76261,27 @@ General Teamsters Local Union No. 26 Champaign Illinois and Vicinity,TEAMSTERS,2
 "Petroleum, Construction, Tankline Drivers, Yeast, Soft Drink Workers and Driver-Salesmen, Amusement and Vending Servicemen and Allied Workers, Warehouse, Retail & Mail-Order Employees, Union Local No. 570, Baltimore & Vicinity, Maryland, an affiliate Local Union of the International Brotherhood of Teamsters",TEAMSTERS,570.0,27440.0,,train
 LOCAL 1-L GCC INT'L BROTHERHOOD OF TEAMSTERS,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,1.0,,potentially resolvable,train
 "LOCAL 13-N, GRAPHIC COMMUNICATIONS INTERNATIONAL UNION (GCIU) OF THE INTERNATIONAL BROTHERHOOD OF TE",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,13.0,2076.0,,train
-"TEAMSTERS LOCALS 117, 38, 174, 231, 252, 313 AND 589",TEAMSTERS,,,potentially resolvable,train
-"TEAMSTERS LOCALS 117, 38, 174, 231, 252, 313, 589",TEAMSTERS,,,potentially resolvable,train
+"TEAMSTERS LOCALS 117, 38, 174, 231, 252, 313 AND 589",TEAMSTERS,,,multi-local,train
+"TEAMSTERS LOCALS 117, 38, 174, 231, 252, 313, 589",TEAMSTERS,,,multi-local,train
 "GRAPHIC COMMUNICATIONS INTERNATIONAL UNION, LOCAL 27C A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,27.0,20398.0,,train
 LOCAL 23N GRAPHIC COMMUNICATIONS CONFERENCE/INTERNATIONAL BROTHERHOOD OF TEAMSTERS,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,23.0,38837.0,,train
 "AUTOMOBILE TRANSPORTERS, NEW TRAILER AND ARMORED CAR DRIVERS, AIRLINE, MECHANICS AND GARAGEMEN (CLEVELAND AND VICINITY, OHIO) TEAMSTERS LOCAL UNION NO. 964 AFFILIATED WITH THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,964.0,10485.0,,train
 LOCAL #863 AFFILIATED WITH INTERNATIONAL BROTHERHOOD OF TEAMSTERS CHAUFFEURS WAREHOUSEMEN AND HELPERS OF AMERICA,TEAMSTERS,863.0,1348.0,,train
-"TEAMSTERS DISTRICT COUNCIL 2, AFFILIATED WITH INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,2.0,,potentially resolvable,train
+"TEAMSTERS DISTRICT COUNCIL 2, AFFILIATED WITH INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,2.0,,ambiguous,train
 "INTERNATIONAL BROTHERHOOD OF TEAMSTERS (IBT),  LOCAL  5",TEAMSTERS,5.0,38170.0,,train
-"TEAMSTERS LOCALS 81, 174, 231, 252, 324, 483, 589, 690, 760, 763, 839 & 962",TEAMSTERS,,,potentially resolvable,train
+"TEAMSTERS LOCALS 81, 174, 231, 252, 324, 483, 589, 690, 760, 763, 839 & 962",TEAMSTERS,,,multi-local,train
 "Teamsters, Chauffeurs, Warehousemen and Helpers Union, Local No. 20, Affiliated with the Internation",TEAMSTERS,20.0,8580.0,,train
 "PETROLEUM, CONSTRUCTION, TANKLINE DRIVERS, YEAST, SOFT DRINK WORKERS AND DRIVER SALESMEN, AMUSEMENT AND VENDING SERVICE MEN AND ALLIED WORKERS, WAREHOUSE, RETAIL AND MAIL ORDER EMPLOYEES LOCAL UNION NO. 311 OF BALTIMORE, MARYLAND, A SUBORDINATE LOCAL UNION OF THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,311.0,9225.0,,train
 "LOCAL UNION NO. 135, CHAUFFEURS, TEAMSTERS, WAREHOUSEMEN AND HELPERS INDIANAPOLIS, INDIANA AND AIRLINE EMPLOYEES IN THE STATE OF INDIANA A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,135.0,9836.0,,train
-"LOCAL 638 AND 120, INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,,,potentially resolvable,train
+"LOCAL 638 AND 120, INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,,,multi-local,train
 TEAMSTERS LOCAL 7,TEAMSTERS,7.0,19535.0,,train
-"TEAMSTERS LOCALS 38, 117, 174, 252, 313, AND 589",TEAMSTERS,,,potentially resolvable,train
+"TEAMSTERS LOCALS 38, 117, 174, 252, 313, AND 589",TEAMSTERS,,,multi-local,train
 TEAMSTERS LOCAL UNION NO. 20 A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,20.0,8580.0,,train
 "LOCAL 1- AMALGAMATED LITHOGRAPHERS OF AMERICA, GCC/IBT",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,1.0,35319.0,,train
 "BOSTON MAILERS UNION, LOCAL 1 A/W  INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,1.0,32175.0,,train
-"INTL. BROTHERHOOD TEAMSTERS BAKERY AND LAUNDRY CONFERENCE LOCALS 7, 135, 142, 364 AND 414",TEAMSTERS,,,potentially resolvable,train
+"INTL. BROTHERHOOD TEAMSTERS BAKERY AND LAUNDRY CONFERENCE LOCALS 7, 135, 142, 364 AND 414",TEAMSTERS,,,multi-local,train
 TEAMSTERS LOCAL NO. 24 A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,24.0,22571.0,,train
-"Teamsters Locals 81, 174, 231, 252, 324, 483, 589, 690, 760, 763, 839, 962",TEAMSTERS,,,potentially resolvable,train
+"Teamsters Locals 81, 174, 231, 252, 324, 483, 589, 690, 760, 763, 839, 962",TEAMSTERS,,,multi-local,train
 TEAMSTERS LOCAL 5,TEAMSTERS,5.0,38170.0,,train
 "LOCAL 705S, GCC/IBT, DISTRICT COUNCIL 3",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,705.0,56148.0,,test
 "TEAMSTERS LOCAL 110 A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS, AFL-CIO",TEAMSTERS,110.0,12194.0,,train
@@ -76289,10 +76289,10 @@ TEAMSTERS LOCAL 5,TEAMSTERS,5.0,38170.0,,train
 New York Local 2N GCC IBT,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,2.0,,potentially resolvable,train
 LOC. 17B OF THE GRAPHIC COMMUNICATIONS OF THE IBT,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,17.0,15488.0,,train
 "TEAMSTERS DISTRICT COUNCIL 2, INTERNATIONAL BROTHERHOOD OF TEAMSTERS, GRAPHIC COMMUNICATIONS CONFERENCE",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,2.0,44243.0,,train
-"Local 584-553, IBT",TEAMSTERS,,,potentially resolvable,train
+"Local 584-553, IBT",TEAMSTERS,,,multi-local,train
 "Freight Drivers, Dockworkers & Helpers Local Union No. 24 a/w International Brotherhood of Teamsters",TEAMSTERS,24.0,22571.0,,train
 "BOSTON NEWSPAPER PRINTING PRESSMEN'S UNION, LOCAL 3",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,3.0,542772.0,,train
-"TEAMSTERS, CHAUFFEURS, WAREHOUSEMEN, INDUSTRIAL, AND ALLIED WORKERS OF AMERICA LOCAL 166, LOCAL 542 affiliated with INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,,,potentially resolvable,train
+"TEAMSTERS, CHAUFFEURS, WAREHOUSEMEN, INDUSTRIAL, AND ALLIED WORKERS OF AMERICA LOCAL 166, LOCAL 542 affiliated with INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,,,multi-local,train
 "CHAUFFEURS, TEAMSTERS AND HELPERS, LOCAL UNION NO. 26, AFFILIATED WITH THE INTERNATIONAL BROTHERHOOD",TEAMSTERS,26.0,21922.0,,train
 "TEAMSTERS,  LOCAL 52 A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,52.0,39065.0,,train
 TEAMSTERS LOCAL UNION NO. 5,TEAMSTERS,5.0,38170.0,,train
@@ -76300,22 +76300,22 @@ TEAMSTERS LOCAL UNION NO. 5,TEAMSTERS,5.0,38170.0,,train
 "District Council 3, Local 2/289M, Graphic Communications Conference (GCC), IBT",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,,,potentially resolvable,train
 "TEAMSTERS LOCAL UNION NO. 100 INTERNATIONAL BROTHERHOOD OF TEAMSTERS AND ITS STEWARD, LYDIA COMBS",TEAMSTERS,100.0,32509.0,,train
 "Teamsters,  Local Union No. 2",TEAMSTERS,2.0,1364.0,,train
-"International Brotherhood of Teamsters (Locals 71, 171, and 509)",TEAMSTERS,,,potentially resolvable,test
+"International Brotherhood of Teamsters (Locals 71, 171, and 509)",TEAMSTERS,,,multi-local,test
 "General Sales Drivers, Delivery Drivers & Helpers & Representing the Private Sector, Teamsters Local 14, affiliated with International Brotherhood of Teamsters",TEAMSTERS,14.0,33295.0,,train
 Teamsters Local Union No. 61 a/w International Brotherhood of Teamsters,TEAMSTERS,61.0,13418.0,,train
 "IBT/TEAMSTERS LOCAL NO. 100 AND OFFICERS: STAPLETON, OVERBERG, WEBSTER AND BUSINESS AGENTS: HURLEY,",TEAMSTERS,100.0,32509.0,,train
 "Local 570, Warehouse, General Sales Drivers, Tankline Drivers, Soft Drink Workers And Driver-Salesmen, Dairy, Bakery, Brewery, Professional and Technical, Laundry, Linen, Petroleum, Construction, Yeast, Amusement And Vending Service Men, Retail, Mail Order Employees And Allied Employees a/w International Brotherhood of Teamsters",TEAMSTERS,570.0,27440.0,,train
 "Teamsters, Chauffeurs, Warehousemen and Helpers, Local Union No. 110 a/w International Brotherhood of Teamsters",TEAMSTERS,110.0,12194.0,,train
 "General Teamsters, Auto Truck Drivers and Helpers Local No, 162 affiliated with International Brotherhood of Teamsters",TEAMSTERS,162.0,2370.0,,train
-"TEAMSTERS LOCALS 81, 174, 231, 252, 324, 483, 589, 690, 760, 763, 839 AND 962",TEAMSTERS,,,potentially resolvable,train
+"TEAMSTERS LOCALS 81, 174, 231, 252, 324, 483, 589, 690, 760, 763, 839 AND 962",TEAMSTERS,,,multi-local,train
 Local 14M of the Graphic Communications Conference/IBT,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,14.0,23547.0,,train
-"The International Brotherhood of Teamsters and its subordinate units, the Teamsters Amazon Division, the Teamsters Amazon National Negotiating Committee, KSBD Amazon Teamsters, Teamsters Local 63, and Teamsters Local 1932.",TEAMSTERS,,,potentially resolvable,train
+"The International Brotherhood of Teamsters and its subordinate units, the Teamsters Amazon Division, the Teamsters Amazon National Negotiating Committee, KSBD Amazon Teamsters, Teamsters Local 63, and Teamsters Local 1932.",TEAMSTERS,,,multi-local,train
 TEAMSTERS LOCAL #20 a/w  INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,20.0,8580.0,,train
 "INTERNATIONAL BROTHERHOOD OF TEAMSTERS, PORT DIVISION AND TEAMSTERS LOCAL 848, WHOLESALE DELIVERY DRIVERS, GENERAL TRUCK DRIVERS, CHAUFFEURS, SALES, INDUSTRIAL AND ALLIED WORKERS, INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,848.0,1429.0,,train
-TEAMSTERS LOCALS 890 AND 912,TEAMSTERS,,,potentially resolvable,train
-"TEAMSTERS LOCALS 81, 274, 231, 252, 324, 483, 589, 690, 760, 763, 839 AND 962",TEAMSTERS,,,potentially resolvable,train
+TEAMSTERS LOCALS 890 AND 912,TEAMSTERS,,,multi-local,train
+"TEAMSTERS LOCALS 81, 274, 231, 252, 324, 483, 589, 690, 760, 763, 839 AND 962",TEAMSTERS,,,multi-local,train
 "General Drivers, Warehousemen and Helpers Local Union No. 89 a/w International Brotherhood of Teamsters, Chauffeurs, Warehousemen and Helpers of America",TEAMSTERS,89.0,20926.0,,train
-"LOCAL 295/851 IBT, AFL-CIO",TEAMSTERS,,,potentially resolvable,train
+"LOCAL 295/851 IBT, AFL-CIO",TEAMSTERS,,,multi-local,train
 General Teamsters Local No. 162 affiliated with International Brotherhood of Teamsters,TEAMSTERS,162.0,2370.0,,test
 INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL NO. 20 A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,20.0,8580.0,,train
 "Graphic Communications Conference of the International Brotherhood of Teamsters, Local 508-M  of District Council 3",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,508.0,47349.0,,train
@@ -76349,18 +76349,18 @@ Teamsters Local Union No. 2 affiliated with the International Brotherhood of Tea
 TEAMSTER LOCAL NO. 52 A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,52.0,39065.0,,train
 "International Brotherhood of Teamsters Local 14, General Sales Drivers, Delivery Drivers and Helpers",TEAMSTERS,14.0,33295.0,,train
 Teamsters Local 2,TEAMSTERS,2.0,1364.0,,train
-"Teamsters Locals 483, and 983",TEAMSTERS,,,potentially resolvable,train
+"Teamsters Locals 483, and 983",TEAMSTERS,,,multi-local,train
 "Teamsters Local 97 of New Jersey, affiliated with the IBT, AFL-CIO",TEAMSTERS,97.0,35045.0,,train
 "Local Union No. 135, Chauffeurs, Teamsters, Warehouseman and Helpers Indianapolis, Indiana and Airline Employees in the State of Indiana A/W The International Brotherhood of Teamsters",TEAMSTERS,135.0,9836.0,,train
 "TEAMSTERS, AUTOMOTIVE CHAUFFEURS, PARTS, GARAGE, OFFICE CLERICAL, AIRLINE, HEALTHCARE, PETROLEUM INDUSTRY, PRODUCT, BAKERY AND INDUSTRIAL WORKERS, WITHIN WESTERN PENNSYLVANIA AND JOINT COUNCIL #40, LOCAL UNION NO. 926, AFFILIATED WITH INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,926.0,19807.0,,train
 TEAMSTERS JOINT COUNCIL 3,TEAMSTERS,3.0,512068.0,,train
 GCC/IBT LOCAL 27N OF DISTRICT COUNCIL 3,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,27.0,36081.0,,train
 "INT'L BROTHERHOOD OF TEAMSTERS, JOINT COUNCIL 3",TEAMSTERS,3.0,512068.0,,train
-"NorCal Committee on its own behalf and on behalf of the affiliated Teamster Locals including Teamsters Local 70, 87, 137, 150, 315, 386, 431, 439, 533, 665, 856, 948 and 2785",TEAMSTERS,,,potentially resolvable,train
+"NorCal Committee on its own behalf and on behalf of the affiliated Teamster Locals including Teamsters Local 70, 87, 137, 150, 315, 386, 431, 439, 533, 665, 856, 948 and 2785",TEAMSTERS,,,multi-local,train
 "Theatrical, Radio, Television, Field Equipment, Sound Trucks, Motion Picture, Film, Exhibition, and Orchestra Chauffeurs and Helpers, Local 817, International Brotherhood of Teamsters (“Teamsters Local 817”)",TEAMSTERS,817.0,48200.0,,train
 TEAMSTERS LOCAL UNION NO. 24 A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,24.0,22571.0,,train
 "TEAMSTERS LOCAL #36 BUILDING MATERIAL, CONSTRUCTION, INDUSTRIAL, PROFESSIONAL & TECHNICAL TEAMSTERS, INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,36.0,35343.0,,train
-Teamsters Local 483 & 983,TEAMSTERS,,,potentially resolvable,train
+Teamsters Local 483 & 983,TEAMSTERS,,,multi-local,train
 TEAMSTER LOCAL 20 A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,20.0,8580.0,,train
 "GRAPHIC COMMUNICATIONS CONFERENCE/INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 23-H PAPER HANDLERS",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,23.0,38837.0,,train
 Teamsters Local 456                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  IBT,TEAMSTERS,456.0,21006.0,,train
@@ -76376,15 +76376,15 @@ TEAMSTERS LOCAL 24 A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,24.0,225
 "TEAMSTERS, CHAUFFEURS, WAREHOUSEMEN AND HELPERS LOCAL UNION NO. 110 A/W INTERNATIONAL BROTHERHOOD OF",TEAMSTERS,110.0,12194.0,,train
 "District Council 3, Graphic Communications Conference of the International Brotherhood of Teamsters",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,3.0,542772.0,,train
 "Boston Mailers Union Local 1, a/w International Brotherhood of Teamsters",TEAMSTERS,1.0,32175.0,,train
-"TEAMSTERS LOCALS 81, 174, 231, 252, 324, 483, 589, 690, 760, 763, 839, 962",TEAMSTERS,,,potentially resolvable,train
+"TEAMSTERS LOCALS 81, 174, 231, 252, 324, 483, 589, 690, 760, 763, 839, 962",TEAMSTERS,,,multi-local,train
 "TEAMSTERS DISTRICT COUNCIL 2, GRAPHIC COMMUNICATIONS CONFERENCE - INTERNATIONAL BROTHERHOOD OF TEAMSTERS",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,2.0,44243.0,,test
 "GRAPHIC COMMUNICATION CONFERENCE OF THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 16C",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,16.0,18869.0,,train
 TEAMSTERS UNION LOCAL 7,TEAMSTERS,7.0,19535.0,,train
 "BAKERY DRIVERS, CHAUFFEURS AND HELPERS LOCAL UNION NO. 20 A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,20.0,8580.0,,train
-"TEAMSTER LOCALS 135, 142, 364 AND 414",TEAMSTERS,,,potentially resolvable,train
+"TEAMSTER LOCALS 135, 142, 364 AND 414",TEAMSTERS,,,multi-local,train
 Local 25M of District Council 3 of the Graphic Communications Conference of the International Brotherhood of Teamsters,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,25.0,,not in gazetteer,train
 "GRAPHIC COMMUNICATIONS CONFERENCE/INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 619-M OF DISTRICT COUNCIL 3",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,619.0,528343.0,,train
-"Teamsters, Chauffeurs, Warehousemen, and Helpers, Local Union Nos. 30, 110, 249 and 397 a/w International Brotherhood of Teamsters",TEAMSTERS,,,potentially resolvable,train
+"Teamsters, Chauffeurs, Warehousemen, and Helpers, Local Union Nos. 30, 110, 249 and 397 a/w International Brotherhood of Teamsters",TEAMSTERS,,,multi-local,train
 "Local 594-S, District Council 9 of the Graphic Communications Conference of the International Brotherhood of Teamsters",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,594.0,25702.0,,train
 "AMERICAN POSTAL WORKERS UNION, TEAMSTER LOCAL 264",TEAMSTERS,264.0,38823.0,,test
 "MINNESOTA TEAMSTERS PUBLIC AND LAW ENFORCEMENT EMPLOYEES' UNION, LOCAL NO. 320",TEAMSTERS,320.0,,not in gazetteer,train
@@ -79368,27 +79368,27 @@ Agora Counselors Association PSEA/NEA,NATIONAL EDUCATION ASN IND,,,potentially r
 "St. Xavier University Adjunct Faculty Organization, IEA-NEA",NATIONAL EDUCATION ASN IND,,,potentially resolvable,train
 "Vida Education Association & Support Professionals, PSEA/NEA",NATIONAL EDUCATION ASN IND,,,potentially resolvable,test
 "PA Cyber Academic Advisors and School Counselors Education Association, PSEA/NEA",NATIONAL EDUCATION ASN IND,,,potentially resolvable,train
-Teamsters 40/52,TEAMSTERS,,,potentially resolvable,train
+Teamsters 40/52,TEAMSTERS,,,multi-local,train
 iNTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 710 (IN TRUSTEESHIP BY THE INTERNATIONAL FOR 18 MONTHS),TEAMSTERS,710.0,28039.0,,train
-"TEAMSTERS LOCAL 657 AND TEAMSTERS LOCAL 988, AS JOINT REPRESENTATIVE",TEAMSTERS,,,potentially resolvable,train
+"TEAMSTERS LOCAL 657 AND TEAMSTERS LOCAL 988, AS JOINT REPRESENTATIVE",TEAMSTERS,,,multi-local,train
 "Graphic Communications International Union, GCC/International Brotherhood of Teamsters Local 24M/9N",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,24.0,25785.0,,train
 IBT Local 210 a/w IBT & Teamsters Joint Council No. 16,TEAMSTERS,210.0,46272.0,,train
 TEAMSTERS LOCAL 71 A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS (PACIFIC 2.1 ENTERTAINMENT GROUP (HOME,TEAMSTERS,71.0,27210.0,,train
 "INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL UNION NO. 705, J.C. COUNCIL 25",TEAMSTERS,705.0,43508.0,,train
-"TEAMSTERS LOCAL 839 AND TEAMSTERS LOCAL 760,  AFFILIATED WITH THE INTERNATIONAL BROTHERHOOD OF TEAMS",TEAMSTERS,,,potentially resolvable,train
-Teamsters Local Union No. 324 and Teamsters Local Union 206,TEAMSTERS,,,potentially resolvable,train
+"TEAMSTERS LOCAL 839 AND TEAMSTERS LOCAL 760,  AFFILIATED WITH THE INTERNATIONAL BROTHERHOOD OF TEAMS",TEAMSTERS,,,multi-local,train
+Teamsters Local Union No. 324 and Teamsters Local Union 206,TEAMSTERS,,,multi-local,train
 "TEAMSTERS LOCAL NO. 206 AND TEAMSTERS LOCAL NO. 962, AS JOINT PETITIONERS, AFFILIATED WITH THE INTER",TEAMSTERS,206.0,42547.0,,train
-"Teamsters Local Union Numbers 71, 171, And 509, Affiliated with International Brotherhood of Teamsters",TEAMSTERS,,,potentially resolvable,train
+"Teamsters Local Union Numbers 71, 171, And 509, Affiliated with International Brotherhood of Teamsters",TEAMSTERS,,,multi-local,train
 "THE GRAPHIC COMMUNICATIONS CONFERENCE OF THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS, LOCAL 6-505M",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,6.0,,potentially resolvable,train
-TEAMSTERS LOCAL 730 AND 639,TEAMSTERS,,,potentially resolvable,train
-"AUTOMOTIVE AND ALLIED INDUSTRIES EMPLOYEES OF SAN DIEGO COUNTY, TEAMSTERS LOCAL 481 &  HAWAII TEAMSTERS AND ALLIED WORKERS, LOCAL 996",TEAMSTERS,,,potentially resolvable,train
+TEAMSTERS LOCAL 730 AND 639,TEAMSTERS,,,multi-local,train
+"AUTOMOTIVE AND ALLIED INDUSTRIES EMPLOYEES OF SAN DIEGO COUNTY, TEAMSTERS LOCAL 481 &  HAWAII TEAMSTERS AND ALLIED WORKERS, LOCAL 996",TEAMSTERS,,,multi-local,train
 TEAMSTERS LOCAL UNION 413N NO. 1164 AFFILIATED WITH THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,413.0,15397.0,,train
 "Graphic Communications Conference International Brotherhood of Teamsters, Local 6-505M",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,6.0,,potentially resolvable,train
 TEAMSTERS LOCAL 24-8508 A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS,TEAMSTERS,24.0,22571.0,,train
 "Teamsters Local 929, affiliated with International Brotherhood of Teamsters Joint Council #53",TEAMSTERS,929.0,16753.0,,train
-Teamsters Local 523 & Teamsters Local 886,TEAMSTERS,,,potentially resolvable,train
+Teamsters Local 523 & Teamsters Local 886,TEAMSTERS,,,multi-local,train
 "LOCAL 6-505M, GRAPHIC COMMUNICATIONS CONFERENCE OF THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,505.0,64088.0,,train
-"TEAMSTERS, LOCALS 386, 431, AND 853",TEAMSTERS,,,potentially resolvable,train
+"TEAMSTERS, LOCALS 386, 431, AND 853",TEAMSTERS,,,multi-local,train
 JOINT COUNCIL #2 TEAMSTERS #388M,TEAMSTERS,388.0,,not in gazetteer,train
 "Teamsters Local 838, Affiliated with Joint Council No. 56 and International Brotherhood of Teamsters",TEAMSTERS,838.0,42299.0,,train
 TEAMSTERS LOCAL UNION NO. 120 AFFILIATED WITH THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS TEAMSTERS JOINT COUNCIL NO. 32,TEAMSTERS,120.0,1526.0,,train
@@ -79397,11 +79397,11 @@ TEAMSTERS LOCAL UNION NO. 206 AND TEAMSTERS LOCAL UNION NO. 962 AFFILIATED WITH 
 GRAPHIC COMMUNICATIONS CONFERENCE/INT'L BROTHERHOOD OF TEAMSTERS LOCAL 14-M DISTRICT COUNCIL 9,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,14.0,23547.0,,train
 TEAMSTERS LOCAL NO. 703 (FORMERLY TEAMSTERS LOCAL NO. 744),TEAMSTERS,703.0,22671.0,,train
 "INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL NO. 120, a successor to TEAMSTERS LOCAL NO. 160",TEAMSTERS,120.0,1526.0,,train
-Teamsters Local 364 & Teamsters Local 414,TEAMSTERS,,,potentially resolvable,train
+Teamsters Local 364 & Teamsters Local 414,TEAMSTERS,,,multi-local,train
 General Teamsters Local 509 Affiliated with IBT & Carolinas Joint Council No. 9,TEAMSTERS,509.0,36315.0,,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 853 AND LOCAL 386, AFL-CIO",TEAMSTERS,,,potentially resolvable,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 853 AND LOCAL 386, AFL-CIO",TEAMSTERS,,,multi-local,train
 "Teamsters Local Union No. 690, Teamsters Local Union No. 760, and Teamsters Local Union No. 839, all of which are affiliated with the International Brotherhood of Teamsters",TEAMSTERS,690.0,1070.0,,train
-"TEAMSTERS LOCAL 839 AND TEAMSTERS LOCAL 760,  AFFILIATED WITH THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,,,potentially resolvable,train
+"TEAMSTERS LOCAL 839 AND TEAMSTERS LOCAL 760,  AFFILIATED WITH THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS",TEAMSTERS,,,multi-local,train
 "GRAPHIC COMMUNICATIONS CONFERENCE, INTERNATIONAL BROTHERHOOD OF TEAMSTERS (GCC/IBT), LOCAL 14-M OF DISTRICT COUNCIL 9",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,14.0,23547.0,,train
 "TEAMSTERS LOCAL UNION NO. 206 AND TEAMSTERS LOCAL UNION NO. 962, AFFILIATED WITH INTERNATIONAL BROTH",TEAMSTERS,206.0,42547.0,,train
 INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 771 AND JOINT  COUNCIL 53,TEAMSTERS,771.0,7665.0,,train
@@ -79411,20 +79411,20 @@ INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 771 AND JOINT  COUNCIL 53,TEAMSTERS
 "Teamsters District Council 2, Affiliated with the Graphic Communications Conference-IBT Locals 388M, 747M, 28N, 5815, 543M, 6255",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,,,potentially resolvable,train
 Teamsters Local Union No. 30 A/W International Brotherhood of Teamsters1,TEAMSTERS,30.0,36259.0,,train
 "TEAMSTERS LOCAL UNION NO. 206 AND TEAMSTERS LOCAL UNION NO. 926, AFFILIATED WITH INTERNATIONAL BROTH",TEAMSTERS,206.0,42547.0,,train
-"TEAMSTERS LOCALS 386, 853",TEAMSTERS,,,potentially resolvable,train
+"TEAMSTERS LOCALS 386, 853",TEAMSTERS,,,multi-local,train
 "OPERATING ENGINEERS LOCAL UNION NO. 3: TEAMSTERS UNION LOCAL UNION LOCAL 287, INTERNATIONAL BROTHERHOOD OF TEAMSTERS; INTERNATIONAL ASSOCIATION OF MACHINISTS AND AEROSPACE WORKERS, LOCAL LODGE NO. 93, DISTRICT NO. 190; AND LABORERS' LOCAL 270 AND THE NORTHERN CALIFORNIA DISTRICT COUNCIL OF LABORERS (JOINT PETITIONERS)",,,,multi-union,train
 "Graphic Communications Conference, IBT, Local 25-M, District Council-3",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,25.0,,not in gazetteer,train
-Teamsters Local 337 and Teamsters Local 20,TEAMSTERS,,,potentially resolvable,train
-TEAMSTERS LOCAL 638 AND INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 120,TEAMSTERS,,,potentially resolvable,train
+Teamsters Local 337 and Teamsters Local 20,TEAMSTERS,,,multi-local,train
+TEAMSTERS LOCAL 638 AND INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 120,TEAMSTERS,,,multi-local,train
 Studio Transportation Drivers Local Union No. 399 of the International Brotherhood of Teamsters and IATSE Local 80,,,,multi-union,train
 GCC/IBT Local 6-505M,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,505.0,64088.0,,train
 GRAPHIC COMMUNICATIONS CONFERENCE/INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 571-M OF DISTRICT COUNCIL 3,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,571.0,512199.0,,train
 GRAPHIC COMMUNICATIONS CONFERENCE OF THE INTERNATIONAL BROTHERHOOD OF TEAMSTERS L619M DC3,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,3.0,542772.0,,train
 "Teamsters District Council 2, Affiliated with the Graphic Communications Conference-IBT Locals 388M,",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,388.0,44245.0,,train
-"TEAMSTERS LOCALS, 853, 386, 431",TEAMSTERS,,,potentially resolvable,train
-"Local 854/ Local 553, International Brotherhood of Teamsters",TEAMSTERS,,,potentially resolvable,train
-"TEAMSTERS LOCAL 287 and TEAMSTERS LOCAL 853, INTERNATIONAL BROTHERHOOD OF TEAMSTERS, CTW",TEAMSTERS,,,potentially resolvable,train
-"Teamsters Local Union Nos. 117, 38, 760, 839",TEAMSTERS,,,potentially resolvable,train
+"TEAMSTERS LOCALS, 853, 386, 431",TEAMSTERS,,,multi-local,train
+"Local 854/ Local 553, International Brotherhood of Teamsters",TEAMSTERS,,,multi-local,train
+"TEAMSTERS LOCAL 287 and TEAMSTERS LOCAL 853, INTERNATIONAL BROTHERHOOD OF TEAMSTERS, CTW",TEAMSTERS,,,multi-local,train
+"Teamsters Local Union Nos. 117, 38, 760, 839",TEAMSTERS,,,multi-local,train
 "Local 14M, District Council 9, Graphic Communications Conference/IBT",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,14.0,23547.0,,train
 "TEAMSTERS UNION, LOCAL 948 (FORMERLY LOCAL 748)",TEAMSTERS,948.0,39853.0,,test
 GCC/IBT LOCAL 1B OF DISTRICT COUNCIL 3,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,1.0,543800.0,,test
@@ -79433,10 +79433,10 @@ JOINT COUNCIL #2 TEAMSTERS 388-M,TEAMSTERS,388.0,,not in gazetteer,train
 GENERAL TEAMSTERS LOCAL UNION NO. 61 A/W INTERNATIONAL BROTHERHOOD OF TEAMSTERS JOINT COUNCIL 9,TEAMSTERS,61.0,13418.0,,train
 "TEAMSTERS LOCAL 783, FORMERLY GENERAL DRIVERS, WAREHOUSEMEN AND HELPERS LOCAL UNION NO. 89",TEAMSTERS,783.0,34832.0,,train
 TEAMSTERS LOCAL 78 (LOCAL 853),TEAMSTERS,78.0,22708.0,,train
-"International Brotherhood of Teamsters, Local 690; International Brotherhood of Teamsters, Local 2; and International Brotherhood of Teamsters, Local 839",TEAMSTERS,,,potentially resolvable,train
+"International Brotherhood of Teamsters, Local 690; International Brotherhood of Teamsters, Local 2; and International Brotherhood of Teamsters, Local 839",TEAMSTERS,,,multi-local,train
 TEAMSTERS LOCAL UNION 413N NO. 435,TEAMSTERS,413.0,15397.0,,train
-"Teamsters Local Unions No. 71, 61 and 391",TEAMSTERS,,,potentially resolvable,train
-"International Brotherhood of Teamsters, Teamsters Local 396, Teamsters Local 705",TEAMSTERS,,,potentially resolvable,train
+"Teamsters Local Unions No. 71, 61 and 391",TEAMSTERS,,,multi-local,train
+"International Brotherhood of Teamsters, Teamsters Local 396, Teamsters Local 705",TEAMSTERS,,,multi-local,train
 "LOCAL 555-S, INTERNATIONAL BROTHERHOOD OF TEAMSTERS (IBT), GCC, DC-3",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,555.0,41097.0,,train
 UNITE HERE! LOCAL 2,UNITE HERE,2.0,507427.0,,train
 "SERVICE WORKERS UNITED, UNITE HERE LOCAL 2552/SEIU",SERVICE EMPLOYEES,2552.0,543137.0,,train
@@ -80340,7 +80340,7 @@ United Food & Commercial Worker 880,FOOD AND COMMERCIAL WKRS,880.0,10330.0,,trai
 AFSCME-4003,STATE COUNTY AND MUNI EMPLS AFL-CIO,4003.0,541968.0,,train
 USW-9121,"STEELWORKERS, AFL-CIO",9121.0,517472.0,,train
 UAW-3400,AUTO WORKERS AFL-CIO,3400.0,543183.0,,train
-IBT-677/191,TEAMSTERS,,,potentially resolvable,train
+IBT-677/191,TEAMSTERS,,,multi-local,train
 CWA-1036,COMMUNICATIONS WORKERS AFL-CIO,1036.0,544265.0,,train
 CWA-7774,COMMUNICATIONS WORKERS AFL-CIO,7774.0,505454.0,,train
 UA-10,PLUMBERS AFL-CIO,10.0,,potentially resolvable,train
@@ -80358,7 +80358,7 @@ Here-17,UNITE HERE,17.0,,potentially resolvable,train
 International Brotherhood of Electrical Workers 876,ELECTRICAL WORKERS IBEW AFL-CIO,876.0,4425.0,,train
 International Association of Machinists and Aerospace Webster 1728,MACHINISTS AFL-CIO,1728.0,25322.0,,train
 Laborers International Union of North America 397,LABORERS,397.0,7246.0,,train
-"Joint Council of Teamsters No. 37 58, 162, 206, 324, 670, 962",TEAMSTERS,,,potentially resolvable,train
+"Joint Council of Teamsters No. 37 58, 162, 206, 324, 670, 962",TEAMSTERS,,,multi-local,train
 PPF -7,PLUMBERS AFL-CIO,7.0,2630.0,,train
 USW-11-418,"STEELWORKERS, AFL-CIO",418.0,,ambiguous,train
 United Steelworkers 89,"STEELWORKERS, AFL-CIO",89.0,,ambiguous,train
@@ -80568,7 +80568,7 @@ C 9404,COMMUNICATIONS WORKERS AFL-CIO,9404.0,47327.0,,train
 CIR/SEIU -1957,SERVICE EMPLOYEES,1957.0,,not in gazetteer,train
 LIUNA-157,LABORERS,157.0,16632.0,,train
 LIUNA-572,LABORERS,572.0,504744.0,,train
-Teamsters Cannery Council 856/948,TEAMSTERS,,,potentially resolvable,train
+Teamsters Cannery Council 856/948,TEAMSTERS,,35507,,train
 UAW-455 Unit 48,AUTO WORKERS AFL-CIO,455.0,38395.0,,train
 United Association Local 11 Plumbers and Steamfitters 11,PLUMBERS AFL-CIO,11.0,29887.0,,train
 "United Steel, Paper & Forestry, Rubber, Manufacturing, Energy, Allied Industrial-8-00031","STEELWORKERS, AFL-CIO",31.0,26907.0,,train
@@ -80604,7 +80604,7 @@ USW-13836-15,"STEELWORKERS, AFL-CIO",13836.0,29070.0,,train
 IBEW 291,ELECTRICAL WORKERS IBEW AFL-CIO,291.0,14232.0,,train
 IBEW-876,ELECTRICAL WORKERS IBEW AFL-CIO,876.0,4425.0,,train
 "International Union, United Automobile, Aerospace & Agricultural Implement Workers of America 629",AUTO WORKERS AFL-CIO,629.0,8311.0,,train
-Teamsters Joint Council No 42 and Teamsters Local 87,TEAMSTERS,,,potentially resolvable,train
+Teamsters Joint Council No 42 and Teamsters Local 87,TEAMSTERS,,,multi-local,train
 IAMAW-1855,MACHINISTS AFL-CIO,1855.0,18149.0,,train
 Committee of Interns and Residents SEIU Local 1957,SERVICE EMPLOYEES,1957.0,,not in gazetteer,train
 IBEW-1690,ELECTRICAL WORKERS IBEW AFL-CIO,1690.0,33051.0,,train
@@ -80614,7 +80614,7 @@ UNITED STEELWORKERS INTERNATIONAL UNION 890L-02,"STEELWORKERS, AFL-CIO",890.0,67
 United Automobile Aerospace & Agricultural Implement Workers of America UAW 2179,AUTO WORKERS AFL-CIO,2179.0,530794.0,,train
 GCIU/IBT Local 406,PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,406.0,37508.0,,train
 IUE-CWA 83225,COMMUNICATIONS WORKERS AFL-CIO,83225.0,545970.0,,train
-"IBT-42-local # 87,166,186,848,986",TEAMSTERS,,,potentially resolvable,train
+"IBT-42-local # 87,166,186,848,986",TEAMSTERS,,,multi-local,train
 IBT 856,TEAMSTERS,856.0,35507.0,,train
 USW Local 6346-09,"STEELWORKERS, AFL-CIO",6346.0,58854.0,,train
 USW-12978,"STEELWORKERS, AFL-CIO",12978.0,8385.0,,train
@@ -81141,7 +81141,7 @@ United Automobile Workers 2402,AUTO WORKERS AFL-CIO,2402.0,541643.0,,train
 USW-692,"STEELWORKERS, AFL-CIO",692.0,44537.0,,train
 IUOE 501,"ENGINEERS, OPERATING, AFL-CIO",501.0,12442.0,,train
 United Steelworkers 420-03,"STEELWORKERS, AFL-CIO",420.0,43466,,train
-Teamsters - CA State Council of Cannery and Food Processing Units 856/948,TEAMSTERS,,,potentially resolvable,train
+Teamsters - CA State Council of Cannery and Food Processing Units 856/948,TEAMSTERS,,35507,,train
 Workers United 365,"WORKERS UNITED, SEIU",365.0,43822.0,,train
 UAW-3048,AUTO WORKERS AFL-CIO,3048.0,542953.0,,train
 Unite Here-2,UNITE HERE,2.0,507427.0,,train
@@ -81265,7 +81265,7 @@ Service Employees International Union 1021,SERVICE EMPLOYEES,1021.0,543658.0,,tr
 LIUNA-538 Great Plains DC,LABORERS,538.0,1244.0,,train
 SEFMBSU/RWDSU-670,"RETAIL WHOLESALE, DC, UFCW",670.0,52198.0,,train
 AFSCME Council 65 1856,STATE COUNTY AND MUNI EMPLS AFL-CIO,1856.0,547138.0,,train
-IBT-179/673,TEAMSTERS,,,potentially resolvable,train
+IBT-179/673,TEAMSTERS,,,multi-local,train
 AFSCME Council 65-2780,STATE COUNTY AND MUNI EMPLS AFL-CIO,2780.0,547107.0,,train
 United Steelworkers 4-53,"STEELWORKERS, AFL-CIO",53.0,25548.0,,train
 Duluth Mailers local Union M62/14733,COMMUNICATIONS WORKERS AFL-CIO,14733.0,30776.0,,train
@@ -81359,7 +81359,7 @@ IBEW-291,ELECTRICAL WORKERS IBEW AFL-CIO,291.0,14232.0,,train
 "United Service Workers Union, IUJAT 355","UNITED SERVICE WORKERS UNION, IUJAT",355.0,35902.0,,train
 INTERNATIONAL UNION OF PAINTERS AND ALLIED TRADES 505,PAINTERS AFL-CIO,505.0,543320.0,,train
 IAMAW 2530,MACHINISTS AFL-CIO,2530.0,504571.0,,train
-IBT -179 301 330 673,TEAMSTERS,,,potentially resolvable,train
+IBT -179 301 330 673,TEAMSTERS,,,multi-local,train
 SMART-Sheet Metal Workers Local Union  214,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",214.0,17785.0,,train
 Unite here-23,UNITE HERE,23.0,544240.0,,train
 IBT Local 830,TEAMSTERS,830.0,9324.0,,train
@@ -81486,7 +81486,7 @@ WBNG TNG/CWA-32035,COMMUNICATIONS WORKERS AFL-CIO,32035.0,38522.0,,train
 UNITED STEELWORKERS INTENATIONAL UNION 1-211,"STEELWORKERS, AFL-CIO",211.0,33150.0,,train
 UAW 2289,AUTO WORKERS AFL-CIO,2289.0,521586.0,,train
 PPF-533,PLUMBERS AFL-CIO,533.0,35249.0,,train
-Teamsters Joint Council No. 42 and Teamsters Local 87,TEAMSTERS,,,potentially resolvable,train
+Teamsters Joint Council No. 42 and Teamsters Local 87,TEAMSTERS,,,multi-local,train
 CIC-2927,CARPENTERS IND,2927.0,45353.0,,train
 International Broitherhood of Electrical Workers 1547,ELECTRICAL WORKERS IBEW AFL-CIO,1547.0,19504.0,,train
 CJA 2158 Chicago Rgl Council,CARPENTERS IND,2158.0,24918.0,,train
@@ -82320,7 +82320,7 @@ CMRJB Local 594,"WORKERS UNITED, SEIU",594.0,543238.0,,train
 IUOE-701,"ENGINEERS, OPERATING, AFL-CIO",701.0,23992.0,,train
 USW 204,"STEELWORKERS, AFL-CIO",204.0,,ambiguous,train
 IUOE-12,"ENGINEERS, OPERATING, AFL-CIO",12.0,7156.0,,train
-IBT -26,TEAMSTERS,26.0,,potentially resolvable,train
+IBT -26,TEAMSTERS,26.0,,ambiguous,train
 IBT 400,TEAMSTERS,400.0,9109.0,,train
 Southern Region Workers United 2398,"WORKERS UNITED, SEIU",2398.0,513733.0,,train
 UNITED STEELWORKERS 1028-01,"STEELWORKERS, AFL-CIO",1028.0,,ambiguous,train
@@ -82372,7 +82372,7 @@ IUPAT Local DC 5,PAINTERS AFL-CIO,5.0,37950.0,,train
 NTEU-295,TREASURY EMPLOYEES UNION IND,295.0,543248.0,,train
 CGB/ LIUNA  -79,LABORERS,79.0,540323.0,,train
 UFCW-227,FOOD AND COMMERCIAL WKRS,227.0,24915,,train
-"Chauffeurs, Teamsters and Helpers 58",TEAMSTERS,58.0,,potentially resolvable,train
+"Chauffeurs, Teamsters and Helpers 58",TEAMSTERS,58.0,,ambiguous,train
 AFCSME Council 28,STATE COUNTY AND MUNI EMPLS AFL-CIO,28.0,544112.0,,train
 "UFCW Local 324, 135, 770, 1167, 1428 and 1442",FOOD AND COMMERCIAL WKRS,,,potentially resolvable,train
 IUE-CWA 83770,COMMUNICATIONS WORKERS AFL-CIO,83770.0,528341.0,,train
@@ -82547,7 +82547,7 @@ Teamstesr Local 525,TEAMSTERS,525.0,4825.0,,train
 GG/IUPAT Local 677,PAINTERS AFL-CIO,677.0,41699.0,,train
 IAMAW 1528,MACHINISTS AFL-CIO,1528.0,41613.0,,train
 "United Steelworkers, District 10 1130","STEELWORKERS, AFL-CIO",1130.0,16630.0,,train
-Chauffeurs Teamsters and Helpers 58,TEAMSTERS,58.0,,potentially resolvable,train
+Chauffeurs Teamsters and Helpers 58,TEAMSTERS,58.0,,ambiguous,train
 IRON WORKERS REGIONAL SHOP LOCAL UNION 851,IRON WORKERS AFL-CIO,851.0,545606.0,,train
 Teamsters 863,TEAMSTERS,863.0,1348.0,,train
 IAMAW District Lodge 4-193,MACHINISTS AFL-CIO,193.0,24774.0,,train
@@ -82655,7 +82655,7 @@ International Brotherhood of Teamsters 814,TEAMSTERS,814.0,35107.0,,train
 "Rochester Regional Joint Board, Workers United 194 & 234","WORKERS UNITED, SEIU",,,ambiguous,train
 District Council 82 880,PAINTERS AFL-CIO,880.0,36284.0,,train
 NPW/OPEA Local 18,NOVELTY AND PRODUCTION WKRS AFL-CIO,18.0,3180.0,,train
-IBT-58,TEAMSTERS,58.0,,potentially resolvable,train
+IBT-58,TEAMSTERS,58.0,,ambiguous,train
 UNITED STEELWORKERS INTERNATIONAL UNION 2L-05,"STEELWORKERS, AFL-CIO",2.0,27974.0,,train
 USW Local 4543-06,"STEELWORKERS, AFL-CIO",4543.0,12820.0,,train
 IBT 614,TEAMSTERS,614.0,19050.0,,train
@@ -82851,7 +82851,7 @@ IAM & AW District 160 297,MACHINISTS AFL-CIO,297.0,24553.0,,train
 UNITED STEELWORKERS INTERNATIONAL UNION 7697,"STEELWORKERS, AFL-CIO",7697.0,67507.0,,train
 USW-12934,"STEELWORKERS, AFL-CIO",12934.0,6793.0,,train
 IAMAW-2171,MACHINISTS AFL-CIO,2171.0,10476.0,,train
-"Chauffeurs, Teamsters, & Helpers 58",TEAMSTERS,58.0,,potentially resolvable,train
+"Chauffeurs, Teamsters, & Helpers 58",TEAMSTERS,58.0,,ambiguous,train
 IAMAW District 154 2507,MACHINISTS AFL-CIO,2507.0,70215.0,,train
 USW-14693-108,"STEELWORKERS, AFL-CIO",14693.0,29062.0,,train
 AFSCME-722,STATE COUNTY AND MUNI EMPLS AFL-CIO,722.0,517772.0,,train
@@ -82905,7 +82905,7 @@ IFPTE-70,"ENGINEERS, PROF AND TECH, AFL-CIO",70.0,542862.0,,train
 International Brotherhood Of Teamsters 673,TEAMSTERS,673.0,21933.0,,train
 BCTGM-70,"BAKERY, TOBACCO AND GRAIN AFL-CIO",70.0,67057.0,,train
 USW-10-448,"STEELWORKERS, AFL-CIO",448.0,,ambiguous,train
-International brotherhood of Teamsters  26,TEAMSTERS,26.0,,potentially resolvable,train
+International brotherhood of Teamsters  26,TEAMSTERS,26.0,,ambiguous,train
 UNITED STEELWORKERS INTERNATIONAL UNION 2211,"STEELWORKERS, AFL-CIO",2211.0,13732.0,,train
 International Association of Fire Fighters-88,FIRE FIGHTERS AFL-CIO,88.0,502742.0,,train
 IBEW  347,ELECTRICAL WORKERS IBEW AFL-CIO,347.0,19803.0,,train
@@ -83054,7 +83054,7 @@ UAW-95,AUTO WORKERS AFL-CIO,95.0,22178.0,,train
 IATSE-834,STAGE AND PICTURE OPERATORS AFL-CIO,834.0,529215.0,,train
 IUOE Local 463,"ENGINEERS, OPERATING, AFL-CIO",463.0,11598.0,,train
 UCW-18,CHRISTIAN LABOR UNION IND,18.0,13124.0,,train
-IBT-26,TEAMSTERS,26.0,,potentially resolvable,train
+IBT-26,TEAMSTERS,26.0,,ambiguous,train
 UAW-1540,AUTO WORKERS AFL-CIO,1540.0,66646.0,,train
 "UFCW Local 324, 135, 770, 1167, 1428, 1442, 5 and 648",FOOD AND COMMERCIAL WKRS,,,potentially resolvable,train
 IATSE-33,STAGE AND PICTURE OPERATORS AFL-CIO,33.0,13250.0,,train
@@ -83203,7 +83203,7 @@ United Steelworkers 15198-03,"STEELWORKERS, AFL-CIO",15198.0,66566.0,,train
 Makeup Artists and Hair Stylists-798,STAGE AND PICTURE OPERATORS AFL-CIO,798.0,9345.0,,train
 CMRJB-1749,"WORKERS UNITED, SEIU",1749.0,66396.0,,train
 I.A.M. & A. W. MACHINISTS & MECHANICS 2182,MACHINISTS AFL-CIO,2182.0,29572.0,,train
-International Brotherhood of Teamsters 26,TEAMSTERS,26.0,,potentially resolvable,train
+International Brotherhood of Teamsters 26,TEAMSTERS,26.0,,ambiguous,train
 IUOE-39,"ENGINEERS, OPERATING, AFL-CIO",39.0,39532.0,,train
 IUPAT DC 82  880,PAINTERS AFL-CIO,880.0,36284.0,,train
 Eastern Millwright Regional Council  443,CARPENTERS IND,443.0,545505.0,,train
@@ -83305,7 +83305,7 @@ USW-1-592,"STEELWORKERS, AFL-CIO",592.0,69161.0,,train
 Denver Musicians Association 20-623,MUSICIANS AFL-CIO,20.0,11949.0,,train
 AFSCME Council 31-1827,STATE COUNTY AND MUNI EMPLS AFL-CIO,1827.0,,potentially resolvable,train
 Southern & Central Illinois Laborers District Council 773 & 1197,LABORERS,,,potentially resolvable,train
-TEAMSTERS 58,TEAMSTERS,58.0,,potentially resolvable,train
+TEAMSTERS 58,TEAMSTERS,58.0,,ambiguous,train
 International Brotherhood of Electrical Workers 2357,ELECTRICAL WORKERS IBEW AFL-CIO,2357.0,70637.0,,train
 AFSCME 1843-2,STATE COUNTY AND MUNI EMPLS AFL-CIO,1843.0,,not in gazetteer,train
 International Association of Machinist and AeroSpace Workers 2152,MACHINISTS AFL-CIO,2152.0,7705.0,,train
@@ -83313,7 +83313,7 @@ UNITED STEELWORKERS 04841-**,"STEELWORKERS, AFL-CIO",4841.0,27884.0,,train
 UFCW 1-D,FOOD AND COMMERCIAL WKRS,1.0,12289.0,,train
 USW AFL-CIO CLC-1324-21,"STEELWORKERS, AFL-CIO",1324.0,10841,,train
 USW District 4 Local 4-00438-01,"STEELWORKERS, AFL-CIO",438.0,22617.0,,train
-International Brotherhood of Teamsters  26,TEAMSTERS,26.0,,potentially resolvable,train
+International Brotherhood of Teamsters  26,TEAMSTERS,26.0,,ambiguous,train
 USW-1398-01,"STEELWORKERS, AFL-CIO",1398.0,69847.0,,train
 USW-4-101,"STEELWORKERS, AFL-CIO",101.0,36874.0,,test
 AFSCME-13,STATE COUNTY AND MUNI EMPLS AFL-CIO,13.0,71060.0,,train
@@ -83367,7 +83367,7 @@ UAW-2250,AUTO WORKERS AFL-CIO,2250.0,515898.0,,train
 International Brotherhood of Teamsters  384,TEAMSTERS,384.0,11689.0,,train
 International Brotherhood of Electrical Workers (IBEW) 1186,ELECTRICAL WORKERS IBEW AFL-CIO,1186.0,14626.0,,train
 CWA-7500,COMMUNICATIONS WORKERS AFL-CIO,7500.0,20013.0,,train
-IBT-453/355,TEAMSTERS,,,potentially resolvable,train
+IBT-453/355,TEAMSTERS,,,multi-local,train
 IAMAW-389,MACHINISTS AFL-CIO,389.0,44215.0,,train
 AFGE  2017,GOVERNMENT EMPLOYEES AFGE AFL-CIO,2017.0,501877.0,,train
 RWDSU 515,"RETAIL WHOLESALE, DC, UFCW",515.0,32504.0,,train
@@ -83435,7 +83435,7 @@ United Steelworkers 9-265-02,"STEELWORKERS, AFL-CIO",265.0,41851.0,,train
 IBT-295,TEAMSTERS,295.0,15398.0,,train
 IATSE 705,STAGE AND PICTURE OPERATORS AFL-CIO,705.0,34969.0,,test
 CMRJB Local 181,"WORKERS UNITED, SEIU",181.0,22746.0,,train
-"IBT-495, 166, 986",TEAMSTERS,,,potentially resolvable,train
+"IBT-495, 166, 986",TEAMSTERS,,,multi-local,train
 IAMAW-2152,MACHINISTS AFL-CIO,2152.0,7705.0,,train
 OFNHP/AFT-5017,TEACHERS AFL-CIO,5017.0,514640.0,,train
 IBT-554,TEAMSTERS,554.0,37997.0,,test
@@ -83471,7 +83471,7 @@ IATSE-798,STAGE AND PICTURE OPERATORS AFL-CIO,798.0,9345.0,,train
 IBEW-1768,ELECTRICAL WORKERS IBEW AFL-CIO,1768.0,43301.0,,train
 IAMAW 297,MACHINISTS AFL-CIO,297.0,24553.0,,train
 IAEP-424,GOVERNMENT EMPLS NAGE SEIU AFL-CIO,424.0,545080.0,,train
-"Chauffeurs, Teamsters adn Helpers 58",TEAMSTERS,58.0,,potentially resolvable,train
+"Chauffeurs, Teamsters adn Helpers 58",TEAMSTERS,58.0,,ambiguous,train
 UAW Local 2031,AUTO WORKERS AFL-CIO,2031.0,511419.0,,train
 USW-1016-12,"STEELWORKERS, AFL-CIO",1016.0,,ambiguous,train
 IBT Local 58,TEAMSTERS,58.0,1854.0,,train
@@ -83562,7 +83562,7 @@ USW-9-1821,"STEELWORKERS, AFL-CIO",1821.0,58977.0,,train
 BCTGM 334,"BAKERY, TOBACCO AND GRAIN AFL-CIO",334.0,14674,,train
 I.A.T.S.E. Local 16,STAGE AND PICTURE OPERATORS AFL-CIO,16.0,4262.0,,train
 IAMAW Local 1502,MACHINISTS AFL-CIO,1502.0,26117.0,,train
-IBT-277/707,TEAMSTERS,,,potentially resolvable,train
+IBT-277/707,TEAMSTERS,,,multi-local,train
 United Steelworkers 2599-08,"STEELWORKERS, AFL-CIO",2599.0,19157.0,,train
 "International Union, UAW Region 9 1612",AUTO WORKERS AFL-CIO,1612.0,68528.0,,train
 USW-9432  District 4,"STEELWORKERS, AFL-CIO",9432.0,541508.0,,train
@@ -83570,7 +83570,7 @@ IAMAW Local 135,MACHINISTS AFL-CIO,135.0,543823.0,,train
 HFIAW 24,INSULATORS AFL-CIO,24.0,18363.0,,train
 "NY-NY Regional Joint Board, Wokers United 1733","WORKERS UNITED, SEIU",1733.0,13699.0,,test
 USW-1016-03,"STEELWORKERS, AFL-CIO",1016.0,,ambiguous,train
-IBT Illinois Conference-26 371 627 722,TEAMSTERS,,,potentially resolvable,train
+IBT Illinois Conference-26 371 627 722,TEAMSTERS,,,multi-local,train
 United Steelworkers 13-02,"STEELWORKERS, AFL-CIO",2.0,,ambiguous,train
 "United Automobile, Aerospace and Agricultural Workers of America 2162",AUTO WORKERS AFL-CIO,2162.0,513753.0,,train
 United Steelworkers 13-06,"STEELWORKERS, AFL-CIO",6.0,,ambiguous,train
@@ -83803,7 +83803,7 @@ UNITED STEELWORKERS INTERNATIONAL UNION 7334-11,"STEELWORKERS, AFL-CIO",7334.0,6
 CWA-88607,COMMUNICATIONS WORKERS AFL-CIO,88607.0,61336.0,,train
 IATSE  Theatrical Wardrobe Union 784,STAGE AND PICTURE OPERATORS AFL-CIO,784.0,33930.0,,train
 United Steelworkers 1342,"STEELWORKERS, AFL-CIO",1342.0,18753.0,,train
-IBT 26,TEAMSTERS,26.0,,potentially resolvable,train
+IBT 26,TEAMSTERS,26.0,,ambiguous,train
 CMRJB-2818,"WORKERS UNITED, SEIU",2818.0,544845.0,,train
 IAM&AW District Lodge 725 25,MACHINISTS AFL-CIO,25.0,,ambiguous,train
 Amalgamated Transit Union 1605,TRANSIT UNION AFL-CIO,1605.0,542994.0,,train
@@ -83832,7 +83832,7 @@ International Alliance of Theatrical Stage Employees 705,STAGE AND PICTURE OPERA
 MTDCGNY / LIUNA-79,LABORERS,79.0,540323.0,,train
 International Union of Painters and Allied Trades-639,PAINTERS AFL-CIO,639.0,31852.0,,train
 United Steelworkers International Union 8309-01,"STEELWORKERS, AFL-CIO",8309.0,505263.0,,train
-"Teamsters Local Union No. 252 252, 174, 231, 589, 760, 763, 839",TEAMSTERS,,,potentially resolvable,train
+"Teamsters Local Union No. 252 252, 174, 231, 589, 760, 763, 839",TEAMSTERS,,,multi-local,train
 IBEW 196,ELECTRICAL WORKERS IBEW AFL-CIO,196.0,37343.0,,train
 IBT-612,TEAMSTERS,612.0,15391.0,,train
 USW District 4 Local 09374 14753,"STEELWORKERS, AFL-CIO",,,not in gazetteer,train
@@ -83847,7 +83847,7 @@ USW AFL-CIO-CLC-02599,"STEELWORKERS, AFL-CIO",2599.0,19157.0,,train
 North Atlantic States Regional Council of Carpenters 279,CARPENTERS IND,279.0,544526.0,,train
 USW Local 12273-09,"STEELWORKERS, AFL-CIO",12273.0,39005.0,,train
 SMWIA-12,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",12.0,43400,,train
-Teamsters -117/670/690/760/839,TEAMSTERS,,,potentially resolvable,train
+Teamsters -117/670/690/760/839,TEAMSTERS,,,multi-local,train
 Motion Picture & Video Tape Laboratory 780,STAGE AND PICTURE OPERATORS AFL-CIO,780.0,22280.0,,train
 IBEW-245,ELECTRICAL WORKERS IBEW AFL-CIO,245.0,13025.0,,train
 International Association of Machinists and Aerospace Workers  1490,MACHINISTS AFL-CIO,1490.0,3858.0,,train
@@ -83861,7 +83861,7 @@ Operative Plasterers and Cement Masons  40,PLASTERERS AND CEMENT MASONS AFL-CIO,
 UE-234,ELECTRICAL WORKERS UE IND,234.0,8884.0,,train
 KY Laborers' District Council 1392,LABORERS,1392.0,17809.0,,train
 "Mid-Atlantic Regional Joint Board, Workers United 1071-7","WORKERS UNITED, SEIU",1071.0,544606.0,,train
-Teamsters 26,TEAMSTERS,26.0,,potentially resolvable,train
+Teamsters 26,TEAMSTERS,26.0,,ambiguous,train
 International Association Of Heat and Frost Insulators 28,INSULATORS AFL-CIO,28.0,18237.0,,train
 USW District 11-1028-01,"STEELWORKERS, AFL-CIO",1028.0,530892.0,,train
 Central South Carpenters Regional Council 551,CARPENTERS IND,551.0,517497.0,,test
@@ -83926,7 +83926,7 @@ USW INTERNATIONAL UNION-1772,"STEELWORKERS, AFL-CIO",1772.0,59758.0,,train
 United Steelworkers 1016-16,"STEELWORKERS, AFL-CIO",1016.0,,ambiguous,train
 Carpenters-551,CARPENTERS IND,551.0,517497.0,,train
 "International Union, UAW 2300",AUTO WORKERS AFL-CIO,2300.0,514445.0,,train
-"Teamsters 252, 231 & 117",TEAMSTERS,,,potentially resolvable,train
+"Teamsters 252, 231 & 117",TEAMSTERS,,,multi-local,train
 United Steelworkers 2-00824 (Unit 1),"STEELWORKERS, AFL-CIO",824.0,530396.0,,train
 United Steelworkers 7898-12,"STEELWORKERS, AFL-CIO",7898.0,68961.0,,train
 IUPAT District Council 36 Local 1247,PAINTERS AFL-CIO,1247.0,23900.0,,train
@@ -84074,7 +84074,7 @@ United Association of Plumbers & Pipefitters Local Union 155,PLUMBERS AFL-CIO,15
 International Brotherhood of Electrical Workers 2150,ELECTRICAL WORKERS IBEW AFL-CIO,2150.0,60914.0,,train
 USW 8248/8249-32,"STEELWORKERS, AFL-CIO",,,ambiguous,train
 USW AFL-CIO-CLC-6871-7,"STEELWORKERS, AFL-CIO",6871.0,62969.0,,train
-International Broterhood of Teamsters 26,TEAMSTERS,26.0,,potentially resolvable,train
+International Broterhood of Teamsters 26,TEAMSTERS,26.0,,ambiguous,train
 LIUNA-79,LABORERS,79.0,540323.0,,train
 United Steelworkers 9-265-01,"STEELWORKERS, AFL-CIO",265.0,41851.0,,train
 UNITED STEELWORKERS 8309-**,"STEELWORKERS, AFL-CIO",8309.0,505263.0,,train
@@ -84264,7 +84264,7 @@ Teamsters 597,TEAMSTERS,597.0,18732.0,,train
 IBEW-2150,ELECTRICAL WORKERS IBEW AFL-CIO,2150.0,60914.0,,train
 International Brotherhood of Electrical Workers  245,ELECTRICAL WORKERS IBEW AFL-CIO,245.0,13025.0,,train
 RWDSU-810,"RETAIL WHOLESALE, DC, UFCW",810.0,52941.0,,train
-IBT 58,TEAMSTERS,58.0,,potentially resolvable,train
+IBT 58,TEAMSTERS,58.0,,ambiguous,train
 United Steelworkers 5429,"STEELWORKERS, AFL-CIO",5429.0,44240.0,,train
 United Steelworkers Locals 14753 and 9374,"STEELWORKERS, AFL-CIO",,,ambiguous,train
 MOTION PICTURE COSTUMES IATSE 705,STAGE AND PICTURE OPERATORS AFL-CIO,705.0,34969.0,,train
@@ -84275,7 +84275,7 @@ AFM-125,MUSICIANS AFL-CIO,125.0,14889.0,,train
 USW AFL-CIO-CLC Local 02599,"STEELWORKERS, AFL-CIO",2599.0,19157.0,,train
 United Association of Journeymen and Apprentices of the Plumbing and Pipefitting Industry 155,PLUMBERS AFL-CIO,155.0,42317.0,,train
 AFSCME Council 31 4008,STATE COUNTY AND MUNI EMPLS AFL-CIO,4008.0,544750.0,,train
-International Brothood of Teamsters 26,TEAMSTERS,26.0,,potentially resolvable,train
+International Brothood of Teamsters 26,TEAMSTERS,26.0,,ambiguous,train
 IBEW - Sound and Communication-150,ELECTRICAL WORKERS IBEW AFL-CIO,150.0,20188.0,,train
 "New England Joint Board, UNITE HERE 313",UNITE HERE,313.0,51126.0,,train
 "Carpenters Industrial Council, UBC-2786",CARPENTERS IND,2786.0,48946.0,,train
