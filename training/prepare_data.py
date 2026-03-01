@@ -124,14 +124,32 @@ def filter_records_by_query(query: str, records: list) -> list:
     numeric_suf = re.findall(r"\d{3,}-0*(\d{1,2})\b", query)
     query_suffixes = query_codes | set(numeric_suf)
 
+    # Build prefix candidate numbers: start with all query numbers, then exclude
+    # numbers that serve other roles (desig_num, trailing sub-unit after suffix letter).
+    matched_desig_nums = set(r["desig_num"] for r in records)
+    # Only exclude desig_num from prefix candidates when all records agree on the
+    # same desig_num.  When records have different desig_nums (e.g. PACE with dn=2
+    # and dn=398), a desig_num for one variant may be the prefix for another.
+    if len(matched_desig_nums) == 1:
+        exclude_as_desig = matched_desig_nums
+    else:
+        exclude_as_desig = set()
+    # Numbers after a suffix letter + dash (e.g. "182B-02" → 02, "460G-01" → 01)
+    # are sub-unit identifiers, not prefixes.  Without a dash (e.g. "582L1"),
+    # the trailing number may be a legitimate prefix.
+    after_suffix_letter = set(
+        int(n) for n in re.findall(r"\d[A-Za-z]{1,3}-(\d+)", query)
+    )
+    prefix_candidates = all_query_nums - exclude_as_desig - after_suffix_letter
+
     # Try positive prefix match
     record_prefixes = set(r.get("prefix", 0) for r in records)
     prefix_matched = False
-    if len(record_prefixes) > 1 and all_query_nums:
+    if len(record_prefixes) > 1 and prefix_candidates:
         prefix_matching = [
             r
             for r in records
-            if r.get("prefix", 0) != 0 and r.get("prefix", 0) in all_query_nums
+            if r.get("prefix", 0) != 0 and r.get("prefix", 0) in prefix_candidates
         ]
         if prefix_matching:
             records = prefix_matching
