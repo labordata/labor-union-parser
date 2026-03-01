@@ -76340,7 +76340,7 @@ GENERAL TEAMSTERS LOCAL UNION #162 AFFILIATED WITH THE INTERNATIONAL BROTHERHOOD
 TEAMSTERS LOCAL 2,TEAMSTERS,2.0,1364.0,,train
 Teamsters Local No. 6,TEAMSTERS,6.0,5879.0,,train
 "Teamsters, Chauffeurs, Warehousemen and Helpers Union, Local No. 20, Affiliated with the International Brotherhood of Teamsters",TEAMSTERS,20.0,8580.0,,train
-"INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 175; INTERNATIONAL UNION OF OPERATING ENGINEERS, LOCAL",,175.0,1608.0,multi-union,train
+"INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 175; INTERNATIONAL UNION OF OPERATING ENGINEERS, LOCAL",,175.0,,multi-union,train
 Joint Council of Teamsters No 3,TEAMSTERS,3.0,512068.0,,train
 "Teamsters, Chauffeurs, Warehouse workers Local No. 20, affiliated with the International Brotherhood of Teamsters, Chauffeurs, Warehousemen and Helpers",TEAMSTERS,20.0,8580.0,,train
 "Local Union No. 135, Chauffeurs, Teamsters, Warehousemen and Helpers Indianapolis, Indiana and Airline Employees in the State of Indiana a/w the International Brotherhood of Teamsters",TEAMSTERS,135.0,9836.0,,train
@@ -78441,7 +78441,7 @@ LiUNA! Midwest Region Organizing Committee,LABORERS,,,potentially resolvable,tra
 "Laborers' International Union of North America, Local 6",LABORERS,6.0,,ambiguous,train
 "Union de Trabajadores de la Industria del Cemento y Ramas Anexas, LiUNA",LABORERS,,,potentially resolvable,train
 "Union de Trabajadores de Concreto y Ramas Anexas, LIUNA, Local 12",LABORERS,12.0,545454.0,,train
-"LABORERS LOCAL 783 & IRON WORKERS, INTL. UNION AFL-CIO",LABORERS,783.0,5939.0,multi-union,train
+"LABORERS LOCAL 783 & IRON WORKERS, INTL. UNION AFL-CIO",LABORERS,783.0,,multi-union,train
 "NPMH UNION LOCAL 297, AFFILIATED WITH LIUNA, AFL-CIO","POSTAL MAIL HANDLERS, LIUNA",297.0,515582.0,,train
 "LABORERS' INTERNATIONAL UNION OF NORTH AMERICA LOCALS 996, 538 & 362 JOINT PETITIONERS",LABORERS,,,multi-local,train
 INTERNATIONAL UNION OF BUILDING CONSTRUCTION LABORERS LOCAL 3,LABORERS,3.0,544697.0,,train
@@ -79805,7 +79805,7 @@ SHEET METAL WORKERS LOCAL 2,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",
 "Local 7-SM, Zone 3, The International Association of Sheet Metal, Air, Rail and Transportation Worke","SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",7.0,36564.0,,train
 "Local Committee of Adjustment, Local 1741, SMART International (fka United Transportation Union)","SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",1741.0,13550.0,,train
 SMART Local Union No. 2,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",2.0,,ambiguous,train
-"IAM and SMART, as Joint Representative (District Lodge 6, International Association of Machinists and Aerospace Workers, AFL-CIO and International Association of Sheet Metal, Air, Rail and Transportation Workers, Local Union #263)",,263.0,23962.0,multi-union,train
+"IAM and SMART, as Joint Representative (District Lodge 6, International Association of Machinists and Aerospace Workers, AFL-CIO and International Association of Sheet Metal, Air, Rail and Transportation Workers, Local Union #263)",,263.0,,multi-union,train
 SHEET METAL WORKERS' LOCAL UNION NO. 16 AFFILIATED WITH SHEET METAL WORKERS INTERNATIONAL ASSOCIATION,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",16.0,35340.0,,train
 Sheet Metal Workers Local 2,"SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",2.0,12414,,train
 "International Association of Sheet Metal, Air, Rail, and Transportation Workers, Local 55, affiliated with Northwest Regional Council of SMART","SHEET METAL, AIR, RAIL AND TRANSPORTATION WORKERS",55.0,544142.0,,train
@@ -88981,7 +88981,7 @@ NYSNA - SCFHP,NATIONAL NURSES UNITED,,38970.0,,train
 NYSNA-,NATIONAL NURSES UNITED,,38970.0,,train
 NYSNA Local,NATIONAL NURSES UNITED,,38970.0,,train
 NYSNA ,NATIONAL NURSES UNITED,,38970.0,,train
-NYSNA & SEIU,NATIONAL NURSES UNITED,,38970.0,multi-union,train
+NYSNA & SEIU,NATIONAL NURSES UNITED,,,multi-union,train
 CMRJB-10 ,"WORKERS UNITED, SEIU",10.0,,ambiguous,train
 CMRJB-210T,"WORKERS UNITED, SEIU",210.0,26618.0,,train
 CMRJB-199T,"WORKERS UNITED, SEIU",199.0,14029.0,,train
