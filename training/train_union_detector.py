@@ -155,10 +155,13 @@ class UnionDataModule(L.LightningDataModule):
             all_examples = json.load(f)
 
         # Union: non-empty records; Non-union: empty records
-        # Multi-union filings are treated as non-union since they aren't
-        # a single identifiable union.
+        # Multi-union and multi-local filings are treated as non-union
+        # since they aren't a single identifiable union.
         def _is_union(ex):
-            return ex["records"] and ex.get("reason_missing_fnum") != "multi-union"
+            return ex["records"] and ex.get("reason_missing_fnum") not in (
+                "multi-union",
+                "multi-local",
+            )
 
         train_union = [
             ex["query"]
