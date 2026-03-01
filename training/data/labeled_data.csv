@@ -51977,7 +51977,7 @@ American Postal Workers Union Local 72,"POSTAL WORKERS, AMERICAN, AFL-CIO",72.0,
 International Brotherhood of Teamsters (DHL),TEAMSTERS,,,potentially resolvable,train
 "International Association of Machinists & Aerospace Workers, District  751 Lodge, Local Lodge 86, AFL-CIO",MACHINISTS AFL-CIO,86.0,,potentially resolvable,train
 "International Association of Machinists and Aerospace Workers, Local 1414",MACHINISTS AFL-CIO,1414.0,30829.0,,train
-"UAW Section 8, 2850",AUTO WORKERS AFL-CIO,,,multi-local,train
+"UAW Section 8, 2850",AUTO WORKERS AFL-CIO,,543372,,train
 "ROANOKE, VA LOCAL APWU (#482); AMERICAN POSTAL WORKERS UNION","POSTAL WORKERS, AMERICAN, AFL-CIO",482.0,92925.0,,train
 "IBT, LOCAL NO. 823",TEAMSTERS,823.0,36261.0,,train
 AMALGAMATED TRANSIT UNION LOCAL 1614,TRANSIT UNION AFL-CIO,1614.0,530436.0,,train
@@ -85443,7 +85443,7 @@ UPIU,"PACE, AFL-CIO",,,potentially resolvable,train
 National Organization of Legal Services Workers 2320,AUTO WORKERS AFL-CIO,2320.0,531724.0,,train
 National Organization of Legal Services Workers 2630,AUTO WORKERS AFL-CIO,2630.0,,not in gazetteer,train
 NOLSW,AUTO WORKERS AFL-CIO,,,potentially resolvable,train
-LSSA 2320 - NOLSW/Local 2320,AUTO WORKERS AFL-CIO,2320.0,,multi-local,train
+LSSA 2320 - NOLSW/Local 2320,AUTO WORKERS AFL-CIO,2320.0,531724,,train
 NATIONAL ORGANIZATION OF LEGAL SERVICES WORKERS LOCAL 2320,AUTO WORKERS AFL-CIO,2320.0,531724.0,,train
 "NATIONAL ORGANIZATION OF LEGAL SERVICES WORKERS, LOCAL 2320",AUTO WORKERS AFL-CIO,2320.0,531724.0,,train
 NATCA AFL-CIO-N/A,AIR TRAFFIC CONTROLLERS AFL-CIO,,,potentially resolvable,train
