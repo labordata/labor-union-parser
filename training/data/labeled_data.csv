@@ -32904,7 +32904,7 @@ Temple University Hospital Nurses Association; Temple University Hospital Allied
 "CHICAGO AND MIDWEST REGIONAL JOINT BOARD , UNITE HERE",UNITE HERE,,,potentially resolvable,train
 "Student Workers of Columbia, UAW Local 2710",AUTO WORKERS AFL-CIO,2710.0,546682.0,,train
 "INTERNATIONAL UNION OF PAINTERS AND ALLIED TRADES, DISTRICT COUNCIL 78/LOCAL UNION 73",PAINTERS AFL-CIO,73.0,543690.0,,train
-"FOLDING BOX, CORRUGATED BOX AND DISPLAY WORKERS, LOCAL 381, PACE","PACE, AFL-CIO",381.0,,not in gazetteer,train
+"FOLDING BOX, CORRUGATED BOX AND DISPLAY WORKERS, LOCAL 381, PACE","STEELWORKERS, AFL-CIO",381.0,2463,,train
 "United Food and Commercial Workers Union, Local 1994 (MCGEO)",FOOD AND COMMERCIAL WKRS,1994.0,530944.0,,train
 USW LOCAL 335,"STEELWORKERS, AFL-CIO",335.0,69698,,test
 American Postal Workers Union Local 089,"POSTAL WORKERS, AMERICAN, AFL-CIO",89.0,92026.0,,train
@@ -41119,7 +41119,7 @@ LOCAL 1 BRICKLAYERS & ALLIED CRAFTWORKERS UNION,BRICKLAYERS AFL-CIO,1.0,545193.0
 "United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union, Local 1145, AFL-CIO, CLC","STEELWORKERS, AFL-CIO",1145.0,27173.0,,train
 "BUILDING MATERIAL TEAMSTERS, LOCAL 282, IBT",TEAMSTERS,282.0,9185.0,,train
 "American Postal Workers Union, Broward County Area Local 1201","POSTAL WORKERS, AMERICAN, AFL-CIO",1201.0,72399.0,,train
-"FOLDING BOX-CORRUGATED BOX AND DISPLAY WORKERS LOCAL 381, A/W PACE INTERNATIONAL UNION, AFL-CIO","PACE, AFL-CIO",381.0,,not in gazetteer,train
+"FOLDING BOX-CORRUGATED BOX AND DISPLAY WORKERS LOCAL 381, A/W PACE INTERNATIONAL UNION, AFL-CIO","STEELWORKERS, AFL-CIO",381.0,2463,,train
 LOCAL 9421 OF THE COMMUNICATIONS WORKERS OF AMERICA (CWA),COMMUNICATIONS WORKERS AFL-CIO,9421.0,44837.0,,train
 Iron Workers Local 272,IRON WORKERS AFL-CIO,272.0,10100.0,,train
 APWU 604-605 AREA LOCAL #6266,"POSTAL WORKERS, AMERICAN, AFL-CIO",604.0,513126.0,,train
@@ -47231,7 +47231,7 @@ United Steelworkers Local No. 460-G,"STEELWORKERS, AFL-CIO",460.0,63662.0,,train
 Service Employees International Union (SEIU)/District 1199,SERVICE EMPLOYEES,1199.0,69557.0,,train
 "THE NEWSPAPER PRINTING PRESSMEN'S UNION, LOCAL 12N, G.C.C./ IBT",PRINTING PACKAGING & PRODUCTION WORKERS UNION OF N,12.0,27291.0,,train
 CARPENTERS' DISTRICT COUNCIL OF WESTERN PENNSYLVANIA A/W UNITED BROTHERHOOD OF CARPENTERS AND JOINER,CARPENTERS IND,,,potentially resolvable,train
-PACE LOCAL 1210 USW,"PACE, AFL-CIO",1210.0,,not in gazetteer,train
+PACE LOCAL 1210 USW,"STEELWORKERS, AFL-CIO",1210.0,4381,,train
 "United EMS Workers, AFSCME Local 4911",STATE COUNTY AND MUNI EMPLS AFL-CIO,4911.0,544573.0,,train
 UAW Local 933 Allison Transmission Division,AUTO WORKERS AFL-CIO,933.0,11323.0,,train
 Teamsters,TEAMSTERS,,,potentially resolvable,train
@@ -47514,7 +47514,7 @@ INTERNATIONAL BROTHERHOOD OF TEAMSTERS LOCAL 523,TEAMSTERS,523.0,33164.0,,train
 "CARPENTERS LOCAL 35, UNITED BROTHERHOOD OF CARPENTERS & JOINERS OF AMERICA",CARPENTERS IND,35.0,43985.0,,train
 "Bakery, Confectionery, Tobacco Workers and Grain Millers Union Local 25","BAKERY, TOBACCO AND GRAIN AFL-CIO",25.0,1797,,train
 LOCAL 900C  ICWUC/UFCW,FOOD AND COMMERCIAL WKRS,900.0,69724.0,,train
-"LOCAL 318 PAPER, ALLIED-INDUSTRIAL, CHEMICAL & ENERGY WORKERS INTERNATIONAL UNION (PACE)","PACE, AFL-CIO",318.0,,not in gazetteer,train
+"LOCAL 318 PAPER, ALLIED-INDUSTRIAL, CHEMICAL & ENERGY WORKERS INTERNATIONAL UNION (PACE)","STEELWORKERS, AFL-CIO",318.0,32980,,train
 AFGE LOCAL 987,GOVERNMENT EMPLOYEES AFGE AFL-CIO,987.0,501303.0,,train
 UGSOA AND ITS AFFILIATED LOCAL 243,"GOVERNMENT SECURITY OFFICERS, IND",243.0,542828.0,,train
 "United Food and Commercial Workers Union, Local 1459",FOOD AND COMMERCIAL WKRS,1459.0,24770.0,,train
@@ -58367,7 +58367,7 @@ Teamsters Local Union No.769,TEAMSTERS,769.0,61186.0,,train
 "BERKLEE FACULTY UNION, AMERICAN FEDERATION OF TEACHERS-LOCAL 4412, AFL-CIO",TEACHERS AFL-CIO,4412.0,530381.0,,train
 "International Alliance of Theatrical Stage Employees (""IATSE""), Local 46",STAGE AND PICTURE OPERATORS AFL-CIO,46.0,,ambiguous,train
 IRON WORKERS DISTRICT COUNCIL OF SOUTHERN OHIO AND VICINITY,IRON WORKERS AFL-CIO,,,potentially resolvable,train
-PACE LOCAL 1444 (AKA USW),"PACE, AFL-CIO",1444.0,,not in gazetteer,train
+PACE LOCAL 1444 (AKA USW),"STEELWORKERS, AFL-CIO",1444.0,65668,,train
 SEIU - United Healthcare Workers-West,SERVICE EMPLOYEES,,,potentially resolvable,train
 "BAKERY, CONFECTIONERY, TOBACCO AND GRAIN MILLERS INTERNATIONAL UNION, LOCAL 25, AFL-CIO","BAKERY, TOBACCO AND GRAIN AFL-CIO",25.0,1797,,train
 "32BJ, SEIU",SERVICE EMPLOYEES,32.0,516823.0,,train
@@ -69501,7 +69501,7 @@ STEELWORKERS LOCAL 1-562,"STEELWORKERS, AFL-CIO",562.0,35067,,train
 "PAPER, ALLIED INDUSTRIAL, CHEMICAL AND ENERGY WORKERS INTERNATIONAL UNION (PACE), LOCAL 7-0779, AFL-","PACE, AFL-CIO",779.0,,not in gazetteer,train
 "Local 2-987-03, United Steel, Paper and Forestry, Rubber, Manufacturing, Energy, Allied Industrial and Service Workers International Union (USW), AFL-CIO","STEELWORKERS, AFL-CIO",987.0,512530,,train
 "USW, LOCAL 1-0250","STEELWORKERS, AFL-CIO",250.0,8609.0,,train
-"PAPER, ALLIED-INDUSTRIAL, CHEMICAL & ENERGY WORKERS INTERNATIONAL UNION, LOCAL 8-675 (PACE), AFL-CIO","PACE, AFL-CIO",675.0,,not in gazetteer,train
+"PAPER, ALLIED-INDUSTRIAL, CHEMICAL & ENERGY WORKERS INTERNATIONAL UNION, LOCAL 8-675 (PACE), AFL-CIO","STEELWORKERS, AFL-CIO",675.0,,ambiguous,train
 "UNITED STEELWORKERS OF AMERICA, DISTRICT 12, SUBDISTRICT 2 AFL-CIO. CLC","STEELWORKERS, AFL-CIO",12.0,55306.0,,train
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION (USW), LOCAL 7-662","STEELWORKERS, AFL-CIO",662.0,,ambiguous,train
 UNITED STEELWORKERS LOCAL 2-169,"STEELWORKERS, AFL-CIO",169.0,69893.0,,train
@@ -69678,7 +69678,7 @@ UNITED STEELWORKERS DIST. 2,"STEELWORKERS, AFL-CIO",2.0,,ambiguous,train
 Steelworkers Local 608 and 712,"STEELWORKERS, AFL-CIO",,,multi-local,train
 USW LOCAL 9-990,"STEELWORKERS, AFL-CIO",990.0,528263.0,,train
 United Steel Workers District 4,"STEELWORKERS, AFL-CIO",4.0,55570.0,,train
-"PAPER ALLIED-INDUSTRIAL CHEMICAL & ENERGY WORKERS INTERNATIONAL UNION, LOCAL 8-0369,  AFL-CIO (PACE)","PACE, AFL-CIO",369.0,,not in gazetteer,train
+"PAPER ALLIED-INDUSTRIAL CHEMICAL & ENERGY WORKERS INTERNATIONAL UNION, LOCAL 8-0369,  AFL-CIO (PACE)","STEELWORKERS, AFL-CIO",369.0,18001,,train
 USW Local 2-460,"STEELWORKERS, AFL-CIO",460.0,64151.0,,train
 United Steel Workers Local 11-574,"STEELWORKERS, AFL-CIO",574.0,7702.0,,train
 "PACE, INTERNATIONAL UNION, LOCAL 2-0770","PACE, AFL-CIO",770.0,,not in gazetteer,train
@@ -70241,7 +70241,7 @@ USW Local 8-0543,"STEELWORKERS, AFL-CIO",543.0,12180.0,,train
 "UNITED STEELWORKERS OF AMERICA, LOCALS 25, 60, 144, 540, 561, 576, 578, 578.01, AFL-CIO-CLC","STEELWORKERS, AFL-CIO",,,multi-local,train
 "United Steelworkers of America, Local 9-267","STEELWORKERS, AFL-CIO",267.0,542705.0,,train
 "United Steel, Paper, Forestry, Rubber, Manufacturing, Energy, Allied Industrial Service Workers International Union, USW LU 9447-09","STEELWORKERS, AFL-CIO",9447.0,541544.0,,train
-PACE LOCAL 8-0175,"PACE, AFL-CIO",175.0,,not in gazetteer,train
+PACE LOCAL 8-0175,"STEELWORKERS, AFL-CIO",175.0,18001,,train
 "UNITED STEEL, PAPER AND FORESTRY, RUBBER, MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION, LOCAL 13-423","STEELWORKERS, AFL-CIO",423.0,22524.0,,train
 "UNITED STEEL WORKERS, DISTRICT 1, LOCAL 1-346 A/W UNITED STEEL, PAPER AND FORESTRY, RUBBER MANUFACTURING, ENERGY, ALLIED INDUSTRIAL AND SERVICE WORKERS INTERNATIONAL UNION","STEELWORKERS, AFL-CIO",346.0,45637.0,,train
 United Steelworkers Local Union 11-505,"STEELWORKERS, AFL-CIO",505.0,39320.0,,train
@@ -77794,7 +77794,7 @@ HOTEL EMP & RESTAURANT EMP INT'L UNION-WELFARE PENSION FUNDS,UNITE HERE,,,potent
 "Hotel Motel Trades Council and Local 6, Hotel, Restaurant & Club Employees and Bartenders Union, AFL",UNITE HERE,6.0,28501.0,,train
 "Hotel, Restaurant & Club Employees and Bartenders Union, Local 6, Hotel and Motel Trades Council",UNITE HERE,6.0,28501.0,,train
 "HOTEL EMPLOYEES & RESTAURANT EMPLOYEES UNION, LOCAL 737",UNITE HERE,737.0,68519.0,,train
-"UNITED NURSING INDUSTRY AND TECHNICAL EMPLOYEES DIV., UNITE/HERE LOCAL 84 A/W HOTEL AND RESTAURANT E",UNITE HERE,84.0,,not in gazetteer,train
+"UNITED NURSING INDUSTRY AND TECHNICAL EMPLOYEES DIV., UNITE/HERE LOCAL 84 A/W HOTEL AND RESTAURANT E","WORKERS UNITED, SEIU",84.0,28740,,train
 "LOCAL 6, HOTEL, RESTAURANT & CLUB EMPLOYEES AND BARTENDERS UNION",UNITE HERE,6.0,28501.0,,train
 "LOCAL 471, HOTEL, RESTAURANT EMPLOYEES AND BARTENDERS UNION, AFL-CIO",UNITE HERE,471.0,26108,,train
 Hotel Employees and Restaurant Employees Local 878,UNITE HERE,878.0,1758.0,,train
@@ -80133,7 +80133,7 @@ UNITE - 211A,UNITE HERE,211.0,,not in gazetteer,train
 UNITE - 225A,UNITE HERE,225.0,,not in gazetteer,train
 UNITE - 2540,UNITE AFL-CIO,2540.0,519636.0,,train
 UNITE - 2052,UNITE AFL-CIO,2052.0,1403.0,,train
-UNITE - 504,UNITE HERE,504.0,,not in gazetteer,train
+UNITE - 504,"WORKERS UNITED, SEIU",504.0,49295,,train
 UNITE - 588,UNITE AFL-CIO,588.0,53754.0,,train
 UNITE - 1790,UNITE AFL-CIO,1790.0,22490.0,,train
 UNITE - 215,UNITE AFL-CIO,215.0,,ambiguous,test
@@ -80141,7 +80141,7 @@ UNITE - 462,UNITE AFL-CIO,462.0,,ambiguous,train
 UNITE - 2504,UNITE HERE,2504.0,,not in gazetteer,train
 UNITE - 208,UNITE HERE,208.0,,not in gazetteer,train
 UNITE - 169,UNITE HERE,169.0,,not in gazetteer,train
-UNITE - 570,UNITE HERE,570.0,,not in gazetteer,train
+UNITE - 570,"WORKERS UNITED, SEIU",570.0,530929,,train
 "INTERNATIONAL UNION OF ELEVATOR CONSTRUCTORS, LOCAL 21",ELEVATOR CONSTRUCTORS AFL-CIO,21.0,21245.0,,train
 "INTERNATIONAL UNION OF ELEVATOR CONSTRUCTORS, LOCAL 21, AFL-CIO",ELEVATOR CONSTRUCTORS AFL-CIO,21.0,21245.0,,train
 "INTERNATIONAL UNION OF ELEVATOR CONSTRUCTORS, AFL-CIO, LOCAL 21",ELEVATOR CONSTRUCTORS AFL-CIO,21.0,21245.0,,train
@@ -84420,8 +84420,8 @@ PACE Local 904,"PACE, AFL-CIO",904.0,504555.0,,train
 PACE Local 1582,"PACE, AFL-CIO",1582.0,49652.0,,train
 PACE Local 237,"PACE, AFL-CIO",237.0,39777.0,,train
 PACE LOCAL 1161,"PACE, AFL-CIO",1161.0,,not in gazetteer,train
-PACE LOCAL 1401,"PACE, AFL-CIO",1401.0,,not in gazetteer,train
-PACE LOCAL 1482,"PACE, AFL-CIO",1482.0,,not in gazetteer,train
+PACE LOCAL 1401,"STEELWORKERS, AFL-CIO",1401.0,40080,,train
+PACE LOCAL 1482,"STEELWORKERS, AFL-CIO",1482.0,63988,,train
 PACE LOCAL 7903,"PACE, AFL-CIO",7903.0,,not in gazetteer,train
 PACE LOCAL 7369,"PACE, AFL-CIO",7369.0,,not in gazetteer,train
 Local 68,,68.0,,unknown union,exclude
@@ -84841,7 +84841,7 @@ USA - 642,"STEELWORKERS, AFL-CIO",642.0,24905.0,,train
 USA - 585,"STEELWORKERS, AFL-CIO",585.0,69726,,train
 USA - 161,"STEELWORKERS, AFL-CIO",161.0,,not in gazetteer,train
 USA - 418G,"STEELWORKERS, AFL-CIO",418.0,34834,,train
-PACE - 589,"PACE, AFL-CIO",589.0,,not in gazetteer,train
+PACE - 589,"STEELWORKERS, AFL-CIO",589.0,65340,,train
 PACE - 1-0032 BLACK RIVER NY,"PACE, AFL-CIO",32.0,,not in gazetteer,train
 PACE - 416,"PACE, AFL-CIO",416.0,18477.0,,train
 PACE - 1-0900 WESTBROOK ME,"PACE, AFL-CIO",900.0,,not in gazetteer,train
@@ -84971,7 +84971,7 @@ PACE - 7-264 FOREST LAKE MN,"PACE, AFL-CIO",264.0,,not in gazetteer,test
 PACE - 7-528 ST PAUL MN,"PACE, AFL-CIO",528.0,39363.0,,train
 PACE - 1-0001 LUDLOW MA,"PACE, AFL-CIO",1.0,46449.0,,train
 PACE - 1-1 LUDLOW MA,"PACE, AFL-CIO",1.0,46449.0,,train
-PACE - 599,"PACE, AFL-CIO",599.0,,not in gazetteer,train
+PACE - 599,"STEELWORKERS, AFL-CIO",599.0,513685,,train
 PACE - 1-0516 BROOKLINE NH,"PACE, AFL-CIO",516.0,39219.0,,train
 PACE - 7-588 WAUPACA WI,"PACE, AFL-CIO",588.0,10804.0,,train
 OCAW - 5-152,"PACE, AFL-CIO",152.0,,not in gazetteer,train
@@ -85005,7 +85005,7 @@ USA - 198-G,"STEELWORKERS, AFL-CIO",198.0,53325.0,,train
 USA - 387L,"STEELWORKERS, AFL-CIO",387.0,28377.0,,test
 USA - 169,"STEELWORKERS, AFL-CIO",169.0,,ambiguous,train
 USA - AFL CIO CLC,"STEELWORKERS, AFL-CIO",,,potentially resolvable,train
-"PACE INTERNATIONAL UNION, LOCAL 1947","PACE, AFL-CIO",1947.0,,not in gazetteer,train
+"PACE INTERNATIONAL UNION, LOCAL 1947","STEELWORKERS, AFL-CIO",1947.0,64212,,train
 PACE - 7-1321 GREEN BAY WI,"PACE, AFL-CIO",1321.0,,not in gazetteer,train
 PACE - 7-1319 GREEN BAY WI,"PACE, AFL-CIO",1319.0,,not in gazetteer,train
 "LOCAL 300, PACE","PACE, AFL-CIO",300.0,24237.0,,train
@@ -85158,10 +85158,10 @@ PACE INT'L UNION LOCAL 5-857,"PACE, AFL-CIO",857.0,,not in gazetteer,train
 "PACE, LOCAL 10058","PACE, AFL-CIO",10058.0,,not in gazetteer,train
 "PACE, LOCAL 12058","PACE, AFL-CIO",12058.0,,not in gazetteer,test
 "PACE, LOCAL 1015","PACE, AFL-CIO",1015.0,,not in gazetteer,train
-"PACE, LOCAL 1263","PACE, AFL-CIO",1263.0,,not in gazetteer,train
-"PACE, LOCAL 1505","PACE, AFL-CIO",1505.0,,not in gazetteer,train
+"PACE, LOCAL 1263","STEELWORKERS, AFL-CIO",1263.0,67586,,train
+"PACE, LOCAL 1505","STEELWORKERS, AFL-CIO",1505.0,510291,,train
 "PACE, LOCAL 7254","PACE, AFL-CIO",7254.0,,not in gazetteer,train
-"PACE, LOCAL 1766","PACE, AFL-CIO",1766.0,,not in gazetteer,train
+"PACE, LOCAL 1766","STEELWORKERS, AFL-CIO",1766.0,20287,,train
 PACE - 1-0080 BRADLEY ME,"PACE, AFL-CIO",80.0,,not in gazetteer,test
 PACE - 2-0853 JAMESTOWN NC,"PACE, AFL-CIO",853.0,,not in gazetteer,train
 PACE - 5-0733 KNOXVILLE TN,"PACE, AFL-CIO",733.0,,not in gazetteer,train
@@ -86559,14 +86559,14 @@ BCTD - 23,BLDG AND CONSTRN TRADES DEPT AFL-CIO,23.0,,not in gazetteer,train
 BCTD - SE LA,BLDG AND CONSTRN TRADES DEPT AFL-CIO,,,potentially resolvable,train
 PACE - 8366,"PACE, AFL-CIO",8366.0,,not in gazetteer,train
 PACE - 7314,"PACE, AFL-CIO",7314.0,,not in gazetteer,train
-PACE - 7701,"PACE, AFL-CIO",7701.0,,not in gazetteer,train
-PACE - 318,"PACE, AFL-CIO",318.0,,not in gazetteer,train
-PACE - 1504,"PACE, AFL-CIO",1504.0,,not in gazetteer,train
-PACE - 1988,"PACE, AFL-CIO",1988.0,,not in gazetteer,train
-PACE - 1473,"PACE, AFL-CIO",1473.0,,not in gazetteer,train
-PACE - 7898,"PACE, AFL-CIO",7898.0,,not in gazetteer,test
+PACE - 7701,"STEELWORKERS, AFL-CIO",7701.0,538125,,train
+PACE - 318,"STEELWORKERS, AFL-CIO",318.0,32980,,train
+PACE - 1504,"STEELWORKERS, AFL-CIO",1504.0,64952,,train
+PACE - 1988,"STEELWORKERS, AFL-CIO",1988.0,65514,,train
+PACE - 1473,"STEELWORKERS, AFL-CIO",1473.0,509926,,train
+PACE - 7898,"STEELWORKERS, AFL-CIO",7898.0,68961,,test
 PACE - ,"PACE, AFL-CIO",,,potentially resolvable,train
-PACE - 7252,"PACE, AFL-CIO",7252.0,,not in gazetteer,train
+PACE - 7252,"STEELWORKERS, AFL-CIO",7252.0,65256,,train
 PACE - 7364,"PACE, AFL-CIO",7364.0,,not in gazetteer,train
 PACE - 637,"PACE, AFL-CIO",637.0,19733.0,,train
 PACE - 987,"PACE, AFL-CIO",987.0,,not in gazetteer,train
@@ -86583,9 +86583,9 @@ PACE - 1053,"PACE, AFL-CIO",1053.0,,not in gazetteer,train
 PACE - 7953,"PACE, AFL-CIO",7953.0,,not in gazetteer,test
 PACE - 839,"PACE, AFL-CIO",839.0,,not in gazetteer,train
 PACE - 9892,"PACE, AFL-CIO",9892.0,,not in gazetteer,train
-PACE - 864,"PACE, AFL-CIO",864.0,,not in gazetteer,train
-PACE - 597,"PACE, AFL-CIO",597.0,,not in gazetteer,train
-PACE - 1240,"PACE, AFL-CIO",1240.0,,not in gazetteer,train
+PACE - 864,"STEELWORKERS, AFL-CIO",864.0,46154,,train
+PACE - 597,"STEELWORKERS, AFL-CIO",597.0,43387,,train
+PACE - 1240,"STEELWORKERS, AFL-CIO",1240.0,40603,,train
 PACE - 1170,"PACE, AFL-CIO",1170.0,,not in gazetteer,test
 PACE - 510,"PACE, AFL-CIO",510.0,516298.0,,train
 PACE - 8-277,"PACE, AFL-CIO",277.0,,not in gazetteer,train
@@ -86593,7 +86593,7 @@ PACE - 50477,"PACE, AFL-CIO",50477.0,,not in gazetteer,train
 PACE - 3562,"PACE, AFL-CIO",3562.0,,not in gazetteer,train
 PACE - 8-670,"PACE, AFL-CIO",670.0,,not in gazetteer,train
 PACE - 1122,"PACE, AFL-CIO",1122.0,,not in gazetteer,train
-PACE - 7274,"PACE, AFL-CIO",7274.0,,not in gazetteer,train
+PACE - 7274,"STEELWORKERS, AFL-CIO",7274.0,65370,,train
 PACE - 895,"PACE, AFL-CIO",895.0,,not in gazetteer,train
 PACE - 7729,"PACE, AFL-CIO",7729.0,,not in gazetteer,train
 PACE - 8-397,"PACE, AFL-CIO",397.0,,not in gazetteer,train
@@ -86616,7 +86616,7 @@ PACE - 2-1419,"PACE, AFL-CIO",1419.0,,not in gazetteer,train
 PACE - 2-0033,"PACE, AFL-CIO",33.0,541646.0,,train
 PACE - 4-0449,"PACE, AFL-CIO",449.0,16416.0,,train
 PACE - 8-7976,"PACE, AFL-CIO",7976.0,,not in gazetteer,train
-PACE - 1389,"PACE, AFL-CIO",1389.0,,not in gazetteer,train
+PACE - 1389,"STEELWORKERS, AFL-CIO",1389.0,509650,,train
 PACE - 8-366,"PACE, AFL-CIO",366.0,,not in gazetteer,train
 PACE - 1-0745,"PACE, AFL-CIO",745.0,,not in gazetteer,train
 PACE - 7-0717,"PACE, AFL-CIO",717.0,,not in gazetteer,train
@@ -86655,7 +86655,7 @@ PACE - 5150,"PACE, AFL-CIO",5150.0,,not in gazetteer,train
 PACE - 8-0171,"PACE, AFL-CIO",171.0,41529.0,,train
 PACE - 8-0208,"PACE, AFL-CIO",208.0,,not in gazetteer,train
 PACE - 8-0279,"PACE, AFL-CIO",279.0,,not in gazetteer,train
-PACE - 402,"PACE, AFL-CIO",402.0,,not in gazetteer,train
+PACE - 402,"STEELWORKERS, AFL-CIO",402.0,39536,,train
 PACE - 4-165,"PACE, AFL-CIO",165.0,49494.0,,train
 PACE - 7-0503,"PACE, AFL-CIO",503.0,,not in gazetteer,train
 PACE - 3-0537,"PACE, AFL-CIO",537.0,,not in gazetteer,train
@@ -86680,7 +86680,7 @@ PACE - MULTI,"PACE, AFL-CIO",,,potentially resolvable,train
 PACE - AFL CIO,"PACE, AFL-CIO",,,potentially resolvable,train
 PACE - 61063,"PACE, AFL-CIO",61063.0,,not in gazetteer,train
 PACE - 1063,"PACE, AFL-CIO",1063.0,,not in gazetteer,train
-PACE - 1215,"PACE, AFL-CIO",1215.0,,not in gazetteer,test
+PACE - 1215,"STEELWORKERS, AFL-CIO",1215.0,50121,,test
 PACE - 1280,"PACE, AFL-CIO",1280.0,,not in gazetteer,train
 PACE - 5-312,"PACE, AFL-CIO",312.0,533908.0,,train
 PACE - 3-0573,"PACE, AFL-CIO",573.0,540358.0,,train
@@ -86705,7 +86705,7 @@ PACE - 60268,"PACE, AFL-CIO",60268.0,,not in gazetteer,train
 PACE - 8-001,"PACE, AFL-CIO",1.0,,potentially resolvable,train
 PACE - 7-578,"PACE, AFL-CIO",578.0,,not in gazetteer,train
 PACE - 8-0600,"PACE, AFL-CIO",600.0,,not in gazetteer,train
-PACE - 325,"PACE, AFL-CIO",325.0,,not in gazetteer,train
+PACE - 325,"STEELWORKERS, AFL-CIO",325.0,3496,,train
 PACE - 50141,"PACE, AFL-CIO",50141.0,,not in gazetteer,train
 PACE - 102058,"PACE, AFL-CIO",102058.0,,not in gazetteer,train
 PACE - 50508,"PACE, AFL-CIO",50508.0,,not in gazetteer,train
@@ -86714,7 +86714,7 @@ PACE - 5293,"PACE, AFL-CIO",5293.0,,not in gazetteer,train
 PACE - 51270,"PACE, AFL-CIO",51270.0,,not in gazetteer,train
 PACE - 5234 UNIT 5,"PACE, AFL-CIO",5234.0,,not in gazetteer,train
 PACE - 2-286,"PACE, AFL-CIO",286.0,,not in gazetteer,train
-PACE - 323,"PACE, AFL-CIO",323.0,,not in gazetteer,train
+PACE - 323,"STEELWORKERS, AFL-CIO",323.0,11987,,train
 PACE - 1010,"PACE, AFL-CIO",1010.0,,not in gazetteer,train
 PACE - 2-149,"PACE, AFL-CIO",149.0,,not in gazetteer,train
 PACE - 1045,"PACE, AFL-CIO",1045.0,5486.0,,train
@@ -86777,7 +86777,7 @@ PACE - 21992,"PACE, AFL-CIO",21992.0,,not in gazetteer,train
 PACE - 7-528,"PACE, AFL-CIO",528.0,39363.0,,train
 PACE - 51738,"PACE, AFL-CIO",51738.0,,not in gazetteer,train
 PACE - 6-0210,"PACE, AFL-CIO",210.0,,not in gazetteer,train
-PACE - 1350,"PACE, AFL-CIO",1350.0,,not in gazetteer,train
+PACE - 1350,"STEELWORKERS, AFL-CIO",1350.0,47682,,train
 PACE - 70380,"PACE, AFL-CIO",70380.0,,not in gazetteer,train
 PACE - 2-406,"PACE, AFL-CIO",406.0,65850.0,,train
 PACE - 2-0547,"PACE, AFL-CIO",547.0,69970.0,,train
@@ -86786,7 +86786,7 @@ PACE - 6-837,"PACE, AFL-CIO",837.0,8589.0,,train
 PACE - 1-1448,"PACE, AFL-CIO",1448.0,,not in gazetteer,train
 PACE - 1-80,"PACE, AFL-CIO",80.0,,not in gazetteer,train
 PACE - 2-629,"PACE, AFL-CIO",629.0,,not in gazetteer,train
-PACE - 5439,"PACE, AFL-CIO",5439.0,,not in gazetteer,train
+PACE - 5439,"STEELWORKERS, AFL-CIO",5439.0,13735,,train
 PACE - 51241,"PACE, AFL-CIO",51241.0,,not in gazetteer,train
 PACE - 5367,"PACE, AFL-CIO",5367.0,,not in gazetteer,train
 PACE - 51983,"PACE, AFL-CIO",51983.0,,not in gazetteer,train
@@ -86861,7 +86861,7 @@ PACE - 50108,"PACE, AFL-CIO",50108.0,,not in gazetteer,train
 PACE - 2-1531,"PACE, AFL-CIO",1531.0,,not in gazetteer,train
 PACE - 4-313,"PACE, AFL-CIO",313.0,,not in gazetteer,train
 PACE - 5-0164,"PACE, AFL-CIO",164.0,43771.0,,train
-PACE - 1442,"PACE, AFL-CIO",1442.0,,not in gazetteer,train
+PACE - 1442,"STEELWORKERS, AFL-CIO",1442.0,14688,,train
 PACE - 50243-10,"PACE, AFL-CIO",50243.0,,not in gazetteer,train
 PACE - 6-154,"PACE, AFL-CIO",154.0,,not in gazetteer,train
 PACE - 2-488,"PACE, AFL-CIO",488.0,,not in gazetteer,train
@@ -86965,7 +86965,7 @@ PACE - 70042,"PACE, AFL-CIO",70042.0,,not in gazetteer,train
 PACE - 5-974,"PACE, AFL-CIO",974.0,,not in gazetteer,train
 PACE - 2-719,"PACE, AFL-CIO",719.0,,not in gazetteer,train
 PACE - 02-989,"PACE, AFL-CIO",989.0,533937.0,,train
-PACE - 1283,"PACE, AFL-CIO",1283.0,,not in gazetteer,train
+PACE - 1283,"STEELWORKERS, AFL-CIO",1283.0,71216,,train
 PACE - 2-782,"PACE, AFL-CIO",782.0,63365.0,,train
 PACE - 3-89,"PACE, AFL-CIO",89.0,,not in gazetteer,train
 PACE - 2-575 2-580,"PACE, AFL-CIO",575.0,50867.0,,train
@@ -87063,7 +87063,7 @@ PACE - 6910,"PACE, AFL-CIO",6910.0,,not in gazetteer,train
 PACE - 6645,"PACE, AFL-CIO",6645.0,,not in gazetteer,train
 PACE - 58291,"PACE, AFL-CIO",58291.0,,not in gazetteer,train
 PACE - 6547,"PACE, AFL-CIO",6547.0,,not in gazetteer,train
-PACE - 1888,"PACE, AFL-CIO",1888.0,,not in gazetteer,train
+PACE - 1888,"STEELWORKERS, AFL-CIO",1888.0,61332,,train
 PACE - 6-669,"PACE, AFL-CIO",669.0,,not in gazetteer,train
 PACE - 5-0516,"PACE, AFL-CIO",516.0,39219.0,,train
 PACE - 1-0503,"PACE, AFL-CIO",503.0,,not in gazetteer,train
@@ -87140,7 +87140,7 @@ PACE - 4-487,"PACE, AFL-CIO",487.0,,not in gazetteer,train
 PACE - 1-1102,"PACE, AFL-CIO",1102.0,,not in gazetteer,train
 PACE - 1-1437,"PACE, AFL-CIO",1437.0,,not in gazetteer,train
 PACE - 6-0323,"PACE, AFL-CIO",323.0,,not in gazetteer,test
-PACE - 1210,"PACE, AFL-CIO",1210.0,,not in gazetteer,train
+PACE - 1210,"STEELWORKERS, AFL-CIO",1210.0,4381,,train
 PACE - 61210,"PACE, AFL-CIO",61210.0,,not in gazetteer,train
 PACE - 5-142,"PACE, AFL-CIO",142.0,34138.0,,train
 PACE - 5-876,"PACE, AFL-CIO",876.0,,not in gazetteer,train
@@ -87157,19 +87157,19 @@ PACE - 3-0663,"PACE, AFL-CIO",663.0,20406.0,,train
 PACE - 3-1465,"PACE, AFL-CIO",1465.0,,not in gazetteer,train
 PACE - 3-0232,"PACE, AFL-CIO",232.0,,not in gazetteer,train
 PACE - 1-1275,"PACE, AFL-CIO",1275.0,,not in gazetteer,train
-PACE - 1488,"PACE, AFL-CIO",1488.0,,not in gazetteer,train
+PACE - 1488,"STEELWORKERS, AFL-CIO",1488.0,50110,,train
 PACE - 1-1799,"PACE, AFL-CIO",1799.0,,not in gazetteer,train
 PACE - 2-0635,"PACE, AFL-CIO",635.0,,not in gazetteer,train
 PACE - 51968,"PACE, AFL-CIO",51968.0,,not in gazetteer,train
 PACE - 51070,"PACE, AFL-CIO",51070.0,,not in gazetteer,train
-PACE - 1241,"PACE, AFL-CIO",1241.0,,not in gazetteer,train
+PACE - 1241,"STEELWORKERS, AFL-CIO",1241.0,69431,,train
 PACE - 2-0455,"PACE, AFL-CIO",455.0,,not in gazetteer,train
 PACE - 5513,"PACE, AFL-CIO",5513.0,,not in gazetteer,train
 PACE - 7-0738,"PACE, AFL-CIO",738.0,,not in gazetteer,train
 PACE - 7-0743,"PACE, AFL-CIO",743.0,61643.0,,train
 PACE - 80810,"PACE, AFL-CIO",80810.0,,not in gazetteer,train
 PACE - 7-0394,"PACE, AFL-CIO",394.0,60463.0,,train
-PACE - 381,"PACE, AFL-CIO",381.0,,not in gazetteer,train
+PACE - 381,"STEELWORKERS, AFL-CIO",381.0,2463,,train
 PACE - 1-870,"PACE, AFL-CIO",870.0,,not in gazetteer,train
 PACE - 7-1822,"PACE, AFL-CIO",1822.0,,not in gazetteer,train
 PACE - 6-643,"PACE, AFL-CIO",643.0,70817.0,,train
@@ -87195,7 +87195,7 @@ PACE - 5-992,"PACE, AFL-CIO",992.0,529183.0,,train
 PACE - 2-1013,"PACE, AFL-CIO",1013.0,,not in gazetteer,train
 PACE - 5765,"PACE, AFL-CIO",5765.0,,not in gazetteer,train
 PACE - 8-593,"PACE, AFL-CIO",593.0,,not in gazetteer,train
-PACE - 5712,"PACE, AFL-CIO",5712.0,,not in gazetteer,train
+PACE - 5712,"STEELWORKERS, AFL-CIO",5712.0,14198,,train
 PACE - 6-662,"PACE, AFL-CIO",662.0,,not in gazetteer,test
 PACE - 1-0905,"PACE, AFL-CIO",905.0,,not in gazetteer,train
 PACE - 1-0836,"PACE, AFL-CIO",836.0,,not in gazetteer,train
@@ -87208,7 +87208,7 @@ PACE - 3-0531,"PACE, AFL-CIO",531.0,,not in gazetteer,train
 PACE - 3-0357,"PACE, AFL-CIO",357.0,,not in gazetteer,train
 PACE - 544,"PACE, AFL-CIO",544.0,,potentially resolvable,train
 PACE - 3-0996,"PACE, AFL-CIO",996.0,540703.0,,train
-PACE - 50634,"PACE, AFL-CIO",50634.0,,not in gazetteer,train
+PACE - 50634,"STEELWORKERS, AFL-CIO",50634.0,54169,,train
 PACE - 2-0388,"PACE, AFL-CIO",388.0,25852.0,,train
 PACE - 80175,"PACE, AFL-CIO",80175.0,,not in gazetteer,train
 PACE - 5-0496,"PACE, AFL-CIO",496.0,,not in gazetteer,train
@@ -87262,7 +87262,7 @@ PACE - 6154,"PACE, AFL-CIO",6154.0,,not in gazetteer,train
 PACE - 80369,"PACE, AFL-CIO",80369.0,,not in gazetteer,train
 PACE - 2-0240,"PACE, AFL-CIO",240.0,3383.0,,train
 PACE - 2-0886,"PACE, AFL-CIO",886.0,,not in gazetteer,test
-PACE - 1971,"PACE, AFL-CIO",1971.0,,not in gazetteer,train
+PACE - 1971,"STEELWORKERS, AFL-CIO",1971.0,69382,,train
 PACE - 51206,"PACE, AFL-CIO",51206.0,,not in gazetteer,train
 PACE - 512372,"PACE, AFL-CIO",512372.0,,not in gazetteer,train
 PACE - 4-314,"PACE, AFL-CIO",314.0,,not in gazetteer,train
@@ -87283,16 +87283,16 @@ PACE - 5-556,"PACE, AFL-CIO",556.0,,not in gazetteer,train
 PACE - 5816,"PACE, AFL-CIO",5816.0,,not in gazetteer,train
 PACE - 5-1338,"PACE, AFL-CIO",1338.0,,not in gazetteer,train
 PACE - 5-796,"PACE, AFL-CIO",796.0,,not in gazetteer,train
-PACE - 6220,"PACE, AFL-CIO",6220.0,,not in gazetteer,train
+PACE - 6220,"STEELWORKERS, AFL-CIO",6220.0,54790,,train
 PACE - 3-0950 3-0952 3-0966,"PACE, AFL-CIO",950.0,,not in gazetteer,train
 PACE - 6-1109,"PACE, AFL-CIO",1109.0,,not in gazetteer,train
 PACE - 5-983,"PACE, AFL-CIO",983.0,,not in gazetteer,train
 PACE - 6-159,"PACE, AFL-CIO",159.0,10563.0,,train
 PACE - 4-0786,"PACE, AFL-CIO",786.0,,not in gazetteer,train
 PACE - 6-347,"PACE, AFL-CIO",347.0,40166.0,,train
-PACE - 1692,"PACE, AFL-CIO",1692.0,,not in gazetteer,train
+PACE - 1692,"STEELWORKERS, AFL-CIO",1692.0,26764,,train
 PACE - 1-86,"PACE, AFL-CIO",86.0,,not in gazetteer,train
-PACE - 1475,"PACE, AFL-CIO",1475.0,,not in gazetteer,train
+PACE - 1475,"STEELWORKERS, AFL-CIO",1475.0,509844,,train
 PACE - 1-0318 REGION 1,"PACE, AFL-CIO",318.0,,not in gazetteer,test
 PACE - 70200,"PACE, AFL-CIO",70200.0,,not in gazetteer,train
 PACE - 1-0345,"PACE, AFL-CIO",345.0,,not in gazetteer,train
@@ -87378,7 +87378,7 @@ PACE - 5-0205,"PACE, AFL-CIO",205.0,,not in gazetteer,train
 PACE - 4-235,"PACE, AFL-CIO",235.0,41400.0,,train
 PACE - 61031,"PACE, AFL-CIO",61031.0,,not in gazetteer,train
 PACE - 2-0111,"PACE, AFL-CIO",111.0,,potentially resolvable,train
-PACE - 1300,"PACE, AFL-CIO",1300.0,,not in gazetteer,train
+PACE - 1300,"STEELWORKERS, AFL-CIO",1300.0,50686,,train
 PACE - 5-0379,"PACE, AFL-CIO",379.0,60997.0,,train
 PACE - 2-902,"PACE, AFL-CIO",902.0,29527.0,,train
 PACE - 2-412,"PACE, AFL-CIO",412.0,,not in gazetteer,train
@@ -87434,10 +87434,10 @@ PACE - 1-0521,"PACE, AFL-CIO",521.0,,not in gazetteer,train
 PACE - 1-0917 NASHUA NH,"PACE, AFL-CIO",917.0,,not in gazetteer,train
 PACE - 80593,"PACE, AFL-CIO",80593.0,,not in gazetteer,train
 PACE - 2-397 AVENEL NJ,"PACE, AFL-CIO",397.0,,not in gazetteer,train
-PACE - 5781,"PACE, AFL-CIO",5781.0,,not in gazetteer,train
+PACE - 5781,"STEELWORKERS, AFL-CIO",5781.0,12367,,train
 PACE - 3-0700 EAST POINT GA,"PACE, AFL-CIO",700.0,,not in gazetteer,train
 PACE - 3-0030 JACKSONVILLE FL,"PACE, AFL-CIO",30.0,,not in gazetteer,train
-PACE - 1509,"PACE, AFL-CIO",1509.0,,not in gazetteer,train
+PACE - 1509,"STEELWORKERS, AFL-CIO",1509.0,66695,,train
 PACE - 3-0703 EAST POINT GA,"PACE, AFL-CIO",703.0,,not in gazetteer,train
 PACE - 5450,"PACE, AFL-CIO",5450.0,,not in gazetteer,train
 PACE - 6126,"PACE, AFL-CIO",6126.0,,not in gazetteer,train
@@ -87479,12 +87479,12 @@ PACE - 7-0264 ST PAUL MN,"PACE, AFL-CIO",264.0,,not in gazetteer,train
 PACE - 7-0415 NEWTON WI,"PACE, AFL-CIO",415.0,61175.0,,train
 PACE - 1-0318 FLUSHING NY,"PACE, AFL-CIO",318.0,,not in gazetteer,train
 PACE - 2-1898 HOPEWELL VA,"PACE, AFL-CIO",1898.0,,not in gazetteer,train
-PACE - 5989,"PACE, AFL-CIO",5989.0,,not in gazetteer,train
-PACE - 5460,"PACE, AFL-CIO",5460.0,,not in gazetteer,train
+PACE - 5989,"STEELWORKERS, AFL-CIO",5989.0,54454,,train
+PACE - 5460,"STEELWORKERS, AFL-CIO",5460.0,31225,,train
 PACE - 5-0107,"PACE, AFL-CIO",107.0,,not in gazetteer,train
 PACE - 1703 1864 1865,"PACE, AFL-CIO",1703.0,,not in gazetteer,train
 PACE - 7-0795 COUNCIL BLUFFS IA,"PACE, AFL-CIO",795.0,,not in gazetteer,train
-PACE - 1085,"PACE, AFL-CIO",1085.0,,not in gazetteer,test
+PACE - 1085,"STEELWORKERS, AFL-CIO",1085.0,67543,,test
 PACE - 5-845 SHERIDAN AR,"PACE, AFL-CIO",845.0,,not in gazetteer,train
 PACE - 5-0357 ARLINGTON TN,"PACE, AFL-CIO",357.0,,not in gazetteer,train
 PACE - 6-960,"PACE, AFL-CIO",960.0,,not in gazetteer,train
@@ -87608,7 +87608,7 @@ PACE - 1-149 RAHWAY,"PACE, AFL-CIO",149.0,,not in gazetteer,train
 PACE - 2-898,"PACE, AFL-CIO",898.0,19079.0,,train
 PACE - 5626,"PACE, AFL-CIO",5626.0,,not in gazetteer,train
 PACE - 6-1,"PACE, AFL-CIO",1.0,,potentially resolvable,train
-PACE - 5887,"PACE, AFL-CIO",5887.0,,not in gazetteer,train
+PACE - 5887,"STEELWORKERS, AFL-CIO",5887.0,31239,,train
 PACE - 5-0241,"PACE, AFL-CIO",241.0,3383.0,,test
 PACE - 5-0558,"PACE, AFL-CIO",558.0,68017.0,,train
 PACE - 5912,"PACE, AFL-CIO",5912.0,,not in gazetteer,train
@@ -87767,7 +87767,7 @@ PACE - 5525,"PACE, AFL-CIO",5525.0,,not in gazetteer,train
 PACE - 5-677,"PACE, AFL-CIO",677.0,,not in gazetteer,train
 PACE - 3-1192,"PACE, AFL-CIO",1192.0,,not in gazetteer,train
 PACE - 5-0931,"PACE, AFL-CIO",931.0,,not in gazetteer,train
-PACE - 5962,"PACE, AFL-CIO",5962.0,,not in gazetteer,test
+PACE - 5962,"STEELWORKERS, AFL-CIO",5962.0,54475,,test
 PACE - 524356,"PACE, AFL-CIO",524356.0,,not in gazetteer,train
 PACE - 61029,"PACE, AFL-CIO",61029.0,,not in gazetteer,train
 PACE - 6-0838,"PACE, AFL-CIO",838.0,,not in gazetteer,train
@@ -87843,7 +87843,7 @@ PACE - 1-1,"PACE, AFL-CIO",1.0,46449.0,,train
 PACE - 1-75,"PACE, AFL-CIO",75.0,,not in gazetteer,train
 PACE - 1-1069,"PACE, AFL-CIO",1069.0,,not in gazetteer,train
 PACE - 5-1289,"PACE, AFL-CIO",1289.0,,not in gazetteer,train
-PACE - 283,"PACE, AFL-CIO",283.0,,not in gazetteer,train
+PACE - 283,"STEELWORKERS, AFL-CIO",283.0,542029,,train
 PACE - 4-1191,"PACE, AFL-CIO",1191.0,,not in gazetteer,train
 PACE - 4-1362,"PACE, AFL-CIO",1362.0,,not in gazetteer,train
 PACE - 7-0709 WATERLOO IA,"PACE, AFL-CIO",709.0,,not in gazetteer,train
@@ -87893,7 +87893,7 @@ PACE - 6-0210 MERRILLVILLE IN,"PACE, AFL-CIO",210.0,,not in gazetteer,train
 PACE - 70578,"PACE, AFL-CIO",70578.0,,not in gazetteer,train
 PACE - 7322,"PACE, AFL-CIO",7322.0,,not in gazetteer,train
 PACE - 21165,"PACE, AFL-CIO",21165.0,,not in gazetteer,train
-PACE - 6103,"PACE, AFL-CIO",6103.0,,not in gazetteer,train
+PACE - 6103,"STEELWORKERS, AFL-CIO",6103.0,55974,,train
 PACE - 58085,"PACE, AFL-CIO",58085.0,,not in gazetteer,train
 PACE - 6507,"PACE, AFL-CIO",6507.0,,not in gazetteer,train
 PACE - 7-1095 DEER RIVER MN,"PACE, AFL-CIO",1095.0,,not in gazetteer,train
@@ -87979,7 +87979,7 @@ PACE - 1-955 PULASKI NY,"PACE, AFL-CIO",955.0,,not in gazetteer,train
 PACE - 60220,"PACE, AFL-CIO",60220.0,,not in gazetteer,train
 PACE - 54200,"PACE, AFL-CIO",54200.0,,not in gazetteer,train
 PACE - 2770,"PACE, AFL-CIO",2770.0,,not in gazetteer,test
-PACE - 2969,"PACE, AFL-CIO",2969.0,,not in gazetteer,test
+PACE - 2969,"STEELWORKERS, AFL-CIO",2969.0,29322,,test
 PACE - 5243 14,"PACE, AFL-CIO",5243.0,,not in gazetteer,train
 PACE - 6176,"PACE, AFL-CIO",6176.0,,not in gazetteer,test
 PACE - 2-989,"PACE, AFL-CIO",989.0,533937.0,,train
@@ -87998,10 +87998,10 @@ PACE - 6-0194,"PACE, AFL-CIO",194.0,,not in gazetteer,train
 PACE - 5531,"PACE, AFL-CIO",5531.0,,not in gazetteer,train
 PACE - 2-580,"PACE, AFL-CIO",580.0,8451.0,,test
 PACE - 6-0517 MERRILLVILLE IN,"PACE, AFL-CIO",517.0,37351.0,,train
-PACE - 4654,"PACE, AFL-CIO",4654.0,,not in gazetteer,train
+PACE - 4654,"STEELWORKERS, AFL-CIO",4654.0,19185,,train
 PACE - 3-1514 ODENVILLE AL,"PACE, AFL-CIO",1514.0,,not in gazetteer,train
 PACE - 8-0005,"PACE, AFL-CIO",5.0,,potentially resolvable,train
-PACE - 8535,"PACE, AFL-CIO",8535.0,,not in gazetteer,train
+PACE - 8535,"STEELWORKERS, AFL-CIO",8535.0,509378,,train
 PACE - 8 0565,"PACE, AFL-CIO",8.0,,not in gazetteer,train
 PACE - 3-0543 ODENVILLE AL,"PACE, AFL-CIO",543.0,44767.0,,train
 PACE - 1-300,"PACE, AFL-CIO",300.0,24237.0,,train
@@ -88033,7 +88033,7 @@ PACE - 6-0189,"PACE, AFL-CIO",189.0,,not in gazetteer,train
 PACE - 61077,"PACE, AFL-CIO",61077.0,,not in gazetteer,train
 PACE - 2406,"PACE, AFL-CIO",2406.0,,not in gazetteer,train
 PACE - 5499,"PACE, AFL-CIO",5499.0,,not in gazetteer,test
-PACE - 6672,"PACE, AFL-CIO",6672.0,,not in gazetteer,train
+PACE - 6672,"STEELWORKERS, AFL-CIO",6672.0,61639,,train
 PACE - 7-0588,"PACE, AFL-CIO",588.0,10804.0,,train
 PACE - 1-080 MADAWASKA ME,"PACE, AFL-CIO",80.0,,not in gazetteer,train
 PACE - 6-0358,"PACE, AFL-CIO",358.0,,not in gazetteer,train
@@ -88051,7 +88051,7 @@ PACE - 6-0433 VASSAR MI,"PACE, AFL-CIO",433.0,542338.0,,test
 PACE - 6-0472 FT WAYNE,"PACE, AFL-CIO",472.0,,not in gazetteer,train
 PACE - 6-0521 UNION MI,"PACE, AFL-CIO",521.0,,not in gazetteer,train
 PACE - 6-0479 KALAMAZOO MI,"PACE, AFL-CIO",479.0,,not in gazetteer,train
-PACE - 1438,"PACE, AFL-CIO",1438.0,,not in gazetteer,test
+PACE - 1438,"STEELWORKERS, AFL-CIO",1438.0,7219,,test
 PACE - 2-1730 SALISBURY NC,"PACE, AFL-CIO",1730.0,,not in gazetteer,train
 PACE - 4620,"PACE, AFL-CIO",4620.0,,not in gazetteer,train
 PACE - 1-0017 QUEENSBURY NY,"PACE, AFL-CIO",17.0,,not in gazetteer,train
@@ -88078,7 +88078,7 @@ PACE - 6-0706 CERRO GORDO IL,"PACE, AFL-CIO",706.0,,not in gazetteer,train
 PACE - 590 JACKSON TN,"PACE, AFL-CIO",590.0,,not in gazetteer,train
 PACE - 6-0626,"PACE, AFL-CIO",626.0,40015.0,,train
 PACE - 6-0540,"PACE, AFL-CIO",540.0,,not in gazetteer,train
-PACE - 4447,"PACE, AFL-CIO",4447.0,,not in gazetteer,train
+PACE - 4447,"STEELWORKERS, AFL-CIO",4447.0,40511,,train
 PACE - 5829,"PACE, AFL-CIO",5829.0,,not in gazetteer,train
 PACE - 5-0783-2 WEST CARROLLTON,"PACE, AFL-CIO",783.0,,not in gazetteer,train
 PACE - 2-0694 RICHMOND VA,"PACE, AFL-CIO",694.0,,not in gazetteer,train
@@ -88177,7 +88177,7 @@ PACE - 5-0965 SODDY DAISY TN,"PACE, AFL-CIO",965.0,,not in gazetteer,train
 PACE - 5-0700,"PACE, AFL-CIO",700.0,,not in gazetteer,train
 PACE - 3-0996 JACKSONVILLE FL,"PACE, AFL-CIO",996.0,540703.0,,train
 PACE - 2-604,"PACE, AFL-CIO",604.0,,not in gazetteer,train
-PACE - 8593,"PACE, AFL-CIO",8593.0,,not in gazetteer,train
+PACE - 8593,"STEELWORKERS, AFL-CIO",8593.0,36227,,train
 PACE - 997,"PACE, AFL-CIO",997.0,,not in gazetteer,train
 PACE - 61082,"PACE, AFL-CIO",61082.0,,not in gazetteer,train
 PACE - 3-0734 STOCKBRIDGE GA,"PACE, AFL-CIO",734.0,,not in gazetteer,train
@@ -88231,8 +88231,8 @@ PACE - 1-366 NASHUA NH,"PACE, AFL-CIO",366.0,,not in gazetteer,test
 PACE - 1-902 ROCHESTER NH,"PACE, AFL-CIO",902.0,29527.0,,train
 PACE - 7-0535 BRYANT WI,"PACE, AFL-CIO",535.0,,not in gazetteer,train
 PACE - 5935,"PACE, AFL-CIO",5935.0,,not in gazetteer,train
-PACE - 4895,"PACE, AFL-CIO",4895.0,,not in gazetteer,train
-PACE - 6816,"PACE, AFL-CIO",6816.0,,not in gazetteer,train
+PACE - 4895,"STEELWORKERS, AFL-CIO",4895.0,19144,,train
+PACE - 6816,"STEELWORKERS, AFL-CIO",6816.0,62692,,train
 PACE - 6-0972,"PACE, AFL-CIO",972.0,,not in gazetteer,train
 PACE - 1-1988 BLACK RIVER NY,"PACE, AFL-CIO",1988.0,,not in gazetteer,train
 PACE - 4-1003,"PACE, AFL-CIO",1003.0,,not in gazetteer,train
@@ -88311,7 +88311,7 @@ PACE - 7-0087 & 0096 MUNISING MI,"PACE, AFL-CIO",87.0,,not in gazetteer,train
 PACE - 5-550 MIDDLETOWN OH,"PACE, AFL-CIO",550.0,,not in gazetteer,train
 PACE - 6-1211,"PACE, AFL-CIO",1211.0,,not in gazetteer,train
 PACE - 1847,"PACE, AFL-CIO",1847.0,59973.0,,train
-PACE - 1979,"PACE, AFL-CIO",1979.0,,not in gazetteer,train
+PACE - 1979,"STEELWORKERS, AFL-CIO",1979.0,65363,,train
 PACE - 1-1102 NASHA NH,"PACE, AFL-CIO",1102.0,,not in gazetteer,train
 PACE - 1-1407 QUEENSBURY NY,"PACE, AFL-CIO",1407.0,,not in gazetteer,train
 PACE - 7-0445,"PACE, AFL-CIO",445.0,,not in gazetteer,train
@@ -88431,13 +88431,13 @@ PACE INTERNATIONAL UNION AND ITS LOCAL 5-2002,"PACE, AFL-CIO",2002.0,,not in gaz
 "PACE INTERNATIONAL UNION LOCAL #5-0532, AFL-CIO","PACE, AFL-CIO",532.0,,not in gazetteer,train
 "PACE UPIU, LOCAL 50","PACE, AFL-CIO",50.0,540790.0,,train
 PACE INTERNATIONAL UNION LOCAL 5-0532,"PACE, AFL-CIO",532.0,,not in gazetteer,train
-PACE LOCAL 864,"PACE, AFL-CIO",864.0,,not in gazetteer,train
+PACE LOCAL 864,"STEELWORKERS, AFL-CIO",864.0,46154,,train
 "PACE INTERNATIONAL UNION, AFL-CIO","PACE, AFL-CIO",,,potentially resolvable,train
 "PACE, LOCAL 3-1161","PACE, AFL-CIO",1161.0,,not in gazetteer,train
 PACE LOCAL 3-1704,"PACE, AFL-CIO",1704.0,,not in gazetteer,train
 "PACE, LOCAL UNION 3-0532","PACE, AFL-CIO",532.0,,not in gazetteer,train
 PACE LOCAL 795,"PACE, AFL-CIO",795.0,,not in gazetteer,train
-PACE LOCAL 702,"PACE, AFL-CIO",702.0,,not in gazetteer,train
+PACE LOCAL 702,"STEELWORKERS, AFL-CIO",702.0,40161,,train
 PACE - Atlanta,"PACE, AFL-CIO",,,potentially resolvable,train
 PACE LOCAL 3-415,"PACE, AFL-CIO",415.0,61175.0,,train
 PACE LOCAL 4-1,"PACE, AFL-CIO",1.0,46449.0,,train
@@ -88470,7 +88470,7 @@ PACE LOCAL NO. 7-75,"PACE, AFL-CIO",75.0,,not in gazetteer,train
 "PACE INTERNATIONAL UNION, LOCAL 7-827","PACE, AFL-CIO",827.0,,not in gazetteer,train
 PACE INTERNATIONAL LOCAL 7-1774,"PACE, AFL-CIO",1774.0,,not in gazetteer,train
 PACE LOCAL 7-409,"PACE, AFL-CIO",409.0,,not in gazetteer,train
-PACE LOCAL 8-369,"PACE, AFL-CIO",369.0,,not in gazetteer,train
+PACE LOCAL 8-369,"STEELWORKERS, AFL-CIO",369.0,18001,,train
 PACE LOCAL 2-1712,"PACE, AFL-CIO",1712.0,,not in gazetteer,train
 PACE INTERNATIONAL UNION AFL-CIO LOCAL 1-417,"PACE, AFL-CIO",417.0,25141.0,,train
 "PACE, INTERNATIONAL UNION,  AFL-CIO, CLC, REGION 1","PACE, AFL-CIO",1.0,,potentially resolvable,train
@@ -88499,7 +88499,7 @@ PACE LOCAL 6-728,"PACE, AFL-CIO",728.0,33208.0,,train
 "PACE, INTERNATIONAL UNION, AFL-CIO, CLC/OIL, CHEMICAL AND ATOMIC WORKERS INTERNATIONAL UNION, LOCAL","PACE, AFL-CIO",,,potentially resolvable,train
 PACE LOCAL 4-0364,"PACE, AFL-CIO",364.0,,not in gazetteer,train
 "PACE TRANSPORTATION UNION #6380, NYSUT","PACE, AFL-CIO",6380.0,,not in gazetteer,train
-PACE LOCAL 8-0369,"PACE, AFL-CIO",369.0,,not in gazetteer,train
+PACE LOCAL 8-0369,"STEELWORKERS, AFL-CIO",369.0,18001,,train
 UIW - ,SEAFARERS AFL-CIO,,,potentially resolvable,train
 UIW - 424,SEAFARERS AFL-CIO,424.0,,not in gazetteer,train
 UIW - DC 424,SEAFARERS AFL-CIO,424.0,,not in gazetteer,train
@@ -93822,21 +93822,21 @@ Actors' Equity Association (AEA or Equity),ACTORS AND ARTISTES AFL-CIO,,,potenti
 UNITE - ,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 415-475,UNITE AFL-CIO,415.0,45731.0,,train
 UNITE - CHICAGO & CENTRAL STATE JB,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 563,UNITE AFL-CIO,563.0,,not in gazetteer,train
+UNITE - 563,"WORKERS UNITED, SEIU",563.0,32704,,train
 UNITE - 177,UNITE AFL-CIO,177.0,,not in gazetteer,train
 UNITE - ASAI JT BD,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - AFL CIO CLC,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 1422,UNITE AFL-CIO,1422.0,,not in gazetteer,train
+UNITE - 1422,"WORKERS UNITED, SEIU",1422.0,49517,,train
 UNITE - 901,UNITE AFL-CIO,901.0,,not in gazetteer,train
 UNITE - 166,UNITE AFL-CIO,166.0,43968.0,,train
 UNITE - 17 55-56,UNITE AFL-CIO,17.0,,not in gazetteer,train
-UNITE - 2543,UNITE AFL-CIO,2543.0,,not in gazetteer,train
+UNITE - 2543,"WORKERS UNITED, SEIU",2543.0,519637,,train
 UNITE - SOUTHWEST DC,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 1944,UNITE AFL-CIO,1944.0,510115.0,,train
 UNITE - 416,UNITE AFL-CIO,416.0,,not in gazetteer,train
 UNITE - 308,UNITE AFL-CIO,308.0,64516.0,,train
-UNITE - 2392,UNITE AFL-CIO,2392.0,,not in gazetteer,train
-UNITE - 352,UNITE AFL-CIO,352.0,,not in gazetteer,train
+UNITE - 2392,"WORKERS UNITED, SEIU",2392.0,515996,,train
+UNITE - 352,"WORKERS UNITED, SEIU",352.0,31452,,train
 UNITE - 1049,UNITE AFL-CIO,1049.0,68765.0,,train
 UNITE - CHICAGO CENTRAL STATES JB,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - CHICAGO/CENTRAL STATES JB,UNITE AFL-CIO,,,potentially resolvable,train
@@ -93845,43 +93845,43 @@ UNITE - 2294,UNITE AFL-CIO,2294.0,,not in gazetteer,train
 UNITE - 1174,UNITE AFL-CIO,1174.0,,not in gazetteer,train
 UNITE - 1712,UNITE AFL-CIO,1712.0,64249.0,,train
 UNITE - 1939,UNITE AFL-CIO,1939.0,508826.0,,test
-UNITE - 368,UNITE AFL-CIO,368.0,,not in gazetteer,train
+UNITE - 368,"WORKERS UNITED, SEIU",368.0,44553,,train
 UNITE - 1131,UNITE AFL-CIO,1131.0,506860.0,,test
 UNITE - 64H,UNITE AFL-CIO,64.0,27403.0,,train
 UNITE - 86,UNITE AFL-CIO,86.0,,not in gazetteer,test
 UNITE - ROANOKE VALLEY DISTRICT,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 56A,UNITE AFL-CIO,56.0,,not in gazetteer,train
-UNITE - 2458,UNITE AFL-CIO,2458.0,,not in gazetteer,train
-UNITE - 2430,UNITE AFL-CIO,2430.0,,not in gazetteer,train
+UNITE - 2458,"WORKERS UNITED, SEIU",2458.0,528544,,train
+UNITE - 2430,"WORKERS UNITED, SEIU",2430.0,515090,,train
 UNITE - 110A-T,UNITE AFL-CIO,110.0,,not in gazetteer,train
-UNITE - 1733,UNITE AFL-CIO,1733.0,,not in gazetteer,train
+UNITE - 1733,"WORKERS UNITED, SEIU",1733.0,13699,,train
 UNITE - 2613,UNITE AFL-CIO,2613.0,,not in gazetteer,train
 UNITE - 5,UNITE AFL-CIO,5.0,,ambiguous,train
 UNITE - NE W PA OH & EAST PA REG,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 2550,UNITE AFL-CIO,2550.0,,not in gazetteer,train
-UNITE - 379,UNITE AFL-CIO,379.0,,not in gazetteer,train
+UNITE - 2550,"WORKERS UNITED, SEIU",2550.0,528514,,train
+UNITE - 379,"WORKERS UNITED, SEIU",379.0,48239,,train
 UNITE - 402T,UNITE AFL-CIO,402.0,,not in gazetteer,train
 UNITE - 374,UNITE AFL-CIO,374.0,,not in gazetteer,train
 UNITE - 643,UNITE AFL-CIO,643.0,,not in gazetteer,train
 UNITE - 393T,UNITE AFL-CIO,393.0,51564.0,,train
 UNITE - 477T,UNITE AFL-CIO,477.0,,not in gazetteer,train
-UNITE - 243,UNITE AFL-CIO,243.0,,not in gazetteer,train
-UNITE - 1808,UNITE AFL-CIO,1808.0,,not in gazetteer,test
-UNITE - 1493,UNITE AFL-CIO,1493.0,,not in gazetteer,train
+UNITE - 243,"WORKERS UNITED, SEIU",243.0,62948,,train
+UNITE - 1808,"WORKERS UNITED, SEIU",1808.0,67655,,test
+UNITE - 1493,"WORKERS UNITED, SEIU",1493.0,53347,,train
 UNITE - MA,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 1700,UNITE AFL-CIO,1700.0,,not in gazetteer,train
+UNITE - 1700,"WORKERS UNITED, SEIU",1700.0,67003,,train
 UNITE - 178,UNITE AFL-CIO,178.0,49108.0,,train
 UNITE - TN/KY DISTRICT,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 1933,UNITE AFL-CIO,1933.0,507031.0,,train
 UNITE - 1094T,UNITE AFL-CIO,1094.0,,not in gazetteer,test
 UNITE - 1107,UNITE AFL-CIO,1107.0,70718.0,,train
 UNITE - 33-T,UNITE AFL-CIO,33.0,,not in gazetteer,train
-UNITE - 2376,UNITE AFL-CIO,2376.0,,not in gazetteer,train
+UNITE - 2376,"WORKERS UNITED, SEIU",2376.0,514638,,train
 UNITE - 189T,UNITE AFL-CIO,189.0,542111.0,,train
-UNITE - 2570,UNITE AFL-CIO,2570.0,,not in gazetteer,train
+UNITE - 2570,"WORKERS UNITED, SEIU",2570.0,529032,,train
 UNITE - 2602,UNITE AFL-CIO,2602.0,,not in gazetteer,train
-UNITE - 516,UNITE AFL-CIO,516.0,,not in gazetteer,train
-UNITE - 457,UNITE AFL-CIO,457.0,,not in gazetteer,train
+UNITE - 516,"WORKERS UNITED, SEIU",516.0,62289,,train
+UNITE - 457,"WORKERS UNITED, SEIU",457.0,47790,,train
 UNITE - 292-H,UNITE AFL-CIO,292.0,540573.0,,train
 UNITE - 1166C,UNITE AFL-CIO,1166.0,507137.0,,train
 UNITE - 17/55-56,UNITE AFL-CIO,17.0,,not in gazetteer,train
@@ -93889,69 +93889,69 @@ UNITE - 62,UNITE AFL-CIO,62.0,50288.0,,train
 UNITE - 252,UNITE AFL-CIO,252.0,,ambiguous,train
 UNITE - 292,UNITE AFL-CIO,292.0,540573.0,,train
 UNITE - 606,UNITE AFL-CIO,606.0,,not in gazetteer,train
-UNITE - 429,UNITE AFL-CIO,429.0,,not in gazetteer,train
+UNITE - 429,"WORKERS UNITED, SEIU",429.0,508640,,train
 UNITE - 340,UNITE AFL-CIO,340.0,540527.0,,train
 UNITE - 2489,UNITE AFL-CIO,2489.0,517109.0,,train
 UNITE - 841T,UNITE AFL-CIO,841.0,26034.0,,train
 UNITE - 1678,UNITE AFL-CIO,1678.0,64859.0,,train
 UNITE - 854,UNITE AFL-CIO,854.0,,not in gazetteer,train
-UNITE - 147,UNITE AFL-CIO,147.0,,not in gazetteer,train
+UNITE - 147,"WORKERS UNITED, SEIU",147.0,52092,,train
 UNITE - 482,UNITE AFL-CIO,482.0,,not in gazetteer,train
 UNITE - 808T,UNITE AFL-CIO,808.0,25559.0,,train
 UNITE - 151,UNITE AFL-CIO,151.0,48603.0,,train
 UNITE - 164,UNITE AFL-CIO,164.0,,not in gazetteer,train
 UNITE - 24,UNITE AFL-CIO,24.0,540559.0,,train
-UNITE - 323,UNITE AFL-CIO,323.0,,not in gazetteer,train
+UNITE - 323,"WORKERS UNITED, SEIU",323.0,52876,,train
 UNITE - 768,UNITE AFL-CIO,768.0,56038.0,,train
-UNITE - 36,UNITE AFL-CIO,36.0,,not in gazetteer,train
+UNITE - 36,"WORKERS UNITED, SEIU",36.0,42288,,train
 UNITE - 2616,UNITE AFL-CIO,2616.0,526877.0,,train
-UNITE - 335,UNITE AFL-CIO,335.0,,not in gazetteer,train
+UNITE - 335,"WORKERS UNITED, SEIU",335.0,19557,,train
 UNITE - 223,UNITE AFL-CIO,223.0,26025.0,,train
-UNITE - 221,UNITE AFL-CIO,221.0,,not in gazetteer,train
+UNITE - 221,"WORKERS UNITED, SEIU",221.0,56266,,train
 UNITE - CHICAGO CENTRAL STATE JB,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 2486,UNITE AFL-CIO,2486.0,,not in gazetteer,train
+UNITE - 2486,"WORKERS UNITED, SEIU",2486.0,517415,,train
 UNITE - 652T,UNITE AFL-CIO,652.0,517427.0,,train
 UNITE - 89-22-1,UNITE AFL-CIO,89.0,,not in gazetteer,train
 UNITE - 23-25,UNITE AFL-CIO,23.0,48562.0,,test
-UNITE - 1398,UNITE AFL-CIO,1398.0,,not in gazetteer,train
+UNITE - 1398,"WORKERS UNITED, SEIU",1398.0,42271,,train
 UNITE - 1418,UNITE AFL-CIO,1418.0,9897.0,,train
-UNITE - 1871,UNITE AFL-CIO,1871.0,,not in gazetteer,train
+UNITE - 1871,"WORKERS UNITED, SEIU",1871.0,515118,,train
 UNITE - 371,UNITE AFL-CIO,371.0,43904.0,,train
 UNITE - MULTI,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 2295,UNITE AFL-CIO,2295.0,,not in gazetteer,test
+UNITE - 2295,"WORKERS UNITED, SEIU",2295.0,541278,,test
 UNITE - 155,UNITE AFL-CIO,155.0,32295.0,,train
 UNITE - 62-32,UNITE AFL-CIO,62.0,50288.0,,train
-UNITE - 2614,UNITE AFL-CIO,2614.0,,not in gazetteer,train
+UNITE - 2614,"WORKERS UNITED, SEIU",2614.0,537434,,train
 UNITE - PHILADELPHIA S JERSEY DC,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 5 81 100,UNITE AFL-CIO,5.0,,multi-local,train
 UNITE - NORTHEASTERN PA DC,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 102,UNITE AFL-CIO,102.0,,not in gazetteer,train
+UNITE - 102,"WORKERS UNITED, SEIU",102.0,543213,,train
 UNITE - 2363,UNITE AFL-CIO,2363.0,513787.0,,train
-UNITE - 310,UNITE AFL-CIO,310.0,,not in gazetteer,train
+UNITE - 310,"WORKERS UNITED, SEIU",310.0,506649,,train
 UNITE - 102G,UNITE AFL-CIO,102.0,,not in gazetteer,train
-UNITE - 196,UNITE AFL-CIO,196.0,,not in gazetteer,train
+UNITE - 196,"WORKERS UNITED, SEIU",196.0,49351,,train
 UNITE - 424 WESTERN PA DC,UNITE AFL-CIO,424.0,48242.0,,train
-UNITE - 44,UNITE AFL-CIO,44.0,,not in gazetteer,train
-UNITE - 7587,UNITE AFL-CIO,7587.0,,not in gazetteer,train
+UNITE - 44,"WORKERS UNITED, SEIU",44.0,521573,,train
+UNITE - 7587,"WORKERS UNITED, SEIU",7587.0,541062,,train
 UNITE - 357,UNITE AFL-CIO,357.0,515398.0,,train
-UNITE - 1651,UNITE AFL-CIO,1651.0,,not in gazetteer,train
-UNITE - 576,UNITE AFL-CIO,576.0,,not in gazetteer,train
+UNITE - 1651,"WORKERS UNITED, SEIU",1651.0,543275,,train
+UNITE - 576,"WORKERS UNITED, SEIU",576.0,44303,,train
 UNITE - VARIOUS,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 148,UNITE AFL-CIO,148.0,43942.0,,train
 UNITE - 251,UNITE AFL-CIO,251.0,,not in gazetteer,train
-UNITE - 162,UNITE AFL-CIO,162.0,,not in gazetteer,train
-UNITE - 111,UNITE AFL-CIO,111.0,,not in gazetteer,train
-UNITE - 85,UNITE AFL-CIO,85.0,,not in gazetteer,train
+UNITE - 162,"WORKERS UNITED, SEIU",162.0,43969,,train
+UNITE - 111,"WORKERS UNITED, SEIU",111.0,49554,,train
+UNITE - 85,"WORKERS UNITED, SEIU",85.0,43949,,train
 UNITE - 149,UNITE AFL-CIO,149.0,45899.0,,train
 UNITE - 134,UNITE AFL-CIO,134.0,45692.0,,train
 UNITE - 108,UNITE AFL-CIO,108.0,,not in gazetteer,train
 UNITE - 292H,UNITE AFL-CIO,292.0,540573.0,,train
 UNITE - 1748,UNITE AFL-CIO,1748.0,67119.0,,train
-UNITE - 132,UNITE AFL-CIO,132.0,,not in gazetteer,test
+UNITE - 132,"WORKERS UNITED, SEIU",132.0,52979,,test
 UNITE - 76,UNITE AFL-CIO,76.0,45450.0,,train
 UNITE - 1901,UNITE AFL-CIO,1901.0,504527.0,,train
 UNITE - 415,UNITE AFL-CIO,415.0,45731.0,,train
-UNITE - 1820,UNITE AFL-CIO,1820.0,,not in gazetteer,train
+UNITE - 1820,"WORKERS UNITED, SEIU",1820.0,68933,,train
 UNITE - 730S,UNITE AFL-CIO,730.0,,not in gazetteer,train
 UNITE - 99,UNITE AFL-CIO,99.0,,not in gazetteer,train
 UNITE - AFL-CIO,UNITE AFL-CIO,,,potentially resolvable,train
@@ -93960,17 +93960,17 @@ UNITE - 132-98-102,UNITE AFL-CIO,132.0,,not in gazetteer,test
 UNITE - 1751T,UNITE AFL-CIO,1751.0,66282.0,,train
 UNITE - 2418,UNITE AFL-CIO,2418.0,,not in gazetteer,train
 UNITE - 1825T,UNITE AFL-CIO,1825.0,,not in gazetteer,train
-UNITE - 2368,UNITE AFL-CIO,2368.0,,not in gazetteer,train
+UNITE - 2368,"WORKERS UNITED, SEIU",2368.0,513140,,train
 UNITE - 170,UNITE AFL-CIO,170.0,,not in gazetteer,train
 UNITE - 75,UNITE AFL-CIO,75.0,,not in gazetteer,train
-UNITE - 2520,UNITE AFL-CIO,2520.0,,not in gazetteer,train
+UNITE - 2520,"WORKERS UNITED, SEIU",2520.0,518978,,train
 UNITE - CHICAGO & CENT STATE JB,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 171,UNITE AFL-CIO,171.0,,not in gazetteer,test
+UNITE - 171,"WORKERS UNITED, SEIU",171.0,513236,,test
 UNITE - CHICAGO & CENT STATES JB,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 2559,UNITE AFL-CIO,2559.0,533775.0,,train
-UNITE - 93,UNITE AFL-CIO,93.0,,not in gazetteer,train
+UNITE - 93,"WORKERS UNITED, SEIU",93.0,49555,,train
 UNITE - DC 600,UNITE AFL-CIO,600.0,45728.0,,train
-UNITE - 2548,UNITE AFL-CIO,2548.0,,not in gazetteer,train
+UNITE - 2548,"WORKERS UNITED, SEIU",2548.0,530308,,train
 UNITE - 1948,UNITE AFL-CIO,1948.0,,ambiguous,train
 UNITE - 180,UNITE AFL-CIO,180.0,48464.0,,train
 UNITE - 187,UNITE AFL-CIO,187.0,48213.0,,train
@@ -93981,25 +93981,25 @@ UNITE - 449,UNITE AFL-CIO,449.0,51519.0,,train
 UNITE - 200C,UNITE AFL-CIO,200.0,,not in gazetteer,train
 UNITE - 18,UNITE AFL-CIO,18.0,,not in gazetteer,train
 UNITE - 33S,UNITE AFL-CIO,33.0,,not in gazetteer,train
-UNITE - 91,UNITE AFL-CIO,91.0,,not in gazetteer,train
+UNITE - 91,"WORKERS UNITED, SEIU",91.0,6394,,train
 UNITE - 2370T,UNITE AFL-CIO,2370.0,513347.0,,train
 UNITE - 8T,UNITE AFL-CIO,8.0,49133.0,,train
 UNITE - 1607,UNITE AFL-CIO,1607.0,509341.0,,train
 UNITE - 494,UNITE AFL-CIO,494.0,,not in gazetteer,train
-UNITE - 399,UNITE AFL-CIO,399.0,,not in gazetteer,train
+UNITE - 399,"WORKERS UNITED, SEIU",399.0,45702,,train
 UNITE - 714,UNITE AFL-CIO,714.0,,not in gazetteer,train
 UNITE - 2638,UNITE AFL-CIO,2638.0,540542.0,,train
 UNITE - 2573,UNITE AFL-CIO,2573.0,,not in gazetteer,train
 UNITE - 163,UNITE AFL-CIO,163.0,49336.0,,train
-UNITE - 2484,UNITE AFL-CIO,2484.0,,not in gazetteer,train
+UNITE - 2484,"WORKERS UNITED, SEIU",2484.0,516825,,train
 UNITE - 5H,UNITE AFL-CIO,5.0,,potentially resolvable,train
 UNITE - 529,UNITE AFL-CIO,529.0,48275.0,,train
-UNITE - 969,UNITE AFL-CIO,969.0,,not in gazetteer,test
+UNITE - 969,"WORKERS UNITED, SEIU",969.0,66205,,test
 UNITE - 298,UNITE AFL-CIO,298.0,44383.0,,train
 UNITE - 885,UNITE AFL-CIO,885.0,,not in gazetteer,train
 UNITE - 2338,UNITE AFL-CIO,2338.0,,not in gazetteer,train
 UNITE - 250T,UNITE AFL-CIO,250.0,17615.0,,train
-UNITE - 1598,UNITE AFL-CIO,1598.0,,not in gazetteer,train
+UNITE - 1598,"WORKERS UNITED, SEIU",1598.0,64236,,train
 UNITE - 1611,UNITE AFL-CIO,1611.0,,not in gazetteer,train
 UNITE - 104 428,UNITE AFL-CIO,104.0,,not in gazetteer,train
 UNITE - 963,UNITE AFL-CIO,963.0,65837.0,,train
@@ -94010,16 +94010,16 @@ UNITE - 1712T,UNITE AFL-CIO,1712.0,64249.0,,train
 UNITE - 1035T,UNITE AFL-CIO,1035.0,,not in gazetteer,train
 UNITE - 1226T,UNITE AFL-CIO,1226.0,,not in gazetteer,train
 UNITE - 121H,UNITE AFL-CIO,121.0,,not in gazetteer,train
-UNITE - 1528,UNITE AFL-CIO,1528.0,,not in gazetteer,train
+UNITE - 1528,"WORKERS UNITED, SEIU",1528.0,59598,,train
 UNITE - 1714T,UNITE AFL-CIO,1714.0,,not in gazetteer,train
 UNITE - 1057T,UNITE AFL-CIO,1057.0,,not in gazetteer,train
-UNITE - 546,UNITE AFL-CIO,546.0,,not in gazetteer,train
-UNITE - 137,UNITE AFL-CIO,137.0,,not in gazetteer,test
+UNITE - 546,"WORKERS UNITED, SEIU",546.0,59518,,train
+UNITE - 137,"WORKERS UNITED, SEIU",137.0,57154,,test
 UNITE - 1465,UNITE AFL-CIO,1465.0,21836.0,,train
-UNITE - 2558,UNITE AFL-CIO,2558.0,,not in gazetteer,train
+UNITE - 2558,"WORKERS UNITED, SEIU",2558.0,533753,,train
 UNITE - 432,UNITE AFL-CIO,432.0,43226.0,,train
 UNITE - 839,UNITE AFL-CIO,839.0,60121.0,,train
-UNITE - 1526,UNITE AFL-CIO,1526.0,,not in gazetteer,train
+UNITE - 1526,"WORKERS UNITED, SEIU",1526.0,544608,,train
 UNITE - 1481,UNITE AFL-CIO,1481.0,,not in gazetteer,train
 UNITE - 73,UNITE AFL-CIO,73.0,,not in gazetteer,train
 UNITE - 1657T,UNITE AFL-CIO,1657.0,63704.0,,train
@@ -94030,20 +94030,20 @@ UNITE - 1036T,UNITE AFL-CIO,1036.0,,not in gazetteer,train
 UNITE - 696,UNITE AFL-CIO,696.0,39204.0,,train
 UNITE - CHICAGO & CENTRAL ST JB,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 1166,UNITE AFL-CIO,1166.0,,ambiguous,train
-UNITE - 782,UNITE AFL-CIO,782.0,,not in gazetteer,test
+UNITE - 782,"WORKERS UNITED, SEIU",782.0,55062,,test
 UNITE - 205,UNITE AFL-CIO,205.0,68855.0,,train
-UNITE - 2576,UNITE AFL-CIO,2576.0,,not in gazetteer,test
+UNITE - 2576,"WORKERS UNITED, SEIU",2576.0,538184,,test
 UNITE - 360,UNITE AFL-CIO,360.0,71025.0,,train
 UNITE - 1525T,UNITE AFL-CIO,1525.0,,not in gazetteer,train
-UNITE - 2423,UNITE AFL-CIO,2423.0,,not in gazetteer,train
+UNITE - 2423,"WORKERS UNITED, SEIU",2423.0,63679,,train
 UNITE - 2488,UNITE AFL-CIO,2488.0,,not in gazetteer,train
 UNITE - 431T,UNITE AFL-CIO,431.0,,not in gazetteer,train
 UNITE - 1174 2294,UNITE AFL-CIO,1174.0,,not in gazetteer,train
 UNITE - 188,UNITE AFL-CIO,188.0,44309.0,,train
 UNITE - 313,UNITE AFL-CIO,313.0,,not in gazetteer,train
 UNITE - 195,UNITE AFL-CIO,195.0,48862.0,,train
-UNITE - 2302,UNITE AFL-CIO,2302.0,,not in gazetteer,train
-UNITE - 844,UNITE AFL-CIO,844.0,,not in gazetteer,train
+UNITE - 2302,"WORKERS UNITED, SEIU",2302.0,512681,,train
+UNITE - 844,"WORKERS UNITED, SEIU",844.0,38292,,train
 UNITE - 616T,UNITE AFL-CIO,616.0,,not in gazetteer,train
 UNITE - 512,UNITE AFL-CIO,512.0,,not in gazetteer,train
 UNITE - FLORIDA DISTRICT,UNITE AFL-CIO,,,potentially resolvable,train
@@ -94059,71 +94059,71 @@ UNITE - 2332,UNITE AFL-CIO,2332.0,,not in gazetteer,train
 UNITE - 484,UNITE AFL-CIO,484.0,,not in gazetteer,train
 UNITE - 1126-T,UNITE AFL-CIO,1126.0,505251.0,,train
 UNITE - 226,UNITE AFL-CIO,226.0,,not in gazetteer,train
-UNITE - 1391,UNITE AFL-CIO,1391.0,,not in gazetteer,train
+UNITE - 1391,"WORKERS UNITED, SEIU",1391.0,28757,,train
 UNITE - 1,UNITE AFL-CIO,1.0,,not in gazetteer,train
-UNITE - 229,UNITE AFL-CIO,229.0,,not in gazetteer,train
-UNITE - 2331,UNITE AFL-CIO,2331.0,,not in gazetteer,train
-UNITE - 2378,UNITE AFL-CIO,2378.0,,not in gazetteer,train
+UNITE - 229,"WORKERS UNITED, SEIU",229.0,41048,,train
+UNITE - 2331,"WORKERS UNITED, SEIU",2331.0,542495,,train
+UNITE - 2378,"WORKERS UNITED, SEIU",2378.0,516020,,train
 UNITE - 1798,UNITE AFL-CIO,1798.0,529018.0,,train
 UNITE - 2560,UNITE AFL-CIO,2560.0,,not in gazetteer,train
-UNITE - 74,UNITE AFL-CIO,74.0,,not in gazetteer,train
+UNITE - 74,"WORKERS UNITED, SEIU",74.0,39172,,train
 UNITE - 2524 2526,UNITE AFL-CIO,2524.0,,not in gazetteer,train
-UNITE - 2625,UNITE AFL-CIO,2625.0,,not in gazetteer,train
+UNITE - 2625,"WORKERS UNITED, SEIU",2625.0,540089,,train
 UNITE - 2286,UNITE AFL-CIO,2286.0,,not in gazetteer,train
 UNITE - 2288,UNITE AFL-CIO,2288.0,,not in gazetteer,train
 UNITE - 284,UNITE AFL-CIO,284.0,48561.0,,train
-UNITE - 950,UNITE AFL-CIO,950.0,,not in gazetteer,train
-UNITE - 874,UNITE AFL-CIO,874.0,,not in gazetteer,train
-UNITE - 1129,UNITE AFL-CIO,1129.0,,not in gazetteer,train
+UNITE - 950,"WORKERS UNITED, SEIU",950.0,542024,,train
+UNITE - 874,"WORKERS UNITED, SEIU",874.0,62608,,train
+UNITE - 1129,"WORKERS UNITED, SEIU",1129.0,504810,,train
 UNITE - 348,UNITE AFL-CIO,348.0,,not in gazetteer,train
-UNITE - 1622,UNITE AFL-CIO,1622.0,,not in gazetteer,train
+UNITE - 1622,"WORKERS UNITED, SEIU",1622.0,544609,,train
 UNITE - 1162,UNITE AFL-CIO,1162.0,506322.0,,train
-UNITE - 1558,UNITE AFL-CIO,1558.0,,not in gazetteer,train
-UNITE - 2577,UNITE AFL-CIO,2577.0,,not in gazetteer,train
-UNITE - 1701,UNITE AFL-CIO,1701.0,,not in gazetteer,train
-UNITE - 1566,UNITE AFL-CIO,1566.0,,not in gazetteer,train
-UNITE - 1899,UNITE AFL-CIO,1899.0,,not in gazetteer,train
+UNITE - 1558,"WORKERS UNITED, SEIU",1558.0,63905,,train
+UNITE - 2577,"WORKERS UNITED, SEIU",2577.0,529997,,train
+UNITE - 1701,"WORKERS UNITED, SEIU",1701.0,514573,,train
+UNITE - 1566,"WORKERS UNITED, SEIU",1566.0,60665,,train
+UNITE - 1899,"WORKERS UNITED, SEIU",1899.0,505325,,train
 UNITE - 406 426,UNITE AFL-CIO,406.0,48257.0,,train
-UNITE - 701,UNITE AFL-CIO,701.0,,not in gazetteer,train
+UNITE - 701,"WORKERS UNITED, SEIU",701.0,48335,,train
 UNITE - 2580,UNITE AFL-CIO,2580.0,537354.0,,train
-UNITE - 1836,UNITE AFL-CIO,1836.0,,not in gazetteer,train
+UNITE - 1836,"WORKERS UNITED, SEIU",1836.0,68130,,train
 UNITE - NORTHERN DISTRICT JB,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 1321T,UNITE AFL-CIO,1321.0,,not in gazetteer,train
-UNITE - 1947,UNITE AFL-CIO,1947.0,,not in gazetteer,train
+UNITE - 1947,"WORKERS UNITED, SEIU",1947.0,509064,,train
 UNITE - 1000C,UNITE AFL-CIO,1000.0,,not in gazetteer,train
-UNITE - 9,UNITE AFL-CIO,9.0,,not in gazetteer,train
+UNITE - 9,"WORKERS UNITED, SEIU",9.0,22235,,train
 UNITE - 2000,UNITE AFL-CIO,2000.0,,not in gazetteer,train
-UNITE - 1994,UNITE AFL-CIO,1994.0,,not in gazetteer,train
+UNITE - 1994,"WORKERS UNITED, SEIU",1994.0,540127,,train
 UNITE - BI COUNTY & NORTH NC DIST,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 2382,UNITE AFL-CIO,2382.0,,not in gazetteer,train
 UNITE - 1737,UNITE AFL-CIO,1737.0,66398.0,,train
 UNITE - 2661,UNITE AFL-CIO,2661.0,,not in gazetteer,train
 UNITE - 224T,UNITE AFL-CIO,224.0,,not in gazetteer,train
-UNITE - 1436,UNITE AFL-CIO,1436.0,,not in gazetteer,train
+UNITE - 1436,"WORKERS UNITED, SEIU",1436.0,34961,,train
 UNITE - 250 & 253C,UNITE AFL-CIO,,17615,,train
 UNITE - 78-T,UNITE AFL-CIO,78.0,,not in gazetteer,train
 UNITE - 1448T,UNITE AFL-CIO,1448.0,,not in gazetteer,train
 UNITE - 305T,UNITE AFL-CIO,305.0,4105.0,,train
 UNITE - 133,UNITE AFL-CIO,133.0,,ambiguous,train
 UNITE - 297,UNITE AFL-CIO,297.0,,not in gazetteer,train
-UNITE - 1749,UNITE AFL-CIO,1749.0,,not in gazetteer,train
-UNITE - 730,UNITE AFL-CIO,730.0,,not in gazetteer,train
-UNITE - 270,UNITE AFL-CIO,270.0,,not in gazetteer,train
+UNITE - 1749,"WORKERS UNITED, SEIU",1749.0,66396,,train
+UNITE - 730,"WORKERS UNITED, SEIU",730.0,36907,,train
+UNITE - 270,"WORKERS UNITED, SEIU",270.0,52172,,train
 UNITE - 113 189C,UNITE AFL-CIO,113.0,,not in gazetteer,test
 UNITE - 113A,UNITE AFL-CIO,113.0,,not in gazetteer,train
 UNITE - 2416,UNITE AFL-CIO,2416.0,514263.0,,train
-UNITE - 1050,UNITE AFL-CIO,1050.0,,not in gazetteer,train
+UNITE - 1050,"WORKERS UNITED, SEIU",1050.0,69786,,train
 UNITE - 135,UNITE AFL-CIO,135.0,45901.0,,train
-UNITE - 112,UNITE AFL-CIO,112.0,,not in gazetteer,train
+UNITE - 112,"WORKERS UNITED, SEIU",112.0,45853,,train
 UNITE - 1044,UNITE AFL-CIO,1044.0,69834.0,,train
 UNITE - 168,UNITE AFL-CIO,168.0,42290.0,,train
 UNITE - 110T,UNITE AFL-CIO,110.0,,not in gazetteer,train
-UNITE - 1106,UNITE AFL-CIO,1106.0,,not in gazetteer,train
+UNITE - 1106,"WORKERS UNITED, SEIU",1106.0,71050,,train
 UNITE - CHICAGO & CENTRAL STATES,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 52,UNITE AFL-CIO,52.0,44320.0,,train
-UNITE - 2632,UNITE AFL-CIO,2632.0,,not in gazetteer,train
-UNITE - 2631,UNITE AFL-CIO,2631.0,,not in gazetteer,train
-UNITE - 2629,UNITE AFL-CIO,2629.0,,not in gazetteer,train
+UNITE - 2632,"WORKERS UNITED, SEIU",2632.0,540462,,train
+UNITE - 2631,"WORKERS UNITED, SEIU",2631.0,540470,,train
+UNITE - 2629,"WORKERS UNITED, SEIU",2629.0,540148,,train
 UNITE - 377,UNITE AFL-CIO,377.0,,not in gazetteer,train
 UNITE - 2423 B,UNITE AFL-CIO,2423.0,,not in gazetteer,train
 UNITE - 1723T,UNITE AFL-CIO,1723.0,66812.0,,train
@@ -94136,32 +94136,32 @@ UNITE - PACIFIC NORTHWEST DC,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - CENTRAL NORTH CAROLINA DC,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - SOUTHERN REGION,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 1711,UNITE AFL-CIO,1711.0,,not in gazetteer,train
-UNITE - 2386,UNITE AFL-CIO,2386.0,,not in gazetteer,train
+UNITE - 2386,"WORKERS UNITED, SEIU",2386.0,513998,,train
 UNITE - 2575,UNITE AFL-CIO,2575.0,529962.0,,train
-UNITE - 515,UNITE AFL-CIO,515.0,,not in gazetteer,train
+UNITE - 515,"WORKERS UNITED, SEIU",515.0,45904,,train
 UNITE - 658,UNITE AFL-CIO,658.0,42728.0,,train
-UNITE - 1818,UNITE AFL-CIO,1818.0,,not in gazetteer,test
+UNITE - 1818,"WORKERS UNITED, SEIU",1818.0,69857,,test
 UNITE - 178 361,UNITE AFL-CIO,178.0,49108.0,,train
 UNITE - 254C,UNITE AFL-CIO,254.0,,not in gazetteer,train
 UNITE - 99H,UNITE AFL-CIO,99.0,,not in gazetteer,train
 UNITE - 3837,UNITE AFL-CIO,3837.0,,not in gazetteer,train
 UNITE - 335T,UNITE AFL-CIO,335.0,,not in gazetteer,train
-UNITE - 1872,UNITE AFL-CIO,1872.0,,not in gazetteer,train
-UNITE - 1557,UNITE AFL-CIO,1557.0,,not in gazetteer,train
+UNITE - 1872,"WORKERS UNITED, SEIU",1872.0,517694,,train
+UNITE - 1557,"WORKERS UNITED, SEIU",1557.0,59423,,train
 UNITE - 322,UNITE AFL-CIO,322.0,53829.0,,train
 UNITE - 1941T,UNITE AFL-CIO,1941.0,509830.0,,train
 UNITE - 48,UNITE AFL-CIO,48.0,42323.0,,train
 UNITE - CALIF DIST,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 1758,UNITE AFL-CIO,1758.0,,not in gazetteer,train
-UNITE - 268,UNITE AFL-CIO,268.0,,not in gazetteer,train
-UNITE - 1934,UNITE AFL-CIO,1934.0,,not in gazetteer,train
-UNITE - 2636,UNITE AFL-CIO,2636.0,,not in gazetteer,train
+UNITE - 1758,"WORKERS UNITED, SEIU",1758.0,66900,,train
+UNITE - 268,"WORKERS UNITED, SEIU",268.0,544611,,train
+UNITE - 1934,"WORKERS UNITED, SEIU",1934.0,510114,,train
+UNITE - 2636,"WORKERS UNITED, SEIU",2636.0,540364,,train
 UNITE - 2640,UNITE AFL-CIO,2640.0,540374.0,,train
 UNITE - 2528,UNITE AFL-CIO,2528.0,537077.0,,train
 UNITE - 1539T,UNITE AFL-CIO,1539.0,,not in gazetteer,train
 UNITE - 438,UNITE AFL-CIO,438.0,43840.0,,train
 UNITE - TENNESSEE KENTUCKY DIST,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 562,UNITE AFL-CIO,562.0,,not in gazetteer,train
+UNITE - 562,"WORKERS UNITED, SEIU",562.0,54736,,train
 UNITE - 913-C,UNITE AFL-CIO,913.0,65168.0,,train
 UNITE - 998,UNITE AFL-CIO,998.0,37635.0,,train
 UNITE - 119-D,UNITE AFL-CIO,119.0,58142.0,,test
@@ -94170,72 +94170,72 @@ UNITE - 2403,UNITE AFL-CIO,2403.0,513969.0,,train
 UNITE - 294,UNITE AFL-CIO,294.0,542371.0,,train
 UNITE - 214 PAC NW DC,UNITE AFL-CIO,214.0,504720.0,,train
 UNITE - 747A,UNITE AFL-CIO,747.0,50390.0,,train
-UNITE - 262,UNITE AFL-CIO,262.0,,not in gazetteer,train
-UNITE - 586,UNITE AFL-CIO,586.0,,not in gazetteer,train
-UNITE - 2408,UNITE AFL-CIO,2408.0,,not in gazetteer,train
+UNITE - 262,"WORKERS UNITED, SEIU",262.0,57148,,train
+UNITE - 586,"WORKERS UNITED, SEIU",586.0,45906,,train
+UNITE - 2408,"WORKERS UNITED, SEIU",2408.0,513810,,train
 UNITE - 1923,UNITE AFL-CIO,1923.0,508939.0,,train
 UNITE - 1067-T,UNITE AFL-CIO,1067.0,,not in gazetteer,train
-UNITE - 49,UNITE AFL-CIO,49.0,,not in gazetteer,train
+UNITE - 49,"WORKERS UNITED, SEIU",49.0,42104,,train
 UNITE - 1104,UNITE AFL-CIO,1104.0,,not in gazetteer,train
 UNITE - 1000T,UNITE AFL-CIO,1000.0,,not in gazetteer,train
 UNITE - 2646,UNITE AFL-CIO,2646.0,540615.0,,train
-UNITE - 2623,UNITE AFL-CIO,2623.0,,not in gazetteer,train
+UNITE - 2623,"WORKERS UNITED, SEIU",2623.0,526938,,train
 UNITE - 239,UNITE AFL-CIO,239.0,,not in gazetteer,train
-UNITE - 1034,UNITE AFL-CIO,1034.0,,not in gazetteer,train
+UNITE - 1034,"WORKERS UNITED, SEIU",1034.0,33998,,train
 UNITE - 2247,UNITE AFL-CIO,2247.0,14214.0,,train
-UNITE - 1118,UNITE AFL-CIO,1118.0,,not in gazetteer,train
-UNITE - 1710,UNITE AFL-CIO,1710.0,,not in gazetteer,train
+UNITE - 1118,"WORKERS UNITED, SEIU",1118.0,504725,,train
+UNITE - 1710,"WORKERS UNITED, SEIU",1710.0,64163,,train
 UNITE - 125H,UNITE AFL-CIO,125.0,,potentially resolvable,test
 UNITE - 1148,UNITE AFL-CIO,1148.0,,not in gazetteer,train
 UNITE - 1540,UNITE AFL-CIO,1540.0,,not in gazetteer,train
-UNITE - 1781,UNITE AFL-CIO,1781.0,,not in gazetteer,train
+UNITE - 1781,"WORKERS UNITED, SEIU",1781.0,68723,,train
 UNITE - 311 533,UNITE AFL-CIO,,,multi-local,train
 UNITE - 1156T,UNITE AFL-CIO,1156.0,,not in gazetteer,train
 UNITE - 296,UNITE AFL-CIO,296.0,44381.0,,train
-UNITE - 80,UNITE AFL-CIO,80.0,,not in gazetteer,test
-UNITE - 1385,UNITE AFL-CIO,1385.0,,not in gazetteer,train
+UNITE - 80,"WORKERS UNITED, SEIU",80.0,547098,,test
+UNITE - 1385,"WORKERS UNITED, SEIU",1385.0,51091,,train
 UNITE - 126H,UNITE AFL-CIO,126.0,17401.0,,train
 UNITE - 851T,UNITE AFL-CIO,851.0,,not in gazetteer,train
 UNITE - 101 213 214,UNITE AFL-CIO,101.0,,not in gazetteer,train
-UNITE - 2448,UNITE AFL-CIO,2448.0,,not in gazetteer,train
+UNITE - 2448,"WORKERS UNITED, SEIU",2448.0,541256,,train
 UNITE - 1053 1055,UNITE AFL-CIO,1053.0,68356.0,,train
 UNITE - 1840,UNITE AFL-CIO,1840.0,,not in gazetteer,train
-UNITE - 116,UNITE AFL-CIO,116.0,,not in gazetteer,train
+UNITE - 116,"WORKERS UNITED, SEIU",116.0,516590,,train
 UNITE - 465C,UNITE AFL-CIO,465.0,,not in gazetteer,train
-UNITE - 2589,UNITE AFL-CIO,2589.0,,not in gazetteer,train
+UNITE - 2589,"WORKERS UNITED, SEIU",2589.0,529985,,train
 UNITE - 1095-T,UNITE AFL-CIO,1095.0,,not in gazetteer,train
-UNITE - 2568,UNITE AFL-CIO,2568.0,,not in gazetteer,train
+UNITE - 2568,"WORKERS UNITED, SEIU",2568.0,528269,,train
 UNITE - 2304,UNITE AFL-CIO,2304.0,67368.0,,train
 UNITE - 24-42,UNITE AFL-CIO,24.0,540559.0,,train
 UNITE - 250-T,UNITE AFL-CIO,250.0,17615.0,,train
-UNITE - 302,UNITE AFL-CIO,302.0,,not in gazetteer,train
-UNITE - 95,UNITE AFL-CIO,95.0,,not in gazetteer,train
-UNITE - 463,UNITE AFL-CIO,463.0,,not in gazetteer,train
+UNITE - 302,"WORKERS UNITED, SEIU",302.0,64839,,train
+UNITE - 95,"WORKERS UNITED, SEIU",95.0,512356,,train
+UNITE - 463,"WORKERS UNITED, SEIU",463.0,53758,,train
 UNITE - 367,UNITE AFL-CIO,367.0,50440.0,,train
 UNITE - 319C,UNITE AFL-CIO,319.0,,not in gazetteer,test
 UNITE - 2395,UNITE AFL-CIO,2395.0,513574.0,,train
 UNITE - SW DC,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 1569J-T,UNITE AFL-CIO,1569.0,61691.0,,train
 UNITE - ALLENTOWN EASTON DIST,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 464,UNITE AFL-CIO,464.0,,not in gazetteer,train
+UNITE - 464,"WORKERS UNITED, SEIU",464.0,530391,,train
 UNITE - 517,UNITE AFL-CIO,517.0,57145.0,,train
-UNITE - 2102,UNITE AFL-CIO,2102.0,,not in gazetteer,train
+UNITE - 2102,"WORKERS UNITED, SEIU",2102.0,8496,,train
 UNITE - 81R,UNITE AFL-CIO,81.0,32037.0,,train
-UNITE - 261,UNITE AFL-CIO,261.0,,not in gazetteer,train
+UNITE - 261,"WORKERS UNITED, SEIU",261.0,45865,,train
 UNITE - 1403,UNITE AFL-CIO,1403.0,542594.0,,train
 UNITE - 2517,UNITE AFL-CIO,2517.0,,not in gazetteer,train
 UNITE - 1298,UNITE AFL-CIO,1298.0,48158.0,,train
 UNITE - 374 NORTHERN DIST JB,UNITE AFL-CIO,374.0,,not in gazetteer,train
 UNITE - 1863,UNITE AFL-CIO,1863.0,507426.0,,train
-UNITE - 871,UNITE AFL-CIO,871.0,,not in gazetteer,train
+UNITE - 871,"WORKERS UNITED, SEIU",871.0,60530,,train
 UNITE - 2672,UNITE AFL-CIO,2672.0,540920.0,,train
-UNITE - 981,UNITE AFL-CIO,981.0,,not in gazetteer,test
+UNITE - 981,"WORKERS UNITED, SEIU",981.0,52743,,test
 UNITE - 2624,UNITE AFL-CIO,2624.0,540371.0,,train
 UNITE - 106,UNITE AFL-CIO,106.0,49775.0,,train
-UNITE - 677,UNITE AFL-CIO,677.0,,not in gazetteer,train
+UNITE - 677,"WORKERS UNITED, SEIU",677.0,544603,,train
 UNITE - 710-T,UNITE AFL-CIO,710.0,,not in gazetteer,train
 UNITE - 160A,UNITE AFL-CIO,160.0,,potentially resolvable,train
-UNITE - 2420,UNITE AFL-CIO,2420.0,,not in gazetteer,train
+UNITE - 2420,"WORKERS UNITED, SEIU",2420.0,514030,,train
 UNITE - 12A,UNITE AFL-CIO,12.0,,not in gazetteer,train
 UNITE - 1554T,UNITE AFL-CIO,1554.0,,not in gazetteer,train
 UNITE - 1022C,UNITE AFL-CIO,1022.0,,not in gazetteer,train
@@ -94244,8 +94244,8 @@ UNITE - 1117,UNITE AFL-CIO,1117.0,70916.0,,train
 UNITE - 2645,UNITE AFL-CIO,2645.0,540448.0,,train
 UNITE - SW DIST COUNCIL,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 601,UNITE AFL-CIO,601.0,56333.0,,train
-UNITE - 17,UNITE AFL-CIO,17.0,,not in gazetteer,train
-UNITE - 840,UNITE AFL-CIO,840.0,,not in gazetteer,train
+UNITE - 17,"WORKERS UNITED, SEIU",17.0,32497,,train
+UNITE - 840,"WORKERS UNITED, SEIU",840.0,59861,,train
 UNITE - 468D,UNITE AFL-CIO,468.0,526909.0,,train
 UNITE - 2650,UNITE AFL-CIO,2650.0,540513.0,,train
 UNITE - 468B,UNITE AFL-CIO,468.0,526909.0,,train
@@ -94255,137 +94255,137 @@ UNITE - 1933A,UNITE AFL-CIO,1933.0,507031.0,,train
 UNITE - 1834T,UNITE AFL-CIO,1834.0,68137.0,,train
 UNITE - 1198T,UNITE AFL-CIO,1198.0,,not in gazetteer,train
 UNITE - WEST REGION JB CA DIST,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 1867,UNITE AFL-CIO,1867.0,,not in gazetteer,train
+UNITE - 1867,"WORKERS UNITED, SEIU",1867.0,70434,,train
 UNITE - 653T,UNITE AFL-CIO,653.0,34995.0,,train
 UNITE - 35,UNITE AFL-CIO,35.0,29822.0,,train
 UNITE - 1560T,UNITE AFL-CIO,1560.0,58290.0,,train
-UNITE - 1785,UNITE AFL-CIO,1785.0,,not in gazetteer,train
+UNITE - 1785,"WORKERS UNITED, SEIU",1785.0,67359,,train
 UNITE - SOUTHWEST DISTRICT COUNCIL,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 479,UNITE AFL-CIO,479.0,,not in gazetteer,train
 UNITE - 2400,UNITE AFL-CIO,2400.0,,not in gazetteer,test
-UNITE - 1739,UNITE AFL-CIO,1739.0,,not in gazetteer,train
-UNITE - 630,UNITE AFL-CIO,630.0,,not in gazetteer,train
+UNITE - 1739,"WORKERS UNITED, SEIU",1739.0,65864,,train
+UNITE - 630,"WORKERS UNITED, SEIU",630.0,46061,,train
 UNITE - 2352,UNITE AFL-CIO,2352.0,513367.0,,train
 UNITE - 1113T 1391 1584,UNITE AFL-CIO,1113.0,39503.0,,train
-UNITE - 144,UNITE AFL-CIO,144.0,,not in gazetteer,train
+UNITE - 144,"WORKERS UNITED, SEIU",144.0,56892,,train
 UNITE - 120,UNITE AFL-CIO,120.0,48212.0,,train
-UNITE - 1170,UNITE AFL-CIO,1170.0,,not in gazetteer,train
+UNITE - 1170,"WORKERS UNITED, SEIU",1170.0,509269,,train
 UNITE - AFL CIO,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 1164,UNITE AFL-CIO,1164.0,,not in gazetteer,train
-UNITE - 903,UNITE AFL-CIO,903.0,,not in gazetteer,train
+UNITE - 1164,"WORKERS UNITED, SEIU",1164.0,509017,,train
+UNITE - 903,"WORKERS UNITED, SEIU",903.0,63069,,train
 UNITE - CHICAGO CENTRAL JB,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 1703,UNITE AFL-CIO,1703.0,,not in gazetteer,train
 UNITE - 2437,UNITE AFL-CIO,2437.0,514565.0,,train
 UNITE - 940,UNITE AFL-CIO,940.0,65170.0,,test
 UNITE - 888,UNITE AFL-CIO,888.0,61998.0,,train
 UNITE - 701T,UNITE AFL-CIO,701.0,,not in gazetteer,train
-UNITE - 1439,UNITE AFL-CIO,1439.0,,not in gazetteer,train
+UNITE - 1439,"WORKERS UNITED, SEIU",1439.0,48159,,train
 UNITE - 2538,UNITE AFL-CIO,2538.0,528339.0,,train
 UNITE - 388G/R,UNITE AFL-CIO,388.0,,not in gazetteer,train
 UNITE - 128C,UNITE AFL-CIO,128.0,52977.0,,train
-UNITE - 879,UNITE AFL-CIO,879.0,,not in gazetteer,train
+UNITE - 879,"WORKERS UNITED, SEIU",879.0,62513,,train
 UNITE - 317C,UNITE AFL-CIO,317.0,52991.0,,train
-UNITE - 2648,UNITE AFL-CIO,2648.0,,not in gazetteer,train
+UNITE - 2648,"WORKERS UNITED, SEIU",2648.0,541325,,train
 UNITE - 1018,UNITE AFL-CIO,1018.0,66545.0,,train
 UNITE - 428 870,UNITE AFL-CIO,428.0,,not in gazetteer,train
 UNITE - 496,UNITE AFL-CIO,496.0,,not in gazetteer,train
-UNITE - 2483,UNITE AFL-CIO,2483.0,,not in gazetteer,test
-UNITE - 2500,UNITE AFL-CIO,2500.0,,not in gazetteer,test
+UNITE - 2483,"WORKERS UNITED, SEIU",2483.0,516782,,test
+UNITE - 2500,"WORKERS UNITED, SEIU",2500.0,517740,,test
 UNITE - TN KY DISTRICT,UNITE AFL-CIO,,,potentially resolvable,test
 UNITE - 1 NEW ENGLAND RGL JT BD,UNITE AFL-CIO,1.0,,not in gazetteer,train
 UNITE - 747,UNITE AFL-CIO,747.0,50390.0,,train
-UNITE - 1099,UNITE AFL-CIO,1099.0,,not in gazetteer,test
+UNITE - 1099,"WORKERS UNITED, SEIU",1099.0,61322,,test
 UNITE - 791A,UNITE AFL-CIO,791.0,,not in gazetteer,train
 UNITE - 2475,UNITE AFL-CIO,2475.0,516619.0,,train
 UNITE - 976,UNITE AFL-CIO,976.0,,not in gazetteer,train
 UNITE - 209,UNITE AFL-CIO,209.0,44318.0,,train
 UNITE - NC/VA DIST SO GA GIST,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 193T,UNITE AFL-CIO,193.0,25462.0,,train
-UNITE - 2512,UNITE AFL-CIO,2512.0,,not in gazetteer,train
-UNITE - 338,UNITE AFL-CIO,338.0,,not in gazetteer,test
+UNITE - 2512,"WORKERS UNITED, SEIU",2512.0,517695,,train
+UNITE - 338,"WORKERS UNITED, SEIU",338.0,50512,,test
 UNITE - NC VA DISTRICT,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 1077,UNITE AFL-CIO,1077.0,,not in gazetteer,train
 UNITE - 694C,UNITE AFL-CIO,694.0,,not in gazetteer,train
 UNITE - 486,UNITE AFL-CIO,486.0,,not in gazetteer,train
-UNITE - 1051,UNITE AFL-CIO,1051.0,,not in gazetteer,train
-UNITE - 1995,UNITE AFL-CIO,1995.0,,not in gazetteer,train
-UNITE - 1716,UNITE AFL-CIO,1716.0,,not in gazetteer,train
+UNITE - 1051,"WORKERS UNITED, SEIU",1051.0,69785,,train
+UNITE - 1995,"WORKERS UNITED, SEIU",1995.0,546498,,train
+UNITE - 1716,"WORKERS UNITED, SEIU",1716.0,67886,,train
 UNITE - 724 841,UNITE AFL-CIO,724.0,50661.0,,train
 UNITE - 1460T,UNITE AFL-CIO,1460.0,26587.0,,train
 UNITE - 26,UNITE AFL-CIO,26.0,66030.0,,train
 UNITE - 3T,UNITE AFL-CIO,3.0,,not in gazetteer,train
 UNITE - 1567,UNITE AFL-CIO,1567.0,59570.0,,train
 UNITE - 895,UNITE AFL-CIO,895.0,62714.0,,train
-UNITE - 1706,UNITE AFL-CIO,1706.0,,not in gazetteer,train
-UNITE - 093,UNITE AFL-CIO,93.0,,not in gazetteer,train
+UNITE - 1706,"WORKERS UNITED, SEIU",1706.0,65191,,train
+UNITE - 093,"WORKERS UNITED, SEIU",93.0,49555,,train
 UNITE - 1495,UNITE AFL-CIO,1495.0,55336.0,,train
-UNITE - 90,UNITE AFL-CIO,90.0,,not in gazetteer,train
+UNITE - 90,"WORKERS UNITED, SEIU",90.0,529154,,train
 UNITE - 244,UNITE AFL-CIO,244.0,43321.0,,test
 UNITE - 128H,UNITE AFL-CIO,128.0,52977.0,,train
 UNITE - 129H,UNITE AFL-CIO,129.0,39927.0,,train
 UNITE - 242,UNITE AFL-CIO,242.0,,not in gazetteer,test
 UNITE - 2656,UNITE AFL-CIO,2656.0,541028.0,,train
 UNITE - 294T,UNITE AFL-CIO,294.0,542371.0,,train
-UNITE - 6,UNITE AFL-CIO,6.0,,not in gazetteer,train
+UNITE - 6,"WORKERS UNITED, SEIU",6.0,544601,,train
 UNITE - 2405,UNITE AFL-CIO,2405.0,517588.0,,train
 UNITE - ALF CIO CLC,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 8A,UNITE AFL-CIO,8.0,49133.0,,train
 UNITE - NORTHERN DISTRICT,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 944,UNITE AFL-CIO,944.0,,not in gazetteer,train
+UNITE - 944,"WORKERS UNITED, SEIU",944.0,64087,,train
 UNITE - L-914,UNITE AFL-CIO,,63321,,train
 UNITE - 133H,UNITE AFL-CIO,133.0,67826.0,,train
-UNITE - 2567,UNITE AFL-CIO,2567.0,,not in gazetteer,train
+UNITE - 2567,"WORKERS UNITED, SEIU",2567.0,528252,,train
 UNITE - NC/VA DIST SO GA DIST,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - ALLENTOWN EASTON DISTRICT,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 208=A,UNITE AFL-CIO,208.0,,not in gazetteer,train
 UNITE - 66L,UNITE AFL-CIO,66.0,42289.0,,train
-UNITE - 1021,UNITE AFL-CIO,1021.0,,not in gazetteer,train
+UNITE - 1021,"WORKERS UNITED, SEIU",1021.0,67173,,train
 UNITE - 942,UNITE AFL-CIO,942.0,65504.0,,train
 UNITE - 578,UNITE AFL-CIO,578.0,67976.0,,train
 UNITE - 1259,UNITE AFL-CIO,1259.0,42295.0,,train
-UNITE - 711,UNITE AFL-CIO,711.0,,not in gazetteer,train
-UNITE - 1538,UNITE AFL-CIO,1538.0,,not in gazetteer,train
+UNITE - 711,"WORKERS UNITED, SEIU",711.0,542098,,train
+UNITE - 1538,"WORKERS UNITED, SEIU",1538.0,57800,,train
 UNITE - 1863T,UNITE AFL-CIO,1863.0,507426.0,,train
 UNITE - L-551,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 150,UNITE AFL-CIO,150.0,,not in gazetteer,train
+UNITE - 150,"WORKERS UNITED, SEIU",150.0,49471,,train
 UNITE - CHICAGO CENTRAL ST JB,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 2683,UNITE AFL-CIO,2683.0,,not in gazetteer,train
-UNITE - 777,UNITE AFL-CIO,777.0,,not in gazetteer,train
-UNITE - 1633,UNITE AFL-CIO,1633.0,,not in gazetteer,train
+UNITE - 777,"WORKERS UNITED, SEIU",777.0,517645,,train
+UNITE - 1633,"WORKERS UNITED, SEIU",1633.0,514023,,train
 UNITE - 147-G,UNITE AFL-CIO,147.0,,not in gazetteer,train
 UNITE - DRESSMAKERS JT COUNCIL,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 472,UNITE AFL-CIO,472.0,49128.0,,train
 UNITE - 2376 CENTRAL N C DISTRICT,UNITE AFL-CIO,2376.0,,not in gazetteer,train
-UNITE - 2375,UNITE AFL-CIO,2375.0,,not in gazetteer,train
-UNITE - 2615,UNITE AFL-CIO,2615.0,,not in gazetteer,train
+UNITE - 2375,"WORKERS UNITED, SEIU",2375.0,514657,,train
+UNITE - 2615,"WORKERS UNITED, SEIU",2615.0,537357,,train
 UNITE - SW DIST,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 551,UNITE AFL-CIO,551.0,,not in gazetteer,train
+UNITE - 551,"WORKERS UNITED, SEIU",551.0,516068,,train
 UNITE - 199T,UNITE AFL-CIO,199.0,,not in gazetteer,train
 UNITE - 939A-T,UNITE AFL-CIO,939.0,,not in gazetteer,train
 UNITE - 1371T,UNITE AFL-CIO,1371.0,37927.0,,train
-UNITE - 1827,UNITE AFL-CIO,1827.0,,not in gazetteer,train
+UNITE - 1827,"WORKERS UNITED, SEIU",1827.0,68685,,train
 UNITE - WESTERN REGIONAL BOARD,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 557,UNITE AFL-CIO,557.0,45911.0,,train
 UNITE - 1071,UNITE AFL-CIO,1071.0,,ambiguous,train
-UNITE - 2535,UNITE AFL-CIO,2535.0,,not in gazetteer,train
+UNITE - 2535,"WORKERS UNITED, SEIU",2535.0,519331,,train
 UNITE - 80 NEW ENGLAND JT BD,UNITE AFL-CIO,80.0,,not in gazetteer,train
 UNITE - 1645,UNITE AFL-CIO,1645.0,63717.0,,train
 UNITE - 146S,UNITE AFL-CIO,146.0,22580.0,,train
 UNITE - 5 81 & 100,UNITE AFL-CIO,5.0,,multi-local,train
-UNITE - 2024,UNITE AFL-CIO,2024.0,,not in gazetteer,train
-UNITE - 2534,UNITE AFL-CIO,2534.0,,not in gazetteer,train
+UNITE - 2024,"WORKERS UNITED, SEIU",2024.0,68011,,train
+UNITE - 2534,"WORKERS UNITED, SEIU",2534.0,541371,,train
 UNITE - 10 & 23-25,UNITE AFL-CIO,10.0,36812.0,,train
-UNITE - 197,UNITE AFL-CIO,197.0,,not in gazetteer,train
+UNITE - 197,"WORKERS UNITED, SEIU",197.0,49350,,train
 UNITE - 66,UNITE AFL-CIO,66.0,42289.0,,train
 UNITE - SOUTHWEST DISTRICT,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 2618,UNITE AFL-CIO,2618.0,,not in gazetteer,train
-UNITE - 2341,UNITE AFL-CIO,2341.0,,not in gazetteer,train
+UNITE - 2618,"WORKERS UNITED, SEIU",2618.0,542044,,train
+UNITE - 2341,"WORKERS UNITED, SEIU",2341.0,512357,,train
 UNITE - 969 CHICAGO CENTRAL ST JB,UNITE AFL-CIO,969.0,,not in gazetteer,test
 UNITE - 2501T,UNITE AFL-CIO,2501.0,517212.0,,train
 UNITE - 177 NEW ENGLAND RGL JT BD,UNITE AFL-CIO,177.0,,not in gazetteer,train
 UNITE - 4,UNITE AFL-CIO,4.0,,not in gazetteer,train
 UNITE - 2411,UNITE AFL-CIO,2411.0,518005.0,,train
-UNITE - 2563,UNITE AFL-CIO,2563.0,,not in gazetteer,train
+UNITE - 2563,"WORKERS UNITED, SEIU",2563.0,528434,,train
 UNITE - 317,UNITE AFL-CIO,317.0,52991.0,,train
 UNITE - SW DISTRICT,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - INT,UNITE AFL-CIO,,,potentially resolvable,train
@@ -94393,22 +94393,22 @@ UNITE - 1802T,UNITE AFL-CIO,1802.0,,not in gazetteer,train
 UNITE - 913C,UNITE AFL-CIO,913.0,65168.0,,train
 UNITE - 402,UNITE AFL-CIO,402.0,,not in gazetteer,train
 UNITE - 528A,UNITE AFL-CIO,528.0,516957.0,,train
-UNITE - 1752,UNITE AFL-CIO,1752.0,,not in gazetteer,train
-UNITE - 107,UNITE AFL-CIO,107.0,,not in gazetteer,train
+UNITE - 1752,"WORKERS UNITED, SEIU",1752.0,66281,,train
+UNITE - 107,"WORKERS UNITED, SEIU",107.0,8879,,train
 UNITE - 2673,UNITE AFL-CIO,2673.0,541118.0,,train
 UNITE - 2680,UNITE AFL-CIO,2680.0,541275.0,,train
 UNITE - 205A,UNITE AFL-CIO,205.0,68855.0,,train
 UNITE - 976-T,UNITE AFL-CIO,976.0,,not in gazetteer,train
-UNITE - 851,UNITE AFL-CIO,851.0,,not in gazetteer,train
+UNITE - 851,"WORKERS UNITED, SEIU",851.0,21012,,train
 UNITE - L-2576,UNITE AFL-CIO,2576.0,,not in gazetteer,train
 UNITE - L-701,UNITE AFL-CIO,701.0,,not in gazetteer,train
 UNITE - 624,UNITE AFL-CIO,624.0,,not in gazetteer,train
 UNITE - 513,UNITE AFL-CIO,513.0,541749.0,,train
-UNITE - 920,UNITE AFL-CIO,920.0,,not in gazetteer,train
+UNITE - 920,"WORKERS UNITED, SEIU",920.0,64831,,train
 UNITE - 2647,UNITE AFL-CIO,2647.0,541006.0,,train
 UNITE - 359 NEW ENGLAND JT BD,UNITE AFL-CIO,359.0,49772.0,,train
 UNITE - 10,UNITE AFL-CIO,10.0,36812.0,,train
-UNITE - 2566,UNITE AFL-CIO,2566.0,,not in gazetteer,train
+UNITE - 2566,"WORKERS UNITED, SEIU",2566.0,533938,,train
 UNITE - 1129C,UNITE AFL-CIO,1129.0,,not in gazetteer,train
 UNITE - 1126,UNITE AFL-CIO,1126.0,505251.0,,train
 UNITE - DISTRICT 132-98-102,UNITE AFL-CIO,,,potentially resolvable,train
@@ -94416,9 +94416,9 @@ UNITE - NORTH GEORGIA DISTRICT,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 1158,UNITE AFL-CIO,1158.0,506466.0,,train
 UNITE - 124,UNITE AFL-CIO,124.0,,not in gazetteer,train
 UNITE - CHICAGO & CENT ST JBD,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 1822,UNITE AFL-CIO,1822.0,,not in gazetteer,train
+UNITE - 1822,"WORKERS UNITED, SEIU",1822.0,71181,,train
 UNITE - 2544,UNITE AFL-CIO,2544.0,529999.0,,train
-UNITE - 1490,UNITE AFL-CIO,1490.0,,not in gazetteer,train
+UNITE - 1490,"WORKERS UNITED, SEIU",1490.0,57670,,train
 UNITE - 14B,UNITE AFL-CIO,14.0,,not in gazetteer,train
 UNITE - 580,UNITE AFL-CIO,580.0,,not in gazetteer,train
 UNITE - 148-C,UNITE AFL-CIO,148.0,43942.0,,train
@@ -94428,100 +94428,100 @@ UNITE - 131A,UNITE AFL-CIO,131.0,,not in gazetteer,train
 UNITE - 424,UNITE AFL-CIO,424.0,48242.0,,train
 UNITE - 2634,UNITE AFL-CIO,2634.0,541066.0,,train
 UNITE - 2629 2630 2631 2632,UNITE AFL-CIO,2629.0,,not in gazetteer,train
-UNITE - 584,UNITE AFL-CIO,584.0,,not in gazetteer,train
+UNITE - 584,"WORKERS UNITED, SEIU",584.0,50402,,train
 UNITE - CHICAGO,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 177/178,UNITE AFL-CIO,177.0,,not in gazetteer,train
-UNITE - 1882,UNITE AFL-CIO,1882.0,,not in gazetteer,train
+UNITE - 1882,"WORKERS UNITED, SEIU",1882.0,70555,,train
 UNITE - 10 89,UNITE AFL-CIO,10.0,36812.0,,train
 UNITE - 445,UNITE AFL-CIO,445.0,54140.0,,train
 UNITE - 10 89-22-1,UNITE AFL-CIO,10.0,36812.0,,train
 UNITE - 3837T,UNITE AFL-CIO,3837.0,,not in gazetteer,train
-UNITE - 1742,UNITE AFL-CIO,1742.0,,not in gazetteer,train
-UNITE - 2675,UNITE AFL-CIO,2675.0,,not in gazetteer,train
+UNITE - 1742,"WORKERS UNITED, SEIU",1742.0,66127,,train
+UNITE - 2675,"WORKERS UNITED, SEIU",2675.0,541103,,train
 UNITE - 911,UNITE AFL-CIO,911.0,,not in gazetteer,train
 UNITE - 178/361,UNITE AFL-CIO,178.0,49108.0,,train
 UNITE - 438 NEW ENGLAND RGL JT BD,UNITE AFL-CIO,438.0,43840.0,,train
 UNITE - 2619,UNITE AFL-CIO,2619.0,541255.0,,train
 UNITE - 1199,UNITE AFL-CIO,1199.0,,not in gazetteer,train
 UNITE - WESTERN JB SW DISTRICT,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 358,UNITE AFL-CIO,358.0,,not in gazetteer,train
-UNITE - 1807,UNITE AFL-CIO,1807.0,,not in gazetteer,train
+UNITE - 358,"WORKERS UNITED, SEIU",358.0,542276,,train
+UNITE - 1807,"WORKERS UNITED, SEIU",1807.0,69789,,train
 UNITE - 188T,UNITE AFL-CIO,188.0,44309.0,,train
 UNITE - 1108T,UNITE AFL-CIO,1108.0,,not in gazetteer,train
 UNITE - 1468T,UNITE AFL-CIO,1468.0,25577.0,,train
-UNITE - 1876,UNITE AFL-CIO,1876.0,,not in gazetteer,train
+UNITE - 1876,"WORKERS UNITED, SEIU",1876.0,70085,,train
 UNITE - 2299,UNITE AFL-CIO,2299.0,511462.0,,train
 UNITE - 114,UNITE AFL-CIO,114.0,45895.0,,train
-UNITE - 304,UNITE AFL-CIO,304.0,,not in gazetteer,train
+UNITE - 304,"WORKERS UNITED, SEIU",304.0,35818,,train
 UNITE - 12085,UNITE AFL-CIO,12085.0,,not in gazetteer,train
 UNITE - 1296T,UNITE AFL-CIO,1296.0,23600.0,,train
 UNITE - 311,UNITE AFL-CIO,311.0,33277.0,,train
 UNITE - 2697,UNITE AFL-CIO,2697.0,,not in gazetteer,train
 UNITE - 118C,UNITE AFL-CIO,118.0,51340.0,,train
-UNITE - 1406,UNITE AFL-CIO,1406.0,,not in gazetteer,train
-UNITE - 364,UNITE AFL-CIO,364.0,,not in gazetteer,train
+UNITE - 1406,"WORKERS UNITED, SEIU",1406.0,32494,,train
+UNITE - 364,"WORKERS UNITED, SEIU",364.0,542250,,train
 UNITE - 1999,UNITE AFL-CIO,1999.0,,not in gazetteer,train
 UNITE - 1791,UNITE AFL-CIO,1791.0,,not in gazetteer,train
 UNITE - 225,UNITE AFL-CIO,225.0,,not in gazetteer,train
-UNITE - 210,UNITE AFL-CIO,210.0,,not in gazetteer,train
+UNITE - 210,"WORKERS UNITED, SEIU",210.0,26618,,train
 UNITE - 1093-T,UNITE AFL-CIO,1093.0,,not in gazetteer,train
 UNITE - 17T,UNITE AFL-CIO,17.0,,not in gazetteer,train
 UNITE - 848T,UNITE AFL-CIO,848.0,,not in gazetteer,train
 UNITE - 1856,UNITE AFL-CIO,1856.0,69039.0,,train
-UNITE - 2679,UNITE AFL-CIO,2679.0,,not in gazetteer,train
-UNITE - 906,UNITE AFL-CIO,906.0,,not in gazetteer,train
+UNITE - 2679,"WORKERS UNITED, SEIU",2679.0,541627,,train
+UNITE - 906,"WORKERS UNITED, SEIU",906.0,541630,,train
 UNITE - 50-10,UNITE AFL-CIO,50.0,541474.0,,train
 UNITE - 2423B,UNITE AFL-CIO,2423.0,,not in gazetteer,train
 UNITE - 14M CHICAGO/CENTRAL ST JB,UNITE AFL-CIO,14.0,,not in gazetteer,train
 UNITE - 1120,UNITE AFL-CIO,1120.0,508960.0,,test
 UNITE - 1867 NC & VA DISTRICT,UNITE AFL-CIO,1867.0,,not in gazetteer,train
 UNITE - 1391 1113T NC & VA DIST,UNITE AFL-CIO,1391.0,,not in gazetteer,test
-UNITE - 2590,UNITE AFL-CIO,2590.0,,not in gazetteer,test
+UNITE - 2590,"WORKERS UNITED, SEIU",2590.0,530001,,test
 UNITE - 89 22 1,UNITE AFL-CIO,89.0,,not in gazetteer,train
 UNITE - 502T,UNITE AFL-CIO,502.0,51089.0,,train
-UNITE - 2398,UNITE AFL-CIO,2398.0,,not in gazetteer,train
-UNITE - 2603,UNITE AFL-CIO,2603.0,,not in gazetteer,train
+UNITE - 2398,"WORKERS UNITED, SEIU",2398.0,513733,,train
+UNITE - 2603,"WORKERS UNITED, SEIU",2603.0,541080,,train
 UNITE - 1742 TN/KY DC,UNITE AFL-CIO,1742.0,,not in gazetteer,train
 UNITE - 2633 TN/KY DC,UNITE AFL-CIO,2633.0,,not in gazetteer,train
 UNITE - 138C,UNITE AFL-CIO,138.0,69840.0,,train
 UNITE - 622,UNITE AFL-CIO,622.0,51352.0,,train
 UNITE - 393,UNITE AFL-CIO,393.0,51564.0,,train
-UNITE - 860,UNITE AFL-CIO,860.0,,not in gazetteer,train
+UNITE - 860,"WORKERS UNITED, SEIU",860.0,61533,,train
 UNITE - 428 & 870,UNITE AFL-CIO,428.0,,not in gazetteer,train
-UNITE - 2685,UNITE AFL-CIO,2685.0,,not in gazetteer,train
+UNITE - 2685,"WORKERS UNITED, SEIU",2685.0,542336,,train
 UNITE - 1 & 187,UNITE AFL-CIO,1.0,,not in gazetteer,train
 UNITE - 931,UNITE AFL-CIO,931.0,64513.0,,train
 UNITE - 1 187,UNITE AFL-CIO,1.0,,not in gazetteer,train
 UNITE - 14K,UNITE AFL-CIO,14.0,,not in gazetteer,train
-UNITE - 829,UNITE AFL-CIO,829.0,,not in gazetteer,train
+UNITE - 829,"WORKERS UNITED, SEIU",829.0,59492,,train
 UNITE - 189,UNITE AFL-CIO,189.0,542111.0,,train
-UNITE - 609,UNITE AFL-CIO,609.0,,not in gazetteer,train
+UNITE - 609,"WORKERS UNITED, SEIU",609.0,52051,,train
 UNITE - 19ET,UNITE AFL-CIO,19.0,542578.0,,train
 UNITE - 46,UNITE AFL-CIO,46.0,,not in gazetteer,train
 UNITE - 1414D,UNITE AFL-CIO,1414.0,,potentially resolvable,train
-UNITE - 2600,UNITE AFL-CIO,2600.0,,not in gazetteer,train
-UNITE - 708,UNITE AFL-CIO,708.0,,not in gazetteer,train
-UNITE - 174,UNITE AFL-CIO,174.0,,not in gazetteer,train
-UNITE - 2668,UNITE AFL-CIO,2668.0,,not in gazetteer,train
-UNITE - 2702,UNITE AFL-CIO,2702.0,,not in gazetteer,train
-UNITE - 101,UNITE AFL-CIO,101.0,,not in gazetteer,train
+UNITE - 2600,"WORKERS UNITED, SEIU",2600.0,537319,,train
+UNITE - 708,"WORKERS UNITED, SEIU",708.0,50577,,train
+UNITE - 174,"WORKERS UNITED, SEIU",174.0,55127,,train
+UNITE - 2668,"WORKERS UNITED, SEIU",2668.0,541024,,train
+UNITE - 2702,"WORKERS UNITED, SEIU",2702.0,542420,,train
+UNITE - 101,"WORKERS UNITED, SEIU",101.0,49134,,train
 UNITE - 616 NEW ENGLAND RGL JT BD,UNITE AFL-CIO,616.0,,not in gazetteer,train
 UNITE - 704C,UNITE AFL-CIO,704.0,44410.0,,test
-UNITE - 2686,UNITE AFL-CIO,2686.0,,not in gazetteer,train
+UNITE - 2686,"WORKERS UNITED, SEIU",2686.0,542025,,train
 UNITE - 1569-J,UNITE AFL-CIO,1569.0,61691.0,,train
-UNITE - 365,UNITE AFL-CIO,365.0,,not in gazetteer,test
+UNITE - 365,"WORKERS UNITED, SEIU",365.0,43822,,test
 UNITE - 2687T,UNITE AFL-CIO,2687.0,541859.0,,train
-UNITE - 978,UNITE AFL-CIO,978.0,,not in gazetteer,train
+UNITE - 978,"WORKERS UNITED, SEIU",978.0,65979,,train
 UNITE - 295C,UNITE AFL-CIO,295.0,,not in gazetteer,train
 UNITE - 2684,UNITE AFL-CIO,2684.0,541636.0,,train
 UNITE - 56,UNITE AFL-CIO,56.0,,not in gazetteer,train
-UNITE - 1089,UNITE AFL-CIO,1089.0,,not in gazetteer,train
-UNITE - 2554,UNITE AFL-CIO,2554.0,,not in gazetteer,train
-UNITE - 3008,UNITE AFL-CIO,3008.0,,not in gazetteer,train
-UNITE - 362,UNITE AFL-CIO,362.0,,not in gazetteer,train
-UNITE - 141,UNITE AFL-CIO,141.0,,not in gazetteer,train
+UNITE - 1089,"WORKERS UNITED, SEIU",1089.0,71240,,train
+UNITE - 2554,"WORKERS UNITED, SEIU",2554.0,530319,,train
+UNITE - 3008,"WORKERS UNITED, SEIU",3008.0,40141,,train
+UNITE - 362,"WORKERS UNITED, SEIU",362.0,542531,,train
+UNITE - 141,"WORKERS UNITED, SEIU",141.0,42321,,train
 UNITE - 1021-C,UNITE AFL-CIO,1021.0,,not in gazetteer,train
-UNITE - 1812,UNITE AFL-CIO,1812.0,,not in gazetteer,train
+UNITE - 1812,"WORKERS UNITED, SEIU",1812.0,68360,,train
 UNITE - 168-39,UNITE AFL-CIO,168.0,42290.0,,train
 UNITE - DRESSMAKER'S JT COUNCIL,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 129,UNITE AFL-CIO,129.0,39927.0,,train
@@ -94537,74 +94537,74 @@ UNITE - 110AT,UNITE AFL-CIO,110.0,,not in gazetteer,train
 UNITE - 2654,UNITE AFL-CIO,2654.0,,not in gazetteer,train
 UNITE - LDC,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 76 CHICAGO & CENTRAL STATE,UNITE AFL-CIO,76.0,45450.0,,train
-UNITE - 2605,UNITE AFL-CIO,2605.0,,not in gazetteer,train
+UNITE - 2605,"WORKERS UNITED, SEIU",2605.0,540174,,train
 UNITE - 100,UNITE AFL-CIO,100.0,41745.0,,train
 UNITE - 55D,UNITE AFL-CIO,55.0,,not in gazetteer,train
-UNITE - 2031,UNITE AFL-CIO,2031.0,,not in gazetteer,train
+UNITE - 2031,"WORKERS UNITED, SEIU",2031.0,2785,,train
 UNITE - 177 NEW ENGLAND JT BD,UNITE AFL-CIO,177.0,,not in gazetteer,train
 UNITE - 178 NEW ENGLAND JT BD,UNITE AFL-CIO,178.0,49108.0,,train
 UNITE - 121H NEW ENGLAND JT BD,UNITE AFL-CIO,121.0,,not in gazetteer,train
 UNITE - 119,UNITE AFL-CIO,119.0,58142.0,,train
 UNITE - 121 & 565,UNITE AFL-CIO,121.0,,not in gazetteer,train
-UNITE - 872,UNITE AFL-CIO,872.0,,not in gazetteer,train
+UNITE - 872,"WORKERS UNITED, SEIU",872.0,60576,,train
 UNITE - 311 NEVADA DISTRICT,UNITE AFL-CIO,311.0,33277.0,,train
 UNITE - WESTERN,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 84,UNITE AFL-CIO,84.0,,not in gazetteer,train
+UNITE - 84,"WORKERS UNITED, SEIU",84.0,28740,,train
 UNITE - 2688T,UNITE AFL-CIO,2688.0,541786.0,,train
 UNITE - 107 WESTERN STATES RGL JB,UNITE AFL-CIO,107.0,,not in gazetteer,train
-UNITE - LOCAL 150,UNITE AFL-CIO,150.0,,not in gazetteer,train
+UNITE - LOCAL 150,"WORKERS UNITED, SEIU",150.0,49471,,train
 UNITE - 976T,UNITE AFL-CIO,976.0,,not in gazetteer,train
 UNITE - TENNESSEE/KENTUCKY DIST,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 400A NEW ENGLAND JT BD,UNITE AFL-CIO,400.0,,not in gazetteer,train
-UNITE - 2620,UNITE AFL-CIO,2620.0,,not in gazetteer,train
+UNITE - 2620,"WORKERS UNITED, SEIU",2620.0,541061,,train
 UNITE - 2667,UNITE AFL-CIO,2667.0,540861.0,,train
 UNITE - 289,UNITE AFL-CIO,289.0,,not in gazetteer,train
-UNITE - 2610,UNITE AFL-CIO,2610.0,,not in gazetteer,train
-UNITE - 524,UNITE AFL-CIO,524.0,,not in gazetteer,train
+UNITE - 2610,"WORKERS UNITED, SEIU",2610.0,537336,,train
+UNITE - 524,"WORKERS UNITED, SEIU",524.0,5847,,train
 UNITE - 881,UNITE AFL-CIO,881.0,,not in gazetteer,train
-UNITE - 1426,UNITE AFL-CIO,1426.0,,not in gazetteer,train
+UNITE - 1426,"WORKERS UNITED, SEIU",1426.0,43779,,train
 UNITE - 701C,UNITE AFL-CIO,701.0,,not in gazetteer,train
 UNITE - 2186,UNITE AFL-CIO,2186.0,,not in gazetteer,train
-UNITE - 2609,UNITE AFL-CIO,2609.0,,not in gazetteer,train
-UNITE - 2696,UNITE AFL-CIO,2696.0,,not in gazetteer,train
+UNITE - 2609,"WORKERS UNITED, SEIU",2609.0,540545,,train
+UNITE - 2696,"WORKERS UNITED, SEIU",2696.0,542017,,train
 UNITE - 2526 2524,UNITE AFL-CIO,2526.0,540106.0,,train
-UNITE - 2721,UNITE AFL-CIO,2721.0,,not in gazetteer,train
+UNITE - 2721,"WORKERS UNITED, SEIU",2721.0,544262,,train
 UNITE - 111 234 & 243,UNITE AFL-CIO,111.0,,not in gazetteer,train
 UNITE - 111 & 234,UNITE AFL-CIO,111.0,,not in gazetteer,train
 UNITE - 277,UNITE AFL-CIO,277.0,68396.0,,train
-UNITE - 2700,UNITE AFL-CIO,2700.0,,not in gazetteer,train
+UNITE - 2700,"WORKERS UNITED, SEIU",2700.0,542023,,train
 UNITE - 305T NEW ENGLAND JT BD,UNITE AFL-CIO,305.0,4105.0,,train
 UNITE - 16839,UNITE AFL-CIO,16839.0,,not in gazetteer,train
 UNITE - 208C,UNITE AFL-CIO,208.0,,not in gazetteer,train
-UNITE - 427,UNITE AFL-CIO,427.0,,not in gazetteer,train
+UNITE - 427,"WORKERS UNITED, SEIU",427.0,35209,,train
 UNITE - 15 51 70,UNITE AFL-CIO,15.0,41737.0,,train
 UNITE - 402C,UNITE AFL-CIO,402.0,,not in gazetteer,train
-UNITE - 604,UNITE AFL-CIO,604.0,,not in gazetteer,train
-UNITE - 2278,UNITE AFL-CIO,2278.0,,not in gazetteer,train
+UNITE - 604,"WORKERS UNITED, SEIU",604.0,21397,,train
+UNITE - 2278,"WORKERS UNITED, SEIU",2278.0,514383,,train
 UNITE - 39C 61 272 617 & 1106,UNITE AFL-CIO,39.0,,not in gazetteer,train
 UNITE - 168-C,UNITE AFL-CIO,168.0,42290.0,,train
 UNITE - W STATES RJB,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 201 207,UNITE AFL-CIO,201.0,,not in gazetteer,train
 UNITE - 99 89221 10,UNITE AFL-CIO,99.0,,not in gazetteer,train
-UNITE - 249,UNITE AFL-CIO,249.0,,not in gazetteer,train
+UNITE - 249,"WORKERS UNITED, SEIU",249.0,50455,,train
 UNITE - 2639 2630 3631 2632,UNITE AFL-CIO,2639.0,,not in gazetteer,train
-UNITE - 2639,UNITE AFL-CIO,2639.0,,not in gazetteer,train
-UNITE - 2351,UNITE AFL-CIO,2351.0,,not in gazetteer,train
+UNITE - 2639,"WORKERS UNITED, SEIU",2639.0,540369,,train
+UNITE - 2351,"WORKERS UNITED, SEIU",2351.0,514499,,train
 UNITE - E,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 110AT NEW ENGLAND JT BD,UNITE AFL-CIO,110.0,,not in gazetteer,train
 UNITE - 2224,UNITE AFL-CIO,2224.0,,not in gazetteer,train
 UNITE - 226 NEW ENGLAND JT BD,UNITE AFL-CIO,226.0,,not in gazetteer,train
-UNITE - 2497,UNITE AFL-CIO,2497.0,,not in gazetteer,train
+UNITE - 2497,"WORKERS UNITED, SEIU",2497.0,517289,,train
 UNITE - 17-55156,UNITE AFL-CIO,17.0,,not in gazetteer,train
-UNITE - 2722,UNITE AFL-CIO,2722.0,,not in gazetteer,train
+UNITE - 2722,"WORKERS UNITED, SEIU",2722.0,543194,,train
 UNITE - 224,UNITE AFL-CIO,224.0,,not in gazetteer,train
-UNITE - 1110,UNITE AFL-CIO,1110.0,,not in gazetteer,train
+UNITE - 1110,"WORKERS UNITED, SEIU",1110.0,70952,,train
 UNITE - 104 183 398,UNITE AFL-CIO,104.0,,not in gazetteer,train
 UNITE - 95 TN/KY DC,UNITE AFL-CIO,95.0,,not in gazetteer,train
-UNITE - 228,UNITE AFL-CIO,228.0,,not in gazetteer,train
+UNITE - 228,"WORKERS UNITED, SEIU",228.0,32036,,train
 UNITE - 1872T,UNITE AFL-CIO,1872.0,,not in gazetteer,train
 UNITE - NEVADA ARIZONA DISTRICT,UNITE AFL-CIO,,,potentially resolvable,train
-UNITE - 16,UNITE AFL-CIO,16.0,,not in gazetteer,train
+UNITE - 16,"WORKERS UNITED, SEIU",16.0,514448,,train
 UNITE - 450,UNITE AFL-CIO,450.0,,not in gazetteer,train
 UNITE - CHICAGO MIDWEST RJB,UNITE AFL-CIO,,,potentially resolvable,train
 UNITE - 311 NEW ENGLAND JT BD,UNITE AFL-CIO,311.0,33277.0,,train
