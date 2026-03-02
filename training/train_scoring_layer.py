@@ -414,7 +414,7 @@ def main(chunk_size, n_outer, train_sample):
     with open(EXAMPLES_PATH) as f:
         all_examples = json.load(f)
 
-    NULL_TARGET_REASONS = {"not in gazetteer", "unknown union"}
+    NULL_TARGET_REASONS = {"not in gazetteer", "unknown union", "ambiguous"}
     train_examples = [
         ex
         for ex in all_examples

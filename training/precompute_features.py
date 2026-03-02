@@ -54,7 +54,7 @@ FEATURE_NAMES = [
     "nf_suffix",
 ]
 
-NULL_TARGET_REASONS = {"not in gazetteer", "unknown union"}
+NULL_TARGET_REASONS = {"not in gazetteer", "unknown union", "ambiguous"}
 
 
 def load_classifier(ckpt, device):
