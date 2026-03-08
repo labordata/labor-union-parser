@@ -211,6 +211,8 @@ class RecordDataset(Dataset):
         records: list[dict],
         text_to_fnum: dict[str, int],
         token_vocab: dict[str, int],
+        distinct_texts: list[str] | None = None,
+        text_to_text_idx: dict[str, int] | None = None,
     ):
         N = len(records)
         unk_id = token_vocab["<UNK>"]
@@ -222,6 +224,7 @@ class RecordDataset(Dataset):
         self.is_number = np.zeros((N, NUM_FIELDS, MAX_TOKENS_PER_FIELD), dtype=np.bool_)
         self.token_lens = np.zeros((N, NUM_FIELDS), dtype=np.int8)
         self.f_num = np.full(N, -1, dtype=np.int32)
+        self.text_idx = np.full(N, -1, dtype=np.int32)
 
         for i, rec in enumerate(records):
             for j, field in enumerate(FIELD_NAMES):
@@ -241,9 +244,12 @@ class RecordDataset(Dataset):
                     else:
                         self.token_ids[i, j, t] = token_vocab.get(tok["token"], unk_id)
 
-            union_name = rec["union_name"].lower()
-            if union_name in text_to_fnum:
-                self.f_num[i] = text_to_fnum[union_name]
+            union_name = rec["union_name"].strip()
+            union_name_lower = union_name.lower()
+            if union_name_lower in text_to_fnum:
+                self.f_num[i] = text_to_fnum[union_name_lower]
+            if text_to_text_idx is not None and union_name in text_to_text_idx:
+                self.text_idx[i] = text_to_text_idx[union_name]
 
         # present = has at least 1 token
         n_fields_present = (self.token_lens > 0).sum(axis=1)
@@ -258,6 +264,7 @@ class RecordDataset(Dataset):
             self.is_number = self.is_number[valid]
             self.token_lens = self.token_lens[valid]
             self.f_num = self.f_num[valid]
+            self.text_idx = self.text_idx[valid]
 
         self.n_labeled = int((self.f_num >= 0).sum())
         unique_fnums = sorted(set(self.f_num[self.f_num >= 0].tolist()))
@@ -294,6 +301,7 @@ class RecordDataset(Dataset):
             "present": present,
             "mask_idx": mask_idx,
             "fnum_label": fnum_label,
+            "text_idx": self.text_idx[idx],
         }
 
 
@@ -584,6 +592,8 @@ class RecordEmbeddingModule(L.LightningModule):
         epochs: int = 20,
         vocab_size: int = 1,
         n_classes: int = 1,
+        repulsive_margin: float = 0.2,
+        repulsive_weight: float = 1.0,
     ):
         super().__init__()
         self.save_hyperparameters(ignore=["vocab_size", "n_classes"])
@@ -596,6 +606,194 @@ class RecordEmbeddingModule(L.LightningModule):
         self._lr = lr
         self._weight_decay = weight_decay
         self._epochs = epochs
+        self._repulsive_margin = repulsive_margin
+        self._repulsive_weight = repulsive_weight
+        self._repulsive_enabled = False
+
+    def setup_repulsive_mining(
+        self,
+        distinct_texts: list[str],
+        token_vocab: dict[str, int],
+        k_neighbors: int = 8,
+    ):
+        """Prepare data for number-overlap repulsive loss.
+
+        For each distinct union_name text, extract number tokens and
+        pre-tokenize for embedding computation. Between epochs, find k-NN
+        and precompute which neighbor pairs have non-overlapping numbers.
+        """
+        N = len(distinct_texts)
+        unk_id = token_vocab["<UNK>"]
+
+        token_ids = np.zeros((N, NUM_FIELDS, MAX_TOKENS_PER_FIELD), dtype=np.int64)
+        bloom_ids = np.zeros(
+            (N, NUM_FIELDS, MAX_TOKENS_PER_FIELD, NUM_BLOOM_HASHES), dtype=np.int64
+        )
+        is_number = np.zeros((N, NUM_FIELDS, MAX_TOKENS_PER_FIELD), dtype=np.bool_)
+        token_lens = np.zeros((N, NUM_FIELDS), dtype=np.int64)
+
+        # Extract number token sets for each text
+        number_sets: list[frozenset[str]] = []
+        for i, text in enumerate(distinct_texts):
+            tokens = _tokenize("union_name", text)
+            n_tok = min(len(tokens), MAX_TOKENS_PER_FIELD)
+            token_lens[i, 0] = n_tok
+            nums = set()
+            for t in range(n_tok):
+                tok = tokens[t]
+                if tok["is_num"]:
+                    is_number[i, 0, t] = True
+                    bloom_ids[i, 0, t] = bloom_hash_ids(tok["token"])
+                    nums.add(tok["token"])
+                else:
+                    token_ids[i, 0, t] = token_vocab.get(tok["token"], unk_id)
+            number_sets.append(frozenset(nums))
+
+        self._hn_token_ids = torch.from_numpy(token_ids)
+        self._hn_bloom_ids = torch.from_numpy(bloom_ids)
+        self._hn_is_number = torch.from_numpy(is_number)
+        self._hn_token_lens = torch.from_numpy(token_lens)
+        self._hn_number_sets = number_sets
+        self._hn_k = k_neighbors
+        self._hn_bank = None  # [N, d_model]
+        # Repulsive pairs: list of (i, j) where i,j are text indices that are
+        # nearest neighbors with non-overlapping numbers
+        self._repulsive_pairs = None  # [P, 2] tensor
+        self._repulsive_enabled = True
+
+        n_with_nums = sum(1 for s in number_sets if s)
+        print(
+            f"  Repulsive mining: {N} distinct texts, {n_with_nums} with numbers, "
+            f"k={k_neighbors} neighbors"
+        )
+
+    @torch.no_grad()
+    def _update_repulsive_pairs(self):
+        """Recompute embeddings, find k-NN, identify repulsive pairs."""
+        device = next(self.parameters()).device
+        N = len(self._hn_token_ids)
+        batch_size = 512
+        embeddings = []
+
+        self.model.eval()
+        for start in range(0, N, batch_size):
+            end = min(start + batch_size, N)
+            field_embs = self.model.encode_fields(
+                self._hn_token_ids[start:end].to(device),
+                self._hn_bloom_ids[start:end].to(device),
+                self._hn_is_number[start:end].to(device),
+                self._hn_token_lens[start:end].to(device),
+            )
+            union_emb = F.normalize(field_embs[:, 0, :], dim=-1)
+            embeddings.append(union_emb.cpu())
+        self.model.train()
+
+        self._hn_bank = torch.cat(embeddings, dim=0)  # [N, d_model]
+
+        # Find k nearest neighbors via chunked cosine similarity
+        k = self._hn_k
+        emb_np = self._hn_bank.numpy().astype(np.float32)
+        pairs = []
+        chunk = 2000
+        for start in range(0, N, chunk):
+            end = min(start + chunk, N)
+            sims = emb_np[start:end] @ emb_np.T  # [chunk, N]
+            for i in range(end - start):
+                sims[i, start + i] = -2.0  # exclude self
+            top_k_idx = np.argpartition(sims, -k, axis=1)[:, -k:]
+
+            for i in range(end - start):
+                idx_i = start + i
+                nums_i = self._hn_number_sets[idx_i]
+                if not nums_i:
+                    continue  # no numbers → no repulsion
+                for j in top_k_idx[i]:
+                    nums_j = self._hn_number_sets[j]
+                    if not nums_j:
+                        continue
+                    # Both have numbers, check for overlap
+                    if nums_i.isdisjoint(nums_j):
+                        pairs.append((idx_i, int(j)))
+
+        if pairs:
+            self._repulsive_pairs = torch.tensor(pairs, dtype=torch.long)
+        else:
+            self._repulsive_pairs = None
+
+        # Move bank to device
+        self._hn_bank = self._hn_bank.to(device)
+
+        n_pairs = len(pairs) if pairs else 0
+        print(f"  Repulsive pairs: {n_pairs} (from {N} texts, k={k})")
+
+    def on_train_epoch_start(self):
+        """Update repulsive pairs at the start of each epoch."""
+        if self._repulsive_enabled:
+            self._update_repulsive_pairs()
+
+    def repulsive_loss(self, field_embs, text_idx):
+        """Repulsive loss: push apart nearest neighbors with non-overlapping numbers.
+
+        For each batch record, look up its precomputed repulsive pairs.
+        Use the live batch embedding for the anchor and the bank embedding
+        for the neighbor. Apply a margin hinge loss.
+        """
+        if self._repulsive_pairs is None or self._hn_bank is None:
+            return torch.tensor(0.0, device=field_embs.device), 0
+
+        # Find batch records that appear in repulsive pairs as anchors
+        valid = text_idx >= 0
+        if not valid.any():
+            return torch.tensor(0.0, device=field_embs.device), 0
+
+        device = field_embs.device
+        batch_text_idx = text_idx.long()  # [B]
+
+        # Get live union_name embeddings for the batch
+        union_embs = F.normalize(field_embs[:, 0, :], dim=-1)  # [B, d_model]
+
+        # For each batch record, find its repulsive neighbors in the pair list
+        # Build a set of anchor text indices that appear in pairs
+        pair_anchors = self._repulsive_pairs[:, 0]  # [P]
+        pair_targets = self._repulsive_pairs[:, 1]  # [P]
+
+        # Find which batch records are anchors in any pair
+        # Use broadcasting: [B] vs [P] → match
+        batch_in_pairs = batch_text_idx.unsqueeze(1) == pair_anchors.to(
+            device
+        ).unsqueeze(
+            0
+        )  # [B, P]
+
+        # For each batch record, collect all its repulsive target indices
+        # Get the batch indices and pair indices where there's a match
+        batch_indices, pair_indices = batch_in_pairs.nonzero(as_tuple=True)
+
+        if len(batch_indices) == 0:
+            return torch.tensor(0.0, device=device), 0
+
+        # Cap to avoid huge computation if too many pairs match
+        max_pairs = 2048
+        if len(batch_indices) > max_pairs:
+            perm = torch.randperm(len(batch_indices), device=device)[:max_pairs]
+            batch_indices = batch_indices[perm]
+            pair_indices = pair_indices[perm]
+
+        # Anchor embeddings (live, from batch)
+        anchor_embs = union_embs[batch_indices]  # [M, d_model]
+
+        # Target embeddings (from bank, detached)
+        target_text_idx = pair_targets[pair_indices.cpu()].to(device)
+        target_embs = self._hn_bank[target_text_idx]  # [M, d_model]
+
+        # Cosine similarity between anchor and repulsive target
+        cos_sim = (anchor_embs * target_embs).sum(dim=-1)  # [M]
+
+        # Margin hinge: penalize when cos_sim > (1 - margin)
+        threshold = 1.0 - self._repulsive_margin
+        loss = F.relu(cos_sim - threshold).mean()
+
+        return loss, len(batch_indices)
 
     def _encode(self, batch):
         return self.model.encode_fields(
@@ -615,6 +813,12 @@ class RecordEmbeddingModule(L.LightningModule):
             field_embs, batch["fnum_label"]
         )
         loss = cbow_loss + proto_loss
+
+        if self._repulsive_enabled:
+            rep_loss, n_rep = self.repulsive_loss(field_embs, batch["text_idx"])
+            loss = loss + self._repulsive_weight * rep_loss
+            self.log("train/rep_loss", rep_loss)
+            self.log("train/n_rep_pairs", float(n_rep))
 
         self.log("train/loss", loss, prog_bar=True)
         self.log("train/cbow_loss", cbow_loss)
@@ -684,6 +888,14 @@ def main():
     parser.add_argument(
         "--resume", default=None, help="Checkpoint to resume from (partial load)"
     )
+    parser.add_argument(
+        "--repulsive-k",
+        type=int,
+        default=8,
+        help="Number of nearest neighbors to check for number-overlap repulsion (0 to disable)",
+    )
+    parser.add_argument("--repulsive-margin", type=float, default=0.2)
+    parser.add_argument("--repulsive-weight", type=float, default=1.0)
     args = parser.parse_args()
 
     random.seed(42)
@@ -703,8 +915,37 @@ def main():
     token_vocab = build_token_vocab(records, min_count=args.min_token_count)
     print(f"  {len(token_vocab)} word tokens (min_count={args.min_token_count})")
 
+    # Build distinct union_name texts deduplicated by token signature
+    # (tokenizer normalizes case/whitespace, so many raw texts map to the same tokens)
+    token_sig_to_text: dict[tuple, str] = {}
+    for rec in records:
+        un = rec["union_name"].strip()
+        if not un:
+            continue
+        tokens = _tokenize("union_name", un)
+        sig = tuple((t["token"], t["is_num"]) for t in tokens)
+        if sig not in token_sig_to_text:
+            token_sig_to_text[sig] = un
+    distinct_texts = sorted(token_sig_to_text.values())
+    # Map each raw text to its deduplicated index via token signature
+    text_to_text_idx: dict[str, int] = {}
+    text_idx_lookup = {t: i for i, t in enumerate(distinct_texts)}
+    sig_to_idx: dict[tuple, int] = {}
+    for sig, canon_text in token_sig_to_text.items():
+        sig_to_idx[sig] = text_idx_lookup[canon_text]
+    for rec in records:
+        un = rec["union_name"].strip()
+        if not un:
+            continue
+        tokens = _tokenize("union_name", un)
+        sig = tuple((t["token"], t["is_num"]) for t in tokens)
+        text_to_text_idx[un] = sig_to_idx[sig]
+    print(f"  {len(distinct_texts)} distinct union_name texts (after tokenizer dedup)")
+
     print("Building dataset...")
-    dataset = RecordDataset(records, text_to_fnum, token_vocab)
+    dataset = RecordDataset(
+        records, text_to_fnum, token_vocab, distinct_texts, text_to_text_idx
+    )
 
     # Stratified split
     N = len(dataset)
@@ -746,6 +987,8 @@ def main():
         epochs=args.epochs,
         vocab_size=len(token_vocab),
         n_classes=dataset.n_classes,
+        repulsive_margin=args.repulsive_margin,
+        repulsive_weight=args.repulsive_weight,
     )
     # Resume from checkpoint (partial load)
     if args.resume:
@@ -774,6 +1017,11 @@ def main():
 
     param_count = sum(p.numel() for p in module.parameters())
     print(f"  Model parameters: {param_count:,}")
+
+    # Setup repulsive mining (push apart NN with non-overlapping numbers)
+    if args.repulsive_k > 0:
+        print("Setting up repulsive mining...")
+        module.setup_repulsive_mining(distinct_texts, token_vocab, args.repulsive_k)
 
     # Train
     trainer = L.Trainer(
