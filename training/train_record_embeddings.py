@@ -592,7 +592,6 @@ class RecordEmbeddingModule(L.LightningModule):
         epochs: int = 20,
         vocab_size: int = 1,
         n_classes: int = 1,
-        repulsive_margin: float = 0.2,
         repulsive_weight: float = 1.0,
     ):
         super().__init__()
@@ -606,179 +605,111 @@ class RecordEmbeddingModule(L.LightningModule):
         self._lr = lr
         self._weight_decay = weight_decay
         self._epochs = epochs
-        self._repulsive_margin = repulsive_margin
         self._repulsive_weight = repulsive_weight
         self._repulsive_enabled = False
 
-    def setup_repulsive_mining(
+    def setup_spectral_repulsion(
         self,
         distinct_texts: list[str],
-        token_vocab: dict[str, int],
-        k_neighbors: int = 8,
+        n_components: int = 64,
     ):
-        """Prepare data for number-overlap repulsive loss.
+        """Precompute spectral repulsive directions from can't-link structure.
 
-        For each distinct union_name text, extract number tokens and
-        pre-tokenize for embedding computation. Between epochs, find k-NN
-        and precompute which neighbor pairs have non-overlapping numbers.
+        Builds the digit indicator matrix D [n_texts_with_nums, n_distinct_numbers]
+        and computes its top-k left singular vectors. These capture the global
+        partition structure of the can't-link graph: texts with non-overlapping
+        numbers project to different regions along these directions.
+
+        During training, the loss maximizes variance of embeddings along these
+        directions: L = -||V^T @ Z||_F^2, where V contains the singular vectors
+        indexed by text_idx for each batch record.
         """
-        N = len(distinct_texts)
-        unk_id = token_vocab["<UNK>"]
+        import scipy.sparse as sp
+        from scipy.sparse.linalg import svds
 
-        token_ids = np.zeros((N, NUM_FIELDS, MAX_TOKENS_PER_FIELD), dtype=np.int64)
-        bloom_ids = np.zeros(
-            (N, NUM_FIELDS, MAX_TOKENS_PER_FIELD, NUM_BLOOM_HASHES), dtype=np.int64
-        )
-        is_number = np.zeros((N, NUM_FIELDS, MAX_TOKENS_PER_FIELD), dtype=np.bool_)
-        token_lens = np.zeros((N, NUM_FIELDS), dtype=np.int64)
-
-        # Extract number token sets for each text
+        # Extract number sets per text
+        all_numbers: set[str] = set()
         number_sets: list[frozenset[str]] = []
-        for i, text in enumerate(distinct_texts):
+        for text in distinct_texts:
             tokens = _tokenize("union_name", text)
-            n_tok = min(len(tokens), MAX_TOKENS_PER_FIELD)
-            token_lens[i, 0] = n_tok
-            nums = set()
-            for t in range(n_tok):
-                tok = tokens[t]
-                if tok["is_num"]:
-                    is_number[i, 0, t] = True
-                    bloom_ids[i, 0, t] = bloom_hash_ids(tok["token"])
-                    nums.add(tok["token"])
-                else:
-                    token_ids[i, 0, t] = token_vocab.get(tok["token"], unk_id)
-            number_sets.append(frozenset(nums))
+            nums = frozenset(tok["token"] for tok in tokens if tok["is_num"])
+            number_sets.append(nums)
+            all_numbers.update(nums)
 
-        self._hn_token_ids = torch.from_numpy(token_ids)
-        self._hn_bloom_ids = torch.from_numpy(bloom_ids)
-        self._hn_is_number = torch.from_numpy(is_number)
-        self._hn_token_lens = torch.from_numpy(token_lens)
-        self._hn_number_sets = number_sets
-        self._hn_k = k_neighbors
-        self._hn_bank = None  # [N, d_model]
-        # Repulsive pairs: list of (i, j) where i,j are text indices that are
-        # nearest neighbors with non-overlapping numbers
-        self._repulsive_pairs = None  # [P, 2] tensor
+        has_nums_idx = [i for i, s in enumerate(number_sets) if s]
+        n_with_nums = len(has_nums_idx)
+        num_to_col = {n: i for i, n in enumerate(sorted(all_numbers))}
+        n_nums = len(num_to_col)
+
+        print(
+            f"  {len(distinct_texts)} texts, {n_with_nums} with numbers, "
+            f"{n_nums} distinct numbers"
+        )
+
+        # Build sparse D [n_with_nums, n_nums]
+        rows, cols = [], []
+        for new_i, orig_i in enumerate(has_nums_idx):
+            for n in number_sets[orig_i]:
+                rows.append(new_i)
+                cols.append(num_to_col[n])
+
+        D = sp.csr_matrix(
+            (np.ones(len(rows), dtype=np.float32), (rows, cols)),
+            shape=(n_with_nums, n_nums),
+        )
+
+        # SVD: top-k left singular vectors
+        k = min(n_components, min(D.shape) - 1)
+        print(f"  Computing SVD (k={k})...")
+        U, S, _ = svds(D.astype(np.float64), k=k)
+        order = np.argsort(-S)
+        U = U[:, order]
+        S = S[order]
+        print(f"  Top singular values: {S[:5]}")
+
+        # Build full V matrix [n_texts, k] — zero for texts without numbers
+        V = np.zeros((len(distinct_texts), k), dtype=np.float32)
+        for new_i, orig_i in enumerate(has_nums_idx):
+            V[orig_i] = U[new_i]
+
+        # Store as a tensor (moved to device in cannotlink_loss)
+        self._spectral_V = torch.from_numpy(V)  # [n_texts, k]
         self._repulsive_enabled = True
+        print(f"  Spectral repulsion ready: V [{V.shape[0]}, {V.shape[1]}]")
 
-        n_with_nums = sum(1 for s in number_sets if s)
-        print(
-            f"  Repulsive mining: {N} distinct texts, {n_with_nums} with numbers, "
-            f"k={k_neighbors} neighbors"
-        )
+    def spectral_repulsion_loss(self, field_embs, text_idx):
+        """Spectral repulsive loss: maximize embedding variance along
+        the can't-link graph's eigen-directions.
 
-    @torch.no_grad()
-    def _update_repulsive_pairs(self):
-        """Recompute embeddings, find k-NN, identify repulsive pairs."""
-        device = next(self.parameters()).device
-        N = len(self._hn_token_ids)
-        batch_size = 512
-        embeddings = []
+        V contains the left singular vectors of the digit indicator matrix D.
+        These directions separate texts with non-overlapping numbers.
 
-        self.model.eval()
-        for start in range(0, N, batch_size):
-            end = min(start + batch_size, N)
-            field_embs = self.model.encode_fields(
-                self._hn_token_ids[start:end].to(device),
-                self._hn_bloom_ids[start:end].to(device),
-                self._hn_is_number[start:end].to(device),
-                self._hn_token_lens[start:end].to(device),
-            )
-            union_emb = F.normalize(field_embs[:, 0, :], dim=-1)
-            embeddings.append(union_emb.cpu())
-        self.model.train()
+        Loss = -||V_batch^T @ Z_batch||_F^2 / B
 
-        self._hn_bank = torch.cat(embeddings, dim=0)  # [N, d_model]
-
-        # Find k nearest neighbors via chunked cosine similarity
-        k = self._hn_k
-        emb_np = self._hn_bank.numpy().astype(np.float32)
-        pairs = []
-        chunk = 2000
-        for start in range(0, N, chunk):
-            end = min(start + chunk, N)
-            sims = emb_np[start:end] @ emb_np.T  # [chunk, N]
-            for i in range(end - start):
-                sims[i, start + i] = -2.0  # exclude self
-            top_k_idx = np.argpartition(sims, -k, axis=1)[:, -k:]
-
-            for i in range(end - start):
-                idx_i = start + i
-                nums_i = self._hn_number_sets[idx_i]
-                if not nums_i:
-                    continue  # no numbers → no repulsion
-                for j in top_k_idx[i]:
-                    nums_j = self._hn_number_sets[j]
-                    if not nums_j:
-                        continue
-                    # Both have numbers, check for overlap
-                    if nums_i.isdisjoint(nums_j):
-                        pairs.append((idx_i, int(j)))
-
-        # Build dict: text_idx -> list of repulsive target text indices
-        anchor_to_targets: dict[int, list[int]] = {}
-        for a, t in pairs:
-            anchor_to_targets.setdefault(a, []).append(t)
-        self._repulsive_dict = anchor_to_targets
-
-        # Move bank to device
-        self._hn_bank = self._hn_bank.to(device)
-
-        print(
-            f"  Repulsive pairs: {len(pairs)} across {len(anchor_to_targets)} anchors "
-            f"(from {N} texts, k={k})"
-        )
-
-    def on_train_epoch_start(self):
-        """Update repulsive pairs at the start of each epoch."""
-        if self._repulsive_enabled:
-            self._update_repulsive_pairs()
-
-    def repulsive_loss(self, field_embs, text_idx):
-        """Repulsive loss: push apart nearest neighbors with non-overlapping numbers.
-
-        For each batch record, look up its precomputed repulsive targets via dict.
-        Use the live batch embedding for the anchor and the bank embedding
-        for the target. Apply a margin hinge loss.
+        This pushes embeddings to spread along the repulsive axes,
+        ensuring can't-linked records end up in different regions.
         """
-        if not self._repulsive_dict or self._hn_bank is None:
-            return torch.tensor(0.0, device=field_embs.device), 0
-
         device = field_embs.device
         union_embs = F.normalize(field_embs[:, 0, :], dim=-1)  # [B, d_model]
 
-        # Dict lookup: for each batch record, find its repulsive targets
-        batch_anchor_idx = []
-        batch_target_text_idx = []
-        for b in range(len(text_idx)):
-            ti = int(text_idx[b].item())
-            if ti < 0:
-                continue
-            targets = self._repulsive_dict.get(ti)
-            if targets:
-                batch_anchor_idx.extend([b] * len(targets))
-                batch_target_text_idx.extend(targets)
+        # Look up spectral directions for batch records
+        V = self._spectral_V.to(device)  # [n_texts, k]
 
-        if not batch_anchor_idx:
-            return torch.tensor(0.0, device=device), 0
+        # Gather V rows for batch — text_idx indexes into distinct_texts
+        ti = text_idx.long()  # [B]
+        valid = ti >= 0
+        if not valid.any():
+            return torch.tensor(0.0, device=device)
 
-        # Cap to avoid huge computation
-        n_matches = len(batch_anchor_idx)
-        max_pairs = 2048
-        if n_matches > max_pairs:
-            perm = torch.randperm(n_matches)[:max_pairs].tolist()
-            batch_anchor_idx = [batch_anchor_idx[p] for p in perm]
-            batch_target_text_idx = [batch_target_text_idx[p] for p in perm]
-            n_matches = max_pairs
+        V_batch = V[ti[valid]]  # [B', k]
+        Z_batch = union_embs[valid]  # [B', d_model]
 
-        anchor_embs = union_embs[batch_anchor_idx]  # [M, d_model]
-        target_embs = self._hn_bank[batch_target_text_idx]  # [M, d_model]
+        # V_batch^T @ Z_batch: [k, d_model] — projection of batch embeddings
+        # onto spectral axes. We want this to have large Frobenius norm.
+        proj = V_batch.t() @ Z_batch  # [k, d_model]
+        loss = -(proj**2).sum() / valid.sum()
 
-        cos_sim = (anchor_embs * target_embs).sum(dim=-1)  # [M]
-        threshold = 1.0 - self._repulsive_margin
-        loss = F.relu(cos_sim - threshold).mean()
-
-        return loss, n_matches
+        return loss
 
     def _encode(self, batch):
         return self.model.encode_fields(
@@ -800,10 +731,9 @@ class RecordEmbeddingModule(L.LightningModule):
         loss = cbow_loss + proto_loss
 
         if self._repulsive_enabled:
-            rep_loss, n_rep = self.repulsive_loss(field_embs, batch["text_idx"])
-            loss = loss + self._repulsive_weight * rep_loss
-            self.log("train/rep_loss", rep_loss)
-            self.log("train/n_rep_pairs", float(n_rep))
+            spectral_loss = self.spectral_repulsion_loss(field_embs, batch["text_idx"])
+            loss = loss + self._repulsive_weight * spectral_loss
+            self.log("train/spectral_loss", spectral_loss)
 
         self.log("train/loss", loss, prog_bar=True)
         self.log("train/cbow_loss", cbow_loss)
@@ -874,13 +804,13 @@ def main():
         "--resume", default=None, help="Checkpoint to resume from (partial load)"
     )
     parser.add_argument(
-        "--repulsive-k",
-        type=int,
-        default=8,
-        help="Number of nearest neighbors to check for number-overlap repulsion (0 to disable)",
+        "--spectral-repulsion",
+        action="store_true",
+        default=False,
+        help="Enable spectral repulsive loss (SVD of digit indicator matrix)",
     )
-    parser.add_argument("--repulsive-margin", type=float, default=0.2)
-    parser.add_argument("--repulsive-weight", type=float, default=1.0)
+    parser.add_argument("--spectral-k", type=int, default=64)
+    parser.add_argument("--spectral-weight", type=float, default=1.0)
     args = parser.parse_args()
 
     random.seed(42)
@@ -972,8 +902,7 @@ def main():
         epochs=args.epochs,
         vocab_size=len(token_vocab),
         n_classes=dataset.n_classes,
-        repulsive_margin=args.repulsive_margin,
-        repulsive_weight=args.repulsive_weight,
+        repulsive_weight=args.spectral_weight,
     )
     # Resume from checkpoint (partial load)
     if args.resume:
@@ -1003,10 +932,10 @@ def main():
     param_count = sum(p.numel() for p in module.parameters())
     print(f"  Model parameters: {param_count:,}")
 
-    # Setup repulsive mining (push apart NN with non-overlapping numbers)
-    if args.repulsive_k > 0:
-        print("Setting up repulsive mining...")
-        module.setup_repulsive_mining(distinct_texts, token_vocab, args.repulsive_k)
+    # Setup spectral repulsion (push apart texts with non-overlapping numbers)
+    if args.spectral_repulsion:
+        print("Setting up spectral repulsion...")
+        module.setup_spectral_repulsion(distinct_texts, args.spectral_k)
 
     # Train
     trainer = L.Trainer(
