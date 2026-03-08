@@ -715,16 +715,19 @@ class RecordEmbeddingModule(L.LightningModule):
                     if nums_i.isdisjoint(nums_j):
                         pairs.append((idx_i, int(j)))
 
-        if pairs:
-            self._repulsive_pairs = torch.tensor(pairs, dtype=torch.long)
-        else:
-            self._repulsive_pairs = None
+        # Build dict: text_idx -> list of repulsive target text indices
+        anchor_to_targets: dict[int, list[int]] = {}
+        for a, t in pairs:
+            anchor_to_targets.setdefault(a, []).append(t)
+        self._repulsive_dict = anchor_to_targets
 
         # Move bank to device
         self._hn_bank = self._hn_bank.to(device)
 
-        n_pairs = len(pairs) if pairs else 0
-        print(f"  Repulsive pairs: {n_pairs} (from {N} texts, k={k})")
+        print(
+            f"  Repulsive pairs: {len(pairs)} across {len(anchor_to_targets)} anchors "
+            f"(from {N} texts, k={k})"
+        )
 
     def on_train_epoch_start(self):
         """Update repulsive pairs at the start of each epoch."""
@@ -734,66 +737,48 @@ class RecordEmbeddingModule(L.LightningModule):
     def repulsive_loss(self, field_embs, text_idx):
         """Repulsive loss: push apart nearest neighbors with non-overlapping numbers.
 
-        For each batch record, look up its precomputed repulsive pairs.
+        For each batch record, look up its precomputed repulsive targets via dict.
         Use the live batch embedding for the anchor and the bank embedding
-        for the neighbor. Apply a margin hinge loss.
+        for the target. Apply a margin hinge loss.
         """
-        if self._repulsive_pairs is None or self._hn_bank is None:
-            return torch.tensor(0.0, device=field_embs.device), 0
-
-        # Find batch records that appear in repulsive pairs as anchors
-        valid = text_idx >= 0
-        if not valid.any():
+        if not self._repulsive_dict or self._hn_bank is None:
             return torch.tensor(0.0, device=field_embs.device), 0
 
         device = field_embs.device
-        batch_text_idx = text_idx.long()  # [B]
-
-        # Get live union_name embeddings for the batch
         union_embs = F.normalize(field_embs[:, 0, :], dim=-1)  # [B, d_model]
 
-        # For each batch record, find its repulsive neighbors in the pair list
-        # Build a set of anchor text indices that appear in pairs
-        pair_anchors = self._repulsive_pairs[:, 0]  # [P]
-        pair_targets = self._repulsive_pairs[:, 1]  # [P]
+        # Dict lookup: for each batch record, find its repulsive targets
+        batch_anchor_idx = []
+        batch_target_text_idx = []
+        for b in range(len(text_idx)):
+            ti = int(text_idx[b].item())
+            if ti < 0:
+                continue
+            targets = self._repulsive_dict.get(ti)
+            if targets:
+                batch_anchor_idx.extend([b] * len(targets))
+                batch_target_text_idx.extend(targets)
 
-        # Find which batch records are anchors in any pair
-        # Use broadcasting: [B] vs [P] → match
-        batch_in_pairs = batch_text_idx.unsqueeze(1) == pair_anchors.to(
-            device
-        ).unsqueeze(
-            0
-        )  # [B, P]
-
-        # For each batch record, collect all its repulsive target indices
-        # Get the batch indices and pair indices where there's a match
-        batch_indices, pair_indices = batch_in_pairs.nonzero(as_tuple=True)
-
-        if len(batch_indices) == 0:
+        if not batch_anchor_idx:
             return torch.tensor(0.0, device=device), 0
 
-        # Cap to avoid huge computation if too many pairs match
+        # Cap to avoid huge computation
+        n_matches = len(batch_anchor_idx)
         max_pairs = 2048
-        if len(batch_indices) > max_pairs:
-            perm = torch.randperm(len(batch_indices), device=device)[:max_pairs]
-            batch_indices = batch_indices[perm]
-            pair_indices = pair_indices[perm]
+        if n_matches > max_pairs:
+            perm = torch.randperm(n_matches)[:max_pairs].tolist()
+            batch_anchor_idx = [batch_anchor_idx[p] for p in perm]
+            batch_target_text_idx = [batch_target_text_idx[p] for p in perm]
+            n_matches = max_pairs
 
-        # Anchor embeddings (live, from batch)
-        anchor_embs = union_embs[batch_indices]  # [M, d_model]
+        anchor_embs = union_embs[batch_anchor_idx]  # [M, d_model]
+        target_embs = self._hn_bank[batch_target_text_idx]  # [M, d_model]
 
-        # Target embeddings (from bank, detached)
-        target_text_idx = pair_targets[pair_indices.cpu()].to(device)
-        target_embs = self._hn_bank[target_text_idx]  # [M, d_model]
-
-        # Cosine similarity between anchor and repulsive target
         cos_sim = (anchor_embs * target_embs).sum(dim=-1)  # [M]
-
-        # Margin hinge: penalize when cos_sim > (1 - margin)
         threshold = 1.0 - self._repulsive_margin
         loss = F.relu(cos_sim - threshold).mean()
 
-        return loss, len(batch_indices)
+        return loss, n_matches
 
     def _encode(self, batch):
         return self.model.encode_fields(
