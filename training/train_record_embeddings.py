@@ -211,8 +211,6 @@ class RecordDataset(Dataset):
         records: list[dict],
         text_to_fnum: dict[str, int],
         token_vocab: dict[str, int],
-        distinct_texts: list[str] | None = None,
-        text_to_text_idx: dict[str, int] | None = None,
     ):
         N = len(records)
         unk_id = token_vocab["<UNK>"]
@@ -224,7 +222,6 @@ class RecordDataset(Dataset):
         self.is_number = np.zeros((N, NUM_FIELDS, MAX_TOKENS_PER_FIELD), dtype=np.bool_)
         self.token_lens = np.zeros((N, NUM_FIELDS), dtype=np.int8)
         self.f_num = np.full(N, -1, dtype=np.int32)
-        self.text_idx = np.full(N, -1, dtype=np.int32)
 
         for i, rec in enumerate(records):
             for j, field in enumerate(FIELD_NAMES):
@@ -244,12 +241,9 @@ class RecordDataset(Dataset):
                     else:
                         self.token_ids[i, j, t] = token_vocab.get(tok["token"], unk_id)
 
-            union_name = rec["union_name"].strip()
-            union_name_lower = union_name.lower()
-            if union_name_lower in text_to_fnum:
-                self.f_num[i] = text_to_fnum[union_name_lower]
-            if text_to_text_idx is not None and union_name in text_to_text_idx:
-                self.text_idx[i] = text_to_text_idx[union_name]
+            union_name = rec["union_name"].lower()
+            if union_name in text_to_fnum:
+                self.f_num[i] = text_to_fnum[union_name]
 
         # present = has at least 1 token
         n_fields_present = (self.token_lens > 0).sum(axis=1)
@@ -264,7 +258,6 @@ class RecordDataset(Dataset):
             self.is_number = self.is_number[valid]
             self.token_lens = self.token_lens[valid]
             self.f_num = self.f_num[valid]
-            self.text_idx = self.text_idx[valid]
 
         self.n_labeled = int((self.f_num >= 0).sum())
         unique_fnums = sorted(set(self.f_num[self.f_num >= 0].tolist()))
@@ -301,7 +294,6 @@ class RecordDataset(Dataset):
             "present": present,
             "mask_idx": mask_idx,
             "fnum_label": fnum_label,
-            "text_idx": self.text_idx[idx],
         }
 
 
@@ -592,7 +584,6 @@ class RecordEmbeddingModule(L.LightningModule):
         epochs: int = 20,
         vocab_size: int = 1,
         n_classes: int = 1,
-        repulsive_weight: float = 1.0,
     ):
         super().__init__()
         self.save_hyperparameters(ignore=["vocab_size", "n_classes"])
@@ -605,111 +596,6 @@ class RecordEmbeddingModule(L.LightningModule):
         self._lr = lr
         self._weight_decay = weight_decay
         self._epochs = epochs
-        self._repulsive_weight = repulsive_weight
-        self._repulsive_enabled = False
-
-    def setup_spectral_repulsion(
-        self,
-        distinct_texts: list[str],
-        n_components: int = 64,
-    ):
-        """Precompute spectral repulsive directions from can't-link structure.
-
-        Builds the digit indicator matrix D [n_texts_with_nums, n_distinct_numbers]
-        and computes its top-k left singular vectors. These capture the global
-        partition structure of the can't-link graph: texts with non-overlapping
-        numbers project to different regions along these directions.
-
-        During training, the loss maximizes variance of embeddings along these
-        directions: L = -||V^T @ Z||_F^2, where V contains the singular vectors
-        indexed by text_idx for each batch record.
-        """
-        import scipy.sparse as sp
-        from scipy.sparse.linalg import svds
-
-        # Extract number sets per text
-        all_numbers: set[str] = set()
-        number_sets: list[frozenset[str]] = []
-        for text in distinct_texts:
-            tokens = _tokenize("union_name", text)
-            nums = frozenset(tok["token"] for tok in tokens if tok["is_num"])
-            number_sets.append(nums)
-            all_numbers.update(nums)
-
-        has_nums_idx = [i for i, s in enumerate(number_sets) if s]
-        n_with_nums = len(has_nums_idx)
-        num_to_col = {n: i for i, n in enumerate(sorted(all_numbers))}
-        n_nums = len(num_to_col)
-
-        print(
-            f"  {len(distinct_texts)} texts, {n_with_nums} with numbers, "
-            f"{n_nums} distinct numbers"
-        )
-
-        # Build sparse D [n_with_nums, n_nums]
-        rows, cols = [], []
-        for new_i, orig_i in enumerate(has_nums_idx):
-            for n in number_sets[orig_i]:
-                rows.append(new_i)
-                cols.append(num_to_col[n])
-
-        D = sp.csr_matrix(
-            (np.ones(len(rows), dtype=np.float32), (rows, cols)),
-            shape=(n_with_nums, n_nums),
-        )
-
-        # SVD: top-k left singular vectors
-        k = min(n_components, min(D.shape) - 1)
-        print(f"  Computing SVD (k={k})...")
-        U, S, _ = svds(D.astype(np.float64), k=k)
-        order = np.argsort(-S)
-        U = U[:, order]
-        S = S[order]
-        print(f"  Top singular values: {S[:5]}")
-
-        # Build full V matrix [n_texts, k] — zero for texts without numbers
-        V = np.zeros((len(distinct_texts), k), dtype=np.float32)
-        for new_i, orig_i in enumerate(has_nums_idx):
-            V[orig_i] = U[new_i]
-
-        # Store as a tensor (moved to device in cannotlink_loss)
-        self._spectral_V = torch.from_numpy(V)  # [n_texts, k]
-        self._repulsive_enabled = True
-        print(f"  Spectral repulsion ready: V [{V.shape[0]}, {V.shape[1]}]")
-
-    def spectral_repulsion_loss(self, field_embs, text_idx):
-        """Spectral repulsive loss: maximize embedding variance along
-        the can't-link graph's eigen-directions.
-
-        V contains the left singular vectors of the digit indicator matrix D.
-        These directions separate texts with non-overlapping numbers.
-
-        Loss = -||V_batch^T @ Z_batch||_F^2 / B
-
-        This pushes embeddings to spread along the repulsive axes,
-        ensuring can't-linked records end up in different regions.
-        """
-        device = field_embs.device
-        union_embs = F.normalize(field_embs[:, 0, :], dim=-1)  # [B, d_model]
-
-        # Look up spectral directions for batch records
-        V = self._spectral_V.to(device)  # [n_texts, k]
-
-        # Gather V rows for batch — text_idx indexes into distinct_texts
-        ti = text_idx.long()  # [B]
-        valid = ti >= 0
-        if not valid.any():
-            return torch.tensor(0.0, device=device)
-
-        V_batch = V[ti[valid]]  # [B', k]
-        Z_batch = union_embs[valid]  # [B', d_model]
-
-        # V_batch^T @ Z_batch: [k, d_model] — projection of batch embeddings
-        # onto spectral axes. We want this to have large Frobenius norm.
-        proj = V_batch.t() @ Z_batch  # [k, d_model]
-        loss = -(proj**2).sum() / valid.sum()
-
-        return loss
 
     def _encode(self, batch):
         return self.model.encode_fields(
@@ -729,11 +615,6 @@ class RecordEmbeddingModule(L.LightningModule):
             field_embs, batch["fnum_label"]
         )
         loss = cbow_loss + proto_loss
-
-        if self._repulsive_enabled:
-            spectral_loss = self.spectral_repulsion_loss(field_embs, batch["text_idx"])
-            loss = loss + self._repulsive_weight * spectral_loss
-            self.log("train/spectral_loss", spectral_loss)
 
         self.log("train/loss", loss, prog_bar=True)
         self.log("train/cbow_loss", cbow_loss)
@@ -803,14 +684,6 @@ def main():
     parser.add_argument(
         "--resume", default=None, help="Checkpoint to resume from (partial load)"
     )
-    parser.add_argument(
-        "--spectral-repulsion",
-        action="store_true",
-        default=False,
-        help="Enable spectral repulsive loss (SVD of digit indicator matrix)",
-    )
-    parser.add_argument("--spectral-k", type=int, default=64)
-    parser.add_argument("--spectral-weight", type=float, default=1.0)
     args = parser.parse_args()
 
     random.seed(42)
@@ -830,37 +703,8 @@ def main():
     token_vocab = build_token_vocab(records, min_count=args.min_token_count)
     print(f"  {len(token_vocab)} word tokens (min_count={args.min_token_count})")
 
-    # Build distinct union_name texts deduplicated by token signature
-    # (tokenizer normalizes case/whitespace, so many raw texts map to the same tokens)
-    token_sig_to_text: dict[tuple, str] = {}
-    for rec in records:
-        un = rec["union_name"].strip()
-        if not un:
-            continue
-        tokens = _tokenize("union_name", un)
-        sig = tuple((t["token"], t["is_num"]) for t in tokens)
-        if sig not in token_sig_to_text:
-            token_sig_to_text[sig] = un
-    distinct_texts = sorted(token_sig_to_text.values())
-    # Map each raw text to its deduplicated index via token signature
-    text_to_text_idx: dict[str, int] = {}
-    text_idx_lookup = {t: i for i, t in enumerate(distinct_texts)}
-    sig_to_idx: dict[tuple, int] = {}
-    for sig, canon_text in token_sig_to_text.items():
-        sig_to_idx[sig] = text_idx_lookup[canon_text]
-    for rec in records:
-        un = rec["union_name"].strip()
-        if not un:
-            continue
-        tokens = _tokenize("union_name", un)
-        sig = tuple((t["token"], t["is_num"]) for t in tokens)
-        text_to_text_idx[un] = sig_to_idx[sig]
-    print(f"  {len(distinct_texts)} distinct union_name texts (after tokenizer dedup)")
-
     print("Building dataset...")
-    dataset = RecordDataset(
-        records, text_to_fnum, token_vocab, distinct_texts, text_to_text_idx
-    )
+    dataset = RecordDataset(records, text_to_fnum, token_vocab)
 
     # Stratified split
     N = len(dataset)
@@ -902,7 +746,6 @@ def main():
         epochs=args.epochs,
         vocab_size=len(token_vocab),
         n_classes=dataset.n_classes,
-        repulsive_weight=args.spectral_weight,
     )
     # Resume from checkpoint (partial load)
     if args.resume:
@@ -931,11 +774,6 @@ def main():
 
     param_count = sum(p.numel() for p in module.parameters())
     print(f"  Model parameters: {param_count:,}")
-
-    # Setup spectral repulsion (push apart texts with non-overlapping numbers)
-    if args.spectral_repulsion:
-        print("Setting up spectral repulsion...")
-        module.setup_spectral_repulsion(distinct_texts, args.spectral_k)
 
     # Train
     trainer = L.Trainer(

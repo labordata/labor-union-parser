@@ -204,6 +204,88 @@ def cluster_rac(
     return clusters
 
 
+def split_clusters_by_numbers(clusters, texts):
+    """Post-process: split clusters where members have non-overlapping numbers.
+
+    Within each cluster, extract number tokens from each text. Two texts are
+    connected if they share at least one number token (or if either has no
+    numbers). Split the cluster into connected components.
+
+    This is the "blocking" post-processing step — texts with disjoint number
+    sets should never be in the same cluster.
+    """
+    import sys
+
+    sys.path.insert(0, ".")
+    from training.train_record_embeddings import _tokenize
+
+    def get_numbers(text):
+        """Extract number tokens, treating letter codes as compound.
+
+        If any word token is a single letter (a-z) and there's at least
+        one number, treat as compound designation (e.g., 1199C, 751-A,
+        GCC-1L) — return 2+ tokens so the caller ejects it as singleton.
+        """
+        tokens = _tokenize("union_name", text)
+        nums = [tok["token"] for tok in tokens if tok["is_num"]]
+        if nums:
+            has_single_letter = any(
+                not tok["is_num"] and tok["token"].isalpha() and len(tok["token"]) == 1
+                for tok in tokens
+            )
+            if has_single_letter:
+                nums.append("__suffix__")
+        return frozenset(nums)
+
+    new_clusters = []
+    for cluster in clusters:
+        if len(cluster) <= 1:
+            new_clusters.append(cluster)
+            continue
+
+        # Extract number sets for each member
+        # Compound numbers (2+ tokens) → exclude from clustering
+        number_sets = []
+        for i in cluster:
+            nums = get_numbers(texts[i])
+            number_sets.append(nums)
+
+        # Group by number token: same single number → same sub-cluster,
+        # no number → own sub-cluster, compound → excluded (singleton)
+        from collections import defaultdict
+
+        number_groups = defaultdict(list)
+        no_number_members = []
+        for idx_in_cluster, i in enumerate(cluster):
+            nums = number_sets[idx_in_cluster]
+            if len(nums) == 1:
+                (num,) = nums
+                number_groups[num].append(i)
+            elif len(nums) == 0:
+                no_number_members.append(i)
+            else:
+                # Compound number — exclude as singleton
+                new_clusters.append([i])
+
+        if len(number_groups) <= 1:
+            # All same number or no numbers — keep as-is
+            remaining = []
+            for members in number_groups.values():
+                remaining.extend(members)
+            remaining.extend(no_number_members)
+            if remaining:
+                new_clusters.append(remaining)
+        else:
+            # Split: each number group becomes its own sub-cluster
+            for members in number_groups.values():
+                new_clusters.append(members)
+            if no_number_members:
+                new_clusters.append(no_number_members)
+
+    new_clusters.sort(key=len, reverse=True)
+    return new_clusters
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="RAC clustering of union_name embeddings"
@@ -223,6 +305,11 @@ def main():
         "--min-cluster-size", type=int, default=2, help="Minimum cluster size to report"
     )
     parser.add_argument("--db", default="f7.db")
+    parser.add_argument(
+        "--split-numbers",
+        action="store_true",
+        help="Post-process: split clusters by disjoint number tokens",
+    )
     parser.add_argument("--output", default=None, help="CSV output path")
     args = parser.parse_args()
 
@@ -282,6 +369,12 @@ def main():
     # Run RAC
     print(f"\nRunning RAC clustering (threshold={args.threshold})...")
     clusters = cluster_rac(embeddings, threshold=args.threshold)
+
+    # Post-process: split by number tokens
+    if args.split_numbers:
+        n_before = len(clusters)
+        clusters = split_clusters_by_numbers(clusters, texts)
+        print(f"\nNumber-split: {n_before} → {len(clusters)} clusters")
 
     # Report
     multi_clusters = [c for c in clusters if len(c) >= args.min_cluster_size]
