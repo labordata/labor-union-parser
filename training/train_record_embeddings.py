@@ -10,7 +10,7 @@ Loss 1 (CBOW, all 539K records):
 
 Loss 2 (ArcFace cosine classifier, ~200K labeled records):
   Cosine similarity classifier with ~8K classes (distinct f_nums), scale=30,
-  no margin. Cross-entropy on scaled cosine logits.
+  Cross-entropy on scaled cosine logits.
 
 Uses the production smart_truncate_nonspace tokenizer. Word tokens use a shared
 vocab embedding; number tokens use digit-level embeddings (10 digits + position)
@@ -561,7 +561,9 @@ class RecordEmbeddingModel(nn.Module):
         # Cosine similarity: normalize both embeddings and prototypes
         embs_norm = F.normalize(union_embs, dim=1)
         w_norm = F.normalize(self.prototypes.weight, dim=1)
-        logits = self.arcface_scale * (embs_norm @ w_norm.t())
+        cos_sim = embs_norm @ w_norm.t()  # [N_lab, n_classes]
+
+        logits = self.arcface_scale * cos_sim
 
         loss = F.cross_entropy(logits, labels)
         top1_acc = (logits.argmax(dim=1) == labels).float().mean()
