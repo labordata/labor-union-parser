@@ -15535,7 +15535,7 @@ American Federation Of State City & Municipal Employees/National Union of Hospit
 Art Directors Guild - IATSE Local 800,STAGE AND PICTURE OPERATORS AFL-CIO,48974,800,4
 Art Directors Guild / IATSE-800,STAGE AND PICTURE OPERATORS AFL-CIO,48974,800,4
 Automobile Mechanics Union Local No. 701,AUTO WORKERS AFL-CIO,529027,1,4
-Automobile Mechanics'-701,AUTO WORKERS AFL-CIO,529027,1,4
+Automobile Mechanics'-701,MACHINISTS AFL-CIO,16910,1,4
 BAC - 1 3 6 7 9 11 13 19 21 34,BRICKLAYERS AFL-CIO,45266,19,4
 BAC - 1 LA NM TX,BRICKLAYERS AFL-CIO,537390,,4
 BAC - 1 MASSACHUSETTS,BRICKLAYERS AFL-CIO,526931,,4
@@ -19070,7 +19070,7 @@ Raytheon Guards Association,RAYTHEON GUARDS ASSOCIATION,2119,,3
 CANA - SANTA CLARA,CALIFORNIA NURSES ASSOCIATION,15724,,3
 EA -,EMPLOYEES ASSOCIATION OF B AND T,537067,,3
 TGWA -,TEXTILE GARMENT WORKERS ASSN,4473,,3
-IUPA -,INDEPENDENT UNION OF PROF AND ASSOC,542797,,3
+IUPA -,"POLICE ASSOCIATIONS, INTL, AFL-CIO",366,,3
 ERA-OH,EMES RABBINIC ASSOCIATION,540466,,3
 Independent Pharmacists Assn,INDEPENDENT PHARMACISTS ASSOCIATION,61597,,3
 Hermandad Empleados de Salud y otras agencias-,MOVIMIENTO SOLIDARIO SINDICAL,544190,,3
@@ -26917,7 +26917,7 @@ District Council 37/1707 Local,PAINTERS AFL-CIO,19096,37,2
 Gas Workers Local 340 340,PLUMBERS AFL-CIO,17509,340,2
 Teamsters Local Union No. 416 416,TEAMSTERS,16339,416,2
 "Transport Workers Union of America, Local 252, AFL=CIO 252",TRANSPORT WORKERS AFL-CIO,53171,252,2
-District Council 37 389,PAINTERS AFL-CIO,19096,37,2
+District Council 37 389,STATE COUNTY AND MUNI EMPLS AFL-CIO,516238,37,2
 OPERATIVE PLASTERERS & CEMENT MASONS LOCAL 692 101S,PLASTERERS AND CEMENT MASONS AFL-CIO,530002,692,2
 OPERATIVE PLASTERERS & CEMENT MASONS LOCAL 692 121,PLASTERERS AND CEMENT MASONS AFL-CIO,530002,692,2
 OPERATIVE PLASTERERS & CEMENT MASONS LOCAL 692 165,PLASTERERS AND CEMENT MASONS AFL-CIO,530002,692,2
@@ -30089,7 +30089,7 @@ Art Directors Guild IATSE Local 800,STAGE AND PICTURE OPERATORS AFL-CIO,48974,80
 "Associated Musicians of Greater New York, AFM Local 802",MUSICIANS AFL-CIO,10790,802,2
 "Associated Musicians of Greater New York, Local 802 AFM 802",MUSICIANS AFL-CIO,10790,802,2
 "Automobile Mechanics Union, IAMAW Local 701",MACHINISTS AFL-CIO,,,2
-Automobile Mechanics' Local 701,AUTO WORKERS AFL-CIO,529027,1,2
+Automobile Mechanics' Local 701,MACHINISTS AFL-CIO,16910,1,2
 "Automobile Mechanics' Local 701, International Association of Machinists and Aerospace Workers, AFL-",MACHINISTS AFL-CIO,,,2
 "Automobile Mechanics, IAM 701",MACHINISTS AFL-CIO,,,2
 "Automotive and Allied Industries Employees of San Diego County, Teamsters Local 481",TEAMSTERS,46777,481,2
@@ -30234,8 +30234,8 @@ Chicago Federatin of Musicians 10-208,MUSICIANS AFL-CIO,28040,10,2
 Chicago Federation of Musicians LOCAL 10-208,MUSICIANS AFL-CIO,28040,10,2
 "Chicago Federation of Musicians, Local 10-208 American Federation of Musicians 10-208",MUSICIANS AFL-CIO,28040,10,2
 Civil Service Employees Association #1000,SERVICE EMPLOYEES,,,2
-Civil Service Employees Association Local 1000 AFSCME AFL-CIO 1000,SERVICE EMPLOYEES,,,2
-"Civil Service Employees Association, Inc., Local 1000, AFSCME, AFL-CIO 710",SERVICE EMPLOYEES,537311,10,2
+Civil Service Employees Association Local 1000 AFSCME AFL-CIO 1000,STATE COUNTY AND MUNI EMPLS AFL-CIO,,,2
+"Civil Service Employees Association, Inc., Local 1000, AFSCME, AFL-CIO 710",STATE COUNTY AND MUNI EMPLS AFL-CIO,519363,10,2
 Civil Service Employees Association/American Federation of State County & Municipal Employees 1000,SERVICE EMPLOYEES,,,2
 "Cleveland Federation of Musicians, Local 4 American Federation of Musicians 4",MUSICIANS AFL-CIO,30803,4,2
 Colorado Laborers-720 & 578,LABORERS,20306,720,2
@@ -49118,7 +49118,7 @@ Michigan Association of Police (MAP) N/A,MICHIGAN ASSOCIATION OF POLICE,540101,,
 Independent Pharmacists Association-N/A,INDEPENDENT PHARMACISTS ASSOCIATION,61597,,1
 Independent Pharmacists Association N/A,INDEPENDENT PHARMACISTS ASSOCIATION,61597,,1
 California Federation of Teachers-,"FIELD REPRESENTATIVES UNION,",517392,,1
-California Federation of Teachers,"FIELD REPRESENTATIVES UNION,",517392,,1
+California Federation of Teachers,TEACHERS AFL-CIO,512967,,1
 S.D.M. of America,SECURITY DEPARTMENT MEMBERSHIP,541796,,1
 SDM of America,SECURITY DEPARTMENT MEMBERSHIP,541796,,1
 "International Organization of Masters, Mates & Pilots UIG-GL's & G",MASTERS MATES AND PILOTS AFL-CIO,,,1
@@ -49150,7 +49150,7 @@ CSHA - IND,CURRENCY AND SECURITY HANDLERS ASSN,541479,,1
 T. A. -,TUNMORE ASSOCIATION,540829,,1
 KNEA - SANTA FE TRAIL EA,NATIONAL EDUCATION ASN IND,,,1
 SNA - SANTA ROSA,STAFF NURSES ASSOICATION  OF,542946,,1
-IUPA - AFL CIO,INDEPENDENT UNION OF PROF AND ASSOC,542797,,1
+IUPA - AFL CIO,"POLICE ASSOCIATIONS, INTL, AFL-CIO",366,,1
 IUPA - WESU,INDEPENDENT UNION OF PROF AND ASSOC,542797,,1
 SFAAW -,SPIRIT FLIGHT ATTENDANTS ASSOCIATION,545499,,1
 DCNA - HOWARD UNIV & HOSP UNIT,DELAWARE COUNTY NURSES ASSOCIATION,545711,,1
@@ -58678,22 +58678,22 @@ Chicago and Midwest Regional Joint Board an affiliate of Workers United 969,"WOR
 "Chuaffeurs, Teamsters and Helpers 58",TEAMSTERS,61314,58,1
 Chuck Parker iuoe132,"ENGINEERS, OPERATING, AFL-CIO",27453,132,1
 Cincinnati Theatrical Wardrobe Union  IATSE 864,STAGE AND PICTURE OPERATORS AFL-CIO,19885,864,1
-"Civil Service Employees Associatiion Local 1000 AFSCME, AFL-CIO 777",SERVICE EMPLOYEES,545484,777,1
+"Civil Service Employees Associatiion Local 1000 AFSCME, AFL-CIO 777",STATE COUNTY AND MUNI EMPLS AFL-CIO,545969,777,1
 Civil Service Employees Association 297,SERVICE EMPLOYEES,,,1
 Civil Service Employees Association 767,SERVICE EMPLOYEES,514578,767,1
-"Civil Service Employees Association Inc Local 1000 AFSCME, AFL-CIO 891",SERVICE EMPLOYEES,23715,1,1
-Civil Service Employees Association Inc. / AFSCME AFL-CIO 1000,SERVICE EMPLOYEES,,,1
-Civil Service Employees Association Inc. Local 1000 / AFSCME AFL-CIO Local 784,SERVICE EMPLOYEES,53007,784,1
+"Civil Service Employees Association Inc Local 1000 AFSCME, AFL-CIO 891",STATE COUNTY AND MUNI EMPLS AFL-CIO,526927,1,1
+Civil Service Employees Association Inc. / AFSCME AFL-CIO 1000,STATE COUNTY AND MUNI EMPLS AFL-CIO,,,1
+Civil Service Employees Association Inc. Local 1000 / AFSCME AFL-CIO Local 784,STATE COUNTY AND MUNI EMPLS AFL-CIO,545263,784,1
 Civil Service Employees Association Local 752,SERVICE EMPLOYEES,25279,52,1
-"Civil Service Employees Association, Inc. AFSCME Local 1000, AFL-CIO 754",SERVICE EMPLOYEES,57122,754,1
-"Civil Service Employees Association, Inc., Local 1000, AFSCME, AFL-CIO",SERVICE EMPLOYEES,,,1
+"Civil Service Employees Association, Inc. AFSCME Local 1000, AFL-CIO 754",STATE COUNTY AND MUNI EMPLS AFL-CIO,544378,754,1
+"Civil Service Employees Association, Inc., Local 1000, AFSCME, AFL-CIO",STATE COUNTY AND MUNI EMPLS AFL-CIO,,,1
 "Civil Service Employees Association, Inc.-1000",SERVICE EMPLOYEES,,,1
 Civil Service Employees Association/American Federation of State County & Municipal Employees 794,SERVICE EMPLOYEES,,,1
 Civil Service Employees Association/American Federation of State County & Municipal Employees CSEA Essex Center for Rehabilitation and Healthcare Local 777,SERVICE EMPLOYEES,545484,777,1
 Civil Service Employees Association/American Federation of State County & Municipal Employees CSEA Otsego Health Care Local 782,SERVICE EMPLOYEES,35521,782,1
 "Civil Service Employees Association/American Federation of State County & Municipal Employees CSEA Storm King Art Center Local 720, Unit VSS",SERVICE EMPLOYEES,542026,20,1
 Civil Service Employees Association/American Federation of State County & Municipal Employees Local 1000,SERVICE EMPLOYEES,,,1
-"Civil Service Employees Association/American Federation of State County & Municipal Employees Local 1000 AFSCME, AFL-CIO",SERVICE EMPLOYEES,,,1
+"Civil Service Employees Association/American Federation of State County & Municipal Employees Local 1000 AFSCME, AFL-CIO",STATE COUNTY AND MUNI EMPLS AFL-CIO,,,1
 Civil Service Employees Association/American Federation of State County & Municipal Employees Local 760,SERVICE EMPLOYEES,,,1
 Civil Service Employees Assocition 1000,SERVICE EMPLOYEES,,,1
 Clerical Engineering & Warehouse-IBEW-969,ELECTRICAL WORKERS IBEW AFL-CIO,25714,969,1
@@ -64104,7 +64104,7 @@ Ohio Federation of Teachers/American Federation of Teachers 6570,TEACHERS AFL-CI
 Ohio Federation of Teachers/American Federation of Teachers Local 6570,TEACHERS AFL-CIO,,,1
 Old Pueblo Firefighters Association IAFF: 4944,FIRE FIGHTERS AFL-CIO,,,1
 Omaha Mailers-M-100/CWA14744,COMMUNICATIONS WORKERS AFL-CIO,47409,14744,1
-Operaitng Engineers Local Union 3,COMMUNICATIONS WORKERS AFL-CIO,3705,3,1
+Operaitng Engineers Local Union 3,"ENGINEERS, OPERATING, AFL-CIO",35651,3,1
 Operating Engineering Local Union No. 3 3,"ENGINEERS, OPERATING, AFL-CIO",35651,3,1
 Operating Engineerrs Local Union 3,"ENGINEERS, OPERATING, AFL-CIO",35651,3,1
 Operating Engineers Local Union No 3,"ENGINEERS, OPERATING, AFL-CIO",35651,3,1
