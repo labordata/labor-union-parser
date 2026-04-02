@@ -897,6 +897,7 @@ def main():
         checkpoint = {
             "state_dict": model.state_dict(),
             "fnum_to_idx": fnum_to_idx,
+            "vocab": vocab,
             "d_model": args.d_model,
             "n_heads": args.n_heads,
             "n_layers": args.n_layers,
