@@ -331,7 +331,12 @@ def load_vocabularies():
 
 
 def load_fnum_records():
-    """Load fnum_to_records from fnum_to_records.json."""
+    """Load fnum_to_records from fnum_to_records.json.
+
+    Also adds short-number alias records for NABET locals (CWA 5xxxx).
+    The gazetteer has e.g. desig_num=52031 but filings say "NABET-31".
+    The alias record with desig_num=31 lets filter_records_by_query match.
+    """
     print(f"Loading fnum_to_records from {FNUM_RECORDS_PATH}...")
     with open(FNUM_RECORDS_PATH) as f:
         data = json.load(f)
@@ -339,6 +344,36 @@ def load_fnum_records():
     fnum_to_records = {int(k): v for k, v in data.items()}
     total_variants = sum(len(v) for v in fnum_to_records.values())
     print(f"  {len(fnum_to_records)} f_nums with {total_variants} record variants")
+
+    # NABET short-number aliases: extracted from lm_data unit_names
+    # "NABET LOCAL 31" = CWA desig_num 52031 → add alias with desig_num=31
+    nabet_aliases = {
+        65293: 16,  # 51016 → 16
+        515264: 17,  # 51017 → 17
+        28509: 21,  # 51021 → 21
+        516680: 209,  # 51209 → 209
+        511308: 211,  # 51211 → 211
+        30514: 31,  # 52031 → 31
+        13035: 42,  # 54042 → 42
+        40233: 43,  # 54043 → 43
+        26313: 53,  # 59053 → 53
+        514219: 57,  # 59057 → 57
+    }
+
+    aliases_added = 0
+    for fnum, short_num in nabet_aliases.items():
+        if fnum in fnum_to_records:
+            records = fnum_to_records[fnum]
+            # Check short_num doesn't already exist as a variant
+            existing_dnums = {r.get("desig_num") for r in records}
+            if short_num not in existing_dnums:
+                alias = dict(records[0])
+                alias["desig_num"] = short_num
+                records.append(alias)
+                aliases_added += 1
+
+    if aliases_added:
+        print(f"  Added {aliases_added} NABET short-number alias records")
 
     return fnum_to_records
 
