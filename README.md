@@ -228,3 +228,40 @@ An auxiliary classification head shares the `W_union` embedding weights
 with the prototypes. During training, a disagree penalty ensures the
 f_num predictions are consistent with the union head's prediction.
 At inference, the union head provides the `union_name` output.
+
+### Performance
+
+<!--[[[cog
+import sys; sys.path.insert(0, "training")
+from evaluate import compute_test_metrics
+
+m = compute_test_metrics()
+
+total_errors = m['wrong_matches'] + m['false_negatives'] + m['false_match_no_fnum'] + m['false_positives']
+total_correct = m['n_scored'] - total_errors
+accuracy = total_correct / m['n_scored']
+
+cog.outl(f"End-to-end on held-out test data ({m['n_scored']:,} examples")
+cog.outl("scored against the full 44K-record gazetteer):")
+cog.outl("")
+cog.outl("| Metric | Score |")
+cog.outl("|--------|-------|")
+cog.outl(f"| Accuracy | {accuracy:.1%} |")
+cog.outl(f"| f_num accuracy (union examples) | {m['fnum_accuracy']:.1%} ({m['fnum_correct']}/{m['fnum_total']}) |")
+cog.outl(f"| union_name accuracy | {m['union_accuracy']:.1%} ({m['union_correct']}/{m['union_total']}) |")
+cog.outl(f"| Wrong match (union, wrong f_num) | {m['wrong_matches']} |")
+cog.outl(f"| False negatives (union missed) | {m['false_negatives']} |")
+cog.outl(f"| False positives (non-union matched) | {m['false_positives']} |")
+]]]-->
+End-to-end on held-out test data (8,675 examples
+scored against the full 44K-record gazetteer):
+
+| Metric | Score |
+|--------|-------|
+| Accuracy | 85.7% |
+| f_num accuracy (union examples) | 96.2% (7301/7589) |
+| union_name accuracy | 96.9% (9081/9367) |
+| Wrong match (union, wrong f_num) | 288 |
+| False negatives (union missed) | 88 |
+| False positives (non-union matched) | 22 |
+<!--[[[end]]]-->
