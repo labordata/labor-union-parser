@@ -5,11 +5,11 @@ ArcFace model against a gazetteer of ~44,000 filing records.
 
 Given an input like `"SEIU Local 1199"`, the parser returns:
 - `is_union`: True (detected as a union)
-- `union_score`: 0.68 (similarity to union centroid)
+- `union_score`: 0.677 (similarity to union centroid)
 - `union_name`: SERVICE EMPLOYEES (predicted parent union name)
 - `f_num`: 31847 (OLMS filing number of best-matching gazetteer record)
 - `match_found`: True (whether the match confidence exceeds threshold)
-- `match_score`: 0.93 (softmax probability of best match)
+- `match_score`: 0.929 (softmax probability of best match)
 
 Other record fields (designation type, local number, prefix, suffix)
 are fully determined by the f_num and can be looked up from the
@@ -31,8 +31,21 @@ from labor_union_parser import Extractor
 extractor = Extractor()
 result = extractor.extract("SEIU Local 1199")
 print(result)
-# {'is_union': True, 'union_score': 0.677, 'union_name': 'SERVICE EMPLOYEES',
-#  'f_num': 31847, 'match_found': True, 'match_score': 0.929}
+<!--[[[cog
+import pprint
+from labor_union_parser import Extractor
+
+result = Extractor().extract("SEIU Local 1199")
+for line in pprint.pformat(result, width=72).splitlines():
+    cog.outl(f"# {line}")
+]]]-->
+# {'f_num': 31847,
+#  'is_union': True,
+#  'match_found': True,
+#  'match_score': 0.9293506741523743,
+#  'union_name': 'SERVICE EMPLOYEES',
+#  'union_score': 0.6771580576896667}
+<!--[[[end]]]-->
 ```
 
 For batch processing, use `extract_batch` which processes texts in parallel for better throughput:
@@ -81,8 +94,18 @@ labor-union-parser unions.csv -c union_name -o results.csv
 
 # Process from stdin
 echo "SEIU Local 1199" | labor-union-parser --no-header
+<!--[[[cog
+import subprocess
+result = subprocess.run(
+    'echo "SEIU Local 1199" | labor-union-parser --no-header',
+    shell=True, capture_output=True, text=True
+)
+for line in result.stdout.strip().splitlines():
+    cog.outl(line)
+]]]-->
 text,pred_is_union,pred_union_score,pred_union_name,pred_f_num,pred_match_found,pred_match_score
 SEIU Local 1199,True,0.6772,SERVICE EMPLOYEES,31847,True,0.9294
+<!--[[[end]]]-->
 ```
 
 ## Output Fields
