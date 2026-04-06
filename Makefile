@@ -8,8 +8,6 @@ all: weights readme
 
 .PHONY: evaluate
 evaluate: weights
-	python training/eval_factored_scoring.py
-	python training/eval_union_detector.py
 	python training/evaluate.py
 
 .PHONY: readme
@@ -17,48 +15,22 @@ readme: weights
 	cog -r README.md
 
 .PHONY: weights
-weights: $(WEIGHTS_DIR)/structured_classifier.pt \
-         $(WEIGHTS_DIR)/union_detector.pt \
-         $(WEIGHTS_DIR)/scoring_weights.pt
+weights: $(WEIGHTS_DIR)/arcface_classifier.pt \
+         $(WEIGHTS_DIR)/union_detector.pt
 
 .PHONY: train
-train: $(WEIGHTS_DIR)/structured_classifier.pt $(WEIGHTS_DIR)/union_detector.pt
+train: $(WEIGHTS_DIR)/arcface_classifier.pt $(WEIGHTS_DIR)/union_detector.pt
 
-PRECOMPUTED_SENTINEL = $(DATA_DIR)/precomputed_features/.done
+# Bundle ArcFace classifier with gazetteer
+$(WEIGHTS_DIR)/arcface_classifier.pt : $(DATA_DIR)/arcface_classifier.ckpt \
+                                       $(DATA_DIR)/gazetteer.json \
+                                       $(DATA_DIR)/training_examples.json
+	python training/bundle_arcface_classifier.py
 
-# Bundle scoring weights for production
-$(WEIGHTS_DIR)/scoring_weights.pt : $(DATA_DIR)/temperatures.json \
-                                    $(WEIGHTS_DIR)/scoring_layer.pt
-	python training/bundle_scoring_weights.py
-
-# Train scoring layer (depends on precomputed features)
-.SECONDARY: $(WEIGHTS_DIR)/scoring_layer.pt
-$(WEIGHTS_DIR)/scoring_layer.pt : $(PRECOMPUTED_SENTINEL) \
-                                  $(DATA_DIR)/training_examples.json
-	python training/train_scoring_layer.py
-
-# Precompute features (depends on bundled classifier + temperatures)
-$(PRECOMPUTED_SENTINEL) : $(WEIGHTS_DIR)/structured_classifier.pt \
-                          $(DATA_DIR)/temperatures.json \
-                          $(DATA_DIR)/training_examples.json
-	python training/precompute_features.py
-	touch $@
-
-# Fit per-head temperatures
-.SECONDARY: $(DATA_DIR)/temperatures.json
-$(DATA_DIR)/temperatures.json : $(WEIGHTS_DIR)/structured_classifier.pt
-	cd training && python fit_temperatures.py
-
-# Bundle trained model with gazetteer and fnum counts
-$(WEIGHTS_DIR)/structured_classifier.pt : $(DATA_DIR)/structured_classifier.ckpt \
-                                          $(DATA_DIR)/gazetteer.json \
-                                          $(DATA_DIR)/training_examples.json
-	python training/bundle_structured_classifier.py
-
-# Train structured classifier (Lightning checkpoint)
-.SECONDARY: $(DATA_DIR)/structured_classifier.ckpt
-$(DATA_DIR)/structured_classifier.ckpt : $(DATA_DIR)/training_examples.json
-	python training/train_structured_classifier.py
+# Train ArcFace classifier
+.SECONDARY: $(DATA_DIR)/arcface_classifier.ckpt
+$(DATA_DIR)/arcface_classifier.ckpt : $(DATA_DIR)/training_examples.json
+	python training/train_arcface_classifier.py
 
 # Train union detector
 $(WEIGHTS_DIR)/union_detector.pt : $(DATA_DIR)/training_examples.json
@@ -98,13 +70,11 @@ $(DATA_DIR)/opdr.db:
 
 .PHONY: clean-training
 clean-training:
-	-rm $(DATA_DIR)/structured_classifier*.ckpt
-	-rm -rf $(DATA_DIR)/precomputed_features
-	-rm -rf $(DATA_DIR)/lightning_logs
-	-rm -rf training/lightning_logs
+	-rm -f $(DATA_DIR)/arcface_classifier.ckpt
+	-rm -f $(WEIGHTS_DIR)/arcface_classifier.pt
 
 .PHONY: clean
-clean:
+clean: clean-training
 	-rm $(DATA_DIR)/vocabularies.json
 	-rm $(DATA_DIR)/unaff_synthetic.csv
 	-rm $(DATA_DIR)/training_examples.json

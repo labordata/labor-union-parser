@@ -13,28 +13,10 @@ from pathlib import Path
 import pandas as pd
 
 from labor_union_parser import Extractor
-from labor_union_parser.scoring import _normalize_pointer_value
-
-
-def _normalize_or_empty(val):
-    """Normalize a pointer field value, returning '' for None."""
-    result = _normalize_pointer_value(val)
-    return result if result is not None else ""
-
 
 SCRIPT_DIR = Path(__file__).parent
 
 BATCH_SIZE = 256
-
-
-SCORE_FIELDS = [
-    "union_name",
-    "desig_name",
-    "f_num",
-    "desig_num",
-    "prefix",
-    "suffix",
-]
 
 
 def compute_test_metrics():
@@ -42,7 +24,7 @@ def compute_test_metrics():
 
     Returns dict with keys:
         n_scored, wrong_matches, false_negatives, false_match_no_fnum,
-        false_positives, n_is_union, field_accuracy (dict field -> float),
+        false_positives, n_is_union,
         union_errors (list), false_positive_errors (list)
     """
     with open(SCRIPT_DIR / "data/training_examples.json") as f:
@@ -90,21 +72,18 @@ def compute_test_metrics():
                 error_type = "false_match_no_fnum"
             else:
                 error_type = "wrong_match"
-            row = {
-                "type": error_type,
-                "text": text[:80],
-                "true_fnum": true_fnum,
-                "pred_fnum": result["f_num"],
-                "is_union": result["is_union"],
-                "union_score": f"{result['union_score']:.4f}",
-                "match_score": f"{result['match_score']:.4f}",
-                "pred_union_name": result["union_name"],
-            }
-            fs = result.get("field_scores", {})
-            for f in SCORE_FIELDS:
-                val = fs.get(f)
-                row[f"score_{f}"] = f"{val:.4f}" if val is not None else ""
-            union_errors.append(row)
+            union_errors.append(
+                {
+                    "type": error_type,
+                    "text": text[:80],
+                    "true_fnum": true_fnum,
+                    "pred_fnum": result["f_num"],
+                    "is_union": result["is_union"],
+                    "union_score": f"{result['union_score']:.4f}",
+                    "match_score": f"{result['match_score']:.4f}",
+                    "pred_union_name": result["union_name"],
+                }
+            )
 
     false_negatives = sum(1 for e in union_errors if e["type"] == "false_negative")
     wrong_matches = sum(1 for e in union_errors if e["type"] == "wrong_match")
@@ -129,32 +108,27 @@ def compute_test_metrics():
                 }
             )
 
-    # --- Per-field accuracy ---
-    field_correct = {f: 0 for f in SCORE_FIELDS}
-    n_is_union_per = {f: 0 for f in SCORE_FIELDS}
+    # --- f_num + union_name accuracy ---
     n_is_union = 0
+    fnum_correct = 0
+    fnum_total = 0
+    union_correct = 0
+    union_total = 0
     for ex, result in zip(union_examples, union_results):
         if not result["is_union"]:
             continue
         n_is_union += 1
         rec = ex["records"][0]
-        for f, pred, raw_true in [
-            ("union_name", result["union_name"], rec.get("union_name", "")),
-            ("desig_name", result["desig_name"], rec.get("desig_name", "")),
-            ("f_num", result["f_num"], rec.get("f_num", 0)),
-            ("desig_num", result["desig_num"], rec.get("desig_num")),
-            ("prefix", result["prefix"], rec.get("prefix")),
-            ("suffix", result["suffix"], rec.get("suffix")),
-        ]:
-            if raw_true == -100:
-                continue
-            if f in ("desig_num", "prefix", "suffix"):
-                true = _normalize_or_empty(raw_true)
-            else:
-                true = raw_true
-            n_is_union_per[f] += 1
-            if pred == true:
-                field_correct[f] += 1
+        true_fnum = rec.get("f_num", -100)
+        if true_fnum != -100:
+            fnum_total += 1
+            if result["f_num"] == true_fnum:
+                fnum_correct += 1
+        true_union = rec.get("union_name", "")
+        if true_union:
+            union_total += 1
+            if result["union_name"] == true_union:
+                union_correct += 1
 
     n_potentially_resolvable = sum(
         1
@@ -163,11 +137,6 @@ def compute_test_metrics():
     )
     n_scored = n_total - n_potentially_resolvable
 
-    field_accuracy = {}
-    for f in SCORE_FIELDS:
-        ft = n_is_union_per[f]
-        field_accuracy[f] = field_correct[f] / ft if ft else 0
-
     return {
         "n_scored": n_scored,
         "wrong_matches": wrong_matches,
@@ -175,7 +144,12 @@ def compute_test_metrics():
         "false_match_no_fnum": false_match_no_fnum,
         "false_positives": len(false_positive_errors),
         "n_is_union": n_is_union,
-        "field_accuracy": field_accuracy,
+        "fnum_accuracy": fnum_correct / fnum_total if fnum_total else 0,
+        "union_accuracy": union_correct / union_total if union_total else 0,
+        "fnum_correct": fnum_correct,
+        "fnum_total": fnum_total,
+        "union_correct": union_correct,
+        "union_total": union_total,
         "union_errors": union_errors,
         "false_positive_errors": false_positive_errors,
         "union_examples": union_examples,
@@ -211,11 +185,13 @@ def main():
     print(f"  False match on no-fnum examples: {m['false_match_no_fnum']}")
     print(f"  False positives (non-union, is_union=True): {m['false_positives']}")
 
+    print(f"\nAccuracy ({m['n_is_union']} union examples with is_union=True):")
     print(
-        f"\nPer-field accuracy ({m['n_is_union']} union examples with is_union=True):"
+        f"  f_num:      {m['fnum_correct']}/{m['fnum_total']} = {m['fnum_accuracy']:.4f}"
     )
-    for f in SCORE_FIELDS:
-        print(f"  {f:>12s}: {m['field_accuracy'][f]:.4f}")
+    print(
+        f"  union_name: {m['union_correct']}/{m['union_total']} = {m['union_accuracy']:.4f}"
+    )
 
     # --- match_found breakdown (only examples with known f_num) ---
     null_total = 0
@@ -284,8 +260,6 @@ def main():
         )
 
     # --- Precision/recall at match_score thresholds ---
-    # A prediction is "accepted" if is_union=True AND match_score >= threshold
-    # True positive: union example accepted with correct f_num
     union_preds = []
     for ex, true_fnum, result in zip(union_examples, true_fnums, union_results):
         if ex.get("reason_missing_fnum") == "potentially resolvable":
