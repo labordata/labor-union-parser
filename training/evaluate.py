@@ -109,9 +109,14 @@ def compute_test_metrics():
             )
 
     # --- f_num + union_name accuracy ---
+    # Get the set of f_nums the model knows about
+    known_fnums = set(extractor.idx_to_fnum.values())
+
     n_is_union = 0
     fnum_correct = 0
     fnum_total = 0
+    fnum_invocab_correct = 0
+    fnum_invocab_total = 0
     union_correct = 0
     union_total = 0
     for ex, result in zip(union_examples, union_results):
@@ -124,6 +129,10 @@ def compute_test_metrics():
             fnum_total += 1
             if result["f_num"] == true_fnum:
                 fnum_correct += 1
+            if true_fnum in known_fnums:
+                fnum_invocab_total += 1
+                if result["f_num"] == true_fnum:
+                    fnum_invocab_correct += 1
         true_union = rec.get("union_name", "")
         if true_union:
             union_total += 1
@@ -145,6 +154,11 @@ def compute_test_metrics():
         "false_positives": len(false_positive_errors),
         "n_is_union": n_is_union,
         "fnum_accuracy": fnum_correct / fnum_total if fnum_total else 0,
+        "fnum_invocab_accuracy": (
+            fnum_invocab_correct / fnum_invocab_total if fnum_invocab_total else 0
+        ),
+        "fnum_invocab_correct": fnum_invocab_correct,
+        "fnum_invocab_total": fnum_invocab_total,
         "union_accuracy": union_correct / union_total if union_total else 0,
         "fnum_correct": fnum_correct,
         "fnum_total": fnum_total,
@@ -187,10 +201,13 @@ def main():
 
     print(f"\nAccuracy ({m['n_is_union']} union examples with is_union=True):")
     print(
-        f"  f_num:      {m['fnum_correct']}/{m['fnum_total']} = {m['fnum_accuracy']:.4f}"
+        f"  f_num:           {m['fnum_correct']}/{m['fnum_total']} = {m['fnum_accuracy']:.4f}"
     )
     print(
-        f"  union_name: {m['union_correct']}/{m['union_total']} = {m['union_accuracy']:.4f}"
+        f"  f_num (in-vocab): {m['fnum_invocab_correct']}/{m['fnum_invocab_total']} = {m['fnum_invocab_accuracy']:.4f}"
+    )
+    print(
+        f"  union_name:      {m['union_correct']}/{m['union_total']} = {m['union_accuracy']:.4f}"
     )
 
     # --- match_found breakdown (only examples with known f_num) ---

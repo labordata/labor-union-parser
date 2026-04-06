@@ -248,6 +248,7 @@ cog.outl("| Metric | Score |")
 cog.outl("|--------|-------|")
 cog.outl(f"| Accuracy | {accuracy:.1%} |")
 cog.outl(f"| f_num accuracy (union examples) | {m['fnum_accuracy']:.1%} ({m['fnum_correct']}/{m['fnum_total']}) |")
+cog.outl(f"| f_num accuracy (in-vocab only) | {m.get('fnum_invocab_accuracy', 0):.1%} |")
 cog.outl(f"| union_name accuracy | {m['union_accuracy']:.1%} ({m['union_correct']}/{m['union_total']}) |")
 cog.outl(f"| Wrong match (union, wrong f_num) | {m['wrong_matches']} |")
 cog.outl(f"| False negatives (union missed) | {m['false_negatives']} |")
@@ -260,6 +261,7 @@ scored against the full 44K-record gazetteer):
 |--------|-------|
 | Accuracy | 85.7% |
 | f_num accuracy (union examples) | 96.2% (7301/7589) |
+| f_num accuracy (in-vocab only) | 99.2% |
 | union_name accuracy | 96.9% (9081/9367) |
 | Wrong match (union, wrong f_num) | 288 |
 | False negatives (union missed) | 88 |
