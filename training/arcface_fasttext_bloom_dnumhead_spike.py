@@ -1,12 +1,10 @@
-"""ArcFace with Multi-Prototype + Union Name Classification Head.
+"""ArcFace with Shared Union Head + Shared Bloom desig_num Head.
 
-Based on arcface_fasttext_bloom_multiproto_spike.py. Adds an auxiliary
-union_name classification head trained jointly with ArcFace. This pushes
-the encoder to produce stronger union representations, which should help
-cross-union disambiguation.
-
-Phase 2 (--disagree-penalty): adds a penalty when the f_num prediction's
-union disagrees with the union head's prediction.
+Extends unionhead spike with a desig_num classification head that shares
+the bloom_embed weights with the factored prototypes. Just as the union
+head shares W_union between prototype and classification, this shares
+bloom_embed — gradient from desig_num classification directly improves
+the prototype's number component.
 """
 
 import argparse
@@ -459,10 +457,12 @@ class ArcFaceFastTextModel(nn.Module):
 
         # Auxiliary shared heads — gradient flows into prototype embeddings
         self.union_scale = nn.Parameter(torch.tensor(10.0))
-        self.desig_scale = nn.Parameter(torch.tensor(10.0))
+        self.dnum_scale = nn.Parameter(torch.tensor(10.0))
         # class→field mappings for disagree penalties (set after construction)
         self.class_to_union = None
-        self.class_to_desig = None
+        self.class_to_dnum = None  # (n_classes,) index into unique dnum table
+        # unique desig_num bloom hashes (set after construction)
+        self.unique_dnum_blooms = None  # (n_unique_dnums, NUM_BLOOM_HASHES)
 
     def encode(self, token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths):
         """Encode to L2-normalized embeddings via masked mean-pool."""
@@ -491,30 +491,47 @@ class ArcFaceFastTextModel(nn.Module):
         )
         logits, arcface_loss = self.arcface(embeddings, targets)
 
-        # Auxiliary heads — shared weights with prototypes
+        # Union head — shared W_union weights with prototypes
         W_u = self.arcface.W_union.weight[1:]
         union_logits = self.union_scale * F.linear(embeddings, F.normalize(W_u, dim=1))
-        W_dn = self.arcface.W_desig_name.weight[1:]
-        desig_logits = self.desig_scale * F.linear(embeddings, F.normalize(W_dn, dim=1))
+
+        # Desig_num head — shared bloom_embed with prototypes
+        dnum_logits = None
+        if self.unique_dnum_blooms is not None:
+            W_dnum = self.arcface.bloom_embed(
+                self.unique_dnum_blooms
+            )  # (n_unique, d_model)
+            dnum_logits = self.dnum_scale * F.linear(
+                embeddings, F.normalize(W_dnum, dim=1)
+            )
 
         field_losses = {}
         if field_targets is not None:
-            for field, flogits in [
-                ("union_name", union_logits),
-                ("desig_name", desig_logits),
-            ]:
-                ft = field_targets.get(field)
+            # Union head supervision
+            ft = field_targets.get("union_name")
+            if ft is not None:
+                valid = ft >= 0
+                if valid.any():
+                    field_losses["union_name"] = F.cross_entropy(
+                        union_logits[valid], ft[valid]
+                    )
+
+            # Desig_num head supervision
+            if dnum_logits is not None:
+                ft = field_targets.get("desig_num")
                 if ft is not None:
                     valid = ft >= 0
                     if valid.any():
-                        field_losses[field] = F.cross_entropy(flogits[valid], ft[valid])
+                        field_losses["desig_num"] = F.cross_entropy(
+                            dnum_logits[valid], ft[valid]
+                        )
 
-        # Disagree penalties: penalize f_num predictions that disagree
-        # with the union head and/or desig_name head
+        # Disagree penalties
         disagree_loss = torch.tensor(0.0, device=logits.device)
         if logits is not None:
             fnum_probs = F.softmax(logits, dim=1)  # (B, n_classes)
 
+            # Union disagree
             if self.class_to_union is not None:
                 union_log_probs = F.log_softmax(union_logits, dim=1)
                 union_per_class = union_log_probs[:, self.class_to_union]
@@ -522,11 +539,12 @@ class ArcFaceFastTextModel(nn.Module):
                     disagree_loss - (fnum_probs * union_per_class).sum(dim=1).mean()
                 )
 
-            if self.class_to_desig is not None:
-                desig_log_probs = F.log_softmax(desig_logits, dim=1)
-                desig_per_class = desig_log_probs[:, self.class_to_desig]
+            # Desig_num disagree — shared bloom head
+            if self.class_to_dnum is not None and dnum_logits is not None:
+                dnum_log_probs = F.log_softmax(dnum_logits, dim=1)
+                dnum_per_class = dnum_log_probs[:, self.class_to_dnum]
                 disagree_loss = (
-                    disagree_loss - (fnum_probs * desig_per_class).sum(dim=1).mean()
+                    disagree_loss - (fnum_probs * dnum_per_class).sum(dim=1).mean()
                 )
 
         return logits, arcface_loss, field_losses, disagree_loss
@@ -610,11 +628,12 @@ def build_fnum_mapping(data):
     return {f: i for i, f in enumerate(fnums)}
 
 
-def encode_examples(data, vocab, fnum_to_idx, field_vocabs_aux=None):
+def encode_examples(data, vocab, fnum_to_idx, field_vocabs_aux=None, dnum_to_idx=None):
     """Encode examples with targets for all auxiliary heads.
 
     field_vocabs_aux: dict with keys union_name, desig_name, prefix, suffix
     mapping field values to indices for classification heads.
+    dnum_to_idx: dict mapping desig_num int values to indices for bloom head.
     """
     for ex in data:
         ex["token_ids"] = [vocab.get(tok, 1) for tok in ex["tokens"]]
@@ -634,6 +653,14 @@ def encode_examples(data, vocab, fnum_to_idx, field_vocabs_aux=None):
                     ex[f"{field}_target"] = -1
                 else:
                     ex[f"{field}_target"] = fv.get(val, -1)
+
+        # Desig_num target for shared bloom head
+        if dnum_to_idx:
+            dnum = rec.get("desig_num", -100)
+            if dnum not in (-100, 0, None):
+                ex["desig_num_target"] = dnum_to_idx.get(int(dnum), -1)
+            else:
+                ex["desig_num_target"] = -1
         else:
             ex["union_target"] = -1
             for field in ["desig_name", "prefix", "suffix"]:
@@ -656,6 +683,7 @@ def collate_batch(batch, device):
     desig_name_targets = torch.full((B,), -1, dtype=torch.long)
     prefix_targets = torch.full((B,), -1, dtype=torch.long)
     suffix_targets = torch.full((B,), -1, dtype=torch.long)
+    desig_num_targets = torch.full((B,), -1, dtype=torch.long)
 
     for i, ex in enumerate(batch):
         L = ex["length"]
@@ -670,12 +698,14 @@ def collate_batch(batch, device):
         desig_name_targets[i] = ex.get("desig_name_target", -1)
         prefix_targets[i] = ex.get("prefix_target", -1)
         suffix_targets[i] = ex.get("suffix_target", -1)
+        desig_num_targets[i] = ex.get("desig_num_target", -1)
 
     field_targets = {
         "union_name": union_targets.to(device),
         "desig_name": desig_name_targets.to(device),
         "prefix": prefix_targets.to(device),
         "suffix": suffix_targets.to(device),
+        "desig_num": desig_num_targets.to(device),
     }
     return (
         token_ids.to(device),
@@ -817,7 +847,13 @@ def main():
         "--disagree-penalty",
         type=float,
         default=0.0,
-        help="Penalty weight when f_num pred's union disagrees with union head (phase 2)",
+        help="Penalty weight for union + desig_num disagree",
+    )
+    parser.add_argument(
+        "--dnum-weight",
+        type=float,
+        default=1.0,
+        help="Weight for auxiliary desig_num classification loss",
     )
     args = parser.parse_args()
 
@@ -918,10 +954,21 @@ def main():
     for field in ["union_name", "desig_name", "prefix", "suffix"]:
         field_vocabs_aux[field] = {v: idx - 1 for v, idx in field_vocabs[field].items()}
 
+    # Build dnum_to_idx for shared bloom head targets
+    dnum_values = sorted(
+        set(
+            int(r.get("desig_num", 0))
+            for r in fnum_records.values()
+            if r.get("desig_num") not in (-100, 0, None)
+        )
+    )
+    dnum_to_idx = {v: i for i, v in enumerate(dnum_values)}
+    print(f"Unique desig_num values: {len(dnum_to_idx)}")
+
     # Now encode examples with all aux targets
-    encode_examples(train_data, vocab, fnum_to_idx, field_vocabs_aux)
-    encode_examples(val_data, vocab, fnum_to_idx, field_vocabs_aux)
-    encode_examples(test_data, vocab, fnum_to_idx, field_vocabs_aux)
+    encode_examples(train_data, vocab, fnum_to_idx, field_vocabs_aux, dnum_to_idx)
+    encode_examples(val_data, vocab, fnum_to_idx, field_vocabs_aux, dnum_to_idx)
+    encode_examples(test_data, vocab, fnum_to_idx, field_vocabs_aux, dnum_to_idx)
 
     idx_to_fnum_map = {v: k for k, v in fnum_to_idx.items()}
 
@@ -1006,9 +1053,42 @@ def main():
         class_to_union[i] = max(proto_un_idx - 1, 0)
     model.class_to_union = class_to_union.to(device)
 
-    # Desig disagree disabled — not accurate enough to help as a constraint
-    # model.class_to_desig remains None
-    print(f"Disagree penalty: union only ({n_classes}→{n_unions})")
+    # Build unique desig_num bloom table and class→dnum mapping
+    # Collect all unique desig_num values across classes
+    dnum_values = set()
+    for i in range(n_classes):
+        fn = idx_to_fnum_map[i]
+        rec = fnum_records.get(fn, {})
+        dnum = rec.get("desig_num", -100)
+        if dnum not in (-100, 0, None):
+            dnum_values.add(int(dnum))
+
+    dnum_values = sorted(dnum_values)
+    dnum_to_idx = {v: i for i, v in enumerate(dnum_values)}
+    n_unique_dnums = len(dnum_values)
+
+    # Build bloom hashes for each unique desig_num
+    unique_dnum_blooms = torch.zeros(n_unique_dnums, NUM_BLOOM_HASHES, dtype=torch.long)
+    for i, dnum in enumerate(dnum_values):
+        hashes = bloom_hash_ids(str(dnum))
+        for j in range(NUM_BLOOM_HASHES):
+            unique_dnum_blooms[i, j] = hashes[j]
+    model.unique_dnum_blooms = unique_dnum_blooms.to(device)
+
+    # Map each class to its index in the unique dnum table (or 0 for no dnum)
+    class_to_dnum = torch.zeros(n_classes, dtype=torch.long)
+    for i in range(n_classes):
+        fn = idx_to_fnum_map[i]
+        rec = fnum_records.get(fn, {})
+        dnum = rec.get("desig_num", -100)
+        if dnum not in (-100, 0, None):
+            class_to_dnum[i] = dnum_to_idx.get(int(dnum), 0)
+    model.class_to_dnum = class_to_dnum.to(device)
+
+    print(f"Desig_num head: {n_unique_dnums} unique values (shared bloom_embed)")
+    print(
+        f"Disagree penalty: union ({n_classes}→{n_unions}) + desig_num ({n_classes}→{n_unique_dnums})"
+    )
 
     param_count = sum(p.numel() for p in model.parameters())
     print(f"Model parameters: {param_count:,}")
@@ -1061,8 +1141,11 @@ def main():
                 field_targets,
             )
             loss = arcface_loss
-            for fl in field_losses.values():
-                loss = loss + args.union_weight * fl
+            for fname, fl in field_losses.items():
+                if fname == "desig_num":
+                    loss = loss + args.dnum_weight * fl
+                else:
+                    loss = loss + args.union_weight * fl
             if disagree_loss is not None and args.disagree_penalty > 0:
                 loss = loss + args.disagree_penalty * disagree_loss
 

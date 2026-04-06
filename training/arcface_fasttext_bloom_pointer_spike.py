@@ -1,12 +1,14 @@
-"""ArcFace with Multi-Prototype + Union Name Classification Head.
+"""ArcFace with Multi-Prototype + Pointer Consistency Penalty.
 
-Based on arcface_fasttext_bloom_multiproto_spike.py. Adds an auxiliary
-union_name classification head trained jointly with ArcFace. This pushes
-the encoder to produce stronger union representations, which should help
-cross-union disambiguation.
+Based on unionhead spike. Adds a desig_num pointer head that attends over
+input tokens to select which number is the designation number. A consistency
+penalty ensures f_num predictions agree with the pointer:
 
-Phase 2 (--disagree-penalty): adds a penalty when the f_num prediction's
-union disagrees with the union head's prediction.
+    disagree_ptr = -E_{c ~ P_fnum}[log P_pointer(positions matching desig_num_of(c))]
+
+This addresses compound number parsing ("usw district 8 - 523") by forcing
+the model to decide which number is the desig_num and making f_num predictions
+consistent with that choice.
 """
 
 import argparse
@@ -459,14 +461,27 @@ class ArcFaceFastTextModel(nn.Module):
 
         # Auxiliary shared heads — gradient flows into prototype embeddings
         self.union_scale = nn.Parameter(torch.tensor(10.0))
-        self.desig_scale = nn.Parameter(torch.tensor(10.0))
         # class→field mappings for disagree penalties (set after construction)
         self.class_to_union = None
-        self.class_to_desig = None
+
+        # Pointer head for desig_num: attends over pre-pooling hidden states
+        self.ptr_head = nn.Linear(d_model, 1)
+        # class→desig_bloom for pointer disagree (set after construction)
+        self.class_desig_bloom = None  # (n_classes, NUM_BLOOM_HASHES)
+
+    def _encode_sequence(
+        self, token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths
+    ):
+        """Encode to per-token hidden states (pre-pooling)."""
+        return self.encoder(
+            token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths
+        )
 
     def encode(self, token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths):
         """Encode to L2-normalized embeddings via masked mean-pool."""
-        h = self.encoder(token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths)
+        h = self._encode_sequence(
+            token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths
+        )
 
         L = h.shape[1]
         mask = torch.arange(L, device=h.device).unsqueeze(0) < lengths.unsqueeze(1)
@@ -486,50 +501,94 @@ class ArcFaceFastTextModel(nn.Module):
         targets=None,
         field_targets=None,
     ):
-        embeddings = self.encode(
+        # Get pre-pooling hidden states
+        h = self._encode_sequence(
             token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths
         )
+
+        # Pool for ArcFace
+        B, L, D = h.shape
+        mask = torch.arange(L, device=h.device).unsqueeze(0) < lengths.unsqueeze(1)
+        mask_f = mask.unsqueeze(-1).float()
+        pooled = (h * mask_f).sum(dim=1) / lengths.unsqueeze(1).float().clamp(min=1)
+        embeddings = F.normalize(pooled, dim=1)
+
         logits, arcface_loss = self.arcface(embeddings, targets)
 
-        # Auxiliary heads — shared weights with prototypes
+        # Union head — shared weights with prototypes
         W_u = self.arcface.W_union.weight[1:]
         union_logits = self.union_scale * F.linear(embeddings, F.normalize(W_u, dim=1))
-        W_dn = self.arcface.W_desig_name.weight[1:]
-        desig_logits = self.desig_scale * F.linear(embeddings, F.normalize(W_dn, dim=1))
 
         field_losses = {}
         if field_targets is not None:
-            for field, flogits in [
-                ("union_name", union_logits),
-                ("desig_name", desig_logits),
-            ]:
-                ft = field_targets.get(field)
-                if ft is not None:
-                    valid = ft >= 0
-                    if valid.any():
-                        field_losses[field] = F.cross_entropy(flogits[valid], ft[valid])
+            ft = field_targets.get("union_name")
+            if ft is not None:
+                valid = ft >= 0
+                if valid.any():
+                    field_losses["union_name"] = F.cross_entropy(
+                        union_logits[valid], ft[valid]
+                    )
 
-        # Disagree penalties: penalize f_num predictions that disagree
-        # with the union head and/or desig_name head
-        disagree_loss = torch.tensor(0.0, device=logits.device)
+        # Pointer head: attend over number tokens
+        ptr_scores = self.ptr_head(h).squeeze(-1)  # (B, L)
+        # Mask: only attend to number tokens within sequence length
+        ptr_mask = is_num * mask.float()  # (B, L)
+        ptr_scores = ptr_scores.masked_fill(ptr_mask == 0, -1e9)
+        ptr_log_probs = F.log_softmax(ptr_scores, dim=1)  # (B, L)
+
+        # Pointer supervision: CE on desig_num position
+        if field_targets is not None:
+            ptr_target = field_targets.get("desig_num_ptr")
+            if ptr_target is not None:
+                valid = (ptr_target >= 0) & (ptr_target < L)
+                if valid.any():
+                    field_losses["desig_num_ptr"] = F.cross_entropy(
+                        ptr_scores[valid], ptr_target[valid]
+                    )
+
+        # Disagree penalties
+        union_disagree = torch.tensor(0.0, device=logits.device)
+        ptr_disagree = torch.tensor(0.0, device=logits.device)
         if logits is not None:
             fnum_probs = F.softmax(logits, dim=1)  # (B, n_classes)
 
+            # Union disagree
             if self.class_to_union is not None:
                 union_log_probs = F.log_softmax(union_logits, dim=1)
                 union_per_class = union_log_probs[:, self.class_to_union]
-                disagree_loss = (
-                    disagree_loss - (fnum_probs * union_per_class).sum(dim=1).mean()
-                )
+                union_disagree = -(fnum_probs * union_per_class).sum(dim=1).mean()
 
-            if self.class_to_desig is not None:
-                desig_log_probs = F.log_softmax(desig_logits, dim=1)
-                desig_per_class = desig_log_probs[:, self.class_to_desig]
-                disagree_loss = (
-                    disagree_loss - (fnum_probs * desig_per_class).sum(dim=1).mean()
-                )
+            # Pointer disagree: match via bloom hashing
+            if self.class_desig_bloom is not None:
+                ptr_probs = torch.exp(ptr_log_probs)  # (B, L)
+                n_hashes = bloom_ids.shape[2]
+                n_buckets = BLOOM_TABLE_SIZE
 
-        return logits, arcface_loss, field_losses, disagree_loss
+                # Scatter pointer probs into bloom buckets
+                bucket_probs = torch.zeros(B, n_hashes, n_buckets, device=h.device)
+                for hi in range(n_hashes):
+                    bidx = bloom_ids[:, :, hi].unsqueeze(1).expand(-1, 1, -1)
+                    pp = (ptr_probs * ptr_mask).unsqueeze(1)
+                    bucket_probs[:, hi : hi + 1, :].scatter_add_(2, bidx, pp)
+
+                # Gather per-class match scores
+                n_classes = self.class_desig_bloom.shape[0]
+                class_bloom = self.class_desig_bloom
+                match_probs = torch.zeros(B, n_classes, device=h.device)
+                for hi in range(n_hashes):
+                    bp = bucket_probs[:, hi, :]
+                    ci = class_bloom[:, hi]
+                    match_probs += bp[:, ci]
+                match_probs = match_probs / n_hashes
+
+                # Classes with no desig_num get match_prob=1 (no penalty)
+                no_dnum = class_bloom.sum(dim=1) == 0
+                match_probs[:, no_dnum] = 1.0
+
+                log_match = torch.log(match_probs.clamp(min=1e-8))
+                ptr_disagree = -(fnum_probs * log_match).sum(dim=1).mean()
+
+        return logits, arcface_loss, field_losses, union_disagree, ptr_disagree
 
 
 # ---------------------------------------------------------------------------
@@ -586,6 +645,17 @@ def load_data(path, n_buckets, synthetic_path=None):
         ngram_ids, ngram_counts = precompute_ngram_hashes(tokens, n_buckets)
         bloom_ids = precompute_bloom_ids(tokens, is_num)
 
+        # Compute desig_num pointer target
+        rec = ex["records"][0] if ex.get("records") else {}
+        desig_num_val = rec.get("desig_num", -100)
+        ptr_target = -1  # no target
+        if desig_num_val not in (-100, 0, None):
+            target_str = str(int(desig_num_val)).lstrip("0") or "0"
+            for ti, (tok, is_n) in enumerate(zip(tokens, is_num)):
+                if is_n and tok == target_str:
+                    ptr_target = ti
+                    break
+
         data.append(
             {
                 "tokens": tokens,
@@ -595,7 +665,8 @@ def load_data(path, n_buckets, synthetic_path=None):
                 "split": ex["split"],
                 "source": ex.get("source"),
                 "union_name": ex.get("union_name"),
-                "record": ex["records"][0] if ex.get("records") else {},
+                "record": rec,
+                "desig_num_ptr": ptr_target,
                 "ngram_ids": ngram_ids,
                 "ngram_counts": ngram_counts,
                 "bloom_ids": bloom_ids,
@@ -656,6 +727,7 @@ def collate_batch(batch, device):
     desig_name_targets = torch.full((B,), -1, dtype=torch.long)
     prefix_targets = torch.full((B,), -1, dtype=torch.long)
     suffix_targets = torch.full((B,), -1, dtype=torch.long)
+    desig_num_ptr_targets = torch.full((B,), -1, dtype=torch.long)
 
     for i, ex in enumerate(batch):
         L = ex["length"]
@@ -670,12 +742,14 @@ def collate_batch(batch, device):
         desig_name_targets[i] = ex.get("desig_name_target", -1)
         prefix_targets[i] = ex.get("prefix_target", -1)
         suffix_targets[i] = ex.get("suffix_target", -1)
+        desig_num_ptr_targets[i] = ex.get("desig_num_ptr", -1)
 
     field_targets = {
         "union_name": union_targets.to(device),
         "desig_name": desig_name_targets.to(device),
         "prefix": prefix_targets.to(device),
         "suffix": suffix_targets.to(device),
+        "desig_num_ptr": desig_num_ptr_targets.to(device),
     }
     return (
         token_ids.to(device),
@@ -738,7 +812,7 @@ def evaluate(model, data, fnum_freq, device, batch_size=512):
                 targets,
                 _field_targets,
             ) = collate_batch(batch, device)
-            logits, _, _, _ = model(
+            logits, _, _, _, _ = model(
                 token_ids, ngram_ids, ngram_counts, bloom_ids, is_num_t, lengths
             )
 
@@ -817,7 +891,19 @@ def main():
         "--disagree-penalty",
         type=float,
         default=0.0,
-        help="Penalty weight when f_num pred's union disagrees with union head (phase 2)",
+        help="Penalty weight when f_num pred's union disagrees with union head",
+    )
+    parser.add_argument(
+        "--ptr-weight",
+        type=float,
+        default=1.0,
+        help="Weight for pointer supervision loss",
+    )
+    parser.add_argument(
+        "--ptr-disagree-penalty",
+        type=float,
+        default=0.0,
+        help="Penalty weight for pointer-based desig_num consistency",
     )
     args = parser.parse_args()
 
@@ -1006,9 +1092,26 @@ def main():
         class_to_union[i] = max(proto_un_idx - 1, 0)
     model.class_to_union = class_to_union.to(device)
 
-    # Desig disagree disabled — not accurate enough to help as a constraint
-    # model.class_to_desig remains None
-    print(f"Disagree penalty: union only ({n_classes}→{n_unions})")
+    # Build class→desig_bloom for pointer disagree penalty
+    if args.ptr_disagree_penalty > 0:
+        class_desig_bloom = torch.zeros(n_classes, NUM_BLOOM_HASHES, dtype=torch.long)
+        for i in range(n_classes):
+            fn = idx_to_fnum_map[i]
+            rec = fnum_records.get(fn, {})
+            dnum = rec.get("desig_num", -100)
+            if dnum not in (-100, 0, None):
+                hashes = bloom_hash_ids(str(int(dnum)))
+                for j in range(NUM_BLOOM_HASHES):
+                    class_desig_bloom[i, j] = hashes[j]
+        model.class_desig_bloom = class_desig_bloom.to(device)
+        n_with_dnum = (class_desig_bloom.sum(dim=1) > 0).sum().item()
+        print(
+            f"Pointer disagree: {n_with_dnum}/{n_classes} classes have desig_num bloom"
+        )
+    else:
+        print("Pointer disagree: disabled")
+
+    print(f"Disagree penalty: union ({n_classes}→{n_unions})")
 
     param_count = sum(p.numel() for p in model.parameters())
     print(f"Model parameters: {param_count:,}")
@@ -1050,7 +1153,7 @@ def main():
                 field_targets,
             ) = collate_batch(batch, device)
 
-            _, arcface_loss, field_losses, disagree_loss = model(
+            _, arcface_loss, field_losses, union_disagree, ptr_disagree = model(
                 token_ids,
                 ngram_ids,
                 ngram_counts,
@@ -1061,10 +1164,15 @@ def main():
                 field_targets,
             )
             loss = arcface_loss
-            for fl in field_losses.values():
-                loss = loss + args.union_weight * fl
-            if disagree_loss is not None and args.disagree_penalty > 0:
-                loss = loss + args.disagree_penalty * disagree_loss
+            for fname, fl in field_losses.items():
+                if fname == "desig_num_ptr":
+                    loss = loss + args.ptr_weight * fl
+                else:
+                    loss = loss + args.union_weight * fl
+            if args.disagree_penalty > 0:
+                loss = loss + args.disagree_penalty * union_disagree
+            if args.ptr_disagree_penalty > 0:
+                loss = loss + args.ptr_disagree_penalty * ptr_disagree
 
             optimizer.zero_grad()
             loss.backward()
