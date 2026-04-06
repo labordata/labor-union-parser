@@ -9,15 +9,18 @@ Loss 1 (CBOW, all 539K records):
   Mask one field, predict its embedding from the remaining fields via InfoNCE.
 
 Loss 2 (ArcFace cosine classifier, ~200K labeled records):
-  Cosine similarity classifier with ~8K classes (distinct f_nums), scale=30,
+  Cosine similarity classifier with ~150 classes (distinct union_names), scale=30,
   Cross-entropy on scaled cosine logits.
 
 Uses the production smart_truncate_nonspace tokenizer. Word tokens use a shared
 vocab embedding; number tokens use digit-level embeddings (10 digits + position)
 so that different local numbers get distinct representations.
+
+Number tokens are stripped from the union_name field in both pathways so that
+embeddings capture union identity rather than local number.
 """
 
-import csv
+import json
 import random
 import re
 import sqlite3
@@ -30,6 +33,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from lightning.pytorch.utilities import CombinedLoader
 from torch.utils.data import DataLoader, Dataset
 
 from labor_union_parser.tokenizer import smart_truncate_nonspace
@@ -171,45 +175,24 @@ def load_f7_records(db_path: str) -> list[dict]:
     return records
 
 
-def load_fnum_labels(labeled_csv: str) -> dict[str, int]:
-    """Load union_name -> f_num mapping from labeled_data.csv."""
-    text_to_fnum = {}
-    with open(labeled_csv, newline="") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            text = row["text"].strip()
-            fnum = row.get("f_num", "").strip()
-            if not fnum:
-                continue
-            try:
-                fnum_int = int(float(fnum))
-            except (ValueError, TypeError):
-                continue
-            text_to_fnum[text.lower()] = fnum_int
-
-    return text_to_fnum
-
-
 # ---------------------------------------------------------------------------
 # Dataset
 # ---------------------------------------------------------------------------
 
 
 class RecordDataset(Dataset):
-    """Token-indexed record dataset.
+    """Token-indexed multi-field record dataset for CBOW loss.
 
     Stores per token position:
         token_ids:   [N, NUM_FIELDS, MAX_TOKENS_PER_FIELD] int32 — vocab ID (words)
         bloom_ids:   [N, NUM_FIELDS, MAX_TOKENS_PER_FIELD, NUM_BLOOM_HASHES] int16
         is_number:   [N, NUM_FIELDS, MAX_TOKENS_PER_FIELD] bool
         token_lens:  [N, NUM_FIELDS] int8 — tokens per field
-        f_num:       [N] int32 (-1 if unlabeled)
     """
 
     def __init__(
         self,
         records: list[dict],
-        text_to_fnum: dict[str, int],
         token_vocab: dict[str, int],
     ):
         N = len(records)
@@ -221,7 +204,6 @@ class RecordDataset(Dataset):
         )
         self.is_number = np.zeros((N, NUM_FIELDS, MAX_TOKENS_PER_FIELD), dtype=np.bool_)
         self.token_lens = np.zeros((N, NUM_FIELDS), dtype=np.int8)
-        self.f_num = np.full(N, -1, dtype=np.int32)
 
         for i, rec in enumerate(records):
             for j, field in enumerate(FIELD_NAMES):
@@ -229,6 +211,10 @@ class RecordDataset(Dataset):
                 if not val:
                     continue
                 tokens = _tokenize(field, val)
+                # Strip numbers from union_name field — embeddings should
+                # capture union identity, not local number
+                if field == "union_name":
+                    tokens = [tok for tok in tokens if not tok["is_num"]]
                 if not tokens:
                     continue
                 n_tok = min(len(tokens), MAX_TOKENS_PER_FIELD)
@@ -241,14 +227,10 @@ class RecordDataset(Dataset):
                     else:
                         self.token_ids[i, j, t] = token_vocab.get(tok["token"], unk_id)
 
-            union_name = rec["union_name"].lower()
-            if union_name in text_to_fnum:
-                self.f_num[i] = text_to_fnum[union_name]
-
         # present = has at least 1 token
         n_fields_present = (self.token_lens > 0).sum(axis=1)
 
-        # Filter records with < 2 present fields
+        # Filter records with < 2 present fields (need 2+ for CBOW)
         valid = n_fields_present >= 2
         n_dropped = N - valid.sum()
         if n_dropped > 0:
@@ -257,17 +239,8 @@ class RecordDataset(Dataset):
             self.bloom_ids = self.bloom_ids[valid]
             self.is_number = self.is_number[valid]
             self.token_lens = self.token_lens[valid]
-            self.f_num = self.f_num[valid]
 
-        self.n_labeled = int((self.f_num >= 0).sum())
-        unique_fnums = sorted(set(self.f_num[self.f_num >= 0].tolist()))
-        self.fnum_to_idx = {fn: i for i, fn in enumerate(unique_fnums)}
-        self.n_classes = len(unique_fnums)
-
-        print(
-            f"  Records: {len(self)}, Labeled: {self.n_labeled}, "
-            f"F_nums: {self.n_classes}"
-        )
+        print(f"  CBOW records: {len(self)}")
 
     def __len__(self):
         return len(self.token_ids)
@@ -283,9 +256,6 @@ class RecordDataset(Dataset):
         present_indices = present.nonzero(as_tuple=True)[0]
         mask_idx = present_indices[torch.randint(len(present_indices), (1,))].item()
 
-        fn = self.f_num[idx]
-        fnum_label = self.fnum_to_idx.get(int(fn), -1) if fn >= 0 else -1
-
         return {
             "token_ids": token_ids,
             "bloom_ids": bloom_ids,
@@ -293,7 +263,66 @@ class RecordDataset(Dataset):
             "token_lens": token_lens,
             "present": present,
             "mask_idx": mask_idx,
-            "fnum_label": fnum_label,
+        }
+
+
+class LabeledQueryDataset(Dataset):
+    """Single-field dataset for ArcFace prototype loss.
+
+    Tokenizes query texts as union_name field (numbers stripped) and pairs
+    with union_name class labels.
+    """
+
+    def __init__(
+        self,
+        examples: list[dict],
+        token_vocab: dict[str, int],
+    ):
+        unk_id = token_vocab["<UNK>"]
+        N = len(examples)
+        self.token_ids = np.zeros((N, MAX_TOKENS_PER_FIELD), dtype=np.int32)
+        self.bloom_ids = np.zeros(
+            (N, MAX_TOKENS_PER_FIELD, NUM_BLOOM_HASHES), dtype=np.int16
+        )
+        self.is_number = np.zeros((N, MAX_TOKENS_PER_FIELD), dtype=np.bool_)
+        self.token_lens = np.zeros(N, dtype=np.int8)
+        self.union_names = [ex["union_name"] for ex in examples]
+
+        for i, ex in enumerate(examples):
+            tokens = _tokenize("union_name", ex["query"])
+            # Strip numbers — classify by union identity, not local number
+            tokens = [tok for tok in tokens if not tok["is_num"]]
+            if not tokens:
+                continue
+            n_tok = min(len(tokens), MAX_TOKENS_PER_FIELD)
+            self.token_lens[i] = n_tok
+            for t in range(n_tok):
+                tok = tokens[t]
+                self.token_ids[i, t] = token_vocab.get(tok["token"], unk_id)
+
+        # Build union_name -> class index mapping
+        unique_unions = sorted(set(self.union_names))
+        self.union_to_idx = {un: i for i, un in enumerate(unique_unions)}
+        self.n_classes = len(unique_unions)
+
+        print(f"  ArcFace queries: {N}, Unions: {self.n_classes}")
+
+    def __len__(self):
+        return len(self.token_ids)
+
+    def __getitem__(self, idx):
+        token_ids = torch.from_numpy(self.token_ids[idx].astype(np.int64))
+        bloom_ids = torch.from_numpy(self.bloom_ids[idx].astype(np.int64))
+        is_number = torch.from_numpy(self.is_number[idx])
+        token_len = int(self.token_lens[idx])
+        union_label = self.union_to_idx[self.union_names[idx]]
+
+        return {
+            "token_ids": token_ids,
+            "bloom_ids": bloom_ids,
+            "is_number": is_number,
+            "token_len": token_len,
+            "union_label": union_label,
         }
 
 
@@ -347,7 +376,7 @@ class RecordEmbeddingModel(nn.Module):
     Word tokens: shared vocab embedding lookup.
     Number tokens: bloom hash embedding (sum of k lookups from shared table).
     Within-field RoPE attention pools tokens into field embeddings.
-    Cross-field attention models field interactions.
+    CBOW predicts masked field from mean-pooled context (no cross-field attention).
     """
 
     def __init__(
@@ -383,9 +412,6 @@ class RecordEmbeddingModel(nn.Module):
         self.token_v = nn.Linear(d_model, d_model)
         self.token_attn_out = nn.Linear(d_model, d_model)
 
-        # Cross-field attention: model interactions between fields
-        self.field_attn = nn.MultiheadAttention(d_model, num_heads=1, batch_first=True)
-
         # CBOW projection: context mean -> predicted target embedding
         self.cbow_proj = nn.Sequential(
             nn.Linear(d_model, d_model),
@@ -397,7 +423,7 @@ class RecordEmbeddingModel(nn.Module):
                 nn.init.normal_(m.weight, std=0.01)
                 nn.init.zeros_(m.bias)
 
-        # Prototype-based cosine classifier for f_num
+        # Prototype-based cosine classifier for union_name
         self.prototypes = nn.Linear(d_model, n_classes, bias=False)
         nn.init.xavier_normal_(self.prototypes.weight)
 
@@ -489,47 +515,59 @@ class RecordEmbeddingModel(nn.Module):
 
         return field_embs
 
-    def cross_attend(self, field_embs, field_pad_mask):
-        """Apply cross-field attention with the given padding mask."""
-        # Ensure at least one field is unmasked
-        all_empty = ~(~field_pad_mask).any(dim=1)
-        safe_mask = field_pad_mask.clone()
-        safe_mask[all_empty, 0] = False
+    def encode_query(self, token_ids, bloom_ids, is_number, token_lens):
+        """Encode single-field query texts (union_name only).
 
-        out, _ = self.field_attn(
-            field_embs,
-            field_embs,
-            field_embs,
-            key_padding_mask=safe_mask,
+        Wraps inputs into the multi-field format with only field 0 populated,
+        then returns the union_name embedding.
+
+        Args:
+            token_ids:  [B, MAX_TOKENS_PER_FIELD]
+            bloom_ids:  [B, MAX_TOKENS_PER_FIELD, NUM_BLOOM_HASHES]
+            is_number:  [B, MAX_TOKENS_PER_FIELD] bool
+            token_lens: [B]
+
+        Returns:
+            union_embs: [B, d_model]
+        """
+        B = token_ids.shape[0]
+
+        # Wrap into multi-field tensors with only field 0 populated
+        full_token_ids = token_ids.new_zeros(B, NUM_FIELDS, MAX_TOKENS_PER_FIELD)
+        full_token_ids[:, 0] = token_ids
+        full_bloom_ids = bloom_ids.new_zeros(
+            B, NUM_FIELDS, MAX_TOKENS_PER_FIELD, NUM_BLOOM_HASHES
         )
-        return out
+        full_bloom_ids[:, 0] = bloom_ids
+        full_is_number = is_number.new_zeros(B, NUM_FIELDS, MAX_TOKENS_PER_FIELD)
+        full_is_number[:, 0] = is_number
+        full_token_lens = token_lens.new_zeros(B, NUM_FIELDS)
+        full_token_lens[:, 0] = token_lens
+
+        field_embs = self.encode_fields(
+            full_token_ids, full_bloom_ids, full_is_number, full_token_lens
+        )
+        return field_embs[:, 0]  # [B, d_model]
 
     def cbow_loss(self, field_embs, present, mask_idx):
         """CBOW loss: predict masked field from context fields via InfoNCE.
 
-        Cross-field attention is applied here with the masked field excluded
-        from keys/values, so context embeddings can't leak target info.
-        The target embedding uses the pre-attention field embedding.
+        Mean-pools the raw context field embeddings (excluding the masked
+        field) and projects to predict the target field embedding.
         """
         B = field_embs.shape[0]
         device = field_embs.device
         batch_range = torch.arange(B, device=device)
 
-        # Target: pre-attention embedding of the masked field
+        # Target: field embedding of the masked field
         target_embs = field_embs[batch_range, mask_idx]
 
-        # Context: cross-attend with masked field excluded from keys/values
-        context_pad_mask = ~present.clone()
-        context_pad_mask[batch_range, mask_idx] = True  # mask out the target
-
-        context_embs = self.cross_attend(field_embs, context_pad_mask)
-
-        # Mean-pool context field embeddings (excluding masked field)
+        # Context: mean-pool raw field embeddings (excluding masked field)
         context_mask = present.clone()
         context_mask[batch_range, mask_idx] = False
         context_mask_f = context_mask.unsqueeze(-1).float()
 
-        context_sum = (context_embs * context_mask_f).sum(dim=1)
+        context_sum = (field_embs * context_mask_f).sum(dim=1)
         context_count = context_mask.float().sum(dim=1, keepdim=True).clamp(min=1)
         context_mean = context_sum / context_count
 
@@ -544,31 +582,24 @@ class RecordEmbeddingModel(nn.Module):
 
         return loss, top1_acc
 
-    def prototype_loss(self, field_embs, fnum_labels):
-        """Cosine classifier loss on union_name field embeddings.
+    def prototype_loss(self, union_embs, union_labels):
+        """Cosine classifier loss on union_name embeddings.
 
-        Uses pre-cross-attention field embeddings so the union_name embedding
-        is a standalone representation (within-field attention only).
+        Args:
+            union_embs: [B, d_model] — union_name field embeddings
+            union_labels: [B] — class indices for parent union_name
         """
-        labeled_mask = fnum_labels >= 0
-        n_labeled = labeled_mask.sum().item()
-        if n_labeled < 2:
-            return torch.tensor(0.0, device=field_embs.device), 0, 0.0
-
-        union_embs = field_embs[labeled_mask, 0]  # [N_lab, d_model]
-        labels = fnum_labels[labeled_mask]
-
         # Cosine similarity: normalize both embeddings and prototypes
         embs_norm = F.normalize(union_embs, dim=1)
         w_norm = F.normalize(self.prototypes.weight, dim=1)
-        cos_sim = embs_norm @ w_norm.t()  # [N_lab, n_classes]
+        cos_sim = embs_norm @ w_norm.t()  # [B, n_classes]
 
         logits = self.arcface_scale * cos_sim
 
-        loss = F.cross_entropy(logits, labels)
-        top1_acc = (logits.argmax(dim=1) == labels).float().mean()
+        loss = F.cross_entropy(logits, union_labels)
+        top1_acc = (logits.argmax(dim=1) == union_labels).float().mean()
 
-        return loss, n_labeled, top1_acc
+        return loss, top1_acc
 
 
 # ---------------------------------------------------------------------------
@@ -599,23 +630,31 @@ class RecordEmbeddingModule(L.LightningModule):
         self._weight_decay = weight_decay
         self._epochs = epochs
 
-    def _encode(self, batch):
-        return self.model.encode_fields(
-            batch["token_ids"],
-            batch["bloom_ids"],
-            batch["is_number"],
-            batch["token_lens"],
-        )
-
     def training_step(self, batch, batch_idx):
-        field_embs = self._encode(batch)
+        cbow_batch, arcface_batch = batch["cbow"], batch["arcface"]
 
+        # CBOW loss on multi-field records
+        field_embs = self.model.encode_fields(
+            cbow_batch["token_ids"],
+            cbow_batch["bloom_ids"],
+            cbow_batch["is_number"],
+            cbow_batch["token_lens"],
+        )
         cbow_loss, cbow_acc = self.model.cbow_loss(
-            field_embs, batch["present"], batch["mask_idx"]
+            field_embs, cbow_batch["present"], cbow_batch["mask_idx"]
         )
-        proto_loss, n_labeled, proto_acc = self.model.prototype_loss(
-            field_embs, batch["fnum_label"]
+
+        # ArcFace loss on labeled queries
+        union_embs = self.model.encode_query(
+            arcface_batch["token_ids"],
+            arcface_batch["bloom_ids"],
+            arcface_batch["is_number"],
+            arcface_batch["token_len"],
         )
+        proto_loss, proto_acc = self.model.prototype_loss(
+            union_embs, arcface_batch["union_label"]
+        )
+
         loss = cbow_loss + proto_loss
 
         self.log("train/loss", loss, prog_bar=True)
@@ -623,18 +662,30 @@ class RecordEmbeddingModule(L.LightningModule):
         self.log("train/proto_loss", proto_loss)
         self.log("train/cbow_acc", cbow_acc, prog_bar=True)
         self.log("train/proto_acc", float(proto_acc), prog_bar=True)
-        self.log("train/n_labeled", float(n_labeled))
 
         return loss
 
     def validation_step(self, batch, batch_idx):
-        field_embs = self._encode(batch)
+        cbow_batch, arcface_batch = batch["cbow"], batch["arcface"]
 
-        cbow_loss, cbow_acc = self.model.cbow_loss(
-            field_embs, batch["present"], batch["mask_idx"]
+        field_embs = self.model.encode_fields(
+            cbow_batch["token_ids"],
+            cbow_batch["bloom_ids"],
+            cbow_batch["is_number"],
+            cbow_batch["token_lens"],
         )
-        proto_loss, _, proto_acc = self.model.prototype_loss(
-            field_embs, batch["fnum_label"]
+        cbow_loss, cbow_acc = self.model.cbow_loss(
+            field_embs, cbow_batch["present"], cbow_batch["mask_idx"]
+        )
+
+        union_embs = self.model.encode_query(
+            arcface_batch["token_ids"],
+            arcface_batch["bloom_ids"],
+            arcface_batch["is_number"],
+            arcface_batch["token_len"],
+        )
+        proto_loss, proto_acc = self.model.prototype_loss(
+            union_embs, arcface_batch["union_label"]
         )
 
         loss = cbow_loss + proto_loss
@@ -670,9 +721,9 @@ def main():
     )
     parser.add_argument("--db", default="f7.db", help="Path to f7.db")
     parser.add_argument(
-        "--labeled-csv",
-        default="training/data/labeled_data.csv",
-        help="Path to labeled_data.csv",
+        "--training-examples",
+        default="training/data/training_examples.json",
+        help="Path to training_examples.json",
     )
     parser.add_argument("--d-model", type=int, default=128)
     parser.add_argument("--temperature", type=float, default=0.07)
@@ -680,7 +731,6 @@ def main():
     parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--weight-decay", type=float, default=0.01)
     parser.add_argument("--epochs", type=int, default=20)
-    parser.add_argument("--val-frac", type=float, default=0.05)
     parser.add_argument("--min-token-count", type=int, default=2)
     parser.add_argument("--save", default="training/data/record_embeddings.pt")
     parser.add_argument(
@@ -692,51 +742,77 @@ def main():
     torch.manual_seed(42)
     np.random.seed(42)
 
-    # Load data
+    # Load CBOW data (f7.db multi-field records)
     print("Loading f7 records...")
     records = load_f7_records(args.db)
     print(f"  {len(records)} records loaded")
-
-    print("Loading f_num labels...")
-    text_to_fnum = load_fnum_labels(args.labeled_csv)
-    print(f"  {len(text_to_fnum)} text->f_num mappings")
 
     print("Building token vocabulary (words only, numbers use bloom hashing)...")
     token_vocab = build_token_vocab(records, min_count=args.min_token_count)
     print(f"  {len(token_vocab)} word tokens (min_count={args.min_token_count})")
 
-    print("Building dataset...")
-    dataset = RecordDataset(records, text_to_fnum, token_vocab)
+    print("Building CBOW dataset...")
+    cbow_dataset = RecordDataset(records, token_vocab)
 
-    # Stratified split
-    N = len(dataset)
+    # Load ArcFace data (training_examples.json)
+    print("Loading training examples...")
+    with open(args.training_examples) as f:
+        all_examples = json.load(f)
+
+    # Filter out f_num=-100 (catch-all "unknown local" — not a real class)
+    all_examples = [ex for ex in all_examples if ex["f_num"] != -100]
+
+    train_examples = [ex for ex in all_examples if ex["split"] == "train"]
+    val_examples = [ex for ex in all_examples if ex["split"] == "val"]
+    print(
+        f"  {len(train_examples)} train, {len(val_examples)} val (after filtering f_num=-100)"
+    )
+
+    print("Building ArcFace datasets...")
+    # Build shared union_to_idx from all examples (train + val need same class mapping)
+    all_unions = sorted(set(ex["union_name"] for ex in all_examples))
+    shared_union_to_idx = {un: i for i, un in enumerate(all_unions)}
+    n_classes = len(shared_union_to_idx)
+
+    arcface_train = LabeledQueryDataset(train_examples, token_vocab)
+    arcface_val = LabeledQueryDataset(val_examples, token_vocab)
+    # Override per-dataset mappings with shared mapping
+    arcface_train.union_to_idx = shared_union_to_idx
+    arcface_train.n_classes = n_classes
+    arcface_val.union_to_idx = shared_union_to_idx
+    arcface_val.n_classes = n_classes
+
+    # CBOW train/val split (simple random)
+    N = len(cbow_dataset)
     indices = list(range(N))
     random.shuffle(indices)
+    n_val = int(N * 0.05)
+    cbow_train = torch.utils.data.Subset(cbow_dataset, indices[n_val:])
+    cbow_val = torch.utils.data.Subset(cbow_dataset, indices[:n_val])
+    print(f"  CBOW train: {len(cbow_train)}, val: {len(cbow_val)}")
 
-    labeled_idx = [i for i in indices if dataset.f_num[i] >= 0]
-    unlabeled_idx = [i for i in indices if dataset.f_num[i] < 0]
-
-    n_val_labeled = int(len(labeled_idx) * args.val_frac)
-    n_val_unlabeled = int(len(unlabeled_idx) * args.val_frac)
-
-    val_indices = labeled_idx[:n_val_labeled] + unlabeled_idx[:n_val_unlabeled]
-    train_indices = labeled_idx[n_val_labeled:] + unlabeled_idx[n_val_unlabeled:]
-
-    train_ds = torch.utils.data.Subset(dataset, train_indices)
-    val_ds = torch.utils.data.Subset(dataset, val_indices)
-    print(f"  Train: {len(train_ds)}, Val: {len(val_ds)}")
-
-    train_loader = DataLoader(
-        train_ds,
-        batch_size=args.batch_size,
-        shuffle=True,
-        num_workers=0,
+    # Combined dataloaders — cycle shorter one
+    train_loader = CombinedLoader(
+        {
+            "cbow": DataLoader(
+                cbow_train, batch_size=args.batch_size, shuffle=True, num_workers=0
+            ),
+            "arcface": DataLoader(
+                arcface_train, batch_size=args.batch_size, shuffle=True, num_workers=0
+            ),
+        },
+        mode="max_size_cycle",
     )
-    val_loader = DataLoader(
-        val_ds,
-        batch_size=args.batch_size,
-        shuffle=False,
-        num_workers=0,
+    val_loader = CombinedLoader(
+        {
+            "cbow": DataLoader(
+                cbow_val, batch_size=args.batch_size, shuffle=False, num_workers=0
+            ),
+            "arcface": DataLoader(
+                arcface_val, batch_size=args.batch_size, shuffle=False, num_workers=0
+            ),
+        },
+        mode="max_size_cycle",
     )
 
     # Model
@@ -747,7 +823,7 @@ def main():
         weight_decay=args.weight_decay,
         epochs=args.epochs,
         vocab_size=len(token_vocab),
-        n_classes=dataset.n_classes,
+        n_classes=n_classes,
     )
     # Resume from checkpoint (partial load)
     if args.resume:
@@ -799,7 +875,7 @@ def main():
                 "temperature": args.temperature,
             },
             "token_vocab": token_vocab,
-            "fnum_to_idx": dataset.fnum_to_idx,
+            "union_to_idx": shared_union_to_idx,
         },
         save_path,
     )

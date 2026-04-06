@@ -220,7 +220,8 @@ class ArcFaceModel(nn.Module):
     """Factored ArcFace model for union text → f_num matching.
 
     Combines FastTextRoPEEncoder with FactoredPrototypeClassifier.
-    Produces class logits over all known f_nums from a single forward pass.
+    Produces class logits over all known f_nums and union logits from
+    the shared union head.
     """
 
     def __init__(
@@ -232,6 +233,7 @@ class ArcFaceModel(nn.Module):
         n_buckets=50000,
         vocab_size=2,
         scale=30.0,
+        union_scale=10.0,
         field_sizes=None,
     ):
         super().__init__()
@@ -240,6 +242,9 @@ class ArcFaceModel(nn.Module):
             d_model, n_heads, n_layers, n_buckets, vocab_size
         )
         self.classifier = FactoredPrototypeClassifier(d_model, n_classes, field_sizes)
+
+        # Shared union head — uses same W_union weights as prototypes
+        self.union_scale = nn.Parameter(torch.tensor(union_scale))
 
     def encode(self, token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths):
         """Encode to L2-normalized pooled embeddings."""
@@ -251,11 +256,19 @@ class ArcFaceModel(nn.Module):
         return F.normalize(pooled, dim=1)
 
     def forward(self, token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths):
-        """Full forward pass: encode → classify.
+        """Full forward pass: encode → classify + union head.
 
-        Returns (B, n_classes) class logits.
+        Returns:
+            class_logits: (B, n_classes) f_num logits
+            union_logits: (B, n_unions) union classification logits
         """
         embeddings = self.encode(
             token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths
         )
-        return self.classifier(embeddings, scale=self.scale)
+        class_logits = self.classifier(embeddings, scale=self.scale)
+
+        # Union head: shared W_union weights (skip padding at index 0)
+        W_u = self.classifier.W_union.weight[1:]
+        union_logits = self.union_scale * F.linear(embeddings, F.normalize(W_u, dim=1))
+
+        return class_logits, union_logits

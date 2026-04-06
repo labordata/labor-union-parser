@@ -96,6 +96,31 @@ Use this lookup table for common abbreviations → gazetteer `union_name`:
 | ICW, International Chemical Workers | `FOOD AND COMMERCIAL WKRS` (merger into UFCW) |
 | NABET, Broadcast | `COMMUNICATIONS WORKERS AFL-CIO` (merger) |
 | CMRJB, Chicago Midwest Regional Joint Board | `WORKERS UNITED, SEIU` |
+| TCIU, Transportation Communications International | `TRANSPORTATION COMMUNICATIONS UNION/IAM, AFL-CIO` (merger into IAM) |
+| MEBA, Marine Engineers Beneficial Association | `MARINE ENGINEERS AFL-CIO` |
+| SIUNA, Seafarers International Union | `SEAFARERS AFL-CIO` |
+| UIW, United Industrial Workers | `INDUSTRIAL WKRS UNTD SIUNA AFL-CIO` (SIU/Seafarers affiliate) |
+| UIWNA, United Industrial Workers of N.A. | `INDUSTRIAL WKRS UNTD SIUNA AFL-CIO` |
+| GCA, Granite Cutters | `GRANITE CUTTERS ASSOCIATION` |
+| ATC, Allied Trades Council | `ALLIED TRADES COUNCIL` |
+| FAIR, Flight Attendants for Independence | `FLIGHT ATTENDANTS FOR INDEPENDEN` |
+| AIU, Atlantic Independent Union | `ATLANTIC INDEPENDENT UNION IND` |
+| UWUA, UWU, Utility Workers | `UTILITY WORKERS AFL-CIO` |
+| UGSOA, Government Security Officers | `GOVERNMENT SECURITY OFFICERS, IND` |
+| NTEU, National Treasury Employees | `TREASURY EMPLOYEES UNION IND` |
+| NATCA, Air Traffic Controllers | `AIR TRAFFIC CONTROLLERS AFL-CIO` |
+| PATCO, Professional Air Traffic Controllers | `PROFESSIONAL AIR TRAFFIC CONTROLLER` |
+| FEA, Federal Education Association | `NATIONAL EDUCATION ASN IND` |
+| FTP, Florida Teaching Profession | `NATIONAL EDUCATION ASN IND` (NEA affiliate) |
+| BCTD, Building & Construction Trades Dept | `BLDG AND CONSTRN TRADES DEPT AFL-CIO` |
+| Congress of Independent Unions | `INDEPENDENT UNIONS, CONGRESS OF` |
+| PRUIET | `UNION INDEPENDIENTE EMPLEADOS` (Puerto Rico telecom) |
+| PRHIET | `HERMANDAD INDEPENDIENTE DE` (Puerto Rico telecom) |
+| USAW, United Service & Allied Workers | `UNITED SERVICE AND ALLIED WORKERS` (Rhode Island) |
+| OHNA, Ohio Nurses | `OHIO NURSES ASSOCIATION` (ANA affiliate) |
+| HINA, Hawaii Nurses | `OFFICE AND PROFESSIONAL EMPLS AFL-CIO` (OPEIU Local 50) |
+| DCNA, DC Nurses | `NURSES ASN, AMERICAN, IND` |
+| IANA, Indiana Nurses | `NURSES ASN, AMERICAN, IND` |
 
 If the text doesn't match any of these, check the `abbreviations` table in the DB.
 

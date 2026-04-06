@@ -11,7 +11,6 @@ Stage 2: Generate synthetic samples for rare f_nums, inspect quality
 
 import argparse
 import json
-import math
 import random
 import time
 from collections import Counter
@@ -473,31 +472,51 @@ def sample(
             seq, field_indices, desig_nums, fnum_indices, t, pad_mask=pad_mask
         )
 
-        is_masked = seq == MASK_ID
+        is_masked = seq == MASK_ID  # (B, SEQ_LEN)
         if not is_masked.any():
             break
 
-        for i in range(B):
-            masked_positions = is_masked[i].nonzero(as_tuple=True)[0]
-            if len(masked_positions) == 0:
-                continue
+        # Vectorized unmasking: sample all positions, then select top-confidence
+        if temperature > 0:
+            scaled = logits / temperature
+            probs = F.softmax(scaled, dim=-1)  # (B, SEQ_LEN, V)
+            sampled_tokens = torch.multinomial(
+                probs.view(-1, probs.size(-1)), num_samples=1
+            ).view(
+                B, SEQ_LEN
+            )  # (B, SEQ_LEN)
+            confidence = (
+                probs.view(-1, probs.size(-1))
+                .gather(1, sampled_tokens.view(-1, 1))
+                .view(B, SEQ_LEN)
+            )  # (B, SEQ_LEN)
+        else:
+            confidence, sampled_tokens = logits.max(dim=-1)
 
-            n_remaining = len(masked_positions)
-            n_unmask = max(1, int(math.ceil(n_remaining / max(n_steps - step, 1))))
+        # Mask out non-masked positions so they're never selected
+        confidence = confidence.masked_fill(~is_masked, -1.0)
 
-            pos_logits = logits[i, masked_positions]
+        # Compute n_unmask (same for all examples if lengths are equal,
+        # but handle the general case per-example)
+        n_masked_per_ex = is_masked.sum(dim=1)  # (B,)
+        steps_left = max(n_steps - step, 1)
+        n_unmask_per_ex = (n_masked_per_ex + steps_left - 1) // steps_left  # ceil div
+        n_unmask_per_ex = n_unmask_per_ex.clamp(min=1)
+        max_unmask = int(n_unmask_per_ex.max().item())
 
-            if temperature > 0:
-                scaled = pos_logits / temperature
-                probs = F.softmax(scaled, dim=-1)
-                sampled_tokens = torch.multinomial(probs, num_samples=1).squeeze(-1)
-                confidence = probs.gather(1, sampled_tokens.unsqueeze(-1)).squeeze(-1)
-            else:
-                confidence, sampled_tokens = pos_logits.max(dim=-1)
+        # Get top-confidence positions per example
+        _, top_pos = confidence.topk(min(max_unmask, SEQ_LEN), dim=1)  # (B, k)
 
-            _, top_indices = confidence.topk(min(n_unmask, n_remaining))
-            positions_to_unmask = masked_positions[top_indices]
-            seq[i, positions_to_unmask] = sampled_tokens[top_indices]
+        # Build mask of positions to unmask (respect per-example n_unmask)
+        k = top_pos.size(1)
+        rank = torch.arange(k, device=device).unsqueeze(0)  # (1, k)
+        should_unmask = rank < n_unmask_per_ex.unsqueeze(1)  # (B, k)
+
+        # Scatter: unmask selected positions
+        unmask_flat = top_pos[should_unmask]  # flat indices into seq dim
+        batch_idx = torch.arange(B, device=device).unsqueeze(1).expand_as(top_pos)
+        batch_flat = batch_idx[should_unmask]
+        seq[batch_flat, unmask_flat] = sampled_tokens[batch_flat, unmask_flat]
 
     still_masked = seq == MASK_ID
     if still_masked.any():
@@ -769,7 +788,9 @@ def main():
         all_examples = json.load(f)
 
     train_examples = [
-        ex for ex in all_examples if ex["split"] == "train" and ex["records"]
+        ex
+        for ex in all_examples
+        if ex["split"] == "train" and ex["records"] and ex.get("source") != "synthetic"
     ]
 
     if args.max_examples:

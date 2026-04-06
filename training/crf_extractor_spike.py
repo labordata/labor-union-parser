@@ -156,7 +156,7 @@ def load_data(path, exclude_sources=None, union_filter=None):
                 "valid_dnum": valid_dnum,
                 "valid_pfx": valid_pfx,
                 "valid_sfx": valid_sfx,
-                "has_fnum": bool(ex.get("f_num")),
+                "has_fnum": bool(ex.get("f_num")) and ex.get("f_num") != -100,
                 "split": ex["split"],
             }
         )
@@ -687,6 +687,12 @@ def main():
         default=None,
         help="Filter to union_name containing this substring (lowercase match)",
     )
+    parser.add_argument(
+        "--save-checkpoint",
+        type=str,
+        default=None,
+        help="Save model checkpoint (state_dict + vocab + hparams) to this path",
+    )
     args = parser.parse_args()
 
     device = (
@@ -878,6 +884,17 @@ def main():
     if best_state is not None:
         model.load_state_dict(best_state)
         print(f"  Restored best model (val_errors={best_val_errors})")
+
+    # Save checkpoint
+    if args.save_checkpoint:
+        checkpoint = {
+            "state_dict": model.state_dict(),
+            "vocab": vocab,
+            "d_model": args.d_model,
+            "n_layers": args.n_layers,
+        }
+        torch.save(checkpoint, args.save_checkpoint)
+        print(f"  Checkpoint saved to {args.save_checkpoint}")
 
     # Final evaluation on test set
     print("\n--- Test Set Evaluation ---")

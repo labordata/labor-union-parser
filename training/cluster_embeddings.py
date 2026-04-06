@@ -22,7 +22,7 @@ import torch.nn.functional as F
 print = partial(print, flush=True)  # noqa: A001
 
 
-def load_union_name_embeddings(checkpoint_path, db_path="f7.db"):
+def load_union_name_embeddings(checkpoint_path, db_path="f7.db", strip_numbers=False):
     """Load model from checkpoint, compute union_name embeddings for all distinct texts."""
     import sys
 
@@ -36,7 +36,6 @@ def load_union_name_embeddings(checkpoint_path, db_path="f7.db"):
         bloom_hash_ids,
         build_token_vocab,
         load_f7_records,
-        load_fnum_labels,
     )
 
     # Load checkpoint — handle both lightning (.ckpt) and manual save formats
@@ -63,7 +62,7 @@ def load_union_name_embeddings(checkpoint_path, db_path="f7.db"):
         token_vocab = ckpt["token_vocab"]
         d_model = ckpt["hparams"]["d_model"]
         temperature = ckpt["hparams"]["temperature"]
-        n_classes = len(ckpt["fnum_to_idx"])
+        n_classes = len(ckpt.get("union_to_idx", ckpt.get("fnum_to_idx", {})))
         sd = ckpt["state_dict"]
         vocab_size = len(token_vocab)
 
@@ -75,7 +74,15 @@ def load_union_name_embeddings(checkpoint_path, db_path="f7.db"):
     )
     model.load_state_dict(sd)
     model.eval()
-    text_to_fnum = load_fnum_labels("training/data/labeled_data.csv")
+    import json as _json
+
+    with open("training/data/training_examples.json") as _f:
+        _examples = _json.load(_f)
+    text_to_fnum = {}
+    for ex in _examples:
+        fnum = ex.get("f_num")
+        if fnum is not None and fnum != -100:
+            text_to_fnum[ex["query"].strip().lower()] = int(fnum)
 
     union_name_counts = Counter()
     for rec in records:
@@ -83,12 +90,58 @@ def load_union_name_embeddings(checkpoint_path, db_path="f7.db"):
         if un:
             union_name_counts[un] += 1
 
-    distinct_texts = sorted(union_name_counts.keys())
-    counts = np.array([union_name_counts[t] for t in distinct_texts])
+    if strip_numbers:
+        # Deduplicate by numberless form: group texts that differ only by numbers
+        from collections import defaultdict
 
-    # Check which are labeled
-    labeled = np.array([t.lower() in text_to_fnum for t in distinct_texts])
-    fnum_labels = np.array([text_to_fnum.get(t.lower(), -1) for t in distinct_texts])
+        def _strip_numbers_from_text(text):
+            tokens = _tokenize("union_name", text)
+            return " ".join(tok["token"] for tok in tokens if not tok["is_num"])
+
+        variation_groups = defaultdict(list)  # stripped -> [original_texts]
+        for text in union_name_counts:
+            key = _strip_numbers_from_text(text)
+            variation_groups[key].append(text)
+
+        # Build deduplicated lists: one entry per unique variation
+        distinct_texts = sorted(variation_groups.keys())
+        counts = np.array(
+            [
+                sum(union_name_counts[t] for t in variation_groups[k])
+                for k in distinct_texts
+            ]
+        )
+        # Labeled if any original text in the group is labeled; collect all f_nums
+        labeled_list = []
+        fnum_labels_list = []
+        for k in distinct_texts:
+            group_fnums = set()
+            for t in variation_groups[k]:
+                fn = text_to_fnum.get(t.lower(), -1)
+                if fn != -1:
+                    group_fnums.add(fn)
+            if group_fnums:
+                labeled_list.append(True)
+                fnum_labels_list.append(min(group_fnums))  # pick one representative
+            else:
+                labeled_list.append(False)
+                fnum_labels_list.append(-1)
+        labeled = np.array(labeled_list)
+        fnum_labels = np.array(fnum_labels_list)
+
+        print(
+            f"  Deduplicated {len(union_name_counts)} texts → "
+            f"{len(distinct_texts)} numberless variations"
+        )
+    else:
+        distinct_texts = sorted(union_name_counts.keys())
+        counts = np.array([union_name_counts[t] for t in distinct_texts])
+
+        # Check which are labeled
+        labeled = np.array([t.lower() in text_to_fnum for t in distinct_texts])
+        fnum_labels = np.array(
+            [text_to_fnum.get(t.lower(), -1) for t in distinct_texts]
+        )
 
     # Encode each union_name through the model (field index 0)
     unk_id = token_vocab["<UNK>"]
@@ -108,6 +161,8 @@ def load_union_name_embeddings(checkpoint_path, db_path="f7.db"):
 
         for i, text in enumerate(batch_texts):
             tokens = _tokenize("union_name", text)
+            if strip_numbers:
+                tokens = [tok for tok in tokens if not tok["is_num"]]
             n_tok = min(len(tokens), MAX_TOKENS_PER_FIELD)
             token_lens[i, 0] = n_tok
             for t in range(n_tok):
@@ -310,6 +365,11 @@ def main():
         action="store_true",
         help="Post-process: split clusters by disjoint number tokens",
     )
+    parser.add_argument(
+        "--strip-numbers",
+        action="store_true",
+        help="Remove number tokens before embedding (cluster by union identity, not local)",
+    )
     parser.add_argument("--output", default=None, help="CSV output path")
     args = parser.parse_args()
 
@@ -351,7 +411,7 @@ def main():
     # Load embeddings
     print("Loading and encoding union names...")
     texts, counts, labeled, fnum_labels, embeddings = load_union_name_embeddings(
-        args.checkpoint, args.db
+        args.checkpoint, args.db, strip_numbers=args.strip_numbers
     )
     print(f"  {len(texts)} distinct union names, {labeled.sum()} labeled")
 
@@ -391,7 +451,23 @@ def main():
         f"({total_records_in_clusters} total records)"
     )
 
-    # Purity analysis: for clusters with 2+ labeled members, are all labels the same?
+    # Build f_num → union_name mapping from gazetteer for purity analysis
+    import os
+    import sqlite3
+
+    opdr_path = "training/data/opdr.db"
+    fnum_to_union = {}
+    if os.path.exists(opdr_path):
+        with sqlite3.connect(opdr_path) as conn:
+            for row in conn.execute("SELECT DISTINCT f_num, union_name FROM gazetteer"):
+                fnum_to_union[row[0]] = row[1]
+        print(f"  Loaded {len(fnum_to_union)} f_num→union_name mappings from gazetteer")
+    else:
+        print(
+            f"  WARNING: {opdr_path} not found, purity will use f_num instead of union_name"
+        )
+
+    # Purity analysis: for clusters with 2+ labeled members, are all from the same union?
     pure = 0
     impure = 0
     impure_details = []
@@ -399,13 +475,17 @@ def main():
         labeled_in_cluster = [(i, fnum_labels[i]) for i in cluster if labeled[i]]
         if len(labeled_in_cluster) < 2:
             continue
-        distinct_fnums = set(fn for _, fn in labeled_in_cluster)
-        if len(distinct_fnums) == 1:
+        # Map f_nums to union_names; fall back to f_num string if not in gazetteer
+        union_names = set(
+            fnum_to_union.get(int(fn), f"f_num={int(fn)}")
+            for _, fn in labeled_in_cluster
+        )
+        if len(union_names) == 1:
             pure += 1
         else:
             impure += 1
             members = sorted(cluster, key=lambda i: counts[i], reverse=True)
-            impure_details.append((len(distinct_fnums), members, labeled_in_cluster))
+            impure_details.append((union_names, members, labeled_in_cluster))
 
     total_evaluated = pure + impure
     if total_evaluated > 0:
@@ -414,12 +494,17 @@ def main():
         print(f"  Pure: {pure}, Impure: {impure}, Purity: {purity:.1f}%")
 
         # Show top impure clusters
-        impure_details.sort(key=lambda x: x[0], reverse=True)
+        impure_details.sort(key=lambda x: len(x[0]), reverse=True)
         print("\n  Impure clusters (top 10):")
-        for n_fnums, members, lab_members in impure_details[:10]:
-            print(f"    {n_fnums} distinct f_nums:")
+        for union_names, members, lab_members in impure_details[:10]:
+            print(f"    {len(union_names)} distinct unions: {union_names}")
             for i in members[:5]:
-                fn_str = f", f_num={fnum_labels[i]}" if labeled[i] else ""
+                if labeled[i]:
+                    fn = int(fnum_labels[i])
+                    un = fnum_to_union.get(fn, "?")
+                    fn_str = f", f_num={fn}, union={un}"
+                else:
+                    fn_str = ""
                 print(f"      {texts[i]} (n={counts[i]}{fn_str})")
 
     # Show top clusters

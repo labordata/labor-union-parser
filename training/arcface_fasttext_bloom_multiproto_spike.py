@@ -979,6 +979,8 @@ def main():
             "field_sizes": factored_info["field_sizes"],
             "field_map": factored_info["field_map"],
             "desig_bloom": factored_info["desig_bloom"],
+            "proto_to_class": factored_info["proto_to_class"],
+            "idx_to_fnum": idx_to_fnum_map,
         }
         torch.save(checkpoint, args.save_checkpoint)
         print(f"Checkpoint saved to {args.save_checkpoint}")
