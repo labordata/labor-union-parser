@@ -140,14 +140,26 @@ class Extractor:
             vocab_size=len(ac_ckpt["vocab"]),
             scale=ac_ckpt.get("arcface_scale", 30.0),
             field_sizes=ac_ckpt["field_sizes"],
+            n_train_classes=ac_ckpt.get("n_train_classes"),
         )
 
-        # Load prototype buffers into the classifier
+        # Remove buffer keys from state dict (they'll be set from bundle)
+        sd = {
+            k: v
+            for k, v in ac_ckpt["state_dict"].items()
+            if k
+            not in (
+                "classifier.field_map",
+                "classifier.desig_bloom",
+                "classifier.proto_to_class",
+            )
+        }
+        self.arcface_model.load_state_dict(sd, strict=False)
+
+        # Set prototype buffers from bundle (includes OOV prototypes)
         self.arcface_model.classifier.field_map = ac_ckpt["field_map"]
         self.arcface_model.classifier.desig_bloom = ac_ckpt["desig_bloom"]
         self.arcface_model.classifier.proto_to_class = ac_ckpt["proto_to_class"]
-
-        self.arcface_model.load_state_dict(ac_ckpt["state_dict"], strict=False)
         self.arcface_model.to(self.device)
         self.arcface_model.eval()
 

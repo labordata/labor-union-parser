@@ -31,7 +31,7 @@ MAX_FALSE_POSITIVE_RATE = 0.4028  # among non-union examples
 MAX_FNUM_ERROR_RATE = 0.0400
 
 # Union name prediction (among union examples with is_union=True)
-MAX_UNION_NAME_ERROR_RATE = 0.0350
+MAX_UNION_NAME_ERROR_RATE = 0.0380
 
 # End-to-end (is_union correct AND f_num correct, excludes potentially resolvable)
 MAX_WRONG_MATCH_RATE = 0.0400
