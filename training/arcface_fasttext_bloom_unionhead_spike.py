@@ -819,6 +819,12 @@ def main():
         default=0.0,
         help="Penalty weight when f_num pred's union disagrees with union head (phase 2)",
     )
+    parser.add_argument(
+        "--fnum-reg",
+        type=float,
+        default=0.0,
+        help="L2 regularization weight on W_fnum to encourage zero-shot generalization",
+    )
     args = parser.parse_args()
 
     random.seed(42)
@@ -955,11 +961,13 @@ def main():
                 seen_hashes.add(hashes_key)
                 proto_rows.append((i, fields, hashes))
 
-    n_protos = len(proto_rows)
-    n_aliases = n_protos - n_classes
+    n_train_protos = len(proto_rows)
+    n_aliases = n_train_protos - n_classes
     print(
-        f"Prototypes: {n_protos} ({n_aliases} variant aliases from {sum(1 for fn in fnum_all_records if len(fnum_all_records[fn]) > 1)} f_nums)"
+        f"Train prototypes: {n_train_protos} ({n_aliases} variant aliases from {sum(1 for fn in fnum_all_records if len(fnum_all_records[fn]) > 1)} f_nums)"
     )
+
+    n_protos = len(proto_rows)
 
     field_map = torch.zeros(n_protos, 4, dtype=torch.long)
     desig_bloom_t = torch.zeros(n_protos, NUM_BLOOM_HASHES, dtype=torch.long)
@@ -1065,6 +1073,8 @@ def main():
                 loss = loss + args.union_weight * fl
             if disagree_loss is not None and args.disagree_penalty > 0:
                 loss = loss + args.disagree_penalty * disagree_loss
+            if args.fnum_reg > 0:
+                loss = loss + args.fnum_reg * model.arcface.W_fnum.pow(2).mean()
 
             optimizer.zero_grad()
             loss.backward()
