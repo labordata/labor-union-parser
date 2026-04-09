@@ -413,13 +413,20 @@ class MultiProtoArcFaceClassifier(nn.Module):
         if targets is None:
             return logits, None
 
-        if self.margin > 0:
-            cos_theta = logits / self.scale
-            theta = torch.acos(cos_theta.clamp(-1 + 1e-7, 1 - 1e-7))
-            one_hot = F.one_hot(targets, self.n_classes).float()
-            logits = self.scale * torch.cos(theta + one_hot * self.margin)
+        valid = targets >= 0
+        if not valid.any():
+            return logits, torch.tensor(0.0, device=logits.device)
 
-        loss = F.cross_entropy(logits, targets)
+        valid_logits = logits[valid]
+        valid_targets = targets[valid]
+
+        if self.margin > 0:
+            cos_theta = valid_logits / self.scale
+            theta = torch.acos(cos_theta.clamp(-1 + 1e-7, 1 - 1e-7))
+            one_hot = F.one_hot(valid_targets, self.n_classes).float()
+            valid_logits = self.scale * torch.cos(theta + one_hot * self.margin)
+
+        loss = F.cross_entropy(valid_logits, valid_targets)
         return logits, loss
 
 
@@ -511,24 +518,26 @@ class ArcFaceFastTextModel(nn.Module):
                         field_losses[field] = F.cross_entropy(flogits[valid], ft[valid])
 
         # Disagree penalties: penalize f_num predictions that disagree
-        # with the union head and/or desig_name head
+        # with the union head and/or desig_name head (only for examples with valid targets)
         disagree_loss = torch.tensor(0.0, device=logits.device)
-        if logits is not None:
-            fnum_probs = F.softmax(logits, dim=1)  # (B, n_classes)
+        if logits is not None and targets is not None:
+            fnum_valid = targets >= 0
+            if fnum_valid.any():
+                fnum_probs = F.softmax(logits[fnum_valid], dim=1)
 
-            if self.class_to_union is not None:
-                union_log_probs = F.log_softmax(union_logits, dim=1)
-                union_per_class = union_log_probs[:, self.class_to_union]
-                disagree_loss = (
-                    disagree_loss - (fnum_probs * union_per_class).sum(dim=1).mean()
-                )
+                if self.class_to_union is not None:
+                    union_log_probs = F.log_softmax(union_logits[fnum_valid], dim=1)
+                    union_per_class = union_log_probs[:, self.class_to_union]
+                    disagree_loss = (
+                        disagree_loss - (fnum_probs * union_per_class).sum(dim=1).mean()
+                    )
 
-            if self.class_to_desig is not None:
-                desig_log_probs = F.log_softmax(desig_logits, dim=1)
-                desig_per_class = desig_log_probs[:, self.class_to_desig]
-                disagree_loss = (
-                    disagree_loss - (fnum_probs * desig_per_class).sum(dim=1).mean()
-                )
+                if self.class_to_desig is not None:
+                    desig_log_probs = F.log_softmax(desig_logits[fnum_valid], dim=1)
+                    desig_per_class = desig_log_probs[:, self.class_to_desig]
+                    disagree_loss = (
+                        disagree_loss - (fnum_probs * desig_per_class).sum(dim=1).mean()
+                    )
 
         return logits, arcface_loss, field_losses, disagree_loss
 
@@ -570,14 +579,22 @@ def load_data(path, n_buckets, synthetic_path=None):
 
     data = []
     skipped = 0
+    n_nofnum = 0
     for ex in raw:
         f_num = ex.get("f_num")
-        if not f_num or f_num == -100:
-            skipped += 1
-            continue
-        if not ex.get("records"):
-            skipped += 1
-            continue
+        has_fnum = f_num and f_num != -100
+
+        if not has_fnum:
+            # Include no-fnum examples only if they have a union_name
+            # (for union head training)
+            union_name = ex.get("union_name")
+            if not union_name or union_name == -100:
+                skipped += 1
+                continue
+        else:
+            if not ex.get("records"):
+                skipped += 1
+                continue
 
         tokens, is_num = tokenize_example(ex["query"])
         if not tokens:
@@ -592,7 +609,7 @@ def load_data(path, n_buckets, synthetic_path=None):
                 "tokens": tokens,
                 "is_num": is_num,
                 "length": len(tokens),
-                "f_num": int(f_num),
+                "f_num": int(f_num) if has_fnum else -100,
                 "split": ex["split"],
                 "source": ex.get("source"),
                 "union_name": ex.get("union_name"),
@@ -602,12 +619,18 @@ def load_data(path, n_buckets, synthetic_path=None):
                 "bloom_ids": bloom_ids,
             }
         )
+        if not has_fnum:
+            n_nofnum += 1
 
-    return data, skipped
+    return data, skipped, n_nofnum
 
 
 def build_fnum_mapping(data):
-    fnums = sorted(set(ex["f_num"] for ex in data if ex["split"] == "train"))
+    fnums = sorted(
+        set(
+            ex["f_num"] for ex in data if ex["split"] == "train" and ex["f_num"] != -100
+        )
+    )
     return {f: i for i, f in enumerate(fnums)}
 
 
@@ -620,7 +643,7 @@ def encode_examples(data, vocab, fnum_to_idx, field_vocabs_aux=None):
     for ex in data:
         ex["token_ids"] = [vocab.get(tok, 1) for tok in ex["tokens"]]
         ex["is_num_f"] = [float(n) for n in ex["is_num"]]
-        ex["target"] = fnum_to_idx[ex["f_num"]]
+        ex["target"] = fnum_to_idx.get(ex["f_num"], -100)
 
         rec = ex.get("record", {})
         if field_vocabs_aux:
@@ -699,7 +722,9 @@ def compute_fnum_freq(data):
     counts = Counter(
         ex["f_num"]
         for ex in data
-        if ex["split"] == "train" and ex.get("source") != "synthetic_mdlm"
+        if ex["split"] == "train"
+        and ex["f_num"] != -100
+        and ex.get("source") != "synthetic_mdlm"
     )
     return counts
 
@@ -845,8 +870,11 @@ def main():
 
     # Load data
     print("Loading data...")
-    data, skipped = load_data(args.data, args.n_buckets, args.synthetic)
-    print(f"Loaded {len(data)} examples with f_num ({skipped} skipped)")
+    data, skipped, n_nofnum = load_data(args.data, args.n_buckets, args.synthetic)
+    n_with_fnum = len(data) - n_nofnum
+    print(
+        f"Loaded {n_with_fnum} examples with f_num, {n_nofnum} union-only ({skipped} skipped)"
+    )
 
     # Split
     train_data = [ex for ex in data if ex["split"] == "train"]
@@ -891,7 +919,7 @@ def main():
 
     for ex in train_data:
         fn = ex["f_num"]
-        if not ex.get("union_name"):
+        if fn == -100 or not ex.get("union_name"):
             continue
         raw_rec = ex.get("record", {})
         rec = {
