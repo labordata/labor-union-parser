@@ -424,12 +424,15 @@ def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
                 # Filter records to match numbers in query
                 records = filter_records_by_query(text, fnum_to_records[f_num])
 
+                # Use gazetteer union_name as source of truth
+                gaz_union = fnum_to_records[f_num][0].get("union_name", "")
+
                 examples.append(
                     {
                         "query": text,
                         "f_num": f_num,
                         "source": "labeled",
-                        "union_name": union_name,
+                        "union_name": gaz_union or union_name,
                         "records": records,
                     }
                 )
@@ -563,12 +566,14 @@ def load_union_name_labels(fnum_set, fnum_to_records, sig_to_fnums, existing_tex
 
                 records = filter_records_by_query(text, fnum_to_records[f_num])
 
+                gaz_union = fnum_to_records[f_num][0].get("union_name", "")
+
                 examples.append(
                     {
                         "query": text,
                         "f_num": f_num,
                         "source": "union_name_labels",
-                        "union_name": union_name,
+                        "union_name": gaz_union or union_name,
                         "records": records,
                     }
                 )
@@ -647,12 +652,14 @@ def load_synthetic_data(fnum_set, fnum_to_records, sig_to_fnums):
             # Filter records to match numbers in query
             records = filter_records_by_query(text, fnum_to_records[f_num])
 
+            gaz_union = fnum_to_records[f_num][0].get("union_name", "")
+
             examples.append(
                 {
                     "query": text,
                     "f_num": f_num,
                     "source": "synthetic",
-                    "union_name": "UNAFF",
+                    "union_name": gaz_union,
                     "records": records,
                 }
             )
