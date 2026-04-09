@@ -166,10 +166,9 @@ class FactoredPrototypeClassifier(nn.Module):
     similarity, then aggregated to class-level logits via logsumexp.
     """
 
-    def __init__(self, d_model, n_classes, field_sizes, n_train_classes=None):
+    def __init__(self, d_model, n_classes, field_sizes):
         super().__init__()
         self.n_classes = n_classes
-        self.n_train_classes = n_train_classes or n_classes
         self.W_union = nn.Embedding(field_sizes["union_name"] + 1, d_model)
         self.W_desig_name = nn.Embedding(field_sizes["desig_name"] + 1, d_model)
         self.W_prefix = nn.Embedding(field_sizes["prefix"] + 1, d_model)
@@ -191,13 +190,10 @@ class FactoredPrototypeClassifier(nn.Module):
         fnum_emb = self.W_fnum[self.proto_to_class]
         return u + dn + dnum + pfx + sfx + fnum_emb
 
-    def forward(self, embeddings, scale=30.0, oov_penalty=0.8):
+    def forward(self, embeddings, scale=30.0):
         """Score embeddings against all prototypes.
 
         Returns (B, n_classes) class logits.
-
-        OOV classes (idx >= n_train_classes) get a penalty subtracted from
-        their logits so training classes are preferred when scores are close.
         """
         W = F.normalize(self._prototypes(), dim=1)
         proto_logits = scale * F.linear(embeddings, W)
@@ -212,13 +208,7 @@ class FactoredPrototypeClassifier(nn.Module):
             self.proto_to_class.unsqueeze(0).expand(embeddings.shape[0], -1),
             exp_logits,
         )
-        logits = class_exp.log()
-
-        # Apply penalty to OOV classes
-        if self.n_train_classes < self.n_classes and oov_penalty > 0:
-            logits[:, self.n_train_classes :] -= oov_penalty * scale
-
-        return logits
+        return class_exp.log()
 
 
 # ---------------------------------------------------------------------------
@@ -245,16 +235,13 @@ class ArcFaceModel(nn.Module):
         scale=30.0,
         union_scale=10.0,
         field_sizes=None,
-        n_train_classes=None,
     ):
         super().__init__()
         self.scale = scale
         self.encoder = FastTextRoPEEncoder(
             d_model, n_heads, n_layers, n_buckets, vocab_size
         )
-        self.classifier = FactoredPrototypeClassifier(
-            d_model, n_classes, field_sizes, n_train_classes=n_train_classes
-        )
+        self.classifier = FactoredPrototypeClassifier(d_model, n_classes, field_sizes)
 
         # Shared union head — uses same W_union weights as prototypes
         self.union_scale = nn.Parameter(torch.tensor(union_scale))

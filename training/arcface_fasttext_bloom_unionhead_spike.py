@@ -17,6 +17,7 @@ import sys
 import time
 from collections import Counter, defaultdict
 from functools import partial
+from pathlib import Path
 
 import torch
 import torch.nn as nn
@@ -825,6 +826,11 @@ def main():
         default=0.0,
         help="L2 regularization weight on W_fnum to encourage zero-shot generalization",
     )
+    parser.add_argument(
+        "--frozen-oov",
+        action="store_true",
+        help="Add all gazetteer f_nums as OOV classes with W_fnum frozen at zero",
+    )
     args = parser.parse_args()
 
     random.seed(42)
@@ -962,10 +968,54 @@ def main():
                 proto_rows.append((i, fields, hashes))
 
     n_train_protos = len(proto_rows)
+    n_train_classes = n_classes
     n_aliases = n_train_protos - n_classes
     print(
         f"Train prototypes: {n_train_protos} ({n_aliases} variant aliases from {sum(1 for fn in fnum_all_records if len(fnum_all_records[fn]) > 1)} f_nums)"
     )
+
+    # Add frozen OOV prototypes from gazetteer
+    if args.frozen_oov:
+        gaz_path = Path(args.data).parent / "gazetteer.json"
+        with open(gaz_path) as f:
+            gazetteer_data = json.load(f)
+
+        n_oov = 0
+        for fnum_str, gaz_records in sorted(
+            gazetteer_data.items(), key=lambda x: int(x[0])
+        ):
+            fn = int(fnum_str)
+            if fn in fnum_to_idx:
+                continue
+            class_idx = len(fnum_to_idx)
+            fnum_to_idx[fn] = class_idx
+            idx_to_fnum_map[class_idx] = fn
+
+            seen_hashes = set()
+            for rec in gaz_records:
+                fields = [0, 0, 0, 0]
+                for col, field_name in enumerate(
+                    ["union_name", "desig_name", "prefix", "suffix"]
+                ):
+                    val = rec.get(field_name, "")
+                    if val and val not in (0, -100, None, ""):
+                        fields[col] = field_vocabs[field_name].get(val, 0)
+                dnum = rec.get("desig_num", 0)
+                hashes = [0] * NUM_BLOOM_HASHES
+                if dnum and dnum not in (0, -100, None):
+                    hashes = bloom_hash_ids(str(int(dnum)))
+                hashes_key = (tuple(fields), tuple(hashes))
+                if hashes_key not in seen_hashes:
+                    seen_hashes.add(hashes_key)
+                    proto_rows.append((class_idx, fields, hashes))
+            n_oov += 1
+
+        n_classes = len(fnum_to_idx)
+        print(
+            f"Frozen OOV: {n_oov} f_nums "
+            f"({len(proto_rows) - n_train_protos} proto rows)"
+        )
+        print(f"Total classes: {n_classes}")
 
     n_protos = len(proto_rows)
 
@@ -1002,12 +1052,31 @@ def main():
         factored_info=factored_info,
     ).to(device)
 
+    # Zero out W_fnum for frozen OOV classes and register gradient hook
+    if args.frozen_oov and n_train_classes < n_classes:
+        with torch.no_grad():
+            model.arcface.W_fnum.data[n_train_classes:].zero_()
+
+        def _zero_oov_grad(grad):
+            grad[n_train_classes:] = 0
+            return grad
+
+        model.arcface.W_fnum.register_hook(_zero_oov_grad)
+        print(f"Frozen W_fnum for OOV classes {n_train_classes}..{n_classes}")
+
     # Build class→union mapping for disagree penalty
     # Use prototype field_vocabs (1-indexed) → subtract 1 to match W_union[1:] (0-indexed)
     class_to_union = torch.zeros(n_classes, dtype=torch.long)
     for i in range(n_classes):
         fn = idx_to_fnum_map[i]
-        rec = fnum_records.get(fn, {})
+        if fn in fnum_records:
+            rec = fnum_records[fn]
+        elif args.frozen_oov:
+            # OOV class — look up from gazetteer
+            gaz_recs = gazetteer_data.get(str(fn), [{}])
+            rec = gaz_recs[0] if gaz_recs else {}
+        else:
+            rec = {}
         un = rec.get("union_name", "")
         proto_un_idx = field_vocabs["union_name"].get(un, 0)
         # field_vocabs is 1-indexed (0=padding), W_union[1:] is 0-indexed
@@ -1126,6 +1195,7 @@ def main():
             "n_heads": args.n_heads,
             "n_layers": args.n_layers,
             "n_classes": n_classes,
+            "n_train_classes": n_train_classes,
             "n_buckets": args.n_buckets,
             "arcface_scale": args.arcface_scale,
             "arcface_margin": args.arcface_margin,

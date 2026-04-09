@@ -76,7 +76,7 @@ def main(checkpoint):
     train_field_map = ckpt["field_map"]
     train_desig_bloom = ckpt["desig_bloom"]
     train_proto_to_class = ckpt["proto_to_class"]
-    n_train_classes = len(fnum_to_idx)
+    n_train_classes = ckpt.get("n_train_classes", len(fnum_to_idx))
     n_train_protos = train_field_map.shape[0]
     d_model = ckpt.get("d_model", 128)
 
@@ -114,7 +114,7 @@ def main(checkpoint):
             oov_proto_rows.append((class_idx, fields, hashes))
 
     # Extend prototype tensors with OOV rows
-    n_total_classes = n_train_classes + n_oov_classes
+    n_total_classes = max(len(fnum_to_idx), n_train_classes + n_oov_classes)
     n_total_protos = n_train_protos + len(oov_proto_rows)
 
     field_map = torch.zeros(n_total_protos, 4, dtype=torch.long)
@@ -131,12 +131,13 @@ def main(checkpoint):
         field_map[p] = torch.tensor(fields, dtype=torch.long)
         desig_bloom[p] = torch.tensor(hashes, dtype=torch.long)
 
-    # Extend W_fnum with zeros for OOV classes
+    # Extend W_fnum with zeros for OOV classes (if not already extended)
     W_fnum_key = "classifier.W_fnum"
     train_W_fnum = mapped_state[W_fnum_key]
-    extended_W_fnum = torch.zeros(n_total_classes, d_model)
-    extended_W_fnum[:n_train_classes] = train_W_fnum
-    mapped_state[W_fnum_key] = extended_W_fnum
+    if train_W_fnum.shape[0] < n_total_classes:
+        extended_W_fnum = torch.zeros(n_total_classes, d_model)
+        extended_W_fnum[: train_W_fnum.shape[0]] = train_W_fnum
+        mapped_state[W_fnum_key] = extended_W_fnum
 
     print(f"  Train classes: {n_train_classes}, OOV classes: {n_oov_classes}")
     print(f"  Train protos: {n_train_protos}, OOV protos: {len(oov_proto_rows)}")

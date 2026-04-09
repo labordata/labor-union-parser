@@ -140,7 +140,6 @@ class Extractor:
             vocab_size=len(ac_ckpt["vocab"]),
             scale=ac_ckpt.get("arcface_scale", 30.0),
             field_sizes=ac_ckpt["field_sizes"],
-            n_train_classes=ac_ckpt.get("n_train_classes"),
         )
 
         # Remove buffer keys from state dict (they'll be set from bundle)
