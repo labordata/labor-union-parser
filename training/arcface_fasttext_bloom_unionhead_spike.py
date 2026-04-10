@@ -388,22 +388,16 @@ class MultiProtoArcFaceClassifier(nn.Module):
 
     def _aggregate_logits(self, proto_logits):
         """Aggregate proto-level logits to class-level via logsumexp."""
-        # proto_logits: (B, n_protos)
-        # For classes with one proto, this is identity.
-        # For classes with multiple protos, logsumexp combines them.
+        # Numerically stable: subtract per-example max before exp to avoid overflow
         B = proto_logits.shape[0]
-        # Scatter to (B, n_classes) using logsumexp
-        class_logits = torch.full((B, self.n_classes), -1e9, device=proto_logits.device)
-        # Use scatter with logsumexp: first scatter_max, then proper logsumexp
-        # Simple approach: for each class, gather its proto logits and logsumexp
-        # Efficient approach: scatter_add on exp, then log
-        exp_logits = proto_logits.exp()
+        max_logit = proto_logits.max(dim=1, keepdim=True).values  # (B, 1)
+        shifted = proto_logits - max_logit  # all <= 0
+        exp_shifted = shifted.exp()
         class_exp = torch.zeros(B, self.n_classes, device=proto_logits.device)
         class_exp.scatter_add_(
-            1, self.proto_to_class.unsqueeze(0).expand(B, -1), exp_logits
+            1, self.proto_to_class.unsqueeze(0).expand(B, -1), exp_shifted
         )
-        class_logits = class_exp.log()
-        return class_logits
+        return class_exp.log() + max_logit  # add back the max
 
     def forward(self, embeddings, targets=None):
         W = F.normalize(self._prototypes(), dim=1)

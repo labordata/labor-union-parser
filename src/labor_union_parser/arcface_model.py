@@ -198,17 +198,18 @@ class FactoredPrototypeClassifier(nn.Module):
         W = F.normalize(self._prototypes(), dim=1)
         proto_logits = scale * F.linear(embeddings, W)
 
-        # Aggregate multi-prototype classes via logsumexp
-        exp_logits = proto_logits.exp()
-        class_exp = torch.zeros(
-            embeddings.shape[0], self.n_classes, device=embeddings.device
-        )
+        # Aggregate multi-prototype classes via numerically stable logsumexp
+        B = embeddings.shape[0]
+        max_logit = proto_logits.max(dim=1, keepdim=True).values
+        shifted = proto_logits - max_logit
+        exp_shifted = shifted.exp()
+        class_exp = torch.zeros(B, self.n_classes, device=embeddings.device)
         class_exp.scatter_add_(
             1,
-            self.proto_to_class.unsqueeze(0).expand(embeddings.shape[0], -1),
-            exp_logits,
+            self.proto_to_class.unsqueeze(0).expand(B, -1),
+            exp_shifted,
         )
-        return class_exp.log()
+        return class_exp.log() + max_logit
 
 
 # ---------------------------------------------------------------------------
