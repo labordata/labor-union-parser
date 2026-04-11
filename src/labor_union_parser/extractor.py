@@ -166,6 +166,8 @@ class Extractor:
         self.vocab = ac_ckpt["vocab"]
         self.idx_to_fnum = ac_ckpt["idx_to_fnum"]  # {class_idx: f_num}
         self.match_threshold = ac_ckpt.get("match_threshold", 0.0)
+        self.fnum_temperature = ac_ckpt.get("fnum_temperature", 1.0)
+        self.union_temperature = ac_ckpt.get("union_temperature", 1.0)
 
         # Union name vocab (for decoding union head predictions)
         self.union_names = ac_ckpt.get(
@@ -273,12 +275,13 @@ class Extractor:
                 token_ids, ngram_ids, ngram_counts, bloom_ids, is_num_t, lengths
             )
 
-        # Match scores: softmax probability of top class
-        class_probs = F.softmax(class_logits, dim=1)
+        # Match scores: temperature-scaled softmax probability of top class
+        class_probs = F.softmax(class_logits / self.fnum_temperature, dim=1)
         top_probs, top_indices = class_probs.max(dim=1)
 
-        # Union head predictions
-        union_preds = union_logits.argmax(dim=1).cpu().tolist()
+        # Union head predictions (temperature-scaled)
+        union_probs = F.softmax(union_logits / self.union_temperature, dim=1)
+        union_preds = union_probs.argmax(dim=1).cpu().tolist()
 
         results = []
         for i in range(len(texts)):
