@@ -66,6 +66,89 @@ def bloom_hash_ids(number_str):
     return ids
 
 
+# Token role tags for number disambiguation
+TAG_O = 0  # non-number or unmatched number
+TAG_DN = 1  # designation number
+TAG_PFX = 2  # prefix
+TAG_SFX = 3  # suffix
+N_TAGS = 4
+
+
+def generate_token_tags(tokens, is_num, record):
+    """Generate per-token role tags by aligning numeric tokens to record fields.
+
+    Returns list of tags (same length as tokens). Non-numeric tokens get TAG_O.
+    Numeric tokens are matched to desig_num, prefix, or suffix from the record.
+    Ambiguous matches (same number appears in multiple roles) get TAG_O.
+    """
+    tags = [TAG_O] * len(tokens)
+
+    desig_num = record.get("desig_num", 0)
+    prefix = record.get("prefix", 0)
+    suffix = record.get("suffix", "")
+
+    # Normalize field values to strings for comparison
+    dn_str = (
+        str(int(desig_num)) if desig_num and desig_num not in (-100, 0, None) else ""
+    )
+    pfx_str = str(int(prefix)) if prefix and prefix not in (-100, 0, None) else ""
+    # suffix can be a string like "S" or a number
+    sfx_str = ""
+    if suffix and suffix not in (-100, 0, "", None):
+        try:
+            sfx_str = str(int(float(suffix)))
+        except (ValueError, TypeError):
+            sfx_str = ""  # non-numeric suffix, can't tag
+
+    if not dn_str and not pfx_str and not sfx_str:
+        return tags  # nothing to tag
+
+    # Collect numeric token indices and their normalized values
+    num_tokens = []
+    for i, (tok, is_n) in enumerate(zip(tokens, is_num)):
+        if is_n:
+            normalized = tok.lstrip("0") or "0"
+            num_tokens.append((i, normalized))
+
+    # Match from right to left: last number is most likely desig_num,
+    # earlier numbers are prefix candidates
+    remaining = list(num_tokens)
+
+    # First pass: match desig_num (usually the last or largest number)
+    if dn_str:
+        dn_normalized = dn_str.lstrip("0") or "0"
+        # Try matching from the right
+        for j in range(len(remaining) - 1, -1, -1):
+            idx, val = remaining[j]
+            if val == dn_normalized:
+                tags[idx] = TAG_DN
+                remaining.pop(j)
+                break
+
+    # Second pass: match prefix
+    if pfx_str:
+        pfx_normalized = pfx_str.lstrip("0") or "0"
+        # Try matching from the left (prefix usually comes first)
+        for j in range(len(remaining)):
+            idx, val = remaining[j]
+            if val == pfx_normalized:
+                tags[idx] = TAG_PFX
+                remaining.pop(j)
+                break
+
+    # Third pass: match suffix (rare, usually at end)
+    if sfx_str:
+        sfx_normalized = sfx_str.lstrip("0") or "0"
+        for j in range(len(remaining) - 1, -1, -1):
+            idx, val = remaining[j]
+            if val == sfx_normalized:
+                tags[idx] = TAG_SFX
+                remaining.pop(j)
+                break
+
+    return tags
+
+
 def precompute_bloom_ids(tokens, is_num):
     """Precompute bloom hash IDs for all tokens. Non-number tokens get all zeros."""
     all_ids = []
@@ -462,12 +545,17 @@ class ArcFaceFastTextModel(nn.Module):
         # Auxiliary shared heads — gradient flows into prototype embeddings
         self.union_scale = nn.Parameter(torch.tensor(10.0))
         self.desig_scale = nn.Parameter(torch.tensor(10.0))
+        # Token role tagging head (number disambiguation)
+        self.tag_head = nn.Linear(d_model, N_TAGS)
         # class→field mappings for disagree penalties (set after construction)
         self.class_to_union = None
         self.class_to_desig = None
 
     def encode(self, token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths):
-        """Encode to L2-normalized embeddings via masked mean-pool."""
+        """Encode to L2-normalized embeddings via masked mean-pool.
+
+        Returns (pooled_embeddings, hidden_states).
+        """
         h = self.encoder(token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths)
 
         L = h.shape[1]
@@ -475,7 +563,7 @@ class ArcFaceFastTextModel(nn.Module):
         mask_f = mask.unsqueeze(-1).float()
         pooled = (h * mask_f).sum(dim=1) / lengths.unsqueeze(1).float().clamp(min=1)
 
-        return F.normalize(pooled, dim=1)
+        return F.normalize(pooled, dim=1), h
 
     def forward(
         self,
@@ -488,7 +576,7 @@ class ArcFaceFastTextModel(nn.Module):
         targets=None,
         field_targets=None,
     ):
-        embeddings = self.encode(
+        embeddings, hidden_states = self.encode(
             token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths
         )
         logits, arcface_loss = self.arcface(embeddings, targets)
@@ -498,6 +586,9 @@ class ArcFaceFastTextModel(nn.Module):
         union_logits = self.union_scale * F.linear(embeddings, F.normalize(W_u, dim=1))
         W_dn = self.arcface.W_desig_name.weight[1:]
         desig_logits = self.desig_scale * F.linear(embeddings, F.normalize(W_dn, dim=1))
+
+        # Token role tagging loss (number disambiguation)
+        tag_logits = self.tag_head(hidden_states)  # (B, L, N_TAGS)
 
         field_losses = {}
         if field_targets is not None:
@@ -510,6 +601,14 @@ class ArcFaceFastTextModel(nn.Module):
                     valid = ft >= 0
                     if valid.any():
                         field_losses[field] = F.cross_entropy(flogits[valid], ft[valid])
+
+            # Token role tagging loss
+            tt = field_targets.get("token_tags")
+            if tt is not None:
+                # tag_logits: (B, L, N_TAGS), tt: (B, L) with -100 for ignore
+                field_losses["token_tags"] = F.cross_entropy(
+                    tag_logits.view(-1, N_TAGS), tt.view(-1), ignore_index=-100
+                )
 
         # Disagree penalties: penalize f_num predictions that disagree
         # with the union head and/or desig_name head (only for examples with valid targets)
@@ -597,6 +696,8 @@ def load_data(path, n_buckets, synthetic_path=None):
 
         ngram_ids, ngram_counts = precompute_ngram_hashes(tokens, n_buckets)
         bloom_ids = precompute_bloom_ids(tokens, is_num)
+        record = ex["records"][0] if ex.get("records") else {}
+        token_tags = generate_token_tags(tokens, is_num, record)
 
         data.append(
             {
@@ -607,10 +708,11 @@ def load_data(path, n_buckets, synthetic_path=None):
                 "split": ex["split"],
                 "source": ex.get("source"),
                 "union_name": ex.get("union_name"),
-                "record": ex["records"][0] if ex.get("records") else {},
+                "record": record,
                 "ngram_ids": ngram_ids,
                 "ngram_counts": ngram_counts,
                 "bloom_ids": bloom_ids,
+                "token_tags": token_tags,
             }
         )
         if not has_fnum:
@@ -670,6 +772,7 @@ def collate_batch(batch, device):
     is_num_t = torch.zeros(B, max_len, dtype=torch.float)
     lengths = torch.zeros(B, dtype=torch.long)
     targets = torch.zeros(B, dtype=torch.long)
+    tag_targets = torch.full((B, max_len), -100, dtype=torch.long)
     union_targets = torch.full((B,), -1, dtype=torch.long)
     desig_name_targets = torch.full((B,), -1, dtype=torch.long)
     prefix_targets = torch.full((B,), -1, dtype=torch.long)
@@ -684,6 +787,8 @@ def collate_batch(batch, device):
         bloom_ids[i, :L] = torch.tensor(ex["bloom_ids"][:L], dtype=torch.long)
         is_num_t[i, :L] = torch.tensor(ex["is_num_f"], dtype=torch.float)
         targets[i] = ex["target"]
+        if "token_tags" in ex:
+            tag_targets[i, :L] = torch.tensor(ex["token_tags"][:L], dtype=torch.long)
         union_targets[i] = ex.get("union_target", -1)
         desig_name_targets[i] = ex.get("desig_name_target", -1)
         prefix_targets[i] = ex.get("prefix_target", -1)
@@ -694,6 +799,7 @@ def collate_batch(batch, device):
         "desig_name": desig_name_targets.to(device),
         "prefix": prefix_targets.to(device),
         "suffix": suffix_targets.to(device),
+        "token_tags": tag_targets.to(device),
     }
     return (
         token_ids.to(device),
@@ -849,6 +955,12 @@ def main():
         "--frozen-oov",
         action="store_true",
         help="Add all gazetteer f_nums as OOV classes with W_fnum frozen at zero",
+    )
+    parser.add_argument(
+        "--tag-weight",
+        type=float,
+        default=0.0,
+        help="Weight for token role tagging auxiliary loss",
     )
     args = parser.parse_args()
 
@@ -1160,8 +1272,9 @@ def main():
                 field_targets,
             )
             loss = arcface_loss
-            for fl in field_losses.values():
-                loss = loss + args.union_weight * fl
+            for fname, fl in field_losses.items():
+                w = args.tag_weight if fname == "token_tags" else args.union_weight
+                loss = loss + w * fl
             if disagree_loss is not None and args.disagree_penalty > 0:
                 loss = loss + args.disagree_penalty * disagree_loss
             if args.fnum_reg > 0:
