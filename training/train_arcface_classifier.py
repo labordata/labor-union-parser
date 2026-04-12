@@ -30,6 +30,10 @@ import torch.nn.functional as F
 print = partial(print, flush=True)  # noqa: A001
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+from labor_union_parser.arcface_model import (  # noqa: E402
+    BloomNumberEmbedding,
+    FastTextRoPEEncoder,
+)
 from labor_union_parser.tokenizer import smart_truncate_nonspace  # noqa: E402
 
 DATA_DIR = Path(__file__).parent / "data"
@@ -174,112 +178,8 @@ def _build_field_tensors(valid_list, batch_size, device):
 
 
 # ---------------------------------------------------------------------------
-# Model
+# Model (training-specific classes; encoder imported from arcface_model.py)
 # ---------------------------------------------------------------------------
-
-
-class FastTextEmbedding(nn.Module):
-    def __init__(self, d_model, vocab_size, n_buckets=50000):
-        super().__init__()
-        self.vocab_embed = nn.Embedding(vocab_size, d_model, padding_idx=0)
-        self.ngram_embed = nn.Embedding(n_buckets + 1, d_model, padding_idx=0)
-        nn.init.normal_(self.vocab_embed.weight, std=0.01)
-        nn.init.normal_(self.ngram_embed.weight, std=0.01)
-        self.vocab_embed.weight.data[0].zero_()
-        self.ngram_embed.weight.data[0].zero_()
-
-    def forward(self, token_ids, ngram_ids, ngram_counts):
-        word_emb = self.vocab_embed(token_ids)
-        shifted = ngram_ids + 1
-        mask = torch.arange(
-            shifted.shape[-1], device=shifted.device
-        ) < ngram_counts.unsqueeze(-1)
-        shifted = shifted * mask
-        ngram_emb = self.ngram_embed(shifted)
-        summed = ngram_emb.sum(dim=2)
-        counts_safe = ngram_counts.float().clamp(min=1).unsqueeze(-1)
-        return word_emb + summed / counts_safe
-
-
-class BloomNumberEmbedding(nn.Module):
-    def __init__(self, d_model, table_size=BLOOM_TABLE_SIZE):
-        super().__init__()
-        self.embed = nn.Embedding(table_size, d_model)
-        nn.init.normal_(self.embed.weight, std=0.01)
-
-    def forward(self, bloom_ids):
-        return self.embed(bloom_ids).sum(dim=-2)
-
-
-class FastTextRoPEEncoder(nn.Module):
-    def __init__(self, d_model, n_heads, n_layers, n_buckets, vocab_size):
-        super().__init__()
-        self.d_model = d_model
-        self.n_heads = n_heads
-        self.token_embed = FastTextEmbedding(d_model, vocab_size, n_buckets)
-        self.bloom_embed = BloomNumberEmbedding(d_model)
-        self.num_flag = nn.Linear(1, d_model)
-        self.attn_layers = nn.ModuleList()
-        for _ in range(n_layers):
-            self.attn_layers.append(
-                nn.ModuleDict(
-                    {
-                        "q_proj": nn.Linear(d_model, d_model),
-                        "k_proj": nn.Linear(d_model, d_model),
-                        "v_proj": nn.Linear(d_model, d_model),
-                        "out_proj": nn.Linear(d_model, d_model),
-                        "norm1": nn.LayerNorm(d_model),
-                        "ff": nn.Sequential(
-                            nn.Linear(d_model, d_model * 2),
-                            nn.GELU(),
-                            nn.Linear(d_model * 2, d_model),
-                        ),
-                        "norm2": nn.LayerNorm(d_model),
-                    }
-                )
-            )
-        self.final_norm = nn.LayerNorm(d_model)
-
-    @staticmethod
-    def _rope(x, seq_len):
-        head_dim = x.shape[-1]
-        pos = torch.arange(seq_len, device=x.device, dtype=x.dtype).unsqueeze(1)
-        dim_idx = torch.arange(0, head_dim, 2, device=x.device, dtype=x.dtype)
-        freq = 1.0 / (10000.0 ** (dim_idx / head_dim))
-        angles = pos * freq
-        cos = angles.cos().unsqueeze(0).unsqueeze(0)
-        sin = angles.sin().unsqueeze(0).unsqueeze(0)
-        x1, x2 = x[..., 0::2], x[..., 1::2]
-        return torch.stack((x1 * cos - x2 * sin, x1 * sin + x2 * cos), dim=-1).flatten(
-            -2
-        )
-
-    def forward(self, token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths):
-        B, L, _ = ngram_ids.shape
-        head_dim = self.d_model // self.n_heads
-        text_emb = self.token_embed(token_ids, ngram_ids, ngram_counts)
-        num_emb = self.bloom_embed(bloom_ids)
-        is_num_mask = is_num.unsqueeze(-1)
-        x = text_emb * (1 - is_num_mask) + num_emb * is_num_mask
-        x = x + self.num_flag(is_num.unsqueeze(-1))
-        pad_mask = torch.arange(L, device=token_ids.device).unsqueeze(
-            0
-        ) >= lengths.unsqueeze(1)
-        attn_mask = pad_mask.unsqueeze(1).unsqueeze(2).float() * -1e9
-        for layer in self.attn_layers:
-            residual = x
-            x = layer["norm1"](x)
-            q = layer["q_proj"](x).view(B, L, self.n_heads, head_dim).transpose(1, 2)
-            k = layer["k_proj"](x).view(B, L, self.n_heads, head_dim).transpose(1, 2)
-            v = layer["v_proj"](x).view(B, L, self.n_heads, head_dim).transpose(1, 2)
-            q, k = self._rope(q, L), self._rope(k, L)
-            scores = torch.matmul(q, k.transpose(-2, -1)) / (head_dim**0.5) + attn_mask
-            attn_out = torch.matmul(torch.softmax(scores, dim=-1), v)
-            attn_out = attn_out.transpose(1, 2).contiguous().view(B, L, self.d_model)
-            x = residual + layer["out_proj"](attn_out)
-            residual = x
-            x = residual + layer["ff"](layer["norm2"](x))
-        return self.final_norm(x)
 
 
 class MultiProtoArcFaceClassifier(nn.Module):

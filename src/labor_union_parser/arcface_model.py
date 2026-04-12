@@ -24,6 +24,10 @@ class FastTextEmbedding(nn.Module):
         super().__init__()
         self.vocab_embed = nn.Embedding(vocab_size, d_model, padding_idx=0)
         self.ngram_embed = nn.Embedding(n_buckets + 1, d_model, padding_idx=0)
+        nn.init.normal_(self.vocab_embed.weight, std=0.01)
+        nn.init.normal_(self.ngram_embed.weight, std=0.01)
+        self.vocab_embed.weight.data[0].zero_()
+        self.ngram_embed.weight.data[0].zero_()
 
     def forward(self, token_ids, ngram_ids, ngram_counts):
         word_emb = self.vocab_embed(token_ids)
@@ -48,6 +52,7 @@ class BloomNumberEmbedding(nn.Module):
     def __init__(self, d_model, table_size=BLOOM_TABLE_SIZE):
         super().__init__()
         self.embed = nn.Embedding(table_size, d_model)
+        nn.init.normal_(self.embed.weight, std=0.01)
 
     def forward(self, bloom_ids):
         return self.embed(bloom_ids).sum(dim=-2)
