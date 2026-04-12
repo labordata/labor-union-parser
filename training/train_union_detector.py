@@ -1,278 +1,127 @@
 #!/usr/bin/env python3
 """Train the union vs non-union detector.
 
-Uses AttentionPoolingEncoder from the production package with PyTorch Lightning.
-Trains CharCNN from scratch (no pretrained weights needed).
+Uses AttentionPoolingEncoder from the production package.
+Trains a contrastive model with a learned union prototype on the
+hypersphere using ArcFace angular margin.
+
+Usage:
+    python training/train_union_detector.py
+    python training/train_union_detector.py --epochs 30 --patience 10
 """
 
+import json
+import random
+import time
+from functools import partial
 from pathlib import Path
 
 import click
-import lightning as L
 import numpy as np
 import torch
 import torch.nn.functional as F
 from sklearn.metrics import accuracy_score, roc_auc_score, roc_curve
-from torch.utils.data import DataLoader, Dataset
 
 from labor_union_parser.char_cnn import CharacterCNN, tokenize_to_chars
 from labor_union_parser.extractor import AttentionPoolingEncoder
+
+print = partial(print, flush=True)  # noqa: A001
 
 DATA_DIR = Path(__file__).parent / "data"
 WEIGHTS_DIR = Path(__file__).parent.parent / "src" / "labor_union_parser" / "weights"
 MODEL_PATH = WEIGHTS_DIR / "union_detector.pt"
 
 MAX_TOKENS = 30
-
-
-# ---------------------------------------------------------------------------
-# Dataset
-# ---------------------------------------------------------------------------
-
-
-class UnionDataset(Dataset):
-    def __init__(self, texts, labels):
-        self.char_ids = []
-        self.token_types = []
-        self.is_numbers = []
-        self.labels = labels
-
-        for text in texts:
-            char_ids, _, is_number, token_type = tokenize_to_chars(
-                text, max_tokens=MAX_TOKENS
-            )
-            self.char_ids.append(torch.tensor(char_ids, dtype=torch.long))
-            self.token_types.append(torch.tensor(token_type, dtype=torch.long))
-            self.is_numbers.append(torch.tensor(is_number, dtype=torch.long))
-
-    def __len__(self):
-        return len(self.labels)
-
-    def __getitem__(self, idx):
-        return {
-            "char_ids": self.char_ids[idx],
-            "token_type": self.token_types[idx],
-            "is_number": self.is_numbers[idx],
-            "label": self.labels[idx],
-        }
-
-
-def collate_fn(batch):
-    return {
-        "char_ids": torch.stack([b["char_ids"] for b in batch]),
-        "token_type": torch.stack([b["token_type"] for b in batch]),
-        "is_number": torch.stack([b["is_number"] for b in batch]),
-        "label": torch.tensor([b["label"] for b in batch]),
-    }
-
-
-# ---------------------------------------------------------------------------
-# Lightning Module — ArcFace with learned union prototype
-# ---------------------------------------------------------------------------
-
 ARCFACE_SCALE = 30.0
 ARCFACE_MARGIN = 0.5
 
 
-class UnionDetectorModule(L.LightningModule):
-    def __init__(self, lr=1e-3, embed_dim=64):
-        super().__init__()
-        self.save_hyperparameters()
-        self.lr = lr
-
-        char_cnn = CharacterCNN(embed_dim=embed_dim, char_embed_dim=16)
-        self.model = AttentionPoolingEncoder(
-            char_cnn, embed_dim=embed_dim, num_embed_dim=8, num_heads=4
-        )
-
-        # Learned union prototype on the hypersphere
-        self.union_prototype = torch.nn.Parameter(
-            F.normalize(torch.randn(embed_dim), dim=0)
-        )
-
-    def forward(self, char_ids, token_type, is_number):
-        return self.model(char_ids, token_type, is_number)
-
-    def training_step(self, batch, batch_idx):
-        embeddings = self(batch["char_ids"], batch["token_type"], batch["is_number"])
-        labels = batch["label"].float().to(embeddings.device)
-
-        prototype = F.normalize(self.union_prototype, dim=0)
-        cos_sim = embeddings @ prototype  # (B,)
-
-        # Angular margin for union examples
-        theta = torch.acos(cos_sim.clamp(-1 + 1e-7, 1 - 1e-7))
-        is_union = labels == 1
-        margin_cos = torch.where(
-            is_union,
-            torch.cos(theta + ARCFACE_MARGIN),
-            cos_sim,
-        )
-
-        logits = ARCFACE_SCALE * margin_cos
-        loss = F.binary_cross_entropy_with_logits(logits, labels)
-
-        self.log("train_loss", loss, prog_bar=True, on_epoch=True)
-        return loss
-
-    def validation_step(self, batch, batch_idx):
-        embeddings = self(batch["char_ids"], batch["token_type"], batch["is_number"])
-        labels = batch["label"].to(embeddings.device)
-
-        prototype = F.normalize(self.union_prototype, dim=0)
-        cos_sim = embeddings @ prototype
-
-        preds = cos_sim > 0.5
-        is_union = labels == 1
-
-        self.log("val_acc", (preds == is_union).float().mean(), prog_bar=True)
-        self.log("val_fp", ((preds) & (~is_union)).float().sum(), reduce_fx="sum")
-        self.log("val_fn", ((~preds) & (is_union)).float().sum(), reduce_fx="sum")
-        self.log("val_mean_sim_union", cos_sim[is_union].mean())
-        if (~is_union).any():
-            self.log("val_mean_sim_nonunion", cos_sim[~is_union].mean())
-
-    def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(self.parameters(), lr=self.lr)
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-            optimizer, T_max=self.trainer.max_epochs
-        )
-        return [optimizer], [scheduler]
-
-
-class UnionDataModule(L.LightningDataModule):
-    def __init__(self, batch_size=256, n_union_samples=0, seed=42):
-        super().__init__()
-        self.batch_size = batch_size
-        self.n_union_samples = n_union_samples
-        self.seed = seed
-
-    def setup(self, stage=None):
-        import json
-        import random
-
-        with open(DATA_DIR / "training_examples.json") as f:
-            all_examples = json.load(f)
-
-        # Union: non-empty records; Non-union: empty records
-        # Multi-union and multi-local filings are treated as non-union
-        # since they aren't a single identifiable union.
-        def _is_union(ex):
-            return ex["records"] and ex.get("reason_missing_fnum") not in (
-                "multi-union",
-                "multi-local",
-            )
-
-        train_union = [
-            ex["query"]
-            for ex in all_examples
-            if _is_union(ex) and ex["split"] == "train"
-        ]
-        test_union = [
-            ex["query"]
-            for ex in all_examples
-            if _is_union(ex) and ex["split"] in ("val", "test")
-        ]
-        train_nonunion = [
-            ex["query"]
-            for ex in all_examples
-            if not _is_union(ex) and ex["split"] == "train"
-        ]
-        test_nonunion = [
-            ex["query"]
-            for ex in all_examples
-            if not _is_union(ex) and ex["split"] in ("val", "test")
-        ]
-
-        # Subsample union training examples if requested
-        if self.n_union_samples and len(train_union) > self.n_union_samples:
-            rng = random.Random(self.seed)
-            train_union = rng.sample(train_union, self.n_union_samples)
-
-        print(f"Union examples: {len(train_union)} train, {len(test_union)} test")
-        print(
-            f"Non-union examples: {len(train_nonunion)} train, {len(test_nonunion)} test"
-        )
-
-        train_texts = train_union + train_nonunion
-        train_labels = [1] * len(train_union) + [0] * len(train_nonunion)
-        test_texts = test_union + test_nonunion
-        test_labels = [1] * len(test_union) + [0] * len(test_nonunion)
-
-        self.train_ds = UnionDataset(train_texts, train_labels)
-        self.test_ds = UnionDataset(test_texts, test_labels)
-
-    def train_dataloader(self):
-        return DataLoader(
-            self.train_ds,
-            batch_size=self.batch_size,
-            shuffle=True,
-            drop_last=True,
-            collate_fn=collate_fn,
-            num_workers=0,
-        )
-
-    def val_dataloader(self):
-        return DataLoader(
-            self.test_ds,
-            batch_size=self.batch_size,
-            shuffle=False,
-            collate_fn=collate_fn,
-            num_workers=0,
-        )
-
-
 # ---------------------------------------------------------------------------
-# Post-training: compute threshold
+# Data loading
 # ---------------------------------------------------------------------------
 
 
-def compute_threshold(module, dm):
-    """Find optimal threshold using the learned prototype on test set."""
-    device = next(module.parameters()).device
-    module.eval()
+def load_data():
+    with open(DATA_DIR / "training_examples.json") as f:
+        all_examples = json.load(f)
 
-    prototype = F.normalize(module.union_prototype.data, dim=0).to(device)
+    def _is_union(ex):
+        return ex["records"] and ex.get("reason_missing_fnum") not in (
+            "multi-union",
+            "multi-local",
+        )
 
-    y_true, y_scores = [], []
+    splits = {}
+    for split_name, split_filter in [
+        ("train", lambda ex: ex["split"] == "train"),
+        ("val", lambda ex: ex["split"] in ("val", "test")),
+    ]:
+        union = [
+            ex["query"] for ex in all_examples if _is_union(ex) and split_filter(ex)
+        ]
+        nonunion = [
+            ex["query"] for ex in all_examples if not _is_union(ex) and split_filter(ex)
+        ]
+        splits[split_name] = (union, nonunion)
+
+    return splits
+
+
+def tokenize_texts(texts):
+    """Tokenize a list of texts into tensors."""
+    char_ids_list = []
+    token_type_list = []
+    is_number_list = []
+
+    for text in texts:
+        char_ids, _, is_number, token_type = tokenize_to_chars(
+            text, max_tokens=MAX_TOKENS
+        )
+        char_ids_list.append(char_ids)
+        token_type_list.append(token_type)
+        is_number_list.append(is_number)
+
+    return (
+        torch.tensor(char_ids_list, dtype=torch.long),
+        torch.tensor(token_type_list, dtype=torch.long),
+        torch.tensor(is_number_list, dtype=torch.long),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Evaluation
+# ---------------------------------------------------------------------------
+
+
+def evaluate(
+    model, prototype, char_ids, token_type, is_number, labels, device, batch_size=1024
+):
+    """Compute cosine similarities and return (y_true, y_scores)."""
+    model.eval()
+    proto = F.normalize(prototype, dim=0).to(device)
+
+    y_true = labels.tolist()
+    y_scores = []
+
     with torch.no_grad():
-        for batch in dm.val_dataloader():
-            char_ids = batch["char_ids"].to(device)
-            token_type = batch["token_type"].to(device)
-            is_number = batch["is_number"].to(device)
-            labels = batch["label"]
-            embeddings = module(char_ids, token_type, is_number)
-            sims = (embeddings @ prototype).cpu().tolist()
-            y_true.extend(labels.tolist())
+        for i in range(0, len(labels), batch_size):
+            ci = char_ids[i : i + batch_size].to(device)
+            tt = token_type[i : i + batch_size].to(device)
+            isn = is_number[i : i + batch_size].to(device)
+            emb = model(ci, tt, isn)
+            sims = (emb @ proto).cpu().tolist()
             y_scores.extend(sims)
 
-    y_true, y_scores = np.array(y_true), np.array(y_scores)
+    return np.array(y_true), np.array(y_scores)
+
+
+def compute_threshold(y_true, y_scores):
+    """Find threshold that minimizes total errors."""
     fpr, tpr, thresholds = roc_curve(y_true, y_scores)
-    # Pick threshold that minimizes total errors (not Youden's J, which
-    # ignores class imbalance and over-penalises the minority class).
-    n = len(y_true)
     n_pos = (y_true == 1).sum()
-    n_neg = n - n_pos
+    n_neg = len(y_true) - n_pos
     total_errors = (1 - tpr) * n_pos + fpr * n_neg
-    optimal_threshold = float(thresholds[np.argmin(total_errors)])
-
-    accuracy = accuracy_score(y_true, (y_scores > optimal_threshold).astype(int))
-    roc_auc = roc_auc_score(y_true, y_scores)
-
-    n_union = int((y_true == 1).sum())
-    n_nonunion = int((y_true == 0).sum())
-    preds = y_scores > optimal_threshold
-    false_neg = int(((y_true == 1) & ~preds).sum())
-    false_pos = int(((y_true == 0) & preds).sum())
-
-    print("\nResults:")
-    print(f"  Accuracy:          {accuracy:.4f}")
-    print(f"  ROC-AUC:           {roc_auc:.4f}")
-    print(f"  Optimal threshold: {optimal_threshold:.4f}")
-    print(f"  False negatives:   {false_neg}/{n_union} ({false_neg/n_union:.4f})")
-    print(f"  False positives:   {false_pos}/{n_nonunion} ({false_pos/n_nonunion:.4f})")
-
-    return prototype.cpu(), optimal_threshold
+    return float(thresholds[np.argmin(total_errors)])
 
 
 # ---------------------------------------------------------------------------
@@ -284,28 +133,161 @@ def compute_threshold(module, dm):
 @click.option("--epochs", default=30, help="Number of training epochs")
 @click.option("--batch-size", default=1024, help="Batch size")
 @click.option("--lr", default=1e-3, help="Learning rate")
-def main(epochs, batch_size, lr):
-    dm = UnionDataModule(batch_size=batch_size)
+@click.option("--patience", default=10, help="Early stopping patience")
+def main(epochs, batch_size, lr, patience):
+    random.seed(42)
+    torch.manual_seed(42)
 
-    module = UnionDetectorModule(lr=lr)
-
-    trainer = L.Trainer(
-        max_epochs=epochs,
-        enable_progress_bar=True,
-        enable_checkpointing=False,
+    device = (
+        torch.device("mps")
+        if torch.backends.mps.is_available()
+        else torch.device("cpu")
     )
-    trainer.fit(module, dm)
+    print(f"Device: {device}")
 
-    # Compute threshold using learned prototype
-    union_centroid, optimal_threshold = compute_threshold(module, dm)
+    # Load data
+    splits = load_data()
+    train_union, train_nonunion = splits["train"]
+    val_union, val_nonunion = splits["val"]
 
-    # Save — union_centroid is the learned prototype, compatible with existing
-    # inference code in extractor.py
+    print(f"Union: {len(train_union)} train, {len(val_union)} val")
+    print(f"Non-union: {len(train_nonunion)} train, {len(val_nonunion)} val")
+
+    # Tokenize all data upfront
+    print("Tokenizing...")
+    train_texts = train_union + train_nonunion
+    train_labels = torch.tensor(
+        [1] * len(train_union) + [0] * len(train_nonunion), dtype=torch.float
+    )
+    val_texts = val_union + val_nonunion
+    val_labels = torch.tensor(
+        [1] * len(val_union) + [0] * len(val_nonunion), dtype=torch.float
+    )
+
+    train_ci, train_tt, train_isn = tokenize_texts(train_texts)
+    val_ci, val_tt, val_isn = tokenize_texts(val_texts)
+    print(f"Train: {len(train_texts)}, Val: {len(val_texts)}")
+
+    # Model
+    char_cnn = CharacterCNN(embed_dim=64, char_embed_dim=16)
+    model = AttentionPoolingEncoder(
+        char_cnn, embed_dim=64, num_embed_dim=8, num_heads=4
+    ).to(device)
+    union_prototype = torch.nn.Parameter(F.normalize(torch.randn(64), dim=0).to(device))
+
+    optimizer = torch.optim.AdamW(list(model.parameters()) + [union_prototype], lr=lr)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
+
+    n_train = len(train_texts)
+    best_val_acc = 0.0
+    best_state = None
+    best_proto = None
+    wait = 0
+
+    print(
+        f"\n{'Epoch':>7} | {'Loss':>8} | {'Val Acc':>7} | {'FN':>5} | {'FP':>5} | {'Time':>6}"
+    )
+    print("-" * 52)
+
+    for epoch in range(epochs):
+        model.train()
+        t0 = time.time()
+
+        indices = list(range(n_train))
+        random.shuffle(indices)
+
+        total_loss = 0.0
+        n_batches = 0
+
+        for start in range(0, n_train, batch_size):
+            batch_idx = indices[start : start + batch_size]
+            ci = train_ci[batch_idx].to(device)
+            tt = train_tt[batch_idx].to(device)
+            isn = train_isn[batch_idx].to(device)
+            labels = train_labels[batch_idx].to(device)
+
+            embeddings = model(ci, tt, isn)
+            proto = F.normalize(union_prototype, dim=0)
+            cos_sim = embeddings @ proto
+
+            # Angular margin for union examples
+            theta = torch.acos(cos_sim.clamp(-1 + 1e-7, 1 - 1e-7))
+            is_union = labels == 1
+            margin_cos = torch.where(
+                is_union, torch.cos(theta + ARCFACE_MARGIN), cos_sim
+            )
+            logits = ARCFACE_SCALE * margin_cos
+            loss = F.binary_cross_entropy_with_logits(logits, labels)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss.item()
+            n_batches += 1
+
+        scheduler.step()
+        avg_loss = total_loss / max(n_batches, 1)
+
+        # Validation
+        y_true, y_scores = evaluate(
+            model, union_prototype.data, val_ci, val_tt, val_isn, val_labels, device
+        )
+        threshold = compute_threshold(y_true, y_scores)
+        preds = y_scores > threshold
+        val_acc = accuracy_score(y_true, preds)
+        fn = int(((y_true == 1) & ~preds).sum())
+        fp = int(((y_true == 0) & preds).sum())
+        elapsed = time.time() - t0
+
+        marker = ""
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            best_state = {k: v.cpu().clone() for k, v in model.state_dict().items()}
+            best_proto = union_prototype.data.cpu().clone()
+            wait = 0
+            marker = " *"
+        else:
+            wait += 1
+
+        print(
+            f"  {epoch + 1:>2}/{epochs} | {avg_loss:>8.4f} | {val_acc:>6.1%} | "
+            f"{fn:>5} | {fp:>5} | {elapsed:>5.1f}s{marker}"
+        )
+
+        if wait >= patience:
+            print(f"  Early stopping (no improvement for {patience} epochs)")
+            break
+
+    # Restore best model
+    model.load_state_dict(best_state)
+    model.eval()
+
+    # Final evaluation with best model
+    y_true, y_scores = evaluate(
+        model, best_proto, val_ci, val_tt, val_isn, val_labels, device
+    )
+    threshold = compute_threshold(y_true, y_scores)
+    roc_auc = roc_auc_score(y_true, y_scores)
+    preds = y_scores > threshold
+
+    n_union = int((y_true == 1).sum())
+    n_nonunion = int((y_true == 0).sum())
+    fn = int(((y_true == 1) & ~preds).sum())
+    fp = int(((y_true == 0) & preds).sum())
+
+    print("\nFinal results:")
+    print(f"  ROC-AUC:           {roc_auc:.4f}")
+    print(f"  Optimal threshold: {threshold:.4f}")
+    print(f"  False negatives:   {fn}/{n_union} ({fn / n_union:.4f})")
+    print(f"  False positives:   {fp}/{n_nonunion} ({fp / n_nonunion:.4f})")
+
+    # Save
     torch.save(
         {
-            "model_state_dict": module.model.state_dict(),
-            "union_centroid": union_centroid,
-            "optimal_threshold": optimal_threshold,
+            "model_state_dict": best_state,
+            "union_centroid": best_proto,
+            "optimal_threshold": threshold,
         },
         MODEL_PATH,
     )
