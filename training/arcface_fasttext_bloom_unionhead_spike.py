@@ -66,7 +66,7 @@ def bloom_hash_ids(number_str):
     return ids
 
 
-# Token role tags for number disambiguation
+# Token role tags for number disambiguation (CRF with latent alignment)
 TAG_O = 0  # non-number or unmatched number
 TAG_DN = 1  # designation number
 TAG_PFX = 2  # prefix
@@ -74,79 +74,64 @@ TAG_SFX = 3  # suffix
 N_TAGS = 4
 
 
-def generate_token_tags(tokens, is_num, record):
-    """Generate per-token role tags by aligning numeric tokens to record fields.
+def find_valid_positions(tokens, record):
+    """Find valid token positions for each field value.
 
-    Returns list of tags (same length as tokens). Non-numeric tokens get TAG_O.
-    Numeric tokens are matched to desig_num, prefix, or suffix from the record.
-    Ambiguous matches (same number appears in multiple roles) get TAG_O.
+    Returns (valid_dnum, valid_pfx, valid_sfx) — each is a list of
+    token indices where that field value appears. Used for CRF
+    constrained marginalization (we know the values but not which
+    tokens they correspond to).
     """
-    tags = [TAG_O] * len(tokens)
-
     desig_num = record.get("desig_num", 0)
     prefix = record.get("prefix", 0)
     suffix = record.get("suffix", "")
 
-    # Normalize field values to strings for comparison
     dn_str = (
-        str(int(desig_num)) if desig_num and desig_num not in (-100, 0, None) else ""
+        str(int(desig_num)) if desig_num and desig_num not in (-100, 0, None) else None
     )
-    pfx_str = str(int(prefix)) if prefix and prefix not in (-100, 0, None) else ""
-    # suffix can be a string like "S" or a number
-    sfx_str = ""
+    pfx_str = str(int(prefix)) if prefix and prefix not in (-100, 0, None) else None
+    sfx_str = None
     if suffix and suffix not in (-100, 0, "", None):
         try:
             sfx_str = str(int(float(suffix)))
         except (ValueError, TypeError):
-            sfx_str = ""  # non-numeric suffix, can't tag
+            pass
 
-    if not dn_str and not pfx_str and not sfx_str:
-        return tags  # nothing to tag
+    valid_dnum = []
+    valid_pfx = []
+    valid_sfx = []
 
-    # Collect numeric token indices and their normalized values
-    num_tokens = []
-    for i, (tok, is_n) in enumerate(zip(tokens, is_num)):
-        if is_n:
-            normalized = tok.lstrip("0") or "0"
-            num_tokens.append((i, normalized))
+    for i, tok in enumerate(tokens):
+        if dn_str is not None and tok == dn_str:
+            valid_dnum.append(i)
+        if pfx_str is not None and tok == pfx_str:
+            valid_pfx.append(i)
+        if sfx_str is not None and tok == sfx_str:
+            valid_sfx.append(i)
 
-    # Match from right to left: last number is most likely desig_num,
-    # earlier numbers are prefix candidates
-    remaining = list(num_tokens)
+    return valid_dnum, valid_pfx, valid_sfx
 
-    # First pass: match desig_num (usually the last or largest number)
-    if dn_str:
-        dn_normalized = dn_str.lstrip("0") or "0"
-        # Try matching from the right
-        for j in range(len(remaining) - 1, -1, -1):
-            idx, val = remaining[j]
-            if val == dn_normalized:
-                tags[idx] = TAG_DN
-                remaining.pop(j)
-                break
 
-    # Second pass: match prefix
-    if pfx_str:
-        pfx_normalized = pfx_str.lstrip("0") or "0"
-        # Try matching from the left (prefix usually comes first)
-        for j in range(len(remaining)):
-            idx, val = remaining[j]
-            if val == pfx_normalized:
-                tags[idx] = TAG_PFX
-                remaining.pop(j)
-                break
+def _build_field_tensors(valid_list, batch_size, device):
+    """Build padded position tensor, validity mask, has_any for a field."""
+    max_pos = max((len(v) for v in valid_list), default=0)
+    if max_pos == 0:
+        return None
 
-    # Third pass: match suffix (rare, usually at end)
-    if sfx_str:
-        sfx_normalized = sfx_str.lstrip("0") or "0"
-        for j in range(len(remaining) - 1, -1, -1):
-            idx, val = remaining[j]
-            if val == sfx_normalized:
-                tags[idx] = TAG_SFX
-                remaining.pop(j)
-                break
+    pos_tensor = torch.zeros(batch_size, max_pos, dtype=torch.long, device=device)
+    pos_valid = torch.zeros(batch_size, max_pos, dtype=torch.bool, device=device)
+    has_any = torch.zeros(batch_size, dtype=torch.bool, device=device)
 
-    return tags
+    for b, positions in enumerate(valid_list):
+        if not positions:
+            continue
+        has_any[b] = True
+        for j, p in enumerate(positions):
+            if j < max_pos:
+                pos_tensor[b, j] = p
+                pos_valid[b, j] = True
+
+    return pos_tensor, pos_valid, has_any
 
 
 def precompute_bloom_ids(tokens, is_num):
@@ -545,8 +530,18 @@ class ArcFaceFastTextModel(nn.Module):
         # Auxiliary shared heads — gradient flows into prototype embeddings
         self.union_scale = nn.Parameter(torch.tensor(10.0))
         self.desig_scale = nn.Parameter(torch.tensor(10.0))
-        # Token role tagging head (number disambiguation)
-        self.tag_head = nn.Linear(d_model, N_TAGS)
+        # CRF tagging head (number disambiguation with latent alignment)
+        self.tag_head = nn.Sequential(
+            nn.Linear(d_model, d_model),
+            nn.ReLU(),
+            nn.Linear(d_model, N_TAGS),
+        )
+        self._crf_trans = nn.Parameter(torch.zeros(N_TAGS, N_TAGS))
+        # Mask: non-O tags can't repeat (single-token spans only)
+        crf_mask = torch.zeros(N_TAGS, N_TAGS)
+        for tag in (TAG_DN, TAG_PFX, TAG_SFX):
+            crf_mask[tag, tag] = float("-inf")
+        self.register_buffer("_crf_mask", crf_mask)
         # class→field mappings for disagree penalties (set after construction)
         self.class_to_union = None
         self.class_to_desig = None
@@ -564,6 +559,153 @@ class ArcFaceFastTextModel(nn.Module):
         pooled = (h * mask_f).sum(dim=1) / lengths.unsqueeze(1).float().clamp(min=1)
 
         return F.normalize(pooled, dim=1), h
+
+    @property
+    def crf_transitions(self):
+        return self._crf_trans + self._crf_mask
+
+    def _crf_forward(self, emissions, lengths):
+        """Standard CRF forward algorithm for unconstrained log Z."""
+        alpha = emissions[:, 0, :]  # (B, N_TAGS)
+        trans = self.crf_transitions.unsqueeze(0)
+        for i in range(1, emissions.shape[1]):
+            scores = alpha.unsqueeze(2) + trans  # (B, N_TAGS, N_TAGS)
+            # Numerically stable logsumexp
+            max_s = scores.max(dim=1, keepdim=True).values
+            new_alpha = (scores - max_s).exp().sum(dim=1).log() + max_s.squeeze(1)
+            new_alpha = new_alpha + emissions[:, i, :]
+            mask = (i < lengths).float().unsqueeze(1)
+            alpha = mask * new_alpha + (1 - mask) * alpha
+        max_a = alpha.max(dim=1, keepdim=True).values
+        return (alpha - max_a).exp().sum(dim=1).log() + max_a.squeeze(1)
+
+    def _crf_constrained_log_z(self, emissions, lengths, crf_fields):
+        """Log Z over constrained tag sequences (latent alignment).
+
+        Marginalizes over all valid alignments where each field value
+        appears at exactly one of its matching positions.
+        """
+        trans = self.crf_transitions
+        B = emissions.shape[0]
+        max_len = emissions.shape[1]
+        device = emissions.device
+
+        # Baseline: all-O score
+        o_emissions = emissions[:, :, TAG_O]
+        pos_mask = torch.arange(max_len, device=device).unsqueeze(
+            0
+        ) < lengths.unsqueeze(1)
+        base_emit = (o_emissions * pos_mask).sum(dim=1)
+        base_trans = trans[TAG_O, TAG_O] * (lengths - 1).float().clamp(min=0)
+        base_score = base_emit + base_trans
+
+        # Precompute deltas
+        trans_in = trans[TAG_O, :] - trans[TAG_O, TAG_O]
+        trans_out = trans[:, TAG_O] - trans[TAG_O, TAG_O]
+        trans_interior = trans_in + trans_out
+        emit_deltas = emissions - emissions[:, :, TAG_O : TAG_O + 1]
+
+        pos_idx = torch.arange(max_len, device=device).unsqueeze(0)
+        is_first = pos_idx == 0
+        is_last = pos_idx >= (lengths - 1).unsqueeze(1)
+        is_interior = ~is_first & ~is_last
+
+        trans_delta = (
+            is_interior.unsqueeze(2).float() * trans_interior.unsqueeze(0).unsqueeze(0)
+            + (is_first & ~is_last).unsqueeze(2).float()
+            * trans_out.unsqueeze(0).unsqueeze(0)
+            + (is_last & ~is_first).unsqueeze(2).float()
+            * trans_in.unsqueeze(0).unsqueeze(0)
+        )
+
+        total_delta = emit_deltas + trans_delta
+
+        # Build per-field options
+        field_options = []
+        field_positions = []
+        for ft, tag in zip(crf_fields, [TAG_DN, TAG_PFX, TAG_SFX]):
+            if ft is None:
+                field_options.append(torch.zeros(B, 1, device=device))
+                field_positions.append(
+                    torch.full((B, 1), -1, dtype=torch.long, device=device)
+                )
+                continue
+
+            pos_tensor, pos_valid, has_any = ft
+            deltas = total_delta[:, :, tag]
+            gathered = deltas.gather(1, pos_tensor)
+            gathered = gathered.masked_fill(~pos_valid, float("-inf"))
+
+            no_tag = torch.where(
+                has_any,
+                torch.full((B,), float("-inf"), device=device),
+                torch.zeros(B, device=device),
+            ).unsqueeze(1)
+            field_options.append(torch.cat([no_tag, gathered], dim=1))
+
+            no_tag_pos = torch.full((B, 1), -1, dtype=torch.long, device=device)
+            real_pos = pos_tensor.clone()
+            real_pos[~pos_valid] = -2
+            field_positions.append(torch.cat([no_tag_pos, real_pos], dim=1))
+
+        # Outer sum over all combos
+        d_opts, p_opts, s_opts = field_options
+        combo_scores = (
+            d_opts.unsqueeze(2).unsqueeze(3)
+            + p_opts.unsqueeze(1).unsqueeze(3)
+            + s_opts.unsqueeze(1).unsqueeze(2)
+        )
+
+        # Mask position conflicts
+        d_pos, p_pos, s_pos = field_positions
+        d_exp = d_pos.unsqueeze(2).unsqueeze(3)
+        p_exp = p_pos.unsqueeze(1).unsqueeze(3)
+        s_exp = s_pos.unsqueeze(1).unsqueeze(2)
+
+        conflict = (
+            ((d_exp == p_exp) & (d_exp >= 0))
+            | ((d_exp == s_exp) & (d_exp >= 0))
+            | ((p_exp == s_exp) & (p_exp >= 0))
+        )
+        combo_scores = combo_scores.masked_fill(conflict, float("-inf"))
+
+        # Adjacency corrections
+        for pos_a, pos_b, tag_a, tag_b, dim_a, dim_b in [
+            (d_pos, p_pos, TAG_DN, TAG_PFX, 1, 2),
+            (d_pos, s_pos, TAG_DN, TAG_SFX, 1, 3),
+            (p_pos, s_pos, TAG_PFX, TAG_SFX, 2, 3),
+        ]:
+            shape_a = [B, 1, 1, 1]
+            shape_a[dim_a] = -1
+            shape_b = [B, 1, 1, 1]
+            shape_b[dim_b] = -1
+            pa = pos_a.view(shape_a)
+            pb = pos_b.view(shape_b)
+
+            fwd = (pa + 1 == pb) & (pa >= 0)
+            corr_fwd = (
+                trans[tag_a, tag_b]
+                - trans[tag_a, TAG_O]
+                - trans[TAG_O, tag_b]
+                + trans[TAG_O, TAG_O]
+            )
+            bwd = (pb + 1 == pa) & (pb >= 0)
+            corr_bwd = (
+                trans[tag_b, tag_a]
+                - trans[tag_b, TAG_O]
+                - trans[TAG_O, tag_a]
+                + trans[TAG_O, TAG_O]
+            )
+
+            combo_scores = (
+                combo_scores + fwd.float() * corr_fwd + bwd.float() * corr_bwd
+            )
+
+        combo_flat = combo_scores.view(B, -1)
+        # Numerically stable logsumexp
+        max_c = combo_flat.max(dim=1, keepdim=True).values
+        stable = (combo_flat - max_c).exp().sum(dim=1).log() + max_c.squeeze(1)
+        return base_score + stable
 
     def forward(
         self,
@@ -602,13 +744,19 @@ class ArcFaceFastTextModel(nn.Module):
                     if valid.any():
                         field_losses[field] = F.cross_entropy(flogits[valid], ft[valid])
 
-            # Token role tagging loss
-            tt = field_targets.get("token_tags")
-            if tt is not None:
-                # tag_logits: (B, L, N_TAGS), tt: (B, L) with -100 for ignore
-                field_losses["token_tags"] = F.cross_entropy(
-                    tag_logits.view(-1, N_TAGS), tt.view(-1), ignore_index=-100
-                )
+            # CRF token role tagging loss (latent alignment)
+            crf_fields = field_targets.get("crf_fields")
+            if crf_fields is not None:
+                has_constraints = any(ft is not None for ft in crf_fields)
+                if has_constraints:
+                    clamped = tag_logits.clamp(-20, 20)
+                    log_z = self._crf_forward(clamped, lengths)
+                    log_z_constrained = self._crf_constrained_log_z(
+                        clamped, lengths, crf_fields
+                    )
+                    crf_loss = (log_z - log_z_constrained).mean()
+                    if not torch.isnan(crf_loss):
+                        field_losses["crf_tags"] = crf_loss
 
         # Disagree penalties: penalize f_num predictions that disagree
         # with the union head and/or desig_name head (only for examples with valid targets)
@@ -697,7 +845,7 @@ def load_data(path, n_buckets, synthetic_path=None):
         ngram_ids, ngram_counts = precompute_ngram_hashes(tokens, n_buckets)
         bloom_ids = precompute_bloom_ids(tokens, is_num)
         record = ex["records"][0] if ex.get("records") else {}
-        token_tags = generate_token_tags(tokens, is_num, record)
+        valid_dnum, valid_pfx, valid_sfx = find_valid_positions(tokens, record)
 
         data.append(
             {
@@ -712,7 +860,9 @@ def load_data(path, n_buckets, synthetic_path=None):
                 "ngram_ids": ngram_ids,
                 "ngram_counts": ngram_counts,
                 "bloom_ids": bloom_ids,
-                "token_tags": token_tags,
+                "valid_dnum": valid_dnum,
+                "valid_pfx": valid_pfx,
+                "valid_sfx": valid_sfx,
             }
         )
         if not has_fnum:
@@ -772,7 +922,9 @@ def collate_batch(batch, device):
     is_num_t = torch.zeros(B, max_len, dtype=torch.float)
     lengths = torch.zeros(B, dtype=torch.long)
     targets = torch.zeros(B, dtype=torch.long)
-    tag_targets = torch.full((B, max_len), -100, dtype=torch.long)
+    crf_valid_dnum = []
+    crf_valid_pfx = []
+    crf_valid_sfx = []
     union_targets = torch.full((B,), -1, dtype=torch.long)
     desig_name_targets = torch.full((B,), -1, dtype=torch.long)
     prefix_targets = torch.full((B,), -1, dtype=torch.long)
@@ -787,19 +939,26 @@ def collate_batch(batch, device):
         bloom_ids[i, :L] = torch.tensor(ex["bloom_ids"][:L], dtype=torch.long)
         is_num_t[i, :L] = torch.tensor(ex["is_num_f"], dtype=torch.float)
         targets[i] = ex["target"]
-        if "token_tags" in ex:
-            tag_targets[i, :L] = torch.tensor(ex["token_tags"][:L], dtype=torch.long)
+        crf_valid_dnum.append(ex.get("valid_dnum", []))
+        crf_valid_pfx.append(ex.get("valid_pfx", []))
+        crf_valid_sfx.append(ex.get("valid_sfx", []))
         union_targets[i] = ex.get("union_target", -1)
         desig_name_targets[i] = ex.get("desig_name_target", -1)
         prefix_targets[i] = ex.get("prefix_target", -1)
         suffix_targets[i] = ex.get("suffix_target", -1)
+
+    crf_field_tensors = [
+        _build_field_tensors(crf_valid_dnum, B, device),
+        _build_field_tensors(crf_valid_pfx, B, device),
+        _build_field_tensors(crf_valid_sfx, B, device),
+    ]
 
     field_targets = {
         "union_name": union_targets.to(device),
         "desig_name": desig_name_targets.to(device),
         "prefix": prefix_targets.to(device),
         "suffix": suffix_targets.to(device),
-        "token_tags": tag_targets.to(device),
+        "crf_fields": crf_field_tensors,
     }
     return (
         token_ids.to(device),
@@ -1273,7 +1432,7 @@ def main():
             )
             loss = arcface_loss
             for fname, fl in field_losses.items():
-                w = args.tag_weight if fname == "token_tags" else args.union_weight
+                w = args.tag_weight if fname == "crf_tags" else args.union_weight
                 loss = loss + w * fl
             if disagree_loss is not None and args.disagree_penalty > 0:
                 loss = loss + args.disagree_penalty * disagree_loss
