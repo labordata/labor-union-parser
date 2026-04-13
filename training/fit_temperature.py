@@ -8,6 +8,7 @@ Saves temperatures to the production weights bundle.
 """
 
 import json
+import random
 from pathlib import Path
 
 import click
@@ -208,12 +209,33 @@ def main(lr, steps):
         )
     ]
 
-    print(f"Union detector val: {len(val_union)} union, {len(val_nonunion)} non-union")
+    # Add F7 employer negatives (same as training script)
+    import sqlite3
 
-    all_ud_texts = [ex["query"] for ex in val_union] + [
-        ex["query"] for ex in val_nonunion
-    ]
-    all_ud_labels = [1.0] * len(val_union) + [0.0] * len(val_nonunion)
+    f7_path = (DATA_DIR / "../../f7.db").resolve()
+    if f7_path.exists():
+        conn = sqlite3.connect(str(f7_path))
+        rows = conn.execute(
+            "SELECT DISTINCT employer FROM f7 "
+            "WHERE employer IS NOT NULL AND employer != '' "
+            "ORDER BY employer"
+        ).fetchall()
+        conn.close()
+        rng = random.Random(42)
+        employers = rng.sample([r[0] for r in rows], min(20000, len(rows)))
+        # Use same 10% val split as training script
+        n_val = len(employers) // 10
+        employer_val = employers[:n_val]
+        val_nonunion_texts = [ex["query"] for ex in val_nonunion] + employer_val
+    else:
+        val_nonunion_texts = [ex["query"] for ex in val_nonunion]
+
+    print(
+        f"Union detector val: {len(val_union)} union, {len(val_nonunion_texts)} non-union"
+    )
+
+    all_ud_texts = [ex["query"] for ex in val_union] + val_nonunion_texts
+    all_ud_labels = [1.0] * len(val_union) + [0.0] * len(val_nonunion_texts)
 
     for i in range(0, len(all_ud_texts), 256):
         batch_texts = all_ud_texts[i : i + 256]
