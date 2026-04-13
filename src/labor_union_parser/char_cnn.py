@@ -1,16 +1,8 @@
-"""Character-level CNN for computing token embeddings from characters.
+"""Character-level tokenization for text preprocessing.
 
-Inspired by CharacterBERT and ELMo's character CNN. Instead of looking up
-tokens in a vocabulary, we compute each token's embedding from its characters
-using parallel CNNs with different filter sizes.
-
-This makes the model robust to typos: "afscme" and "afcsme" produce similar
-embeddings because they share most character n-grams.
+Tokenizes text into character ID sequences with token type classification
+(word, number, space, punctuation, padding).
 """
-
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
 
 MAX_TOKENS = 70
 MAX_CHARS_PER_TOKEN = 20
@@ -40,119 +32,6 @@ def chars_to_ids(token: str, max_chars: int = MAX_CHARS_PER_TOKEN) -> list[int]:
     # Pad to max_chars
     ids = ids + [0] * (max_chars - len(ids))
     return ids
-
-
-class Highway(nn.Module):
-    """Highway network layer.
-
-    Applies a gated transformation: y = g * transform(x) + (1-g) * x
-    where g is a learned gate.
-    """
-
-    def __init__(self, dim: int):
-        super().__init__()
-        self.transform = nn.Linear(dim, dim)
-        self.gate = nn.Linear(dim, dim)
-
-    def forward(self, x):
-        t = F.relu(self.transform(x))
-        g = torch.sigmoid(self.gate(x))
-        return g * t + (1 - g) * x
-
-
-class CharacterCNN(nn.Module):
-    """Character-level CNN that computes token embeddings from characters.
-
-    Architecture:
-    1. Character embedding lookup (small vocab ~50 chars)
-    2. Parallel CNNs with filter sizes 1-7 to capture character n-grams
-    3. Max-pool over character dimension
-    4. Highway network for non-linear transformation
-    5. Projection to desired embedding dimension
-
-    Args:
-        embed_dim: Output embedding dimension (default 64)
-        char_embed_dim: Character embedding dimension (default 16)
-        max_chars: Maximum characters per token (default 20)
-    """
-
-    def __init__(
-        self,
-        embed_dim: int = 64,
-        char_embed_dim: int = 16,
-        max_chars: int = MAX_CHARS_PER_TOKEN,
-    ):
-        super().__init__()
-
-        self.char_embed_dim = char_embed_dim
-        self.max_chars = max_chars
-        self.embed_dim = embed_dim
-
-        # Character embeddings
-        self.char_embed = nn.Embedding(len(CHAR_VOCAB), char_embed_dim, padding_idx=0)
-
-        # Parallel CNNs with different filter sizes
-        # Just 1-3 grams - keeps short words like "seiu" from overfitting
-        self.convs = nn.ModuleList(
-            [
-                nn.Conv1d(char_embed_dim, 32, kernel_size=1),  # unigrams
-                nn.Conv1d(char_embed_dim, 64, kernel_size=2, padding=1),  # bigrams
-                nn.Conv1d(char_embed_dim, 128, kernel_size=3, padding=1),  # trigrams
-            ]
-        )
-
-        # Total CNN output dimension
-        cnn_out_dim = 32 + 64 + 128  # = 224
-
-        # Single highway layer (simpler)
-        self.highway1 = Highway(cnn_out_dim)
-
-        # Final projection to embedding dimension
-        self.projection = nn.Linear(cnn_out_dim, embed_dim)
-
-    def forward(self, char_ids):
-        """
-        Args:
-            char_ids: [batch, seq_len, max_chars] character IDs for each token
-
-        Returns:
-            [batch, seq_len, embed_dim] token embeddings
-        """
-        batch_size, seq_len, max_chars = char_ids.shape
-
-        # Reshape to process all tokens at once
-        # [batch * seq_len, max_chars]
-        char_ids_flat = char_ids.reshape(-1, max_chars)
-
-        # Character embeddings: [batch * seq_len, max_chars, char_embed_dim]
-        char_emb = self.char_embed(char_ids_flat)
-
-        # Conv1d expects [batch, channels, length]
-        # Transpose: [batch * seq_len, char_embed_dim, max_chars]
-        char_emb = char_emb.transpose(1, 2)
-
-        # Apply each CNN and max-pool
-        conv_outputs = []
-        for conv in self.convs:
-            # [batch * seq_len, num_filters, ~max_chars]
-            conv_out = F.relu(conv(char_emb))
-            # Max-pool over character dimension: [batch * seq_len, num_filters]
-            pooled = conv_out.max(dim=2)[0]
-            conv_outputs.append(pooled)
-
-        # Concatenate all CNN outputs: [batch * seq_len, 368]
-        cnn_out = torch.cat(conv_outputs, dim=1)
-
-        # Highway layer
-        highway_out = self.highway1(cnn_out)
-
-        # Project to embedding dimension: [batch * seq_len, embed_dim]
-        token_emb = self.projection(highway_out)
-
-        # Reshape back: [batch, seq_len, embed_dim]
-        token_emb = token_emb.view(batch_size, seq_len, self.embed_dim)
-
-        return token_emb
 
 
 def tokenize_to_chars(
