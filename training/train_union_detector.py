@@ -48,7 +48,13 @@ EMBED_DIM = 64
 # ---------------------------------------------------------------------------
 
 
+F7_DB_PATH = DATA_DIR / "../../f7.db"
+N_EMPLOYER_NEGATIVES = 20000
+
+
 def load_data():
+    import sqlite3
+
     with open(DATA_DIR / "training_examples.json") as f:
         all_examples = json.load(f)
 
@@ -70,6 +76,35 @@ def load_data():
             ex["query"] for ex in all_examples if not _is_union(ex) and split_filter(ex)
         ]
         splits[split_name] = (union, nonunion)
+
+    # Add F7 employer names as hard negatives (train only)
+    f7_path = F7_DB_PATH.resolve()
+    if f7_path.exists():
+        conn = sqlite3.connect(str(f7_path))
+        rows = conn.execute(
+            "SELECT DISTINCT employer FROM f7 "
+            "WHERE employer IS NOT NULL AND employer != '' "
+            "ORDER BY employer"
+        ).fetchall()
+        conn.close()
+        all_employers = [r[0] for r in rows]
+
+        rng = random.Random(42)
+        n_sample = min(N_EMPLOYER_NEGATIVES, len(all_employers))
+        employer_sample = rng.sample(all_employers, n_sample)
+
+        # 90/10 train/val split
+        n_val = n_sample // 10
+        splits["val"] = (splits["val"][0], splits["val"][1] + employer_sample[:n_val])
+        splits["train"] = (
+            splits["train"][0],
+            splits["train"][1] + employer_sample[n_val:],
+        )
+        print(
+            f"F7 employers: {n_sample} sampled ({n_sample - n_val} train, {n_val} val)"
+        )
+    else:
+        print(f"Warning: {f7_path} not found, skipping employer negatives")
 
     return splits
 
