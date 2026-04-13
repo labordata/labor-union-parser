@@ -21,19 +21,22 @@ weights: $(WEIGHTS_DIR)/arcface_classifier.pt \
 .PHONY: train
 train: $(WEIGHTS_DIR)/arcface_classifier.pt $(WEIGHTS_DIR)/union_detector.pt
 
-# Bundle ArcFace classifier with gazetteer
+# Bundle ArcFace classifier with gazetteer and fit temperatures
 $(WEIGHTS_DIR)/arcface_classifier.pt : $(DATA_DIR)/arcface_classifier.ckpt \
                                        $(DATA_DIR)/gazetteer.json \
                                        $(DATA_DIR)/training_examples.json
 	python training/bundle_arcface_classifier.py
+	python training/fit_temperature.py
 
-# Train ArcFace classifier
+# Train ArcFace classifier (needs gazetteer for frozen OOV prototypes)
 .SECONDARY: $(DATA_DIR)/arcface_classifier.ckpt
-$(DATA_DIR)/arcface_classifier.ckpt : $(DATA_DIR)/training_examples.json
+$(DATA_DIR)/arcface_classifier.ckpt : $(DATA_DIR)/training_examples.json \
+                                      $(DATA_DIR)/gazetteer.json
 	python training/train_arcface_classifier.py
 
-# Train union detector
-$(WEIGHTS_DIR)/union_detector.pt : $(DATA_DIR)/training_examples.json
+# Train union detector (uses f7.db employer names as hard negatives)
+$(WEIGHTS_DIR)/union_detector.pt : $(DATA_DIR)/training_examples.json \
+                                   f7.db
 	python training/train_union_detector.py
 
 .PHONY: data
