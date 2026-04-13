@@ -174,13 +174,112 @@ def main(lr, steps):
     show_calibration(all_fnum_logits, all_fnum_targets, fnum_temp, "f_num")
     show_calibration(all_union_logits, all_union_targets, union_temp, "union_name")
 
-    # Save to bundle
+    # Save to arcface bundle
     bundle["fnum_temperature"] = fnum_temp
     bundle["union_temperature"] = union_temp
     torch.save(bundle, WEIGHTS_DIR / "arcface_classifier.pt")
     print(
         f"\nSaved fnum_temperature={fnum_temp:.4f}, union_temperature={union_temp:.4f}"
     )
+
+    # --- Union detector Platt scaling ---
+    # Fit sigmoid(a * cos_sim + b) to calibrate union_score
+    print("\n--- Union detector Platt scaling ---")
+
+    # Collect union detector cosine similarities on val set
+    ud_sims = []
+
+    # Union examples
+    val_union = [
+        ex
+        for ex in all_examples
+        if ex["split"] in ("val", "test")
+        and ex.get("records")
+        and ex.get("reason_missing_fnum") not in ("multi-union", "multi-local")
+    ]
+    # Non-union examples
+    val_nonunion = [
+        ex
+        for ex in all_examples
+        if ex["split"] in ("val", "test")
+        and (
+            not ex.get("records")
+            or ex.get("reason_missing_fnum") in ("multi-union", "multi-local")
+        )
+    ]
+
+    print(f"Union detector val: {len(val_union)} union, {len(val_nonunion)} non-union")
+
+    all_ud_texts = [ex["query"] for ex in val_union] + [
+        ex["query"] for ex in val_nonunion
+    ]
+    all_ud_labels = [1.0] * len(val_union) + [0.0] * len(val_nonunion)
+
+    for i in range(0, len(all_ud_texts), 256):
+        batch_texts = all_ud_texts[i : i + 256]
+        batch_features = [tokenize_for_arcface(text) for text in batch_texts]
+        collated = ext._collate_for_union(batch_features)
+
+        with torch.no_grad():
+            emb = ext.union_encoder(*collated)
+            sims = (emb @ ext.union_centroid.unsqueeze(0).T).squeeze(-1)
+            ud_sims.extend(sims.cpu().tolist())
+
+    ud_sims_t = torch.tensor(ud_sims)
+    ud_labels_t = torch.tensor(all_ud_labels)
+
+    # Fit Platt scaling: sigmoid(a * sim + b)
+    log_a = torch.nn.Parameter(torch.zeros(1))
+    b = torch.nn.Parameter(torch.zeros(1))
+    platt_optimizer = torch.optim.Adam([log_a, b], lr=lr)
+
+    # NLL before (using raw threshold)
+    raw_nll = F.binary_cross_entropy_with_logits(ud_sims_t, ud_labels_t).item()
+
+    for step in range(steps):
+        platt_optimizer.zero_grad()
+        a = log_a.exp()
+        logits = a * ud_sims_t + b
+        loss = F.binary_cross_entropy_with_logits(logits, ud_labels_t)
+        loss.backward()
+        platt_optimizer.step()
+
+        if step % 100 == 0 or step == steps - 1:
+            print(
+                f"  Step {step:3d}: NLL={loss.item():.4f}  a={log_a.exp().item():.4f}  b={b.item():.4f}"
+            )
+
+    platt_a = log_a.exp().item()
+    platt_b = b.item()
+    platt_nll = F.binary_cross_entropy_with_logits(
+        platt_a * ud_sims_t + platt_b, ud_labels_t
+    ).item()
+    print(f"  NLL: {raw_nll:.4f} -> {platt_nll:.4f}")
+
+    # Calibration table
+    probs = torch.sigmoid(platt_a * ud_sims_t + platt_b)
+    correct = (ud_labels_t == 1).float()
+    bins = [(0, 0.1), (0.1, 0.3), (0.3, 0.5), (0.5, 0.7), (0.7, 0.9), (0.9, 1.0)]
+    print("\n  Union detector calibration (Platt scaled):")
+    print(f"  {'Conf range':>12}  {'Count':>6}  {'Accuracy':>8}  {'Avg conf':>8}")
+    for lo, hi in bins:
+        mask = (probs >= lo) & (probs < hi)
+        if mask.sum() == 0:
+            continue
+        acc = correct[mask].mean().item()
+        avg_conf = probs[mask].mean().item()
+        print(
+            f"  [{lo:.1f}, {hi:.1f})  {mask.sum().item():>6}  {acc:>8.1%}  {avg_conf:>8.4f}"
+        )
+
+    # Save to union detector bundle
+    ud_bundle = torch.load(
+        WEIGHTS_DIR / "union_detector.pt", map_location="cpu", weights_only=False
+    )
+    ud_bundle["platt_a"] = platt_a
+    ud_bundle["platt_b"] = platt_b
+    torch.save(ud_bundle, WEIGHTS_DIR / "union_detector.pt")
+    print(f"\nSaved platt_a={platt_a:.4f}, platt_b={platt_b:.4f} to union_detector.pt")
 
 
 if __name__ == "__main__":

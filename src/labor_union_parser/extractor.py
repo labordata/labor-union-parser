@@ -65,7 +65,7 @@ class Extractor:
 
     Output dict keys:
         is_union: bool — detected as union text
-        union_score: float — similarity to union centroid (0-1)
+        union_score: float — calibrated probability of being a union (0-1)
         union_name: str — predicted parent union name from shared head
         f_num: int — OLMS filing number of best-matching gazetteer record
         match_found: bool — whether match confidence exceeds threshold
@@ -75,7 +75,7 @@ class Extractor:
     def __init__(
         self,
         device: str | None = None,
-        union_threshold: float = 0.55,
+        union_threshold: float = 0.5,
     ):
         if device is None:
             self.device = torch.accelerator.current_accelerator(
@@ -111,6 +111,8 @@ class Extractor:
 
         self.union_vocab = union_checkpoint.get("vocab")
         self.union_centroid = union_checkpoint["union_centroid"].to(self.device)
+        self.platt_a = union_checkpoint.get("platt_a", 1.0)
+        self.platt_b = union_checkpoint.get("platt_b", 0.0)
 
         # Stage 2: ArcFace classifier
         ac_path = weights_dir / "arcface_classifier.pt"
@@ -236,11 +238,13 @@ class Extractor:
             union_emb = self.union_encoder(
                 union_tk, union_ng, union_nc, union_bl, union_isn, union_ln
             )
-            union_sims = torch.matmul(
+            raw_sims = torch.matmul(
                 union_emb, self.union_centroid.unsqueeze(0).T
             ).squeeze(-1)
+            # Platt-scaled probability: sigmoid(a * sim + b)
+            union_probs = torch.sigmoid(self.platt_a * raw_sims + self.platt_b)
 
-        union_sims_list = union_sims.cpu().tolist()
+        union_scores_list = union_probs.cpu().tolist()
 
         # Stage 2: ArcFace classification
         (
@@ -280,8 +284,8 @@ class Extractor:
 
             results.append(
                 {
-                    "is_union": union_sims_list[i] >= self.union_threshold,
-                    "union_score": union_sims_list[i],
+                    "is_union": union_scores_list[i] >= self.union_threshold,
+                    "union_score": union_scores_list[i],
                     "union_name": union_name,
                     "f_num": f_num,
                     "match_found": match_score >= self.match_threshold,
