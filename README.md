@@ -42,9 +42,9 @@ for line in pprint.pformat(result, width=72).splitlines():
 # {'f_num': 31847,
 #  'is_union': True,
 #  'match_found': True,
-#  'match_score': 0.9293506741523743,
+#  'match_score': 0.9560386538505554,
 #  'union_name': 'SERVICE EMPLOYEES',
-#  'union_score': 0.6771580576896667}
+#  'union_score': 0.992104172706604}
 <!--[[[end]]]-->
 ```
 
@@ -104,7 +104,7 @@ for line in result.stdout.strip().splitlines():
     cog.outl(line)
 ]]]-->
 text,pred_is_union,pred_union_score,pred_union_name,pred_f_num,pred_match_found,pred_match_score
-SEIU Local 1199,True,0.6772,SERVICE EMPLOYEES,31847,True,0.9294
+SEIU Local 1199,True,0.9921,SERVICE EMPLOYEES,31847,True,0.9560
 <!--[[[end]]]-->
 ```
 
@@ -254,16 +254,16 @@ cog.outl(f"| Wrong match (union, wrong f_num) | {m['wrong_matches']} |")
 cog.outl(f"| False negatives (union missed) | {m['false_negatives']} |")
 cog.outl(f"| False positives (non-union matched) | {m['false_positives']} |")
 ]]]-->
-End-to-end on held-out test data (8,675 examples
+End-to-end on held-out test data (8,691 examples
 scored against the full 44K-record gazetteer):
 
 | Metric | Score |
 |--------|-------|
-| Accuracy | 85.7% |
-| f_num accuracy (union examples) | 96.2% (7301/7589) |
-| f_num accuracy (in-vocab only) | 99.2% |
-| union_name accuracy | 96.9% (9081/9367) |
-| Wrong match (union, wrong f_num) | 288 |
-| False negatives (union missed) | 88 |
-| False positives (non-union matched) | 22 |
+| Accuracy | 88.4% |
+| f_num accuracy (union examples) | 98.6% (7540/7646) |
+| f_num accuracy (in-vocab only) | 98.6% |
+| union_name accuracy | 98.1% (9247/9427) |
+| Wrong match (union, wrong f_num) | 106 |
+| False negatives (union missed) | 30 |
+| False positives (non-union matched) | 13 |
 <!--[[[end]]]-->
