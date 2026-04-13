@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Train the union vs non-union detector.
 
-Uses AttentionPoolingEncoder from the production package.
-Trains a contrastive model with a learned union prototype on the
-hypersphere using ArcFace angular margin.
+Uses the same FastText+RoPE encoder as the f_num classifier.
+Trains with ArcFace angular margin against a learned union prototype
+on the hypersphere.
 
 Usage:
     python training/train_union_detector.py
@@ -12,7 +12,9 @@ Usage:
 
 import json
 import random
+import sys
 import time
+from collections import Counter
 from functools import partial
 from pathlib import Path
 
@@ -22,18 +24,23 @@ import torch
 import torch.nn.functional as F
 from sklearn.metrics import accuracy_score, roc_auc_score, roc_curve
 
-from labor_union_parser.char_cnn import CharacterCNN, tokenize_to_chars
-from labor_union_parser.extractor import AttentionPoolingEncoder
-
 print = partial(print, flush=True)  # noqa: A001
+
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+from labor_union_parser.extractor import UnionDetectorEncoder  # noqa: E402
+from labor_union_parser.tokenizer import tokenize_for_arcface  # noqa: E402
 
 DATA_DIR = Path(__file__).parent / "data"
 WEIGHTS_DIR = Path(__file__).parent.parent / "src" / "labor_union_parser" / "weights"
 MODEL_PATH = WEIGHTS_DIR / "union_detector.pt"
 
-MAX_TOKENS = 30
 ARCFACE_SCALE = 30.0
 ARCFACE_MARGIN = 0.5
+D_MODEL = 128
+N_HEADS = 4
+N_LAYERS = 2
+N_BUCKETS = 50000
+EMBED_DIM = 64
 
 
 # ---------------------------------------------------------------------------
@@ -67,24 +74,54 @@ def load_data():
     return splits
 
 
-def tokenize_texts(texts):
-    """Tokenize a list of texts into tensors."""
-    char_ids_list = []
-    token_type_list = []
-    is_number_list = []
-
+def build_vocab(texts):
+    """Build token vocab from a list of texts."""
+    counter = Counter()
     for text in texts:
-        char_ids, _, is_number, token_type = tokenize_to_chars(
-            text, max_tokens=MAX_TOKENS
+        tokens, is_num, ng_ids, ng_counts, bl_ids = tokenize_for_arcface(text)
+        for tok in tokens:
+            counter[tok] += 1
+    vocab = {"<pad>": 0, "<unk>": 1}
+    for tok, count in counter.most_common():
+        if count >= 2:
+            vocab[tok] = len(vocab)
+    return vocab
+
+
+def tokenize_and_collate(texts, vocab, device):
+    """Tokenize texts and collate into tensors."""
+    features = [tokenize_for_arcface(text) for text in texts]
+    B = len(features)
+    max_len = max(len(f[0]) for f in features)
+    max_ngrams = len(features[0][2][0]) if features[0][2] else 32
+
+    from labor_union_parser.tokenizer import NUM_BLOOM_HASHES
+
+    token_ids = torch.zeros(B, max_len, dtype=torch.long)
+    ngram_ids = torch.zeros(B, max_len, max_ngrams, dtype=torch.long)
+    ngram_counts = torch.zeros(B, max_len, dtype=torch.long)
+    bloom_ids = torch.zeros(B, max_len, NUM_BLOOM_HASHES, dtype=torch.long)
+    is_num_t = torch.zeros(B, max_len, dtype=torch.float)
+    lengths = torch.zeros(B, dtype=torch.long)
+
+    for i, (tokens, is_num, ng_ids, ng_counts, bl_ids) in enumerate(features):
+        L = len(tokens)
+        lengths[i] = L
+        token_ids[i, :L] = torch.tensor(
+            [vocab.get(tok, 1) for tok in tokens], dtype=torch.long
         )
-        char_ids_list.append(char_ids)
-        token_type_list.append(token_type)
-        is_number_list.append(is_number)
+        ngram_ids[i, :L] = torch.tensor(ng_ids, dtype=torch.long)
+        ngram_counts[i, :L] = torch.tensor(ng_counts, dtype=torch.long)
+        bloom_ids[i, :L] = torch.tensor(bl_ids, dtype=torch.long)
+        is_num_t[i, :L] = torch.tensor([float(n) for n in is_num], dtype=torch.float)
 
     return (
-        torch.tensor(char_ids_list, dtype=torch.long),
-        torch.tensor(token_type_list, dtype=torch.long),
-        torch.tensor(is_number_list, dtype=torch.long),
+        token_ids.to(device),
+        ngram_ids.to(device),
+        ngram_counts.to(device),
+        bloom_ids.to(device),
+        is_num_t.to(device),
+        lengths.to(device),
     )
 
 
@@ -93,22 +130,24 @@ def tokenize_texts(texts):
 # ---------------------------------------------------------------------------
 
 
-def evaluate(
-    model, prototype, char_ids, token_type, is_number, labels, device, batch_size=1024
-):
-    """Compute cosine similarities and return (y_true, y_scores)."""
+def evaluate(model, prototype, collated, labels, device, batch_size=1024):
     model.eval()
     proto = F.normalize(prototype, dim=0).to(device)
+    tk, ng, nc, bl, isn, ln = collated
 
     y_true = labels.tolist()
     y_scores = []
 
     with torch.no_grad():
         for i in range(0, len(labels), batch_size):
-            ci = char_ids[i : i + batch_size].to(device)
-            tt = token_type[i : i + batch_size].to(device)
-            isn = is_number[i : i + batch_size].to(device)
-            emb = model(ci, tt, isn)
+            emb = model(
+                tk[i : i + batch_size],
+                ng[i : i + batch_size],
+                nc[i : i + batch_size],
+                bl[i : i + batch_size],
+                isn[i : i + batch_size],
+                ln[i : i + batch_size],
+            )
             sims = (emb @ proto).cpu().tolist()
             y_scores.extend(sims)
 
@@ -116,7 +155,6 @@ def evaluate(
 
 
 def compute_threshold(y_true, y_scores):
-    """Find threshold that minimizes total errors."""
     fpr, tpr, thresholds = roc_curve(y_true, y_scores)
     n_pos = (y_true == 1).sum()
     n_neg = len(y_true) - n_pos
@@ -125,14 +163,14 @@ def compute_threshold(y_true, y_scores):
 
 
 # ---------------------------------------------------------------------------
-# CLI
+# Main
 # ---------------------------------------------------------------------------
 
 
 @click.command()
-@click.option("--epochs", default=30, help="Number of training epochs")
+@click.option("--epochs", default=30, help="Max training epochs")
 @click.option("--batch-size", default=1024, help="Batch size")
-@click.option("--lr", default=1e-3, help="Learning rate")
+@click.option("--lr", default=1e-3, type=float)
 @click.option("--patience", default=10, help="Early stopping patience")
 def main(epochs, batch_size, lr, patience):
     random.seed(42)
@@ -153,7 +191,13 @@ def main(epochs, batch_size, lr, patience):
     print(f"Union: {len(train_union)} train, {len(val_union)} val")
     print(f"Non-union: {len(train_nonunion)} train, {len(val_nonunion)} val")
 
-    # Tokenize all data upfront
+    # Build vocab from training texts
+    print("Building vocab...")
+    all_train = train_union + train_nonunion
+    vocab = build_vocab(all_train)
+    print(f"Vocab: {len(vocab)} tokens")
+
+    # Tokenize and collate
     print("Tokenizing...")
     train_texts = train_union + train_nonunion
     train_labels = torch.tensor(
@@ -164,16 +208,22 @@ def main(epochs, batch_size, lr, patience):
         [1] * len(val_union) + [0] * len(val_nonunion), dtype=torch.float
     )
 
-    train_ci, train_tt, train_isn = tokenize_texts(train_texts)
-    val_ci, val_tt, val_isn = tokenize_texts(val_texts)
+    train_collated = tokenize_and_collate(train_texts, vocab, device)
+    val_collated = tokenize_and_collate(val_texts, vocab, device)
     print(f"Train: {len(train_texts)}, Val: {len(val_texts)}")
 
     # Model
-    char_cnn = CharacterCNN(embed_dim=64, char_embed_dim=16)
-    model = AttentionPoolingEncoder(
-        char_cnn, embed_dim=64, num_embed_dim=8, num_heads=4
+    model = UnionDetectorEncoder(
+        d_model=D_MODEL,
+        n_heads=N_HEADS,
+        n_layers=N_LAYERS,
+        n_buckets=N_BUCKETS,
+        vocab_size=len(vocab),
+        embed_dim=EMBED_DIM,
     ).to(device)
-    union_prototype = torch.nn.Parameter(F.normalize(torch.randn(64), dim=0).to(device))
+    union_prototype = torch.nn.Parameter(
+        F.normalize(torch.randn(EMBED_DIM), dim=0).to(device)
+    )
 
     optimizer = torch.optim.AdamW(list(model.parameters()) + [union_prototype], lr=lr)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
@@ -184,8 +234,11 @@ def main(epochs, batch_size, lr, patience):
     best_proto = None
     wait = 0
 
+    tk, ng, nc, bl, isn, ln = train_collated
+
     print(
-        f"\n{'Epoch':>7} | {'Loss':>8} | {'Val Acc':>7} | {'FN':>5} | {'FP':>5} | {'Time':>6}"
+        f"\n{'Epoch':>7} | {'Loss':>8} | {'Val Acc':>7} | "
+        f"{'FN':>5} | {'FP':>5} | {'Time':>6}"
     )
     print("-" * 52)
 
@@ -200,13 +253,16 @@ def main(epochs, batch_size, lr, patience):
         n_batches = 0
 
         for start in range(0, n_train, batch_size):
-            batch_idx = indices[start : start + batch_size]
-            ci = train_ci[batch_idx].to(device)
-            tt = train_tt[batch_idx].to(device)
-            isn = train_isn[batch_idx].to(device)
-            labels = train_labels[batch_idx].to(device)
+            idx = indices[start : start + batch_size]
+            b_tk = tk[idx]
+            b_ng = ng[idx]
+            b_nc = nc[idx]
+            b_bl = bl[idx]
+            b_isn = isn[idx]
+            b_ln = ln[idx]
+            labels = train_labels[idx].to(device)
 
-            embeddings = model(ci, tt, isn)
+            embeddings = model(b_tk, b_ng, b_nc, b_bl, b_isn, b_ln)
             proto = F.normalize(union_prototype, dim=0)
             cos_sim = embeddings @ proto
 
@@ -231,7 +287,7 @@ def main(epochs, batch_size, lr, patience):
 
         # Validation
         y_true, y_scores = evaluate(
-            model, union_prototype.data, val_ci, val_tt, val_isn, val_labels, device
+            model, union_prototype.data, val_collated, val_labels, device
         )
         threshold = compute_threshold(y_true, y_scores)
         preds = y_scores > threshold
@@ -263,10 +319,8 @@ def main(epochs, batch_size, lr, patience):
     model.load_state_dict(best_state)
     model.eval()
 
-    # Final evaluation with best model
-    y_true, y_scores = evaluate(
-        model, best_proto, val_ci, val_tt, val_isn, val_labels, device
-    )
+    # Final evaluation
+    y_true, y_scores = evaluate(model, best_proto, val_collated, val_labels, device)
     threshold = compute_threshold(y_true, y_scores)
     roc_auc = roc_auc_score(y_true, y_scores)
     preds = y_scores > threshold
@@ -288,6 +342,13 @@ def main(epochs, batch_size, lr, patience):
             "model_state_dict": best_state,
             "union_centroid": best_proto,
             "optimal_threshold": threshold,
+            "vocab": vocab,
+            "d_model": D_MODEL,
+            "n_heads": N_HEADS,
+            "n_layers": N_LAYERS,
+            "n_buckets": N_BUCKETS,
+            "vocab_size": len(vocab),
+            "embed_dim": EMBED_DIM,
         },
         MODEL_PATH,
     )
