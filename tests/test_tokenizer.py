@@ -1,6 +1,10 @@
 """Tests for tokenizer period handling."""
 
-from labor_union_parser.char_cnn import CHAR_VOCAB, chars_to_ids, tokenize_to_chars
+from labor_union_parser.char_tokenizer import (
+    CHAR_VOCAB,
+    chars_to_ids,
+    tokenize_to_chars,
+)
 
 
 def get_tokens(text: str) -> list[str]:

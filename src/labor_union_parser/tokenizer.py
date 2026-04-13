@@ -8,7 +8,7 @@ Provides:
 
 import hashlib
 
-from .char_cnn import tokenize_to_chars
+from .char_tokenizer import tokenize_to_chars
 
 MAX_TOKENS = 20
 MAX_CHARS_PER_TOKEN = 20
