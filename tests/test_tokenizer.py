@@ -1,21 +1,17 @@
 """Tests for tokenizer period handling."""
 
-from labor_union_parser.char_tokenizer import (
-    CHAR_VOCAB,
-    chars_to_ids,
-    tokenize_to_chars,
-)
+from labor_union_parser.char_tokenizer import tokenize
 
 
 def get_tokens(text: str) -> list[str]:
     """Helper to get just the non-empty tokens."""
-    _, tokens, _, _ = tokenize_to_chars(text, max_tokens=40)
+    tokens, _, _ = tokenize(text, max_tokens=40)
     return [t for t in tokens if t]
 
 
 def get_tokens_and_types(text: str) -> list[tuple[str, int]]:
     """Helper to get (token, token_type) pairs for non-empty tokens."""
-    _, tokens, _, token_types = tokenize_to_chars(text, max_tokens=40)
+    tokens, _, token_types = tokenize(text, max_tokens=40)
     return [(t, tt) for t, tt in zip(tokens, token_types) if t]
 
 
@@ -145,53 +141,6 @@ class TestSpaceHandling:
         assert tokens == [" ", "ibew", " "]
 
 
-class TestCharsToIds:
-    """chars_to_ids converts tokens to character ID sequences."""
-
-    def test_known_characters(self):
-        ids = chars_to_ids("abc")
-        assert ids[0] == CHAR_VOCAB["a"]
-        assert ids[1] == CHAR_VOCAB["b"]
-        assert ids[2] == CHAR_VOCAB["c"]
-
-    def test_unknown_character_maps_to_unk(self):
-        ids = chars_to_ids("@")
-        assert ids[0] == CHAR_VOCAB["<UNK>"]
-
-    def test_unicode_maps_to_unk(self):
-        ids = chars_to_ids("ñ")
-        assert ids[0] == CHAR_VOCAB["<UNK>"]
-
-    def test_case_folded(self):
-        assert chars_to_ids("ABC") == chars_to_ids("abc")
-
-    def test_empty_string_all_padding(self):
-        ids = chars_to_ids("")
-        assert all(c == 0 for c in ids)
-
-    def test_padding_length(self):
-        ids = chars_to_ids("hi")
-        assert len(ids) == 20  # MAX_CHARS_PER_TOKEN
-        assert ids[2:] == [0] * 18
-
-    def test_truncation_at_max_chars(self):
-        long_token = "a" * 30
-        ids = chars_to_ids(long_token, max_chars=20)
-        assert len(ids) == 20
-        assert all(c == CHAR_VOCAB["a"] for c in ids)
-
-    def test_digits(self):
-        ids = chars_to_ids("123")
-        assert ids[0] == CHAR_VOCAB["1"]
-        assert ids[1] == CHAR_VOCAB["2"]
-        assert ids[2] == CHAR_VOCAB["3"]
-
-    def test_punctuation(self):
-        for char in "-/&,.":
-            ids = chars_to_ids(char)
-            assert ids[0] == CHAR_VOCAB[char]
-
-
 class TestTokenTypes:
     """token_type values: 0=word, 1=number, 2=space, 3=punct, 4=pad."""
 
@@ -213,7 +162,7 @@ class TestTokenTypes:
         assert pairs[1] == ("-", 3)
 
     def test_pad_type(self):
-        _, _, _, token_types = tokenize_to_chars("hi", max_tokens=5)
+        _, _, token_types = tokenize("hi", max_tokens=5)
         # After real tokens, remaining should be pad (4)
         assert token_types[-1] == 4
 

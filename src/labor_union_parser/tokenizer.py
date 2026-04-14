@@ -8,10 +8,9 @@ Provides:
 
 import hashlib
 
-from .char_tokenizer import tokenize_to_chars
+from .char_tokenizer import tokenize
 
 MAX_TOKENS = 20
-MAX_CHARS_PER_TOKEN = 20
 
 # ---------------------------------------------------------------------------
 # Bloom hashing for number tokens
@@ -81,18 +80,15 @@ def _token_to_ngram_hashes(token, n_buckets, min_n=3, max_n=6):
 def smart_truncate_nonspace(text, max_tokens=MAX_TOKENS):
     """Tokenize, drop spaces, keep first N tokens, recover lost numbers.
 
-    Returns list of dicts with keys: chars, token, is_num, token_type
+    Returns list of dicts with keys: token, is_num, token_type
     """
-    full_chars, full_tokens, full_is_num, full_token_types = tokenize_to_chars(
-        text, 999
-    )
+    full_tokens, full_is_num, full_token_types = tokenize(text, 999)
 
     nonspace = []
     for i, tt in enumerate(full_token_types):
         if full_tokens[i] and tt != 2:  # not space, not empty
             nonspace.append(
                 {
-                    "chars": full_chars[i],
                     "token": full_tokens[i],
                     "is_num": full_is_num[i],
                     "token_type": tt,
@@ -122,7 +118,6 @@ def smart_truncate_nonspace(text, max_tokens=MAX_TOKENS):
     while len(trunc) < max_tokens:
         trunc.append(
             {
-                "chars": [0] * MAX_CHARS_PER_TOKEN,
                 "token": "",
                 "is_num": 0,
                 "token_type": 4,
