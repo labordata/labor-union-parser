@@ -24,26 +24,28 @@ pip install labor-union-parser
 
 ### Python API
 
-```python
-from labor_union_parser import Extractor
-
-extractor = Extractor()
-result = extractor.extract("SEIU Local 1199")
-print(result)
-```
-
 <!--[[[cog
 import pprint
 from labor_union_parser import Extractor
 
 result = Extractor().extract("SEIU Local 1199")
 lines = pprint.pformat(result, width=72).splitlines()
-cog.outl("```")
+cog.outl("```python")
+cog.outl("from labor_union_parser import Extractor")
+cog.outl("")
+cog.outl('extractor = Extractor()')
+cog.outl('result = extractor.extract("SEIU Local 1199")')
+cog.outl("print(result)")
 for line in lines:
     cog.outl(f"# {line}")
 cog.outl("```")
 ]]]-->
-```
+```python
+from labor_union_parser import Extractor
+
+extractor = Extractor()
+result = extractor.extract("SEIU Local 1199")
+print(result)
 # {'f_num': 31847,
 #  'is_union': True,
 #  'match_score': 0.982312023639679,
