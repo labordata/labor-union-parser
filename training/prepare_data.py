@@ -34,10 +34,10 @@ DESIG_KEYWORDS = [
     ("local joint board", {"LJB"}),
     ("state association", {"SA", "ASSN"}),
     ("district council", {"DC"}),
-    ("district lodge", {"DLG"}),
+    ("district lodge", {"DC"}),
     ("local division", {"LDIV"}),
     ("local chapter", {"LCH"}),
-    ("local lodge", {"LLG"}),
+    ("local lodge", {"LU"}),
     ("local union", {"LU"}),
     ("joint board", {"JB"}),
     ("joint council", {"JC"}),
@@ -53,7 +53,7 @@ DESIG_KEYWORDS = [
     ("council", {"C", "LEADC", "DC", "JC", "STC", "BCTC"}),
     ("chapter", {"CH", "LCH"}),
     ("branch", {"BR"}),
-    ("lodge", {"LG", "LLG", "DLG"}),
+    ("lodge", {"LU", "DC"}),
     ("local", {"LU", "LOCAL"}),
     ("unit", {"UNIT"}),
 ]
@@ -63,12 +63,11 @@ DESIG_KEYWORDS = [
 # first over the alternates.  E.g. keep "C" over "LEADC", "LU" over "LOCAL".
 DESIG_PREFERENCE = [
     ("C", {"LEADC"}),
-    ("LU", {"LOCAL", "LG", "LLG", "NHQ", "DALU"}),
-    ("LLG", {"LG"}),
+    ("LU", {"LOCAL", "NHQ", "DALU"}),
     ("DC", {"DIV"}),
     ("D", {"DC"}),
     ("SA", {"ASSN"}),
-    ("STC", {"DLG"}),
+    ("STC", {"DC"}),
 ]
 
 
