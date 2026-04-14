@@ -8,7 +8,6 @@ Given an input like `"SEIU Local 1199"`, the parser returns:
 - `union_score`: 0.992 (calibrated probability of being a union)
 - `union_name`: SERVICE EMPLOYEES (predicted parent union name)
 - `f_num`: 31847 (OLMS filing number of best-matching gazetteer record)
-- `match_found`: True (whether the match confidence exceeds threshold)
 - `match_score`: 0.956 (softmax probability of best match)
 
 Other record fields (designation type, local number, prefix, suffix)
@@ -116,7 +115,6 @@ SEIU Local 1199,True,0.9937,SERVICE EMPLOYEES,31847,True,0.9827
 | `union_score` | Calibrated probability of being a union (0-1, Platt-scaled) |
 | `union_name` | Predicted parent union name from the shared classification head |
 | `f_num` | OLMS filing number of the best-matching gazetteer record |
-| `match_found` | Whether the match confidence exceeds the threshold |
 | `match_score` | Softmax probability of best gazetteer match (0-1) |
 
 ## Training
@@ -257,7 +255,7 @@ from evaluate import compute_test_metrics
 
 m = compute_test_metrics()
 
-total_errors = m['wrong_matches'] + m['false_negatives'] + m['false_match_no_fnum'] + m['false_positives']
+total_errors = m['wrong_matches'] + m['false_negatives'] + m['false_positives']
 total_correct = m['n_scored'] - total_errors
 accuracy = total_correct / m['n_scored']
 
@@ -268,7 +266,7 @@ cog.outl("| Metric | Score |")
 cog.outl("|--------|-------|")
 cog.outl(f"| Accuracy | {accuracy:.1%} |")
 cog.outl(f"| f_num accuracy (union examples) | {m['fnum_accuracy']:.1%} ({m['fnum_correct']}/{m['fnum_total']}) |")
-cog.outl(f"| f_num accuracy (in-vocab only) | {m.get('fnum_invocab_accuracy', 0):.1%} |")
+cog.outl(f"| f_num accuracy (in-vocab only) | {m['fnum_invocab_accuracy']:.1%} |")
 cog.outl(f"| union_name accuracy | {m['union_accuracy']:.1%} ({m['union_correct']}/{m['union_total']}) |")
 cog.outl(f"| Wrong match (union, wrong f_num) | {m['wrong_matches']} |")
 cog.outl(f"| False negatives (union missed) | {m['false_negatives']} |")

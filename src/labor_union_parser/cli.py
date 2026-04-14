@@ -14,7 +14,6 @@ PRED_FIELDS = [
     "pred_union_score",
     "pred_union_name",
     "pred_f_num",
-    "pred_match_found",
     "pred_match_score",
 ]
 
@@ -80,7 +79,6 @@ def build_pred_row(result):
         "pred_union_score": f"{result['union_score']:.4f}",
         "pred_union_name": result["union_name"],
         "pred_f_num": result["f_num"],
-        "pred_match_found": result["match_found"],
         "pred_match_score": f"{result['match_score']:.4f}",
     }
 
@@ -119,7 +117,7 @@ def main(input_file, column, output, batch_size, no_header):
 
     Reads CSV from INPUT_FILE (or stdin if not specified) and appends columns:
     pred_is_union, pred_union_score, pred_union_name, pred_f_num,
-    pred_match_found, pred_match_score
+    pred_match_score
 
     The pred_union_name column is the model's predicted parent union name.
     The pred_f_num column is the OLMS filing number of the best-matching

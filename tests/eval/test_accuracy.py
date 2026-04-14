@@ -190,7 +190,7 @@ class TestEndToEnd:
                 continue
             true_fnum = ex["records"][0]["f_num"]
             if true_fnum == -100:
-                continue  # Skip no-fnum examples (match_found threshold TBD)
+                continue
             n += 1
             if result["is_union"] and result["f_num"] != true_fnum:
                 wrong += 1

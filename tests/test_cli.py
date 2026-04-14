@@ -140,7 +140,6 @@ class TestOutputFields:
             "pred_union_score",
             "pred_union_name",
             "pred_f_num",
-            "pred_match_found",
             "pred_match_score",
         ]
         for field in expected_fields:

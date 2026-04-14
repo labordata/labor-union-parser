@@ -126,7 +126,7 @@ def main(lr, steps):
         targets = [fnum_to_idx[ex["records"][0]["f_num"]] for ex in batch_ex]
 
         batch_features = [tokenize_for_arcface(text) for text in texts]
-        collated = ext._collate_arcface(batch_features)
+        collated = ext._collate(batch_features, ext.vocab)
 
         with torch.no_grad():
             class_logits, _ = model(*collated)
@@ -148,7 +148,7 @@ def main(lr, steps):
         targets = [union_vocab[ex["records"][0]["union_name"]] for ex in batch_ex]
 
         batch_features = [tokenize_for_arcface(text) for text in texts]
-        collated = ext._collate_arcface(batch_features)
+        collated = ext._collate(batch_features, ext.vocab)
 
         with torch.no_grad():
             _, union_logits = model(*collated)
@@ -240,7 +240,7 @@ def main(lr, steps):
     for i in range(0, len(all_ud_texts), 256):
         batch_texts = all_ud_texts[i : i + 256]
         batch_features = [tokenize_for_arcface(text) for text in batch_texts]
-        collated = ext._collate_for_union(batch_features)
+        collated = ext._collate(batch_features, ext.union_vocab)
 
         with torch.no_grad():
             emb = ext.union_encoder(*collated)
