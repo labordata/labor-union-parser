@@ -40,10 +40,9 @@ for line in pprint.pformat(result, width=72).splitlines():
 ]]]-->
 # {'f_num': 31847,
 #  'is_union': True,
-#  'match_found': True,
-#  'match_score': 0.9826743006706238,
+#  'match_score': 0.982312023639679,
 #  'union_name': 'SERVICE EMPLOYEES',
-#  'union_score': 0.9937368631362915}
+#  'union_score': 0.8276892304420471}
 <!--[[[end]]]-->
 ```
 
@@ -102,8 +101,8 @@ result = subprocess.run(
 for line in result.stdout.strip().splitlines():
     cog.outl(line)
 ]]]-->
-text,pred_is_union,pred_union_score,pred_union_name,pred_f_num,pred_match_found,pred_match_score
-SEIU Local 1199,True,0.9937,SERVICE EMPLOYEES,31847,True,0.9827
+text,pred_is_union,pred_union_score,pred_union_name,pred_f_num,pred_match_score
+SEIU Local 1199,True,0.8277,SERVICE EMPLOYEES,31847,0.9823
 <!--[[[end]]]-->
 ```
 
@@ -277,11 +276,11 @@ scored against the full 44K-record gazetteer):
 
 | Metric | Score |
 |--------|-------|
-| Accuracy | 88.3% |
-| f_num accuracy (union examples) | 98.6% (7533/7643) |
+| Accuracy | 98.0% |
+| f_num accuracy (union examples) | 98.6% (7519/7627) |
 | f_num accuracy (in-vocab only) | 98.6% |
-| union_name accuracy | 98.0% (9237/9424) |
-| Wrong match (union, wrong f_num) | 110 |
-| False negatives (union missed) | 35 |
-| False positives (non-union matched) | 11 |
+| union_name accuracy | 98.0% (9180/9364) |
+| Wrong match (union, wrong f_num) | 108 |
+| False negatives (union missed) | 24 |
+| False positives (non-union matched) | 43 |
 <!--[[[end]]]-->
