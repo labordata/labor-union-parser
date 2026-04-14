@@ -1,22 +1,18 @@
 # Labor Union Parser
 
-Match labor union name text to OLMS filing numbers using a factored
-ArcFace model against a gazetteer of ~44,000 filing records.
+Match labor union name text to [Office of Labor-Management Standards filing numbers](https://olmsapps.dol.gov/olpdr/).
 
 Given an input like `"SEIU Local 1199"`, the parser returns:
-- `is_union`: True (detected as a union)
-- `union_score`: 0.992 (calibrated probability of being a union)
-- `union_name`: SERVICE EMPLOYEES (predicted parent union name)
-- `f_num`: 31847 (OLMS filing number of best-matching gazetteer record)
-- `match_score`: 0.956 (softmax probability of best match)
+- `is_union`: True
+- `union_score`: 0.992
+- `union_name`: SERVICE EMPLOYEES
+- `f_num`: 31847
+- `match_score`: 0.956
 
-Other record fields (designation type, local number, prefix, suffix)
-are fully determined by the f_num and can be looked up from the
-[OLMS gazetteer](https://github.com/labordata/opdr).
 
 ## Installation
 
-```bash
+```console
 pip install labor-union-parser
 ```
 
@@ -148,7 +144,7 @@ for line in result.stdout.strip().splitlines():
     cog.outl(line)
 cog.outl("```")
 ]]]-->
-```bash
+```console
 # Process CSV file
 labor-union-parser unions.csv -c union_name -o results.csv
 
