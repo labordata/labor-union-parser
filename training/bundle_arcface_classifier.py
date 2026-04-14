@@ -98,7 +98,7 @@ def main(checkpoint):
             fields = [
                 field_vocabs["union_name"].get(rec.get("union_name", ""), 0),
                 field_vocabs["desig_name"].get(rec.get("desig_name", ""), 0),
-                field_vocabs["prefix"].get(str(rec.get("prefix", "")), 0),
+                field_vocabs["prefix"].get(rec.get("prefix", 0), 0),
                 field_vocabs["suffix"].get(str(rec.get("suffix", "")), 0),
             ]
             dnum = rec.get("desig_num", 0)
