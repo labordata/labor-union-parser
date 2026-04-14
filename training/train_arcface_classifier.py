@@ -113,15 +113,15 @@ class TrainingModel(CRFTaggerMixin, ArcFaceModel, L.LightningModule):
         desig_logits = self.desig_scale * F.linear(embeddings, F.normalize(W_dn, dim=1))
         tag_logits = self.tag_head(hidden)
 
-        # Field classification losses
-        field_losses = {}
-        for name, flogits, ft in [
-            ("union_name", union_logits, batch.union_targets),
-            ("desig_name", desig_logits, batch.desig_targets),
-        ]:
-            valid = ft >= 0
-            if valid.any():
-                field_losses[name] = F.cross_entropy(flogits[valid], ft[valid])
+        # Field classification losses (ignore_index=-1 skips unknown targets)
+        field_losses = {
+            "union_name": F.cross_entropy(
+                union_logits, batch.union_targets, ignore_index=-1
+            ),
+            "desig_name": F.cross_entropy(
+                desig_logits, batch.desig_targets, ignore_index=-1
+            ),
+        }
 
         # CRF token role tagging loss
         crf_fields = [batch.crf_dnum, batch.crf_pfx, batch.crf_sfx]
