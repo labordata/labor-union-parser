@@ -107,11 +107,11 @@ class TrainingModel(CRFTaggerMixin, ArcFaceModel):
                     if valid.any():
                         field_losses[field] = F.cross_entropy(flogits[valid], ft[valid])
 
-            crf_fields = field_targets.get("crf_fields")
-            if crf_fields is not None and any(ft is not None for ft in crf_fields):
-                crf_loss_val = self.crf_loss(tag_logits, lengths, crf_fields)
-                if crf_loss_val is not None:
-                    field_losses["crf_tags"] = crf_loss_val
+            crf_loss_val = self.crf_loss(
+                tag_logits, lengths, field_targets["crf_fields"]
+            )
+            if crf_loss_val is not None:
+                field_losses["crf_tags"] = crf_loss_val
 
         disagree_loss = torch.tensor(0.0, device=logits.device)
         if logits is not None and targets is not None:
