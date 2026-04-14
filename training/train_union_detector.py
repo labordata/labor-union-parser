@@ -347,6 +347,8 @@ def main():
             "n_buckets": N_BUCKETS,
             "vocab_size": len(dm.vocab),
             "embed_dim": EMBED_DIM,
+            "platt_a": 1.0,
+            "platt_b": 0.0,
         },
         MODEL_PATH,
     )

@@ -285,11 +285,12 @@ class TestDesigNameFiltering:
         result = filter_records_by_query("USW District 4", [r_LU, r_D, r_DC])
         assert all(r["desig_name"] in ("D", "DC") for r in result)
 
-    def test_keyword_lodge_matches_LG_or_LLG(self):
+    def test_keyword_lodge_matches_LU_or_DC(self):
         r_LU = rec(desig_name="LU")
-        r_LLG = rec(desig_name="LLG")
-        result = filter_records_by_query("Lodge 100", [r_LU, r_LLG])
-        assert result == [r_LLG]
+        r_DC = rec(desig_name="DC")
+        r_JB = rec(desig_name="JB")
+        result = filter_records_by_query("Lodge 100", [r_LU, r_DC, r_JB])
+        assert result == [r_LU, r_DC]
 
     def test_keyword_district_council_matches_DC(self):
         r_DC = rec(desig_name="DC")

@@ -72,6 +72,8 @@ def main():
         "arcface_scale": ckpt["arcface_scale"],
         "union_names": union_names,
         "gazetteer": gazetteer,
+        "fnum_temperature": 1.0,
+        "union_temperature": 1.0,
     }
 
     out_path = WEIGHTS_DIR / "arcface_classifier.pt"
