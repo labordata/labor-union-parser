@@ -113,14 +113,10 @@ class TrainingModel(CRFTaggerMixin, ArcFaceModel, L.LightningModule):
         desig_logits = self.desig_scale * F.linear(embeddings, F.normalize(W_dn, dim=1))
         tag_logits = self.tag_head(hidden)
 
-        # Field classification losses (ignore_index=-1 skips unknown targets)
+        # Field classification losses (-100 targets ignored by default)
         field_losses = {
-            "union_name": F.cross_entropy(
-                union_logits, batch.union_targets, ignore_index=-1
-            ),
-            "desig_name": F.cross_entropy(
-                desig_logits, batch.desig_targets, ignore_index=-1
-            ),
+            "union_name": F.cross_entropy(union_logits, batch.union_targets),
+            "desig_name": F.cross_entropy(desig_logits, batch.desig_targets),
         }
 
         # CRF token role tagging loss
@@ -196,10 +192,10 @@ def _collate_batch(examples) -> Batch:
     is_num = torch.zeros(B, max_len, dtype=torch.float)
     lengths = torch.zeros(B, dtype=torch.long)
     targets = torch.zeros(B, dtype=torch.long)
-    union_tgt = torch.full((B,), -1, dtype=torch.long)
-    desig_tgt = torch.full((B,), -1, dtype=torch.long)
-    prefix_tgt = torch.full((B,), -1, dtype=torch.long)
-    suffix_tgt = torch.full((B,), -1, dtype=torch.long)
+    union_tgt = torch.full((B,), -100, dtype=torch.long)
+    desig_tgt = torch.full((B,), -100, dtype=torch.long)
+    prefix_tgt = torch.full((B,), -100, dtype=torch.long)
+    suffix_tgt = torch.full((B,), -100, dtype=torch.long)
     crf_dnum_list, crf_pfx_list, crf_sfx_list = [], [], []
 
     for i, ex in enumerate(examples):
@@ -359,15 +355,15 @@ class ArcFaceDataModule(L.LightningDataModule):
                 ex["is_num_f"] = [float(n) for n in ex["is_num"]]
                 ex["target"] = self.fnum_to_idx.get(ex["f_num"], -100)
                 ex["union_target"] = fva.get("union_name", {}).get(
-                    ex.get("union_name", ""), -1
+                    ex.get("union_name", ""), -100
                 )
                 rec = ex.get("record", {})
                 for field in ["desig_name", "prefix", "suffix"]:
                     val = rec.get(field, -100)
                     ex[f"{field}_target"] = (
-                        -1
+                        -100
                         if val in (-100, 0, "", None)
-                        else fva.get(field, {}).get(val, -1)
+                        else fva.get(field, {}).get(val, -100)
                     )
 
     def _build_prototypes(self):
