@@ -113,30 +113,31 @@ class TrainingModel(CRFTaggerMixin, ArcFaceModel, L.LightningModule):
         desig_logits = self.desig_scale * F.linear(embeddings, F.normalize(W_dn, dim=1))
         tag_logits = self.tag_head(hidden)
 
+        # Field classification losses
         field_losses = {}
+        for name, flogits, ft in [
+            ("union_name", union_logits, batch.union_targets),
+            ("desig_name", desig_logits, batch.desig_targets),
+        ]:
+            valid = ft >= 0
+            if valid.any():
+                field_losses[name] = F.cross_entropy(flogits[valid], ft[valid])
+
+        # CRF token role tagging loss
+        crf_fields = [batch.crf_dnum, batch.crf_pfx, batch.crf_sfx]
+        crf_loss_val = self.crf_loss(tag_logits, batch.lengths, crf_fields)
+        if crf_loss_val is not None:
+            field_losses["crf_tags"] = crf_loss_val
+
+        # Disagree penalty
         disagree_loss = torch.tensor(0.0, device=logits.device)
-
-        if batch.union_targets is not None:
-            for name, flogits, ft in [
-                ("union_name", union_logits, batch.union_targets),
-                ("desig_name", desig_logits, batch.desig_targets),
-            ]:
-                valid = ft >= 0
-                if valid.any():
-                    field_losses[name] = F.cross_entropy(flogits[valid], ft[valid])
-
-            crf_fields = [batch.crf_dnum, batch.crf_pfx, batch.crf_sfx]
-            crf_loss_val = self.crf_loss(tag_logits, batch.lengths, crf_fields)
-            if crf_loss_val is not None:
-                field_losses["crf_tags"] = crf_loss_val
-
-            fnum_valid = batch.targets >= 0
-            if fnum_valid.any():
-                fnum_probs = F.softmax(logits[fnum_valid], dim=1)
-                union_lp = F.log_softmax(union_logits[fnum_valid], dim=1)
-                disagree_loss = -(
-                    (fnum_probs * union_lp[:, self.class_to_union]).sum(dim=1).mean()
-                )
+        fnum_valid = batch.targets >= 0
+        if fnum_valid.any():
+            fnum_probs = F.softmax(logits[fnum_valid], dim=1)
+            union_lp = F.log_softmax(union_logits[fnum_valid], dim=1)
+            disagree_loss = -(
+                (fnum_probs * union_lp[:, self.class_to_union]).sum(dim=1).mean()
+            )
 
         return logits, arcface_loss, field_losses, disagree_loss
 
@@ -150,7 +151,15 @@ class TrainingModel(CRFTaggerMixin, ArcFaceModel, L.LightningModule):
         return loss
 
     def validation_step(self, batch: Batch):
-        logits, _, _, _ = self(batch)
+        embeddings, _ = self.encode(
+            batch.token_ids,
+            batch.ngram_ids,
+            batch.ngram_counts,
+            batch.bloom_ids,
+            batch.is_num,
+            batch.lengths,
+        )
+        logits, _ = self.classifier(embeddings)
         top1 = (logits.argmax(dim=1) == batch.targets).float().mean()
         self.log("val_top1", top1, prog_bar=True, sync_dist=True)
 
