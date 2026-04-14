@@ -8,6 +8,7 @@ Uses PyTorch Lightning for structured training with:
 
 import json
 from collections import Counter, defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 
 import lightning as L
@@ -43,6 +44,31 @@ FNUM_REG = 100.0
 
 
 # ---------------------------------------------------------------------------
+# Batch
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class Batch:
+    """All tensors for a training/validation batch."""
+
+    token_ids: torch.Tensor
+    ngram_ids: torch.Tensor
+    ngram_counts: torch.Tensor
+    bloom_ids: torch.Tensor
+    is_num: torch.Tensor
+    lengths: torch.Tensor
+    targets: torch.Tensor
+    union_targets: torch.Tensor
+    desig_targets: torch.Tensor
+    prefix_targets: torch.Tensor
+    suffix_targets: torch.Tensor
+    crf_dnum: tuple[torch.Tensor, torch.Tensor, torch.Tensor] | None
+    crf_pfx: tuple[torch.Tensor, torch.Tensor, torch.Tensor] | None
+    crf_sfx: tuple[torch.Tensor, torch.Tensor, torch.Tensor] | None
+
+
+# ---------------------------------------------------------------------------
 # Model
 # ---------------------------------------------------------------------------
 
@@ -70,21 +96,16 @@ class TrainingModel(CRFTaggerMixin, ArcFaceModel, L.LightningModule):
         self.n_train_classes = n_train_classes
         self.register_buffer("class_to_union", class_to_union)
 
-    def forward(
-        self,
-        token_ids,
-        ngram_ids,
-        ngram_counts,
-        bloom_ids,
-        is_num,
-        lengths,
-        targets=None,
-        field_targets=None,
-    ):
+    def forward(self, batch: Batch):
         embeddings, hidden = self.encode(
-            token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths
+            batch.token_ids,
+            batch.ngram_ids,
+            batch.ngram_counts,
+            batch.bloom_ids,
+            batch.is_num,
+            batch.lengths,
         )
-        logits, arcface_loss = self.classifier(embeddings, targets)
+        logits, arcface_loss = self.classifier(embeddings, batch.targets)
 
         W_u = self.classifier.W_union.weight[1:]
         union_logits = self.union_scale * F.linear(embeddings, F.normalize(W_u, dim=1))
@@ -95,23 +116,21 @@ class TrainingModel(CRFTaggerMixin, ArcFaceModel, L.LightningModule):
         field_losses = {}
         disagree_loss = torch.tensor(0.0, device=logits.device)
 
-        if field_targets is not None:
-            for field, flogits in [
-                ("union_name", union_logits),
-                ("desig_name", desig_logits),
+        if batch.union_targets is not None:
+            for name, flogits, ft in [
+                ("union_name", union_logits, batch.union_targets),
+                ("desig_name", desig_logits, batch.desig_targets),
             ]:
-                ft = field_targets[field]
                 valid = ft >= 0
                 if valid.any():
-                    field_losses[field] = F.cross_entropy(flogits[valid], ft[valid])
+                    field_losses[name] = F.cross_entropy(flogits[valid], ft[valid])
 
-            crf_loss_val = self.crf_loss(
-                tag_logits, lengths, field_targets["crf_fields"]
-            )
+            crf_fields = [batch.crf_dnum, batch.crf_pfx, batch.crf_sfx]
+            crf_loss_val = self.crf_loss(tag_logits, batch.lengths, crf_fields)
             if crf_loss_val is not None:
                 field_losses["crf_tags"] = crf_loss_val
 
-            fnum_valid = targets >= 0
+            fnum_valid = batch.targets >= 0
             if fnum_valid.any():
                 fnum_probs = F.softmax(logits[fnum_valid], dim=1)
                 union_lp = F.log_softmax(union_logits[fnum_valid], dim=1)
@@ -121,11 +140,8 @@ class TrainingModel(CRFTaggerMixin, ArcFaceModel, L.LightningModule):
 
         return logits, arcface_loss, field_losses, disagree_loss
 
-    def training_step(self, batch):
-        tk, ng, nc, bl, isn, ln, tg, ft = batch
-        _, arcface_loss, field_losses, disagree_loss = self(
-            tk, ng, nc, bl, isn, ln, tg, ft
-        )
+    def training_step(self, batch: Batch):
+        _, arcface_loss, field_losses, disagree_loss = self(batch)
         loss = arcface_loss + disagree_loss
         for fl in field_losses.values():
             loss = loss + fl
@@ -133,10 +149,9 @@ class TrainingModel(CRFTaggerMixin, ArcFaceModel, L.LightningModule):
         self.log("train_loss", loss, prog_bar=True)
         return loss
 
-    def validation_step(self, batch):
-        tk, ng, nc, bl, isn, ln, tg, _ = batch
-        logits, _, _, _ = self(tk, ng, nc, bl, isn, ln)
-        top1 = (logits.argmax(dim=1) == tg).float().mean()
+    def validation_step(self, batch: Batch):
+        logits, _, _, _ = self(batch)
+        top1 = (logits.argmax(dim=1) == batch.targets).float().mean()
         self.log("val_top1", top1, prog_bar=True, sync_dist=True)
 
     def configure_optimizers(self):
@@ -157,6 +172,61 @@ class TrainingModel(CRFTaggerMixin, ArcFaceModel, L.LightningModule):
 # ---------------------------------------------------------------------------
 # Data
 # ---------------------------------------------------------------------------
+
+
+def _collate_batch(examples) -> Batch:
+    """Collate list of example dicts into a Batch."""
+    B = len(examples)
+    max_len = max(ex["length"] for ex in examples)
+    max_ngrams = len(examples[0]["ngram_ids"][0])
+
+    token_ids = torch.zeros(B, max_len, dtype=torch.long)
+    ngram_ids = torch.zeros(B, max_len, max_ngrams, dtype=torch.long)
+    ngram_counts = torch.zeros(B, max_len, dtype=torch.long)
+    bloom_ids = torch.zeros(B, max_len, NUM_BLOOM_HASHES, dtype=torch.long)
+    is_num = torch.zeros(B, max_len, dtype=torch.float)
+    lengths = torch.zeros(B, dtype=torch.long)
+    targets = torch.zeros(B, dtype=torch.long)
+    union_tgt = torch.full((B,), -1, dtype=torch.long)
+    desig_tgt = torch.full((B,), -1, dtype=torch.long)
+    prefix_tgt = torch.full((B,), -1, dtype=torch.long)
+    suffix_tgt = torch.full((B,), -1, dtype=torch.long)
+    crf_dnum_list, crf_pfx_list, crf_sfx_list = [], [], []
+
+    for i, ex in enumerate(examples):
+        L = ex["length"]
+        lengths[i] = L
+        token_ids[i, :L] = torch.tensor(ex["token_ids"][:L], dtype=torch.long)
+        ngram_ids[i, :L] = torch.tensor(ex["ngram_ids"][:L], dtype=torch.long)
+        ngram_counts[i, :L] = torch.tensor(ex["ngram_counts"][:L], dtype=torch.long)
+        bloom_ids[i, :L] = torch.tensor(ex["bloom_ids"][:L], dtype=torch.long)
+        is_num[i, :L] = torch.tensor(ex["is_num_f"], dtype=torch.float)
+        targets[i] = ex["target"]
+        union_tgt[i] = ex.get("union_target", -1)
+        desig_tgt[i] = ex.get("desig_name_target", -1)
+        prefix_tgt[i] = ex.get("prefix_target", -1)
+        suffix_tgt[i] = ex.get("suffix_target", -1)
+        crf_dnum_list.append(ex.get("valid_dnum", []))
+        crf_pfx_list.append(ex.get("valid_pfx", []))
+        crf_sfx_list.append(ex.get("valid_sfx", []))
+
+    device = torch.device("cpu")
+    return Batch(
+        token_ids=token_ids,
+        ngram_ids=ngram_ids,
+        ngram_counts=ngram_counts,
+        bloom_ids=bloom_ids,
+        is_num=is_num,
+        lengths=lengths,
+        targets=targets,
+        union_targets=union_tgt,
+        desig_targets=desig_tgt,
+        prefix_targets=prefix_tgt,
+        suffix_targets=suffix_tgt,
+        crf_dnum=build_field_tensors(crf_dnum_list, B, device),
+        crf_pfx=build_field_tensors(crf_pfx_list, B, device),
+        crf_sfx=build_field_tensors(crf_sfx_list, B, device),
+    )
 
 
 class ArcFaceDataModule(L.LightningDataModule):
@@ -206,7 +276,6 @@ class ArcFaceDataModule(L.LightningDataModule):
         }
         self.n_train_classes = len(self.fnum_to_idx)
         self.idx_to_fnum_map = {v: k for k, v in self.fnum_to_idx.items()}
-
         self.val_data = [ex for ex in self.val_data if ex["f_num"] in self.fnum_to_idx]
         self.test_data = [
             ex for ex in self.test_data if ex["f_num"] in self.fnum_to_idx
@@ -389,7 +458,6 @@ class ArcFaceDataModule(L.LightningDataModule):
         }
 
     def _build_class_to_union(self):
-        """Build class→union mapping for disagree penalty."""
         self.class_to_union = torch.zeros(self.n_classes, dtype=torch.long)
         for i in range(self.n_classes):
             fn = self.idx_to_fnum_map[i]
@@ -472,67 +540,6 @@ class ArcFaceDataModule(L.LightningDataModule):
         return data, skipped, n_nofnum
 
 
-def _collate_batch(batch):
-    """Collate list of example dicts into tensors (on CPU; Lightning moves to device)."""
-    B = len(batch)
-    max_len = max(ex["length"] for ex in batch)
-    max_ngrams = len(batch[0]["ngram_ids"][0])
-
-    token_ids = torch.zeros(B, max_len, dtype=torch.long)
-    ngram_ids = torch.zeros(B, max_len, max_ngrams, dtype=torch.long)
-    ngram_counts = torch.zeros(B, max_len, dtype=torch.long)
-    bloom_ids = torch.zeros(B, max_len, NUM_BLOOM_HASHES, dtype=torch.long)
-    is_num_t = torch.zeros(B, max_len, dtype=torch.float)
-    lengths = torch.zeros(B, dtype=torch.long)
-    targets = torch.zeros(B, dtype=torch.long)
-    crf_dnum, crf_pfx, crf_sfx = [], [], []
-    union_tgt = torch.full((B,), -1, dtype=torch.long)
-    desig_tgt = torch.full((B,), -1, dtype=torch.long)
-    prefix_tgt = torch.full((B,), -1, dtype=torch.long)
-    suffix_tgt = torch.full((B,), -1, dtype=torch.long)
-
-    for i, ex in enumerate(batch):
-        L = ex["length"]
-        lengths[i] = L
-        token_ids[i, :L] = torch.tensor(ex["token_ids"][:L], dtype=torch.long)
-        ngram_ids[i, :L] = torch.tensor(ex["ngram_ids"][:L], dtype=torch.long)
-        ngram_counts[i, :L] = torch.tensor(ex["ngram_counts"][:L], dtype=torch.long)
-        bloom_ids[i, :L] = torch.tensor(ex["bloom_ids"][:L], dtype=torch.long)
-        is_num_t[i, :L] = torch.tensor(ex["is_num_f"], dtype=torch.float)
-        targets[i] = ex["target"]
-        crf_dnum.append(ex.get("valid_dnum", []))
-        crf_pfx.append(ex.get("valid_pfx", []))
-        crf_sfx.append(ex.get("valid_sfx", []))
-        union_tgt[i] = ex.get("union_target", -1)
-        desig_tgt[i] = ex.get("desig_name_target", -1)
-        prefix_tgt[i] = ex.get("prefix_target", -1)
-        suffix_tgt[i] = ex.get("suffix_target", -1)
-
-    device = torch.device("cpu")
-    field_targets = {
-        "union_name": union_tgt,
-        "desig_name": desig_tgt,
-        "prefix": prefix_tgt,
-        "suffix": suffix_tgt,
-        "crf_fields": [
-            build_field_tensors(crf_dnum, B, device),
-            build_field_tensors(crf_pfx, B, device),
-            build_field_tensors(crf_sfx, B, device),
-        ],
-    }
-
-    return (
-        token_ids,
-        ngram_ids,
-        ngram_counts,
-        bloom_ids,
-        is_num_t,
-        lengths,
-        targets,
-        field_targets,
-    )
-
-
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -551,7 +558,6 @@ def main():
         field_sizes=dm.field_sizes,
         class_to_union=dm.class_to_union,
     )
-    # Set prototype buffers from datamodule
     model.classifier.field_map = dm.factored_info["field_map"]
     model.classifier.desig_bloom = dm.factored_info["desig_bloom"]
     model.classifier.proto_to_class = dm.factored_info["proto_to_class"]
@@ -570,7 +576,7 @@ def main():
     )
     trainer.fit(model, dm)
 
-    # Save checkpoint in our format (not Lightning's)
+    # Save checkpoint in our format
     state = {k: v.cpu() for k, v in model.state_dict().items()}
     torch.save(
         {
