@@ -156,8 +156,11 @@ class TrainingModel(CRFTaggerMixin, ArcFaceModel, L.LightningModule):
             batch.lengths,
         )
         logits, _ = self.classifier(embeddings)
-        top1 = (logits.argmax(dim=1) == batch.targets).float().mean()
-        self.log("val_top1", top1, prog_bar=True, sync_dist=True)
+        mask = batch.targets != -100
+        if mask.any():
+            preds = logits.argmax(dim=1)[mask]
+            top1 = (preds == batch.targets[mask]).float().mean()
+            self.log("val_top1", top1, prog_bar=True, sync_dist=True)
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(self.parameters(), lr=1e-3)
@@ -254,91 +257,76 @@ class ArcFaceDataModule(L.LightningDataModule):
         self.val_data = [ex for ex in data if ex["split"] == "val"]
         self.test_data = [ex for ex in data if ex["split"] == "test"]
 
-        self._build_fnum_mapping(data)
-        self._build_vocab(data)
+        self._build_fnum_mapping()
+        self._build_vocab()
         self._build_field_vocabs()
-        self._encode_all()
         self._build_prototypes()
+        self._encode_all()
         self._build_class_to_union()
 
         print(
             f"Classes: {self.n_train_classes}, Vocab: {len(self.vocab)}, "
-            f"Unions: {len(self.union_names)}"
+            f"Unions: {len(self.field_vocabs['union_name'])}"
         )
 
-    def _build_fnum_mapping(self, data):
+    def _build_fnum_mapping(self):
+        # Train classes must come first (0..n_train-1) so the model knows
+        # which get learnable W_fnum embeddings vs frozen OOV prototypes.
         self.fnum_to_idx = {
             f: i
             for i, f in enumerate(
                 sorted(
-                    set(
-                        ex["f_num"]
-                        for ex in data
-                        if ex["split"] == "train" and ex["f_num"] != -100
-                    )
+                    set(ex["f_num"] for ex in self.train_data if ex["f_num"] != -100)
                 )
             )
         }
         self.n_train_classes = len(self.fnum_to_idx)
-        self.idx_to_fnum_map = {v: k for k, v in self.fnum_to_idx.items()}
-        self.val_data = [ex for ex in self.val_data if ex["f_num"] in self.fnum_to_idx]
-        self.test_data = [
-            ex for ex in self.test_data if ex["f_num"] in self.fnum_to_idx
-        ]
 
-    def _build_vocab(self, data):
+        # Add OOV classes from gazetteer
+        with open(DATA_DIR / "gazetteer.json") as f:
+            self.gazetteer_data = json.load(f)
+
+        n_oov = 0
+        for fnum_str in sorted(self.gazetteer_data, key=int):
+            fn = int(fnum_str)
+            if fn not in self.fnum_to_idx:
+                self.fnum_to_idx[fn] = len(self.fnum_to_idx)
+                n_oov += 1
+
+        self.n_classes = len(self.fnum_to_idx)
+        self.idx_to_fnum_map = {v: k for k, v in self.fnum_to_idx.items()}
+        print(
+            f"Train classes: {self.n_train_classes}, "
+            f"OOV: {n_oov}, Total: {self.n_classes}"
+        )
+
+    def _build_vocab(self):
         counter = Counter()
-        for ex in data:
-            if ex["split"] == "train":
-                for tok in ex["tokens"]:
-                    counter[tok] += 1
+        for ex in self.train_data:
+            for tok in ex["tokens"]:
+                counter[tok] += 1
         self.vocab = {"<pad>": 0, "<unk>": 1}
         for tok, count in counter.most_common():
             if count >= 2:
                 self.vocab[tok] = len(self.vocab)
-        self.union_names = sorted(
-            set(
-                ex.get("union_name", "")
-                for ex in self.train_data
-                if ex.get("union_name")
-            )
-        )
 
     def _build_field_vocabs(self):
         self.field_vocabs = {}
-        self.fnum_records = {}
-        self.fnum_all_records = defaultdict(list)
+        self.fnum_records = defaultdict(list)
 
         for ex in self.train_data:
             fn = ex["f_num"]
             if fn == -100 or not ex.get("union_name"):
                 continue
-            raw_rec = ex.get("record", {})
-            rec = {
-                f: raw_rec.get(f, -100) if f != "union_name" else ex["union_name"]
-                for f in ["union_name", "desig_name", "desig_num", "prefix", "suffix"]
-            }
-            if fn not in self.fnum_records:
-                self.fnum_records[fn] = rec
-            self.fnum_all_records[fn].append(
-                tuple(
-                    rec[k]
-                    for k in [
-                        "union_name",
-                        "desig_name",
-                        "desig_num",
-                        "prefix",
-                        "suffix",
-                    ]
-                )
-            )
+            self.fnum_records[fn].append(ex["record"])
 
         for field in ["union_name", "desig_name", "prefix", "suffix"]:
             vals = sorted(
                 set(
                     r[field]
-                    for r in self.fnum_records.values()
-                    if r[field] not in (-100, 0, None, "")
+                    for recs in self.fnum_records.values()
+                    for r in recs
+                    if r[field]
                 )
             )
             self.field_vocabs[field] = {v: i + 1 for i, v in enumerate(vals)}
@@ -359,11 +347,9 @@ class ArcFaceDataModule(L.LightningDataModule):
                 )
                 rec = ex.get("record", {})
                 for field in ["desig_name", "prefix", "suffix"]:
-                    val = rec.get(field, -100)
+                    val = rec.get(field, "")
                     ex[f"{field}_target"] = (
-                        -100
-                        if val in (-100, 0, "", None)
-                        else fva.get(field, {}).get(val, -100)
+                        fva.get(field, {}).get(val, -100) if val else -100
                     )
 
     def _record_to_fields_and_hashes(self, rec):
@@ -373,11 +359,7 @@ class ArcFaceDataModule(L.LightningDataModule):
             for f in ["union_name", "desig_name", "prefix", "suffix"]
         ]
         dnum = rec.get("desig_num", 0)
-        hashes = (
-            bloom_hash_ids(str(int(dnum)))
-            if dnum and dnum not in (-100, 0, None)
-            else [0] * NUM_BLOOM_HASHES
-        )
+        hashes = bloom_hash_ids(str(dnum)) if dnum else [0] * NUM_BLOOM_HASHES
         return fields, hashes
 
     def _deduped_proto_rows(self, class_idx, records):
@@ -395,52 +377,23 @@ class ArcFaceDataModule(L.LightningDataModule):
     def _build_prototypes(self):
         proto_rows = []
 
-        # Training prototypes
+        # Training prototypes (from training data records)
         for i in range(self.n_train_classes):
             fn = self.idx_to_fnum_map[i]
-            all_recs = self.fnum_all_records.get(fn, [])
-            if all_recs:
-                # Convert tuples back to dicts for the helper
-                recs = [
-                    dict(
-                        zip(
-                            [
-                                "union_name",
-                                "desig_name",
-                                "desig_num",
-                                "prefix",
-                                "suffix",
-                            ],
-                            rec_tuple,
-                        )
-                    )
-                    for rec_tuple in all_recs
-                ]
-            else:
-                recs = [self.fnum_records.get(fn, {})]
+            recs = self.fnum_records[fn]
             proto_rows.extend(self._deduped_proto_rows(i, recs))
 
-        print(f"Train prototypes: {len(proto_rows)}")
-
-        # Frozen OOV from gazetteer
-        with open(DATA_DIR / "gazetteer.json") as f:
-            self.gazetteer_data = json.load(f)
-
-        n_oov = 0
+        # OOV prototypes (from gazetteer)
         for fnum_str, gaz_records in sorted(
             self.gazetteer_data.items(), key=lambda x: int(x[0])
         ):
             fn = int(fnum_str)
-            if fn in self.fnum_to_idx:
+            if fn in self.fnum_records:
                 continue
-            ci = len(self.fnum_to_idx)
-            self.fnum_to_idx[fn] = ci
-            self.idx_to_fnum_map[ci] = fn
+            ci = self.fnum_to_idx[fn]
             proto_rows.extend(self._deduped_proto_rows(ci, gaz_records))
-            n_oov += 1
 
-        self.n_classes = len(self.fnum_to_idx)
-        print(f"Frozen OOV: {n_oov}, Total classes: {self.n_classes}")
+        print(f"Prototypes: {len(proto_rows)}")
 
         # Tensorize
         n_protos = len(proto_rows)
@@ -463,11 +416,7 @@ class ArcFaceDataModule(L.LightningDataModule):
         self.class_to_union = torch.zeros(self.n_classes, dtype=torch.long)
         for i in range(self.n_classes):
             fn = self.idx_to_fnum_map[i]
-            rec = self.fnum_records.get(fn) or (
-                self.gazetteer_data.get(str(fn), [{}])[0]
-                if str(fn) in self.gazetteer_data
-                else {}
-            )
+            rec = self.fnum_records.get(fn, self.gazetteer_data.get(str(fn), [{}]))[0]
             un = rec.get("union_name", "")
             self.class_to_union[i] = max(
                 self.field_vocabs["union_name"].get(un, 0) - 1, 0
@@ -516,8 +465,14 @@ class ArcFaceDataModule(L.LightningDataModule):
                 skipped += 1
                 continue
 
-            record = ex["records"][0] if ex.get("records") else {}
-            valid_dnum, valid_pfx, valid_sfx = find_valid_positions(tokens, record)
+            raw_rec = ex["records"][0] if ex.get("records") else {}
+            record = {}
+            for f in ["union_name", "desig_name", "prefix", "suffix"]:
+                v = raw_rec.get(f)
+                record[f] = v if v and v not in (-100, 0) else ""
+            dnum = raw_rec.get("desig_num")
+            record["desig_num"] = int(dnum) if dnum and dnum not in (-100, 0) else 0
+            valid_dnum, valid_pfx, valid_sfx = find_valid_positions(tokens, raw_rec)
 
             data.append(
                 {
@@ -598,8 +553,10 @@ def main():
             "desig_bloom": dm.factored_info["desig_bloom"],
             "proto_to_class": dm.factored_info["proto_to_class"],
             "idx_to_fnum": dm.idx_to_fnum_map,
-            "union_vocab": {name: i for i, name in enumerate(dm.union_names)},
-            "n_unions": len(dm.union_names),
+            "union_vocab": {
+                v: idx - 1 for v, idx in dm.field_vocabs["union_name"].items()
+            },
+            "n_unions": len(dm.field_vocabs["union_name"]),
         },
         str(DATA_DIR / "arcface_classifier.ckpt"),
     )

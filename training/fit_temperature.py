@@ -212,7 +212,7 @@ def main(lr, steps):
     # Add F7 employer negatives (same as training script)
     import sqlite3
 
-    f7_path = (DATA_DIR / "../../f7.db").resolve()
+    f7_path = (DATA_DIR / "f7.db").resolve()
     if f7_path.exists():
         conn = sqlite3.connect(str(f7_path))
         rows = conn.execute(

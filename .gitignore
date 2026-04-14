@@ -24,6 +24,7 @@ training/data/vocabularies.json
 training/data/fnum_to_unit_identifier.csv
 training/data/gazetteer.json
 training/data/opdr.db
+training/data/lightning_logs/
 training/data/factored_scoring_errors_test.csv
 training/data/pipeline_errors.csv
 training/data/temperatures.json
