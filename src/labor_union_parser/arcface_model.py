@@ -285,13 +285,17 @@ class ArcFaceModel(nn.Module):
         self.union_scale = nn.Parameter(torch.tensor(union_scale))
 
     def encode(self, token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths):
-        """Encode to L2-normalized pooled embeddings."""
+        """Encode to L2-normalized pooled embeddings.
+
+        Returns (pooled_embeddings, hidden_states). Hidden states are used
+        by the CRF tag head during training.
+        """
         h = self.encoder(token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths)
         L = h.shape[1]
         mask = torch.arange(L, device=h.device).unsqueeze(0) < lengths.unsqueeze(1)
         mask_f = mask.unsqueeze(-1).float()
         pooled = (h * mask_f).sum(dim=1) / lengths.unsqueeze(1).float().clamp(min=1)
-        return F.normalize(pooled, dim=1)
+        return F.normalize(pooled, dim=1), h
 
     def forward(self, token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths):
         """Full forward pass: encode → classify + union head.
@@ -300,7 +304,7 @@ class ArcFaceModel(nn.Module):
             class_logits: (B, n_classes) f_num logits
             union_logits: (B, n_unions) union classification logits
         """
-        embeddings = self.encode(
+        embeddings, _ = self.encode(
             token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths
         )
         class_logits, _ = self.classifier(embeddings)

@@ -29,10 +29,7 @@ import torch.nn.functional as F
 print = partial(print, flush=True)  # noqa: A001
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-from labor_union_parser.arcface_model import (  # noqa: E402
-    FactoredPrototypeClassifier,
-    FastTextRoPEEncoder,
-)
+from labor_union_parser.arcface_model import ArcFaceModel  # noqa: E402
 from labor_union_parser.tokenizer import (  # noqa: E402
     DEFAULT_N_BUCKETS,
     NUM_BLOOM_HASHES,
@@ -119,26 +116,27 @@ def _build_field_tensors(valid_list, batch_size, device):
 # ---------------------------------------------------------------------------
 
 
-class TrainingModel(nn.Module):
-    """Full training model: encoder + ArcFace + union head + CRF tag head."""
+class TrainingModel(ArcFaceModel):
+    """ArcFaceModel extended with CRF tag head and disagree penalty for training."""
 
     def __init__(self, n_classes, n_unions, vocab_size, factored_info):
-        super().__init__()
-        self.encoder = FastTextRoPEEncoder(
-            D_MODEL, N_HEADS, N_LAYERS, N_BUCKETS, vocab_size
-        )
-        self.arcface = FactoredPrototypeClassifier(
-            D_MODEL,
-            n_classes,
-            factored_info["field_sizes"],
+        super().__init__(
+            n_classes=n_classes,
+            d_model=D_MODEL,
+            n_heads=N_HEADS,
+            n_layers=N_LAYERS,
+            n_buckets=N_BUCKETS,
+            vocab_size=vocab_size,
             scale=ARCFACE_SCALE,
-            margin=ARCFACE_MARGIN,
+            field_sizes=factored_info["field_sizes"],
         )
+        # Override classifier margin (ArcFaceModel defaults to 0)
+        self.classifier.margin = ARCFACE_MARGIN
         # Set prototype buffers from factored_info
-        self.arcface.field_map = factored_info["field_map"]
-        self.arcface.desig_bloom = factored_info["desig_bloom"]
-        self.arcface.proto_to_class = factored_info["proto_to_class"]
-        self.union_scale = nn.Parameter(torch.tensor(10.0))
+        self.classifier.field_map = factored_info["field_map"]
+        self.classifier.desig_bloom = factored_info["desig_bloom"]
+        self.classifier.proto_to_class = factored_info["proto_to_class"]
+        # Training-only heads
         self.desig_scale = nn.Parameter(torch.tensor(10.0))
         self.tag_head = nn.Sequential(
             nn.Linear(D_MODEL, D_MODEL),
@@ -151,15 +149,6 @@ class TrainingModel(nn.Module):
             crf_mask[tag, tag] = float("-inf")
         self.register_buffer("_crf_mask", crf_mask)
         self.class_to_union = None
-
-    def encode(self, token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths):
-        h = self.encoder(token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths)
-        L = h.shape[1]
-        mask = torch.arange(L, device=h.device).unsqueeze(0) < lengths.unsqueeze(1)
-        pooled = (h * mask.unsqueeze(-1).float()).sum(dim=1) / lengths.unsqueeze(
-            1
-        ).float().clamp(min=1)
-        return F.normalize(pooled, dim=1), h
 
     @property
     def crf_transitions(self):
@@ -300,11 +289,11 @@ class TrainingModel(nn.Module):
         embeddings, hidden = self.encode(
             token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths
         )
-        logits, arcface_loss = self.arcface(embeddings, targets)
+        logits, arcface_loss = self.classifier(embeddings, targets)
 
-        W_u = self.arcface.W_union.weight[1:]
+        W_u = self.classifier.W_union.weight[1:]
         union_logits = self.union_scale * F.linear(embeddings, F.normalize(W_u, dim=1))
-        W_dn = self.arcface.W_desig_name.weight[1:]
+        W_dn = self.classifier.W_desig_name.weight[1:]
         desig_logits = self.desig_scale * F.linear(embeddings, F.normalize(W_dn, dim=1))
         tag_logits = self.tag_head(hidden)
 

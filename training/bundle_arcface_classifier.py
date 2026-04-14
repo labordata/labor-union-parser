@@ -57,20 +57,17 @@ def main(checkpoint):
     # Extract only the encoder + classifier weights (no auxiliary training heads)
     state_dict = ckpt["state_dict"]
 
-    # Map training model keys to inference model keys
-    # Training: encoder.*, arcface.* (+ union_scale, desig_scale, class_to_*)
-    # Inference: encoder.*, classifier.* (+ union_scale)
+    # Filter and map state dict to inference keys
+    # Training may use "classifier.*" (new) or "arcface.*" (old) prefix
     mapped_state = {}
     for key, value in state_dict.items():
-        if key.startswith("encoder."):
+        if key.startswith("encoder.") or key == "union_scale":
+            mapped_state[key] = value
+        elif key.startswith("classifier."):
             mapped_state[key] = value
         elif key.startswith("arcface."):
-            # arcface.* -> classifier.*
-            new_key = key.replace("arcface.", "classifier.", 1)
-            mapped_state[new_key] = value
-        elif key == "union_scale":
-            mapped_state[key] = value
-        # Skip: desig_scale, class_to_union, class_to_desig (training only)
+            mapped_state[key.replace("arcface.", "classifier.", 1)] = value
+        # Skip: desig_scale, tag_head.*, _crf_*, class_to_union (training only)
 
     # --- Build zero-shot prototypes for OOV gazetteer f_nums ---
     train_field_map = ckpt["field_map"]
