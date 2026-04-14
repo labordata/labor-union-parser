@@ -14,7 +14,7 @@ from pathlib import Path
 
 import click
 
-DATA_DIR = Path(__file__).parent / "data"
+DATA_DIR = Path(__file__).parent.parent / "training" / "data"
 DB_PATH = DATA_DIR / "opdr.db"
 GAZETTEER_PATH = DATA_DIR / "gazetteer.json"
 LABELED_DATA_PATH = DATA_DIR / "labeled_data.csv"

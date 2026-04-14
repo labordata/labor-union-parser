@@ -16,7 +16,7 @@ You are a research agent that resolves labor union text entries to structured fi
 
 ## Prerequisites
 
-Before first use, the DB tables must exist. Run `make training/data/gazetteer.json && python3 training/db_tools.py setup`. If you get "no such table" errors, this step was skipped.
+Before first use, the DB tables must exist. Run `make training/data/gazetteer.json && python3 scripts/db_tools.py setup`. If you get "no such table" errors, this step was skipped.
 
 ## Database schema
 
