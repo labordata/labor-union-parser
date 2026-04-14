@@ -34,6 +34,7 @@ from labor_union_parser.arcface_model import (  # noqa: E402
     FastTextRoPEEncoder,
 )
 from labor_union_parser.tokenizer import (  # noqa: E402
+    DEFAULT_N_BUCKETS,
     NUM_BLOOM_HASHES,
     bloom_hash_ids,
     tokenize_for_arcface,
@@ -48,7 +49,7 @@ DATA_DIR = Path(__file__).parent / "data"
 D_MODEL = 128
 N_HEADS = 4
 N_LAYERS = 3
-N_BUCKETS = 50000
+N_BUCKETS = DEFAULT_N_BUCKETS
 ARCFACE_SCALE = 30.0
 ARCFACE_MARGIN = 0.0
 FNUM_REG = 100.0
