@@ -43,7 +43,6 @@ N_HEADS = 4
 N_LAYERS = 3
 N_BUCKETS = DEFAULT_N_BUCKETS
 ARCFACE_SCALE = 30.0
-ARCFACE_MARGIN = 0.0
 FNUM_REG = 100.0
 
 # ---------------------------------------------------------------------------
@@ -54,7 +53,7 @@ FNUM_REG = 100.0
 class TrainingModel(CRFTaggerMixin, ArcFaceModel):
     """ArcFaceModel extended with CRF tag head and disagree penalty for training."""
 
-    def __init__(self, n_classes, n_unions, vocab_size, factored_info):
+    def __init__(self, n_classes, vocab_size, factored_info):
         super().__init__(
             n_classes=n_classes,
             d_model=D_MODEL,
@@ -65,7 +64,6 @@ class TrainingModel(CRFTaggerMixin, ArcFaceModel):
             scale=ARCFACE_SCALE,
             field_sizes=factored_info["field_sizes"],
         )
-        self.classifier.margin = ARCFACE_MARGIN
         self.classifier.field_map = factored_info["field_map"]
         self.classifier.desig_bloom = factored_info["desig_bloom"]
         self.classifier.proto_to_class = factored_info["proto_to_class"]
@@ -292,7 +290,7 @@ def evaluate(model, data, fnum_freq, device, batch_size=512):
             batch = data[start : start + batch_size]
             if not batch:
                 continue
-            tk, ng, nc, bl, isn, ln, tg, ft = collate_batch(batch, device)
+            tk, ng, nc, bl, isn, ln, tg, _ = collate_batch(batch, device)
             logits, _, _, _ = model(tk, ng, nc, bl, isn, ln)
             _, top5_preds = logits.topk(5, dim=1)
             top1_correct = (top5_preds[:, 0] == tg).cpu()
@@ -526,7 +524,6 @@ def main():
     # Model
     model = TrainingModel(
         n_classes,
-        n_unions,
         len(vocab),
         {
             "field_sizes": field_sizes,
