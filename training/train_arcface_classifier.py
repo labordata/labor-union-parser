@@ -15,10 +15,8 @@ Output:
 
 import json
 import random
-import sys
 import time
 from collections import Counter, defaultdict
-from functools import partial
 from pathlib import Path
 
 import click
@@ -26,11 +24,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-print = partial(print, flush=True)  # noqa: A001
-
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-from labor_union_parser.arcface_model import ArcFaceModel  # noqa: E402
-from labor_union_parser.tokenizer import (  # noqa: E402
+from labor_union_parser.arcface_model import ArcFaceModel
+from labor_union_parser.tokenizer import (
     DEFAULT_N_BUCKETS,
     NUM_BLOOM_HASHES,
     bloom_hash_ids,

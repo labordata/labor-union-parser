@@ -12,10 +12,8 @@ Usage:
 
 import json
 import random
-import sys
 import time
 from collections import Counter
-from functools import partial
 from pathlib import Path
 
 import click
@@ -24,11 +22,8 @@ import torch
 import torch.nn.functional as F
 from sklearn.metrics import accuracy_score, roc_auc_score, roc_curve
 
-print = partial(print, flush=True)  # noqa: A001
-
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-from labor_union_parser.extractor import UnionDetectorEncoder  # noqa: E402
-from labor_union_parser.tokenizer import tokenize_for_arcface  # noqa: E402
+from labor_union_parser.extractor import UnionDetectorEncoder
+from labor_union_parser.tokenizer import tokenize_for_arcface
 
 DATA_DIR = Path(__file__).parent / "data"
 WEIGHTS_DIR = Path(__file__).parent.parent / "src" / "labor_union_parser" / "weights"
