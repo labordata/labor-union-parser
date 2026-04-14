@@ -56,6 +56,29 @@ print(result)
 
 For batch processing, use `extract_batch` which processes texts in parallel for better throughput:
 
+<!--[[[cog
+import pprint
+from labor_union_parser import Extractor
+
+results = Extractor().extract_batch([
+    "SEIU Local 1199",
+    "Teamsters Local 705",
+    "UAW Local 600",
+])
+cog.outl("```python")
+cog.outl("from labor_union_parser import Extractor")
+cog.outl("")
+cog.outl("extractor = Extractor()")
+cog.outl("results = extractor.extract_batch([")
+cog.outl('    "SEIU Local 1199",')
+cog.outl('    "Teamsters Local 705",')
+cog.outl('    "UAW Local 600",')
+cog.outl("])")
+for r in results:
+    for line in pprint.pformat(r, width=72).splitlines():
+        cog.outl(f"# {line}")
+cog.outl("```")
+]]]-->
 ```python
 from labor_union_parser import Extractor
 
@@ -65,8 +88,23 @@ results = extractor.extract_batch([
     "Teamsters Local 705",
     "UAW Local 600",
 ])
-# Returns list of result dicts, one per input text
+# {'f_num': 31847,
+#  'is_union': True,
+#  'match_score': 0.9823121428489685,
+#  'union_name': 'SERVICE EMPLOYEES',
+#  'union_score': 0.8276892900466919}
+# {'f_num': 43508,
+#  'is_union': True,
+#  'match_score': 0.9988226294517517,
+#  'union_name': 'TEAMSTERS',
+#  'union_score': 0.7318565249443054}
+# {'f_num': 13030,
+#  'is_union': True,
+#  'match_score': 0.9968639612197876,
+#  'union_name': 'AUTO WORKERS AFL-CIO',
+#  'union_score': 0.7855185270309448}
 ```
+<!--[[[end]]]-->
 
 The `batch_size` parameter controls how many texts are processed at once (default: 256). Larger batches are faster but use more memory:
 
@@ -94,26 +132,28 @@ with open("union_names.txt") as f:
 
 ### Command Line
 
-```bash
-# Process CSV file
-labor-union-parser unions.csv -c union_name -o results.csv
-
-# Process from stdin
-echo "SEIU Local 1199" | labor-union-parser --no-header
-```
-
 <!--[[[cog
 import subprocess
 result = subprocess.run(
     'echo "SEIU Local 1199" | labor-union-parser --no-header',
     shell=True, capture_output=True, text=True
 )
-cog.outl("```")
+cog.outl("```bash")
+cog.outl("# Process CSV file")
+cog.outl("labor-union-parser unions.csv -c union_name -o results.csv")
+cog.outl("")
+cog.outl("# Process from stdin")
+cog.outl('echo "SEIU Local 1199" | labor-union-parser --no-header')
 for line in result.stdout.strip().splitlines():
     cog.outl(line)
 cog.outl("```")
 ]]]-->
-```
+```bash
+# Process CSV file
+labor-union-parser unions.csv -c union_name -o results.csv
+
+# Process from stdin
+echo "SEIU Local 1199" | labor-union-parser --no-header
 text,pred_is_union,pred_union_score,pred_union_name,pred_f_num,pred_match_score
 SEIU Local 1199,True,0.8277,SERVICE EMPLOYEES,31847,0.9823
 ```
