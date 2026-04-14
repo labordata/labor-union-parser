@@ -36,7 +36,7 @@ from labor_union_parser.arcface_model import (  # noqa: E402
 from labor_union_parser.tokenizer import (  # noqa: E402
     NUM_BLOOM_HASHES,
     bloom_hash_ids,
-    smart_truncate_nonspace,
+    tokenize_for_arcface,
 )
 
 DATA_DIR = Path(__file__).parent / "data"
@@ -64,63 +64,8 @@ N_TAGS = 4
 
 
 # ---------------------------------------------------------------------------
-# Tokenization & hashing
+# CRF field position finding
 # ---------------------------------------------------------------------------
-
-
-def tokenize_example(query):
-    tok_dicts = smart_truncate_nonspace(query)
-    tokens, is_num = [], []
-    for td in tok_dicts:
-        if td["token_type"] == 4:
-            break
-        tokens.append(td["token"])
-        is_num.append(bool(td["is_num"]))
-    return tokens, is_num
-
-
-FNV_OFFSET = 2166136261
-FNV_PRIME = 16777619
-MASK32 = 0xFFFFFFFF
-
-
-def _fnv1a_32(s):
-    h = FNV_OFFSET
-    for c in s.encode("utf-8"):
-        h ^= c
-        h = (h * FNV_PRIME) & MASK32
-    return h
-
-
-def token_to_ngram_hashes(token, n_buckets, min_n=3, max_n=6):
-    padded = f"<{token}>"
-    hashes = []
-    for n in range(min_n, max_n + 1):
-        for i in range(len(padded) - n + 1):
-            hashes.append(_fnv1a_32(padded[i : i + n]) % n_buckets)
-    hashes.append(_fnv1a_32(token) % n_buckets)
-    return hashes
-
-
-def precompute_ngram_hashes(tokens, n_buckets, max_ngrams=32):
-    all_ids, all_counts = [], []
-    for tok in tokens:
-        if not tok:
-            all_ids.append([0] * max_ngrams)
-            all_counts.append(0)
-            continue
-        hashes = token_to_ngram_hashes(tok, n_buckets)
-        count = min(len(hashes), max_ngrams)
-        all_ids.append((hashes[:max_ngrams] + [0] * max_ngrams)[:max_ngrams])
-        all_counts.append(count)
-    return all_ids, all_counts
-
-
-def precompute_bloom_ids(tokens, is_num):
-    return [
-        bloom_hash_ids(tok) if is_n and tok else [0] * NUM_BLOOM_HASHES
-        for tok, is_n in zip(tokens, is_num)
-    ]
 
 
 def find_valid_positions(tokens, record):
@@ -484,13 +429,12 @@ def load_data(path):
             skipped += 1
             continue
 
-        tokens, is_num = tokenize_example(ex["query"])
+        result = tokenize_for_arcface(ex["query"])
+        tokens, is_num, ngram_ids, ngram_counts, bloom_ids = result
         if not tokens:
             skipped += 1
             continue
 
-        ngram_ids, ngram_counts = precompute_ngram_hashes(tokens, N_BUCKETS)
-        bloom_ids = precompute_bloom_ids(tokens, is_num)
         record = ex["records"][0] if ex.get("records") else {}
         valid_dnum, valid_pfx, valid_sfx = find_valid_positions(tokens, record)
 
