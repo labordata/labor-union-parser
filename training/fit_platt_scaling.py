@@ -120,22 +120,10 @@ def main():
         n_val = len(employers) // 10
         val_nonunion_texts += employers[:n_val]
 
-    # Subsample union to match non-union count for balanced Platt fit
-    # so that 0.5 probability is the natural decision threshold
-    rng = random.Random(42)
-    n_nonunion = len(val_nonunion_texts)
-    if len(val_union) > n_nonunion:
-        val_union_sample = rng.sample(val_union, n_nonunion)
-    else:
-        val_union_sample = val_union
+    print(f"Val: {len(val_union)} union, {len(val_nonunion_texts)} non-union")
 
-    print(
-        f"Val: {len(val_union_sample)} union (subsampled from {len(val_union)}), "
-        f"{n_nonunion} non-union"
-    )
-
-    all_texts = [ex["query"] for ex in val_union_sample] + val_nonunion_texts
-    all_labels = [1.0] * len(val_union_sample) + [0.0] * n_nonunion
+    all_texts = [ex["query"] for ex in val_union] + val_nonunion_texts
+    all_labels = [1.0] * len(val_union) + [0.0] * len(val_nonunion_texts)
 
     # Collect cosine similarities
     sims = []
@@ -150,18 +138,30 @@ def main():
     sims_t = torch.tensor(sims)
     labels_t = torch.tensor(all_labels)
 
-    # Fit sigmoid(a * sim + b)
+    # Fit sigmoid(a * sim + b) with class-balanced weights
+    # so that 0.5 probability is the natural decision threshold
+    n_pos = labels_t.sum().item()
+    n_neg = len(labels_t) - n_pos
+    n_total = len(labels_t)
+    sample_weights = torch.where(
+        labels_t == 1, n_total / (2 * n_pos), n_total / (2 * n_neg)
+    )
+
     log_a = torch.nn.Parameter(torch.zeros(1))
     b = torch.nn.Parameter(torch.zeros(1))
     optimizer = torch.optim.Adam([log_a, b], lr=0.01)
 
-    raw_nll = F.binary_cross_entropy_with_logits(sims_t, labels_t).item()
+    raw_nll = F.binary_cross_entropy_with_logits(
+        sims_t, labels_t, weight=sample_weights
+    ).item()
 
     for step in range(500):
         optimizer.zero_grad()
         a = log_a.exp()
         logits = a * sims_t + b
-        loss = F.binary_cross_entropy_with_logits(logits, labels_t)
+        loss = F.binary_cross_entropy_with_logits(
+            logits, labels_t, weight=sample_weights
+        )
         loss.backward()
         optimizer.step()
 
@@ -174,7 +174,7 @@ def main():
     platt_a = log_a.exp().item()
     platt_b = b.item()
     final_nll = F.binary_cross_entropy_with_logits(
-        platt_a * sims_t + platt_b, labels_t
+        platt_a * sims_t + platt_b, labels_t, weight=sample_weights
     ).item()
     print(f"  NLL: {raw_nll:.4f} -> {final_nll:.4f}")
 
