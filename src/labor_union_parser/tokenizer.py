@@ -7,10 +7,81 @@ Provides:
 """
 
 import hashlib
-
-from .char_tokenizer import tokenize
+import re
 
 MAX_TOKENS = 20
+_RAW_MAX_TOKENS = 70
+
+
+# ---------------------------------------------------------------------------
+# Base tokenizer — splits text into classified tokens
+# ---------------------------------------------------------------------------
+
+
+def _merge_spaced_letters(m):
+    return "".join(m.group(0).split())
+
+
+_TOKEN_PATTERN = re.compile(
+    r"([A-Za-z](?:\.[A-Za-z])+\.?)|([a-zA-Z]+)|(\d+)|(\s+)|(\.(?=\S))|([^\s\w.])"
+)
+
+
+def _tokenize(text, max_tokens=_RAW_MAX_TOKENS):
+    """Tokenize text into classified tokens.
+
+    Returns:
+        tokens: list of str (padded to max_tokens)
+        is_number: list of int (1 if number, 0 otherwise)
+        token_type: list of int (0=word, 1=number, 2=space, 3=punct, 4=pad)
+    """
+    text = re.sub(
+        r"(?<![A-Za-z])([A-Za-z])(?:\s+([A-Za-z]))+(?![A-Za-z])",
+        _merge_spaced_letters,
+        text,
+    )
+
+    tokens = []
+    is_number = []
+    token_type = []
+
+    for match in _TOKEN_PATTERN.finditer(text.lower()):
+        if match.group(1):  # acronym
+            tokens.append(match.group(1).replace(".", ""))
+            is_number.append(0)
+            token_type.append(0)
+        elif match.group(2):  # word
+            tokens.append(match.group(2))
+            is_number.append(0)
+            token_type.append(0)
+        elif match.group(3):  # number
+            tokens.append(match.group(3).lstrip("0") or "0")
+            is_number.append(1)
+            token_type.append(1)
+        elif match.group(4):  # space
+            tokens.append(" ")
+            is_number.append(0)
+            token_type.append(2)
+        elif match.group(5):  # period (attached)
+            tokens.append(".")
+            is_number.append(0)
+            token_type.append(3)
+        elif match.group(6):  # other punct
+            tokens.append(match.group(6))
+            is_number.append(0)
+            token_type.append(3)
+
+    tokens = tokens[:max_tokens]
+    is_number = is_number[:max_tokens]
+    token_type = token_type[:max_tokens]
+
+    while len(tokens) < max_tokens:
+        tokens.append("")
+        is_number.append(0)
+        token_type.append(4)
+
+    return tokens, is_number, token_type
+
 
 # ---------------------------------------------------------------------------
 # Bloom hashing for number tokens
@@ -82,7 +153,7 @@ def smart_truncate_nonspace(text, max_tokens=MAX_TOKENS):
 
     Returns list of dicts with keys: token, is_num, token_type
     """
-    full_tokens, full_is_num, full_token_types = tokenize(text, 999)
+    full_tokens, full_is_num, full_token_types = _tokenize(text, 999)
 
     nonspace = []
     for i, tt in enumerate(full_token_types):

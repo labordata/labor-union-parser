@@ -1,6 +1,6 @@
 """Tests for tokenizer period handling."""
 
-from labor_union_parser.char_tokenizer import tokenize
+from labor_union_parser.tokenizer import _tokenize as tokenize  # noqa: PLC2701
 
 
 def get_tokens(text: str) -> list[str]:
