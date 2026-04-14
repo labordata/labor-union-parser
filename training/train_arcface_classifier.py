@@ -95,34 +95,31 @@ class TrainingModel(CRFTaggerMixin, ArcFaceModel):
         desig_logits = self.desig_scale * F.linear(embeddings, F.normalize(W_dn, dim=1))
         tag_logits = self.tag_head(hidden)
 
+        # Auxiliary field losses (union_name, desig_name classification)
         field_losses = {}
-        if field_targets is not None:
-            for field, flogits in [
-                ("union_name", union_logits),
-                ("desig_name", desig_logits),
-            ]:
-                ft = field_targets.get(field)
-                if ft is not None:
-                    valid = ft >= 0
-                    if valid.any():
-                        field_losses[field] = F.cross_entropy(flogits[valid], ft[valid])
+        for field, flogits in [
+            ("union_name", union_logits),
+            ("desig_name", desig_logits),
+        ]:
+            ft = field_targets[field]
+            valid = ft >= 0
+            if valid.any():
+                field_losses[field] = F.cross_entropy(flogits[valid], ft[valid])
 
-            crf_loss_val = self.crf_loss(
-                tag_logits, lengths, field_targets["crf_fields"]
-            )
-            if crf_loss_val is not None:
-                field_losses["crf_tags"] = crf_loss_val
+        # CRF token role tagging loss
+        crf_loss_val = self.crf_loss(tag_logits, lengths, field_targets["crf_fields"])
+        if crf_loss_val is not None:
+            field_losses["crf_tags"] = crf_loss_val
 
+        # Disagree penalty: f_num predictions should be consistent with union head
         disagree_loss = torch.tensor(0.0, device=logits.device)
-        if logits is not None and targets is not None:
-            fnum_valid = targets >= 0
-            if fnum_valid.any() and self.class_to_union is not None:
-                fnum_probs = F.softmax(logits[fnum_valid], dim=1)
-                union_lp = F.log_softmax(union_logits[fnum_valid], dim=1)
-                disagree_loss = (
-                    disagree_loss
-                    - (fnum_probs * union_lp[:, self.class_to_union]).sum(dim=1).mean()
-                )
+        fnum_valid = targets >= 0
+        if fnum_valid.any():
+            fnum_probs = F.softmax(logits[fnum_valid], dim=1)
+            union_lp = F.log_softmax(union_logits[fnum_valid], dim=1)
+            disagree_loss = -(
+                (fnum_probs * union_lp[:, self.class_to_union]).sum(dim=1).mean()
+            )
 
         return logits, arcface_loss, field_losses, disagree_loss
 
