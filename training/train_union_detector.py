@@ -16,7 +16,6 @@ import time
 from collections import Counter
 from pathlib import Path
 
-import click
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -197,12 +196,11 @@ def compute_threshold(y_true, y_scores):
 # ---------------------------------------------------------------------------
 
 
-@click.command()
-@click.option("--epochs", default=30, help="Max training epochs")
-@click.option("--batch-size", default=1024, help="Batch size")
-@click.option("--lr", default=1e-3, type=float)
-@click.option("--patience", default=10, help="Early stopping patience")
-def main(epochs, batch_size, lr, patience):
+def main():
+    epochs = 30
+    batch_size = 1024
+    lr = 1e-3
+    patience = 10
     random.seed(42)
     torch.manual_seed(42)
 

@@ -19,7 +19,6 @@ import time
 from collections import Counter, defaultdict
 from pathlib import Path
 
-import click
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -343,13 +342,12 @@ def print_results(results, label=""):
 # ---------------------------------------------------------------------------
 
 
-@click.command()
-@click.option("--epochs", default=50, help="Max training epochs")
-@click.option("--patience", default=15, help="Early stopping patience")
-@click.option("--batch-size", default=256)
-@click.option("--lr", default=1e-3, type=float)
-@click.option("--save-checkpoint", default=str(DATA_DIR / "arcface_classifier.ckpt"))
-def main(epochs, patience, batch_size, lr, save_checkpoint):
+def main():
+    epochs = 50
+    patience = 15
+    batch_size = 256
+    lr = 1e-3
+    save_checkpoint = str(DATA_DIR / "arcface_classifier.ckpt")
     random.seed(42)
     torch.manual_seed(42)
 
