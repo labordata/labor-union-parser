@@ -45,9 +45,6 @@ N_BUCKETS = DEFAULT_N_BUCKETS
 ARCFACE_SCALE = 30.0
 ARCFACE_MARGIN = 0.0
 FNUM_REG = 100.0
-UNION_WEIGHT = 1.0
-DISAGREE_PENALTY = 1.0
-TAG_WEIGHT = 1.0
 
 # ---------------------------------------------------------------------------
 # Model (training-specific classes; encoder imported from arcface_model.py)
@@ -584,11 +581,10 @@ def main():
                 tk, ng, nc, bl, isn, ln, tg, ft
             )
 
-            loss = arcface_loss
-            for fname, fl in field_losses.items():
-                loss = loss + (TAG_WEIGHT if fname == "crf_tags" else UNION_WEIGHT) * fl
-            loss = loss + DISAGREE_PENALTY * disagree_loss
-            loss = loss + FNUM_REG * model.arcface.W_fnum.pow(2).mean()
+            loss = arcface_loss + disagree_loss
+            for fl in field_losses.values():
+                loss = loss + fl
+            loss = loss + FNUM_REG * model.classifier.W_fnum.pow(2).mean()
 
             optimizer.zero_grad()
             loss.backward()
