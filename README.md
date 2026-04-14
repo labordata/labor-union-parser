@@ -1,20 +1,18 @@
 # Labor Union Parser
 
-Extract structured fields from labor union name strings by matching against
-an OLMS gazetteer of ~44,000 filing records.
+Match labor union name text to OLMS filing numbers using a factored
+ArcFace model against a gazetteer of ~44,000 filing records.
 
 Given an input like `"SEIU Local 1199"`, the parser returns:
 - `is_union`: True (detected as a union)
-- `union_score`: 0.9997 (confidence score for union detection)
+- `union_score`: 0.992 (calibrated probability of being a union)
 - `union_name`: SERVICE EMPLOYEES (predicted parent union name)
-- `desig_name`: LU (predicted designation type — Local Union)
-- `desig_num`: 1199 (predicted local number)
-- `prefix`: (predicted designation prefix, if any)
-- `suffix`: (predicted designation suffix, if any)
-- `f_num`: 509111 (OLMS filing number of best-scoring gazetteer record)
-- `match_found`: True (whether the model found a confident gazetteer match)
-- `match_score`: 0.4496 (probability of best gazetteer match)
-- `conflicts`: [] (mismatches between predictions and matched record)
+- `f_num`: 31847 (OLMS filing number of best-matching gazetteer record)
+- `match_score`: 0.956 (softmax probability of best match)
+
+Other record fields (designation type, local number, prefix, suffix)
+are fully determined by the f_num and can be looked up from the
+[OLMS gazetteer](https://github.com/labordata/opdr).
 
 ## Installation
 
@@ -40,23 +38,11 @@ result = Extractor().extract("SEIU Local 1199")
 for line in pprint.pformat(result, width=72).splitlines():
     cog.outl(f"# {line}")
 ]]]-->
-# {'conflicts': [],
-#  'desig_name': 'LU',
-#  'desig_num': '1199',
-#  'f_num': 543235,
-#  'field_scores': {'desig_name': 0.8863651752471924,
-#                   'desig_num': 0.9985641837120056,
-#                   'f_num': 0.5405167937278748,
-#                   'prefix': 0.9999574422836304,
-#                   'suffix': 0.9908127188682556,
-#                   'union_name': 0.9999861717224121},
+# {'f_num': 31847,
 #  'is_union': True,
-#  'match_found': True,
-#  'match_score': 0.5042665004730225,
-#  'prefix': '',
-#  'suffix': '',
+#  'match_score': 0.982312023639679,
 #  'union_name': 'SERVICE EMPLOYEES',
-#  'union_score': 0.9999850392341614}
+#  'union_score': 0.8276892304420471}
 <!--[[[end]]]-->
 ```
 
@@ -94,7 +80,7 @@ with open("union_names.txt") as f:
     for chunk in itertools.batched(f, 1000):
         texts = [line.strip() for line in chunk]
         for result in extractor.extract_batch(texts):
-            print(result["union_name"], result["desig_num"])
+            print(result["f_num"], result["union_name"])
 ```
 
 
@@ -115,8 +101,8 @@ result = subprocess.run(
 for line in result.stdout.strip().splitlines():
     cog.outl(line)
 ]]]-->
-text,pred_is_union,pred_union_score,pred_union_name,pred_desig_name,pred_desig_num,pred_prefix,pred_suffix,pred_f_num,pred_match_found,pred_match_score,pred_conflicts,score_union_name,score_desig_name,score_f_num,score_desig_num,score_prefix,score_suffix
-SEIU Local 1199,True,1.0000,SERVICE EMPLOYEES,LU,1199,,,543235,True,0.5042665004730225,,1.0000,0.8864,0.5405,0.9986,1.0000,0.9908
+text,pred_is_union,pred_union_score,pred_union_name,pred_f_num,pred_match_score
+SEIU Local 1199,True,0.8277,SERVICE EMPLOYEES,31847,0.9823
 <!--[[[end]]]-->
 ```
 
@@ -125,37 +111,10 @@ SEIU Local 1199,True,1.0000,SERVICE EMPLOYEES,LU,1199,,,543235,True,0.5042665004
 | Field | Description |
 |-------|-------------|
 | `is_union` | Whether the text is detected as a union name |
-| `union_score` | Similarity score to union centroid (0-1) |
-| `union_name` | Predicted parent union name (e.g., "SERVICE EMPLOYEES", "TEAMSTERS") |
-| `desig_name` | Predicted designation type (e.g., "LU" for Local Union, "JC" for Joint Council) |
-| `desig_num` | Predicted local/designation number (e.g., "1199") |
-| `prefix` | Predicted designation prefix, if any |
-| `suffix` | Predicted designation suffix, if any |
-| `f_num` | OLMS filing number of the best-scoring gazetteer record |
-| `match_found` | Whether the model found a confident gazetteer match (False when the learned null record outscores all real records) |
-| `match_score` | Probability of best gazetteer match (0-1) |
-| `conflicts` | List of conflict codes (see below) |
-| `field_scores` | Per-field probabilities for the matched record (see below) |
-
-### Conflict Codes
-
-The `conflicts` list (Python API) or `pred_conflicts` column (CLI, pipe-delimited)
-flags mismatches between the field predictions and the matched gazetteer record.
-A non-empty conflicts list indicates the model's field-level predictions disagree
-with the record selected by the gazetteer scoring, which may signal a bad match.
-
-| Code | Description |
-|------|-------------|
-| `union_name_mismatch` | Predicted union name differs from the matched record. Strongest signal of a bad match. |
-| `desig_name_mismatch` | Predicted designation type differs from the matched record (e.g., LU vs JC). |
-| `desig_num_mismatch` | Predicted designation number differs from the matched record. |
-| `prefix_mismatch` | Predicted prefix differs from the matched record. |
-| `suffix_mismatch` | Predicted suffix differs from the matched record. |
-
-The `field_scores` dict (Python API) or `score_*` columns (CLI) give the
-classifier's confidence in its top prediction for each field.
-Values close to 1.0 indicate the head is confident in its prediction;
-lower values indicate uncertainty among multiple candidates.
+| `union_score` | Calibrated probability of being a union (0-1, Platt-scaled) |
+| `union_name` | Predicted parent union name from the shared classification head |
+| `f_num` | OLMS filing number of the best-matching gazetteer record |
+| `match_score` | Softmax probability of best gazetteer match (0-1) |
 
 ## Training
 
@@ -165,8 +124,8 @@ Training data and scripts are in `training/`. The pipeline is orchestrated by th
 pip install -e ".[train]"   # Install training dependencies
 
 make data                   # Download opdr.db, generate gazetteer and training data
-make train                  # Train structured classifier and union detector
-make evaluate               # Run evaluation scripts
+make train                  # Train ArcFace classifier and union detector
+make evaluate               # Run evaluation
 make all                    # Full pipeline (data + train)
 ```
 
@@ -186,114 +145,116 @@ Input: "SEIU Local 1199"
               ▼
 ┌───────────────────────────────────────────────────┐
 │  Tokenizer                                        │
-│  tokens: ["SEIU", " ", "Local", " ", "1199"]      │
-│  token_type: [word, space, word, space, number]   │
-└───────────────────────────────────────────────────┘
-              │
-              ▼
-┌───────────────────────────────────────────────────┐
-│  CharCNN                                          │
-│                                                   │
-│  For each token: chars → char embeddings →        │
-│  parallel CNNs (1,2,3-grams) → max pool →         │
-│  highway layer → 64-dim token embedding           │
-│                                                   │
-│  Typo-robust: "SEIU" ≈ "SIEU" ≈ "S.E.I.U."        │
+│  tokens: ["seiu", "local", "1199"]                │
+│  is_num: [False, False, True]                     │
+│  + FastText char n-gram hashes + Bloom number IDs │
 └───────────────────────────────────────────────────┘
               │
               ▼
 ┌───────────────────────────────────────────────────┐
 │  Stage 1: Union Detection (Contrastive)           │
 │                                                   │
-│  Token embeddings + is_number embedding →         │
-│  Cross-attention (learned query) → Projection →   │
-│  Similarity to union centroid                     │
+│  FastText + Bloom + RoPE Transformer (2 layers)   │
+│  → Mean pool → Projection → L2 normalize          │
+│  → Cosine similarity to learned union prototype   │
+│  → Platt scaling: sigmoid(a·sim + b)              │
 │                                                   │
-│  score = 0.999 → is_union = True                  │
+│  union_score = 0.99 → is_union = True             │
 └───────────────────────────────────────────────────┘
               │
               ▼ (always runs)
 ┌───────────────────────────────────────────────────┐
-│  Stage 2: Structured Classifier + Gazetteer       │
+│  Stage 2: Factored ArcFace Classifier             │
 │                                                   │
-│  CharCNN per token → RoPE Transformer →           │
-│  Per-field classification & pointer heads         │
+│  FastText + Bloom + RoPE Transformer (3 layers)   │
+│  → Mean pool → L2 normalize                       │
 │                                                   │
-│  Learned linear combination of per-field          │
-│  log-probs across ~44K gazetteer records          │
+│  Score against ~35K factored prototypes:           │
+│  prototype = W_union + W_desig + bloom(num)       │
+│            + W_prefix + W_suffix + W_fnum         │
+│  (~17K trained + ~18K zero-shot from gazetteer)   │
 │                                                   │
-│  Match: SERVICE EMPLOYEES LU 1199, f_num=509111   │
+│  Match: SERVICE EMPLOYEES LU 1199 → f_num=31847   │
 └───────────────────────────────────────────────────┘
               │
               ▼
 Output: {is_union: True, union_name: "SERVICE EMPLOYEES",
-         desig_name: "LU", desig_num: "1199", f_num: 509111, ...}
+         f_num: 31847, match_score: 0.96, ...}
 ```
-
-### CharCNN
-
-Character-level CNN that computes token embeddings from characters.
-
-- **Character embedding**: 16-dim lookup for ~50 chars (letters, digits, punctuation)
-- **Parallel CNNs**: 1-gram (32 filters), 2-gram (64 filters), 3-gram (128 filters)
-- **Pooling**: Max-pool over character dimension → 224-dim
-- **Highway layer**: Gated transformation for non-linearity
-- **Projection**: Linear layer → 64-dim token embedding
-- **Typo-robust**: Similar spellings produce similar embeddings
 
 ### Stage 1: Union Detection
 
 Contrastive learning to distinguish union names from non-union text.
+Uses the same FastText+RoPE encoder architecture as Stage 2 (2 layers
+instead of 3), trained with ArcFace angular margin against a learned
+union prototype.
 
-- **Input**: CharCNN token embeddings + is_number embedding (8-dim)
-- **Cross-attention**: Learned query attends over token sequence
-- **Projection**: 2-layer MLP (72 → 128 → 64) with L2 normalization
-- **Training**: One-class contrastive loss (union examples form positive pairs)
-- **Inference**: Cosine similarity to learned union centroid
-- **Threshold**: Similarity ≥ 0.9 → is_union = True
+- **Encoder**: FastText + Bloom + RoPE Transformer (2 layers, 128-dim)
+- **Pooling**: Masked mean pool → linear projection → L2 normalize (64-dim)
+- **Training**: ArcFace contrastive loss with 20K F7 employer names as hard negatives
+- **Calibration**: Platt scaling (sigmoid) for calibrated probability output
+- **Inference**: Cosine similarity to learned prototype → Platt-scaled probability
 
-### Stage 2: Structured Classifier + Factored Scoring
+### Stage 2: Factored ArcFace Classifier
 
-A single forward pass through the classifier produces per-field probability
-distributions. These are combined with a gazetteer of ~44K OLMS filing
-records to find the best match — no pairwise comparisons needed.
+A single forward pass through the encoder produces a query embedding.
+This is scored against factored prototypes — one per gazetteer record —
+via cosine similarity. No pairwise comparisons needed.
 
-**Classifier:**
-- **Encoder**: CharCNN (20 tokens × 20 chars) → Transformer with RoPE (2 layers, 4 heads)
-- **Classification heads**: `union_name`, `desig_name`, `f_num` — softmax over field vocabulary
-- **Pointer heads**: `desig_num`, `prefix`, `suffix` — attention over input token positions
+**Encoder:**
+- **FastText embedding**: Vocabulary lookup + hashed character 3-6 gram average.
+  Typo-robust: similar spellings share n-gram hashes.
+- **Bloom number embedding**: Numbers hashed to 3 indices in a 4096-entry
+  table, summed. Treats numbers as opaque identifiers.
+- **RoPE Transformer**: 3 layers, 4 heads, 128-dim. Position-aware
+  attention helps distinguish "district 10 local 66" from "district 66 local 10".
+- **Pooling**: Masked mean pool → L2 normalize → 128-dim query embedding.
 
-**Scoring:**
+**Factored Prototypes:**
 
-Each classification head produces a log-probability distribution over its
-vocabulary (e.g., all known union names). Each pointer head produces a
-log-probability distribution over input token positions (plus a "none"
-position). For each gazetteer record, we assemble a 12-feature vector:
+Each f_num's prototype is the sum of learned field embeddings:
 
-- 6 **log-prob features**: the classifier's log-probability for each field
-  value of that record (set to 0 if the value is unknown to the vocabulary
-  or not found in the query tokens)
-- 3 **unknown indicators**: 1 if the record's classification field value is
-  not in the vocabulary, 0 otherwise
-- 3 **not-found indicators**: 1 if the record's pointer field value is not
-  present in the query tokens, 0 otherwise
+```
+prototype = W_union[u] + W_desig_name[d] + bloom(desig_num)
+          + W_prefix[p] + W_suffix[s] + W_fnum[f]
+```
 
-A learned linear layer (12 weights + bias, trained with marginalized
-cross-entropy over all correct records) scores each record. The
-log-prob weights are less than 1.0, acting as correlation discounts
-that correct for the naive independence assumption across fields. The
-highest-scoring record is the prediction, and `match_score` is the
-softmax probability of that record.
+This additive structure means the model learns separate representations
+for each field. At inference, scoring is a single matrix multiply
+against ~35K pre-computed prototype vectors (~17K trained classes +
+~18K zero-shot from gazetteer with `W_fnum = 0`).
+
+**Zero-shot prototypes:** For gazetteer f_nums without training data,
+prototypes are built from field embeddings alone. During training,
+these are included as frozen distractors in the ArcFace softmax,
+teaching the model to distinguish trained classes from similar
+zero-shot prototypes. W_fnum is L2-regularized to keep trained
+prototypes close to their zero-shot versions.
+
+**Union Head:**
+
+An auxiliary classification head shares the `W_union` embedding weights
+with the prototypes. During training, a disagree penalty ensures the
+f_num predictions are consistent with the union head's prediction.
+At inference, the union head provides the `union_name` output.
+
+**CRF Tag Head (training only):**
+
+A per-token CRF labels numbers as desig_num, prefix, or suffix using
+constrained marginalization — we know the field values from the gazetteer
+but not which tokens they correspond to, so the loss marginalizes over
+all valid alignments (à la CTC). This teaches the encoder to represent
+number roles without requiring ground truth token labels.
 
 ### Performance
 
 <!--[[[cog
 import sys; sys.path.insert(0, "training")
-from evaluate import compute_test_metrics, SCORE_FIELDS
+from evaluate import compute_test_metrics
 
 m = compute_test_metrics()
 
-total_errors = m['wrong_matches'] + m['false_negatives'] + m['false_match_no_fnum'] + m['false_positives']
+total_errors = m['wrong_matches'] + m['false_negatives'] + m['false_positives']
 total_correct = m['n_scored'] - total_errors
 accuracy = total_correct / m['n_scored']
 
@@ -303,34 +264,23 @@ cog.outl("")
 cog.outl("| Metric | Score |")
 cog.outl("|--------|-------|")
 cog.outl(f"| Accuracy | {accuracy:.1%} |")
+cog.outl(f"| f_num accuracy (union examples) | {m['fnum_accuracy']:.1%} ({m['fnum_correct']}/{m['fnum_total']}) |")
+cog.outl(f"| f_num accuracy (in-vocab only) | {m['fnum_invocab_accuracy']:.1%} |")
+cog.outl(f"| union_name accuracy | {m['union_accuracy']:.1%} ({m['union_correct']}/{m['union_total']}) |")
 cog.outl(f"| Wrong match (union, wrong f_num) | {m['wrong_matches']} |")
 cog.outl(f"| False negatives (union missed) | {m['false_negatives']} |")
-cog.outl("")
-cog.outl(f"Per-field accuracy on test set ({m['n_is_union']:,} union examples with is_union=True):")
-cog.outl("")
-cog.outl("| Field | Accuracy |")
-cog.outl("|-------|----------|")
-for f in SCORE_FIELDS:
-    if f == "f_num":
-        continue
-    cog.outl(f"| `{f}` | {m['field_accuracy'][f]:.1%} |")
+cog.outl(f"| False positives (non-union matched) | {m['false_positives']} |")
 ]]]-->
-End-to-end on held-out test data (7,831 examples
+End-to-end on held-out test data (8,691 examples
 scored against the full 44K-record gazetteer):
 
 | Metric | Score |
 |--------|-------|
-| Accuracy | 97.4% |
-| Wrong match (union, wrong f_num) | 113 |
-| False negatives (union missed) | 0 |
-
-Per-field accuracy on test set (9,509 union examples with is_union=True):
-
-| Field | Accuracy |
-|-------|----------|
-| `union_name` | 98.4% |
-| `desig_name` | 99.1% |
-| `desig_num` | 99.1% |
-| `prefix` | 97.5% |
-| `suffix` | 96.7% |
+| Accuracy | 98.0% |
+| f_num accuracy (union examples) | 98.6% (7519/7627) |
+| f_num accuracy (in-vocab only) | 98.6% |
+| union_name accuracy | 98.0% (9180/9364) |
+| Wrong match (union, wrong f_num) | 108 |
+| False negatives (union missed) | 24 |
+| False positives (non-union matched) | 43 |
 <!--[[[end]]]-->

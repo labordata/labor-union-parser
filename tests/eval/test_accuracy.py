@@ -20,31 +20,21 @@ BATCH_SIZE = 256
 
 # --- Thresholds (max allowed error rates) ---
 # Update these when model weights are intentionally changed.
-# Using error rates instead of absolute counts so that thresholds
-# remain stable as the test split grows.
-#
-# TOLERANCE scales the allowed deviation: threshold = baseline * (1 + TOLERANCE).
-# This naturally gives tighter absolute bounds for higher-accuracy fields.
-# ABSOLUTE_FLOOR handles near-zero baselines where relative tolerance is too tight.
 TOLERANCE = 0.05
 ABSOLUTE_FLOOR = 0.002
 
 # Union detection
-MAX_FALSE_NEGATIVE_RATE = 0.0003  # among union examples with known f_num
-MAX_FALSE_POSITIVE_RATE = 0.4028  # among non-union examples
+MAX_FALSE_NEGATIVE_RATE = 0.0035  # among all union examples
+MAX_FALSE_POSITIVE_RATE = 0.0900  # among non-union examples
 
-# Per-field error rates (among union examples with is_union=True, skip -100 fields)
-MAX_FIELD_ERROR_RATE = {
-    "union_name": 0.0164,
-    "desig_name": 0.0097,
-    "f_num": 0.0157,
-    "desig_num": 0.0098,
-    "prefix": 0.0244,
-    "suffix": 0.0326,
-}
+# f_num matching (among union examples with is_union=True and known f_num)
+MAX_FNUM_ERROR_RATE = 0.0150
+
+# Union name prediction (among union examples with is_union=True)
+MAX_UNION_NAME_ERROR_RATE = 0.0200
 
 # End-to-end (is_union correct AND f_num correct, excludes potentially resolvable)
-MAX_WRONG_MATCH_RATE = 0.0179
+MAX_WRONG_MATCH_RATE = 0.0150
 
 
 def _max_rate(baseline):
@@ -124,51 +114,57 @@ class TestUnionDetection:
         )
 
 
-# --- Per-field accuracy tests ---
-
-
-def _normalize_pointer_value(val):
-    """Normalize pointer field values (desig_num, prefix, suffix) to match Extractor."""
-    if val is None or val == "" or val == 0:
-        return ""
-    return str(val).lower()
-
-
-def _field_truth(rec, field):
-    """Extract ground truth value for a field, matching Extractor output format."""
-    if field == "f_num":
-        return rec.get("f_num", 0)
-    if field in ("union_name", "desig_name"):
-        return rec.get(field, "")
-    return _normalize_pointer_value(rec.get(field))
+# --- Accuracy tests ---
 
 
 @pytest.mark.eval
-class TestFieldAccuracy:
+class TestAccuracy:
 
-    @pytest.mark.parametrize("field", MAX_FIELD_ERROR_RATE.keys())
-    def test_field_errors(self, field, eval_data, predictions):
-        """Per-field error rate on union examples where is_union=True, skipping -100."""
+    def test_fnum_accuracy(self, eval_data, predictions):
+        """f_num error rate on union examples with is_union=True and known f_num."""
         union, _ = eval_data
         union_results, _ = predictions
-        baseline = MAX_FIELD_ERROR_RATE[field]
 
         errors = 0
         n = 0
         for ex, result in zip(union, union_results):
             if not result["is_union"]:
                 continue
-            truth = ex["records"][0].get(field)
-            if truth == -100:
+            true_fnum = ex["records"][0]["f_num"]
+            if true_fnum == -100:
                 continue
             n += 1
-            if result[field] != _field_truth(ex["records"][0], field):
+            if result["f_num"] != true_fnum:
                 errors += 1
 
         rate = errors / n if n else 0
-        threshold = _max_rate(baseline)
+        threshold = _max_rate(MAX_FNUM_ERROR_RATE)
         assert rate <= threshold, (
-            f"{field} error rate: {rate:.4f} ({errors}/{n}), "
+            f"f_num error rate: {rate:.4f} ({errors}/{n}), "
+            f"threshold: {threshold:.4f}"
+        )
+
+    def test_union_name_accuracy(self, eval_data, predictions):
+        """union_name error rate on union examples with is_union=True."""
+        union, _ = eval_data
+        union_results, _ = predictions
+
+        errors = 0
+        n = 0
+        for ex, result in zip(union, union_results):
+            if not result["is_union"]:
+                continue
+            true_union = ex["records"][0].get("union_name", "")
+            if not true_union:
+                continue
+            n += 1
+            if result["union_name"] != true_union:
+                errors += 1
+
+        rate = errors / n if n else 0
+        threshold = _max_rate(MAX_UNION_NAME_ERROR_RATE)
+        assert rate <= threshold, (
+            f"union_name error rate: {rate:.4f} ({errors}/{n}), "
             f"threshold: {threshold:.4f}"
         )
 
@@ -192,15 +188,12 @@ class TestEndToEnd:
         for ex, result in zip(union, union_results):
             if ex.get("reason_missing_fnum") == "potentially resolvable":
                 continue
-            n += 1
             true_fnum = ex["records"][0]["f_num"]
             if true_fnum == -100:
-                # No-fnum example: correct if no match found
-                if result["is_union"] and result["match_found"]:
-                    wrong += 1
-            else:
-                if result["is_union"] and result["f_num"] != true_fnum:
-                    wrong += 1
+                continue
+            n += 1
+            if result["is_union"] and result["f_num"] != true_fnum:
+                wrong += 1
 
         rate = wrong / n if n else 0
         threshold = _max_rate(MAX_WRONG_MATCH_RATE)

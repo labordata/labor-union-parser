@@ -1,7 +1,5 @@
 fmcs.db
 *.ckpt
-# Intermediate scoring layer checkpoint (bundled into scoring_weights.pt)
-src/labor_union_parser/weights/scoring_layer.pt
 checkpoints/*
 lightning_logs/*
 *.egg-info
@@ -24,6 +22,9 @@ training/data/vocabularies.json
 training/data/fnum_to_unit_identifier.csv
 training/data/gazetteer.json
 training/data/opdr.db
+training/data/lightning_logs/
 training/data/factored_scoring_errors_test.csv
 training/data/pipeline_errors.csv
 training/data/temperatures.json
+training/data/arcface_temperatures.json
+training/data/platt_params.json

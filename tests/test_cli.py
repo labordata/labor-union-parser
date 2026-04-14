@@ -139,14 +139,8 @@ class TestOutputFields:
             "pred_is_union",
             "pred_union_score",
             "pred_union_name",
-            "pred_desig_name",
-            "pred_desig_num",
-            "pred_prefix",
-            "pred_suffix",
             "pred_f_num",
-            "pred_match_found",
             "pred_match_score",
-            "pred_conflicts",
         ]
         for field in expected_fields:
             assert field in row, f"Missing field: {field}"

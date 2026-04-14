@@ -34,10 +34,10 @@ DESIG_KEYWORDS = [
     ("local joint board", {"LJB"}),
     ("state association", {"SA", "ASSN"}),
     ("district council", {"DC"}),
-    ("district lodge", {"DLG"}),
+    ("district lodge", {"DC"}),
     ("local division", {"LDIV"}),
     ("local chapter", {"LCH"}),
-    ("local lodge", {"LLG"}),
+    ("local lodge", {"LU"}),
     ("local union", {"LU"}),
     ("joint board", {"JB"}),
     ("joint council", {"JC"}),
@@ -53,7 +53,7 @@ DESIG_KEYWORDS = [
     ("council", {"C", "LEADC", "DC", "JC", "STC", "BCTC"}),
     ("chapter", {"CH", "LCH"}),
     ("branch", {"BR"}),
-    ("lodge", {"LG", "LLG", "DLG"}),
+    ("lodge", {"LU", "DC"}),
     ("local", {"LU", "LOCAL"}),
     ("unit", {"UNIT"}),
 ]
@@ -63,12 +63,11 @@ DESIG_KEYWORDS = [
 # first over the alternates.  E.g. keep "C" over "LEADC", "LU" over "LOCAL".
 DESIG_PREFERENCE = [
     ("C", {"LEADC"}),
-    ("LU", {"LOCAL", "LG", "LLG", "NHQ", "DALU"}),
-    ("LLG", {"LG"}),
+    ("LU", {"LOCAL", "NHQ", "DALU"}),
     ("DC", {"DIV"}),
     ("D", {"DC"}),
     ("SA", {"ASSN"}),
-    ("STC", {"DLG"}),
+    ("STC", {"DC"}),
 ]
 
 
@@ -124,14 +123,32 @@ def filter_records_by_query(query: str, records: list) -> list:
     numeric_suf = re.findall(r"\d{3,}-0*(\d{1,2})\b", query)
     query_suffixes = query_codes | set(numeric_suf)
 
+    # Build prefix candidate numbers: start with all query numbers, then exclude
+    # numbers that serve other roles (desig_num, trailing sub-unit after suffix letter).
+    matched_desig_nums = set(r["desig_num"] for r in records)
+    # Only exclude desig_num from prefix candidates when all records agree on the
+    # same desig_num.  When records have different desig_nums (e.g. PACE with dn=2
+    # and dn=398), a desig_num for one variant may be the prefix for another.
+    if len(matched_desig_nums) == 1:
+        exclude_as_desig = matched_desig_nums
+    else:
+        exclude_as_desig = set()
+    # Numbers after a suffix letter + dash (e.g. "182B-02" → 02, "460G-01" → 01)
+    # are sub-unit identifiers, not prefixes.  Without a dash (e.g. "582L1"),
+    # the trailing number may be a legitimate prefix.
+    after_suffix_letter = set(
+        int(n) for n in re.findall(r"\d[A-Za-z]{1,3}-(\d+)", query)
+    )
+    prefix_candidates = all_query_nums - exclude_as_desig - after_suffix_letter
+
     # Try positive prefix match
     record_prefixes = set(r.get("prefix", 0) for r in records)
     prefix_matched = False
-    if len(record_prefixes) > 1 and all_query_nums:
+    if len(record_prefixes) > 1 and prefix_candidates:
         prefix_matching = [
             r
             for r in records
-            if r.get("prefix", 0) != 0 and r.get("prefix", 0) in all_query_nums
+            if r.get("prefix", 0) != 0 and r.get("prefix", 0) in prefix_candidates
         ]
         if prefix_matching:
             records = prefix_matching
@@ -313,7 +330,12 @@ def load_vocabularies():
 
 
 def load_fnum_records():
-    """Load fnum_to_records from fnum_to_records.json."""
+    """Load fnum_to_records from gazetteer.json.
+
+    Also adds short-number alias records for NABET locals (CWA 5xxxx).
+    The gazetteer has e.g. desig_num=52031 but filings say "NABET-31".
+    The alias record with desig_num=31 lets filter_records_by_query match.
+    """
     print(f"Loading fnum_to_records from {FNUM_RECORDS_PATH}...")
     with open(FNUM_RECORDS_PATH) as f:
         data = json.load(f)
@@ -321,6 +343,36 @@ def load_fnum_records():
     fnum_to_records = {int(k): v for k, v in data.items()}
     total_variants = sum(len(v) for v in fnum_to_records.values())
     print(f"  {len(fnum_to_records)} f_nums with {total_variants} record variants")
+
+    # NABET short-number aliases: extracted from lm_data unit_names
+    # "NABET LOCAL 31" = CWA desig_num 52031 → add alias with desig_num=31
+    nabet_aliases = {
+        65293: 16,  # 51016 → 16
+        515264: 17,  # 51017 → 17
+        28509: 21,  # 51021 → 21
+        516680: 209,  # 51209 → 209
+        511308: 211,  # 51211 → 211
+        30514: 31,  # 52031 → 31
+        13035: 42,  # 54042 → 42
+        40233: 43,  # 54043 → 43
+        26313: 53,  # 59053 → 53
+        514219: 57,  # 59057 → 57
+    }
+
+    aliases_added = 0
+    for fnum, short_num in nabet_aliases.items():
+        if fnum in fnum_to_records:
+            records = fnum_to_records[fnum]
+            # Check short_num doesn't already exist as a variant
+            existing_dnums = {r.get("desig_num") for r in records}
+            if short_num not in existing_dnums:
+                alias = dict(records[0])
+                alias["desig_num"] = short_num
+                records.append(alias)
+                aliases_added += 1
+
+    if aliases_added:
+        print(f"  Added {aliases_added} NABET short-number alias records")
 
     return fnum_to_records
 
@@ -371,12 +423,15 @@ def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
                 # Filter records to match numbers in query
                 records = filter_records_by_query(text, fnum_to_records[f_num])
 
+                # Use gazetteer union_name as source of truth
+                gaz_union = fnum_to_records[f_num][0].get("union_name", "")
+
                 examples.append(
                     {
                         "query": text,
                         "f_num": f_num,
                         "source": "labeled",
-                        "union_name": union_name,
+                        "union_name": gaz_union or union_name,
                         "records": records,
                     }
                 )
@@ -458,6 +513,104 @@ def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
     return examples
 
 
+def load_union_name_labels(fnum_set, fnum_to_records, sig_to_fnums, existing_texts):
+    """Load union_name_labels.csv as additional training examples.
+
+    Skips texts already present in labeled_data.  Entries with f_num go through
+    the same gazetteer lookup and filtering as labeled_data.  Entries without
+    f_num but with union_name get a synthetic record.
+    """
+    examples = []
+    skipped_dup = 0
+    skipped_not_in_vocab = 0
+    skipped_ambiguous = 0
+    no_fnum_included = 0
+
+    path = DATA_DIR / "union_name_labels.csv"
+    if not path.exists():
+        print("  No union_name_labels.csv found, skipping")
+        return examples
+
+    with open(path) as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            text = row["text"]
+
+            # Skip texts already in labeled_data
+            if text in existing_texts:
+                skipped_dup += 1
+                continue
+
+            union_name = row.get("union_name", "").strip()
+            fnum_str = row.get("f_num", "").strip()
+            desig_num_str = row.get("desig_num", "").strip()
+            try:
+                desig_num = int(float(desig_num_str)) if desig_num_str else 0
+            except ValueError:
+                desig_num = 0
+
+            if fnum_str:
+                try:
+                    f_num = int(float(fnum_str))
+                except ValueError:
+                    continue
+
+                if f_num not in fnum_set or f_num not in fnum_to_records:
+                    skipped_not_in_vocab += 1
+                    continue
+
+                if is_ambiguous(text, f_num, fnum_to_records, sig_to_fnums):
+                    skipped_ambiguous += 1
+                    continue
+
+                records = filter_records_by_query(text, fnum_to_records[f_num])
+
+                gaz_union = fnum_to_records[f_num][0].get("union_name", "")
+
+                examples.append(
+                    {
+                        "query": text,
+                        "f_num": f_num,
+                        "source": "union_name_labels",
+                        "union_name": gaz_union or union_name,
+                        "records": records,
+                    }
+                )
+            elif union_name:
+                # No f_num but has union_name — synthetic record
+                synthetic_record = {
+                    "union_name": union_name,
+                    "desig_name": -100,
+                    "desig_num": desig_num,
+                    "prefix": -100,
+                    "suffix": -100,
+                    "unit_id": -100,
+                    "f_num": -100,
+                }
+                examples.append(
+                    {
+                        "query": text,
+                        "f_num": -100,
+                        "source": "union_name_labels",
+                        "union_name": union_name,
+                        "records": [synthetic_record],
+                    }
+                )
+                no_fnum_included += 1
+
+    print(
+        f"  {len(examples)} examples loaded"
+        f" ({no_fnum_included} without f_num,"
+        f" {skipped_dup} duplicates skipped)"
+    )
+    print(
+        f"  Skipped: {skipped_not_in_vocab} not in vocab,"
+        f" {skipped_ambiguous} ambiguous"
+    )
+
+    return examples
+
+
 def load_synthetic_data(fnum_set, fnum_to_records, sig_to_fnums):
     """Load unaff_synthetic.csv using pre-assigned f_num values."""
     examples = []
@@ -498,12 +651,14 @@ def load_synthetic_data(fnum_set, fnum_to_records, sig_to_fnums):
             # Filter records to match numbers in query
             records = filter_records_by_query(text, fnum_to_records[f_num])
 
+            gaz_union = fnum_to_records[f_num][0].get("union_name", "")
+
             examples.append(
                 {
                     "query": text,
                     "f_num": f_num,
                     "source": "synthetic",
-                    "union_name": "UNAFF",
+                    "union_name": gaz_union,
                     "records": records,
                 }
             )
@@ -643,12 +798,20 @@ def main():
     # Load labeled data
     print("\nLoading labeled data...")
     labeled = load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums)
+    labeled_texts = set(ex["query"] for ex in labeled)
+
+    # Load union_name_labels (additional training data, skip duplicates)
+    print("\nLoading union_name_labels...")
+    union_name_examples = load_union_name_labels(
+        fnum_set, fnum_to_records, sig_to_fnums, labeled_texts
+    )
 
     # Load synthetic data
     print("\nLoading synthetic data...")
     synthetic = load_synthetic_data(fnum_set, fnum_to_records, sig_to_fnums)
 
-    # Assign splits: labeled data gets train/val/test, synthetic is train only
+    # Assign splits: labeled data gets train/val/test,
+    # union_name_labels and synthetic are train only
     print("\nAssigning splits...")
     split_counts = defaultdict(int)
 
@@ -656,14 +819,18 @@ def main():
         ex["split"] = get_split(ex["query"])
         split_counts[ex["split"]] += 1
 
+    for ex in union_name_examples:
+        ex["split"] = "train"
+        split_counts["train"] += 1
+
     for ex in synthetic:
         ex["split"] = "train"
         split_counts["train"] += 1
 
     # Combine
-    examples = labeled + synthetic
+    examples = labeled + union_name_examples + synthetic
     print(f"\nTotal: {len(examples)} examples")
-    print(f"  Train: {split_counts['train']} (labeled + synthetic)")
+    print(f"  Train: {split_counts['train']} (labeled + union_name_labels + synthetic)")
     print(f"  Val: {split_counts['val']} (labeled only)")
     print(f"  Test: {split_counts['test']} (labeled only)")
 
