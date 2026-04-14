@@ -5,11 +5,11 @@ ArcFace model against a gazetteer of ~44,000 filing records.
 
 Given an input like `"SEIU Local 1199"`, the parser returns:
 - `is_union`: True (detected as a union)
-- `union_score`: 0.677 (similarity to union centroid)
+- `union_score`: 0.992 (calibrated probability of being a union)
 - `union_name`: SERVICE EMPLOYEES (predicted parent union name)
 - `f_num`: 31847 (OLMS filing number of best-matching gazetteer record)
 - `match_found`: True (whether the match confidence exceeds threshold)
-- `match_score`: 0.929 (softmax probability of best match)
+- `match_score`: 0.956 (softmax probability of best match)
 
 Other record fields (designation type, local number, prefix, suffix)
 are fully determined by the f_num and can be looked up from the
@@ -113,7 +113,7 @@ SEIU Local 1199,True,0.9921,SERVICE EMPLOYEES,31847,True,0.9560
 | Field | Description |
 |-------|-------------|
 | `is_union` | Whether the text is detected as a union name |
-| `union_score` | Similarity score to union centroid (0-1) |
+| `union_score` | Calibrated probability of being a union (0-1, Platt-scaled) |
 | `union_name` | Predicted parent union name from the shared classification head |
 | `f_num` | OLMS filing number of the best-matching gazetteer record |
 | `match_found` | Whether the match confidence exceeds the threshold |
@@ -150,49 +150,53 @@ Input: "SEIU Local 1199"
 │  Tokenizer                                        │
 │  tokens: ["seiu", "local", "1199"]                │
 │  is_num: [False, False, True]                     │
+│  + FastText char n-gram hashes + Bloom number IDs │
 └───────────────────────────────────────────────────┘
               │
               ▼
 ┌───────────────────────────────────────────────────┐
 │  Stage 1: Union Detection (Contrastive)           │
 │                                                   │
-│  CharCNN token embeddings + is_number embedding → │
-│  Cross-attention (learned query) → Projection →   │
-│  Cosine similarity to union centroid              │
+│  FastText + Bloom + RoPE Transformer (2 layers)   │
+│  → Mean pool → Projection → L2 normalize          │
+│  → Cosine similarity to learned union prototype   │
+│  → Platt scaling: sigmoid(a·sim + b)              │
 │                                                   │
-│  score = 0.68 → is_union = True                   │
+│  union_score = 0.99 → is_union = True             │
 └───────────────────────────────────────────────────┘
               │
               ▼ (always runs)
 ┌───────────────────────────────────────────────────┐
 │  Stage 2: Factored ArcFace Classifier             │
 │                                                   │
-│  FastText encoder (vocab + char n-gram hashing)   │
-│  + Bloom hash embedding for numbers               │
-│  + RoPE Transformer (3 layers)                    │
-│  → L2-normalized query embedding                  │
+│  FastText + Bloom + RoPE Transformer (3 layers)   │
+│  → Mean pool → L2 normalize                       │
 │                                                   │
-│  Score against ~17K factored prototypes:           │
+│  Score against ~35K factored prototypes:           │
 │  prototype = W_union + W_desig + bloom(num)       │
 │            + W_prefix + W_suffix + W_fnum         │
+│  (~17K trained + ~18K zero-shot from gazetteer)   │
 │                                                   │
 │  Match: SERVICE EMPLOYEES LU 1199 → f_num=31847   │
 └───────────────────────────────────────────────────┘
               │
               ▼
 Output: {is_union: True, union_name: "SERVICE EMPLOYEES",
-         f_num: 31847, match_score: 0.93, ...}
+         f_num: 31847, match_score: 0.96, ...}
 ```
 
 ### Stage 1: Union Detection
 
 Contrastive learning to distinguish union names from non-union text.
+Uses the same FastText+RoPE encoder architecture as Stage 2 (2 layers
+instead of 3), trained with ArcFace angular margin against a learned
+union prototype.
 
-- **Input**: CharCNN token embeddings + is_number embedding (8-dim)
-- **Cross-attention**: Learned query attends over token sequence
-- **Projection**: 2-layer MLP (72 → 128 → 64) with L2 normalization
-- **Training**: One-class contrastive loss (union examples form positive pairs)
-- **Inference**: Cosine similarity to learned union centroid
+- **Encoder**: FastText + Bloom + RoPE Transformer (2 layers, 128-dim)
+- **Pooling**: Masked mean pool → linear projection → L2 normalize (64-dim)
+- **Training**: ArcFace contrastive loss with 20K F7 employer names as hard negatives
+- **Calibration**: Platt scaling (sigmoid) for calibrated probability output
+- **Inference**: Cosine similarity to learned prototype → Platt-scaled probability
 
 ### Stage 2: Factored ArcFace Classifier
 
@@ -220,7 +224,15 @@ prototype = W_union[u] + W_desig_name[d] + bloom(desig_num)
 
 This additive structure means the model learns separate representations
 for each field. At inference, scoring is a single matrix multiply
-against ~17K pre-computed prototype vectors.
+against ~35K pre-computed prototype vectors (~17K trained classes +
+~18K zero-shot from gazetteer with `W_fnum = 0`).
+
+**Zero-shot prototypes:** For gazetteer f_nums without training data,
+prototypes are built from field embeddings alone. During training,
+these are included as frozen distractors in the ArcFace softmax,
+teaching the model to distinguish trained classes from similar
+zero-shot prototypes. W_fnum is L2-regularized to keep trained
+prototypes close to their zero-shot versions.
 
 **Union Head:**
 
@@ -228,6 +240,14 @@ An auxiliary classification head shares the `W_union` embedding weights
 with the prototypes. During training, a disagree penalty ensures the
 f_num predictions are consistent with the union head's prediction.
 At inference, the union head provides the `union_name` output.
+
+**CRF Tag Head (training only):**
+
+A per-token CRF labels numbers as desig_num, prefix, or suffix using
+constrained marginalization — we know the field values from the gazetteer
+but not which tokens they correspond to, so the loss marginalizes over
+all valid alignments (à la CTC). This teaches the encoder to represent
+number roles without requiring ground truth token labels.
 
 ### Performance
 
