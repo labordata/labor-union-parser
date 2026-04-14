@@ -93,31 +93,33 @@ class TrainingModel(CRFTaggerMixin, ArcFaceModel):
         desig_logits = self.desig_scale * F.linear(embeddings, F.normalize(W_dn, dim=1))
         tag_logits = self.tag_head(hidden)
 
-        # Auxiliary field losses (union_name, desig_name classification)
+        # Training losses (skipped during evaluation when field_targets is None)
         field_losses = {}
-        for field, flogits in [
-            ("union_name", union_logits),
-            ("desig_name", desig_logits),
-        ]:
-            ft = field_targets[field]
-            valid = ft >= 0
-            if valid.any():
-                field_losses[field] = F.cross_entropy(flogits[valid], ft[valid])
-
-        # CRF token role tagging loss
-        crf_loss_val = self.crf_loss(tag_logits, lengths, field_targets["crf_fields"])
-        if crf_loss_val is not None:
-            field_losses["crf_tags"] = crf_loss_val
-
-        # Disagree penalty: f_num predictions should be consistent with union head
         disagree_loss = torch.tensor(0.0, device=logits.device)
-        fnum_valid = targets >= 0
-        if fnum_valid.any():
-            fnum_probs = F.softmax(logits[fnum_valid], dim=1)
-            union_lp = F.log_softmax(union_logits[fnum_valid], dim=1)
-            disagree_loss = -(
-                (fnum_probs * union_lp[:, self.class_to_union]).sum(dim=1).mean()
+
+        if field_targets is not None:
+            for field, flogits in [
+                ("union_name", union_logits),
+                ("desig_name", desig_logits),
+            ]:
+                ft = field_targets[field]
+                valid = ft >= 0
+                if valid.any():
+                    field_losses[field] = F.cross_entropy(flogits[valid], ft[valid])
+
+            crf_loss_val = self.crf_loss(
+                tag_logits, lengths, field_targets["crf_fields"]
             )
+            if crf_loss_val is not None:
+                field_losses["crf_tags"] = crf_loss_val
+
+            fnum_valid = targets >= 0
+            if fnum_valid.any():
+                fnum_probs = F.softmax(logits[fnum_valid], dim=1)
+                union_lp = F.log_softmax(union_logits[fnum_valid], dim=1)
+                disagree_loss = -(
+                    (fnum_probs * union_lp[:, self.class_to_union]).sum(dim=1).mean()
+                )
 
         return logits, arcface_loss, field_losses, disagree_loss
 
@@ -534,8 +536,8 @@ def main():
     ).to(device)
 
     with torch.no_grad():
-        model.arcface.W_fnum.data[n_train_classes:].zero_()
-    model.arcface.W_fnum.register_hook(
+        model.classifier.W_fnum.data[n_train_classes:].zero_()
+    model.classifier.W_fnum.register_hook(
         lambda grad: grad.__setitem__(slice(n_train_classes, None), 0) or grad
     )
 
