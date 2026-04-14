@@ -30,21 +30,27 @@ from labor_union_parser import Extractor
 extractor = Extractor()
 result = extractor.extract("SEIU Local 1199")
 print(result)
+```
+
 <!--[[[cog
 import pprint
 from labor_union_parser import Extractor
 
 result = Extractor().extract("SEIU Local 1199")
-for line in pprint.pformat(result, width=72).splitlines():
+lines = pprint.pformat(result, width=72).splitlines()
+cog.outl("```")
+for line in lines:
     cog.outl(f"# {line}")
+cog.outl("```")
 ]]]-->
+```
 # {'f_num': 31847,
 #  'is_union': True,
 #  'match_score': 0.982312023639679,
 #  'union_name': 'SERVICE EMPLOYEES',
 #  'union_score': 0.8276892304420471}
-<!--[[[end]]]-->
 ```
+<!--[[[end]]]-->
 
 For batch processing, use `extract_batch` which processes texts in parallel for better throughput:
 
@@ -92,19 +98,24 @@ labor-union-parser unions.csv -c union_name -o results.csv
 
 # Process from stdin
 echo "SEIU Local 1199" | labor-union-parser --no-header
+```
+
 <!--[[[cog
 import subprocess
 result = subprocess.run(
     'echo "SEIU Local 1199" | labor-union-parser --no-header',
     shell=True, capture_output=True, text=True
 )
+cog.outl("```")
 for line in result.stdout.strip().splitlines():
     cog.outl(line)
+cog.outl("```")
 ]]]-->
+```
 text,pred_is_union,pred_union_score,pred_union_name,pred_f_num,pred_match_score
 SEIU Local 1199,True,0.8277,SERVICE EMPLOYEES,31847,0.9823
-<!--[[[end]]]-->
 ```
+<!--[[[end]]]-->
 
 ## Output Fields
 
