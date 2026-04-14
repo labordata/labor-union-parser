@@ -3,13 +3,17 @@
 Reads:
   - training/data/arcface_classifier.ckpt
   - training/data/gazetteer.json
+  - training/data/arcface_temperatures.json
+  - training/data/platt_params.json
 
 Writes:
   - src/labor_union_parser/weights/arcface_classifier.pt
+  - src/labor_union_parser/weights/union_detector.pt (adds platt params)
 
 The checkpoint already includes OOV prototypes (built during training).
 This script filters the state dict to inference-only keys and packages
-the bundle for production.
+the bundle for production, including calibration parameters from
+fit_temperature.py.
 """
 
 import json
@@ -50,6 +54,12 @@ def main():
     with open(DATA_DIR / "gazetteer.json") as f:
         gazetteer = json.load(f)
 
+    with open(DATA_DIR / "arcface_temperatures.json") as f:
+        temps = json.load(f)
+
+    with open(DATA_DIR / "platt_params.json") as f:
+        platt = json.load(f)
+
     n_classes = ckpt["n_classes"]
     n_train_classes = ckpt["n_train_classes"]
 
@@ -72,8 +82,8 @@ def main():
         "arcface_scale": ckpt["arcface_scale"],
         "union_names": union_names,
         "gazetteer": gazetteer,
-        "fnum_temperature": 1.0,
-        "union_temperature": 1.0,
+        "fnum_temperature": temps["fnum_temperature"],
+        "union_temperature": temps["union_temperature"],
     }
 
     out_path = WEIGHTS_DIR / "arcface_classifier.pt"
@@ -84,6 +94,16 @@ def main():
     print(f"  vocab_size: {len(ckpt['vocab'])}")
     print(f"  d_model: {bundle['d_model']}, n_layers: {bundle['n_layers']}")
     print(f"  gazetteer records: {sum(len(v) for v in gazetteer.values())}")
+
+    # Add platt params to union detector weights
+    ud_path = WEIGHTS_DIR / "union_detector.pt"
+    ud_bundle = torch.load(ud_path, map_location="cpu", weights_only=False)
+    ud_bundle["platt_a"] = platt["platt_a"]
+    ud_bundle["platt_b"] = platt["platt_b"]
+    torch.save(ud_bundle, ud_path)
+    print(
+        f"\nSaved platt_a={platt['platt_a']:.4f}, platt_b={platt['platt_b']:.4f} to {ud_path}"
+    )
 
 
 if __name__ == "__main__":

@@ -26,3 +26,5 @@ training/data/lightning_logs/
 training/data/factored_scoring_errors_test.csv
 training/data/pipeline_errors.csv
 training/data/temperatures.json
+training/data/arcface_temperatures.json
+training/data/platt_params.json
