@@ -1,16 +1,16 @@
 """Factored ArcFace model for union text → f_num matching.
 
-Inference-only version of the factored ArcFace architecture. Encodes a query
-text into an embedding, then scores it against factored prototypes built from
-field embeddings (union_name + desig_name + bloom(desig_num) + prefix + suffix
-+ fnum_residual). Returns class logits over all known f_nums.
+Encoder and embedding classes are shared between training and inference.
+The FactoredPrototypeClassifier and ArcFaceModel classes are inference-only
+(the training model in train_arcface_classifier.py adds CRF, union head,
+and disagree penalty on top of these shared components).
 """
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .tokenizer import BLOOM_TABLE_SIZE
+from .tokenizer import BLOOM_TABLE_SIZE, NUM_BLOOM_HASHES
 
 # ---------------------------------------------------------------------------
 # Embedding layers
@@ -183,7 +183,9 @@ class FactoredPrototypeClassifier(nn.Module):
 
         # Buffers set after loading checkpoint
         self.register_buffer("field_map", torch.zeros(1, 4, dtype=torch.long))
-        self.register_buffer("desig_bloom", torch.zeros(1, 3, dtype=torch.long))
+        self.register_buffer(
+            "desig_bloom", torch.zeros(1, NUM_BLOOM_HASHES, dtype=torch.long)
+        )
         self.register_buffer("proto_to_class", torch.zeros(1, dtype=torch.long))
 
     def _prototypes(self):

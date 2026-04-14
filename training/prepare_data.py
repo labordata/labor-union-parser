@@ -331,7 +331,7 @@ def load_vocabularies():
 
 
 def load_fnum_records():
-    """Load fnum_to_records from fnum_to_records.json.
+    """Load fnum_to_records from gazetteer.json.
 
     Also adds short-number alias records for NABET locals (CWA 5xxxx).
     The gazetteer has e.g. desig_num=52031 but filings say "NABET-31".

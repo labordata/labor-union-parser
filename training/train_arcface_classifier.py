@@ -13,7 +13,6 @@ Output:
     training/data/arcface_classifier.ckpt (or --save-checkpoint path)
 """
 
-import hashlib
 import json
 import random
 import sys
@@ -34,7 +33,11 @@ from labor_union_parser.arcface_model import (  # noqa: E402
     BloomNumberEmbedding,
     FastTextRoPEEncoder,
 )
-from labor_union_parser.tokenizer import smart_truncate_nonspace  # noqa: E402
+from labor_union_parser.tokenizer import (  # noqa: E402
+    NUM_BLOOM_HASHES,
+    bloom_hash_ids,
+    smart_truncate_nonspace,
+)
 
 DATA_DIR = Path(__file__).parent / "data"
 
@@ -52,9 +55,6 @@ FNUM_REG = 100.0
 UNION_WEIGHT = 1.0
 DISAGREE_PENALTY = 1.0
 TAG_WEIGHT = 1.0
-
-NUM_BLOOM_HASHES = 3
-BLOOM_TABLE_SIZE = 4096
 
 TAG_O = 0
 TAG_DN = 1
@@ -77,15 +77,6 @@ def tokenize_example(query):
         tokens.append(td["token"])
         is_num.append(bool(td["is_num"]))
     return tokens, is_num
-
-
-def bloom_hash_ids(number_str):
-    normalized = number_str.lstrip("0") or "0"
-    return [
-        int(hashlib.md5(f"{seed}:{normalized}".encode()).hexdigest(), 16)
-        % BLOOM_TABLE_SIZE
-        for seed in range(NUM_BLOOM_HASHES)
-    ]
 
 
 FNV_OFFSET = 2166136261
@@ -804,18 +795,7 @@ def main(epochs, patience, batch_size, lr, save_checkpoint):
         else:
             seen = set()
             for un, dn_name, dnum, pfx, sfx in all_recs:
-                fields = (
-                    [
-                        field_vocabs[f].get(v, 0)
-                        for f, v in zip(
-                            ["union_name", "desig_name", "prefix", "suffix"],
-                            [un, dn_name, pfx, sfx],
-                        )
-                        if v not in (-100, 0, None, "")
-                    ]
-                    if False
-                    else [0, 0, 0, 0]
-                )
+                fields = [0, 0, 0, 0]
                 for col, (f, v) in enumerate(
                     zip(
                         ["union_name", "desig_name", "prefix", "suffix"],
@@ -829,8 +809,9 @@ def main(epochs, patience, batch_size, lr, save_checkpoint):
                     if dnum and dnum not in (-100, 0, None)
                     else [0] * NUM_BLOOM_HASHES
                 )
-                if tuple(hashes) not in seen:
-                    seen.add(tuple(hashes))
+                key = (tuple(fields), tuple(hashes))
+                if key not in seen:
+                    seen.add(key)
                     proto_rows.append((i, fields, hashes))
 
     n_train_protos = len(proto_rows)

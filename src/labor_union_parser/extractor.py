@@ -266,8 +266,8 @@ class Extractor:
         top_probs, top_indices = class_probs.max(dim=1)
 
         # Union head predictions (temperature-scaled)
-        union_probs = F.softmax(union_logits / self.union_temperature, dim=1)
-        union_preds = union_probs.argmax(dim=1).cpu().tolist()
+        union_head_probs = F.softmax(union_logits / self.union_temperature, dim=1)
+        union_preds = union_head_probs.argmax(dim=1).cpu().tolist()
 
         results = []
         for i in range(len(texts)):

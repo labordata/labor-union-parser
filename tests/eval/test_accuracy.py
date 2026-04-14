@@ -24,17 +24,17 @@ TOLERANCE = 0.05
 ABSOLUTE_FLOOR = 0.002
 
 # Union detection
-MAX_FALSE_NEGATIVE_RATE = 0.0060  # among union examples with known f_num
-MAX_FALSE_POSITIVE_RATE = 0.4028  # among non-union examples
+MAX_FALSE_NEGATIVE_RATE = 0.0035  # among all union examples
+MAX_FALSE_POSITIVE_RATE = 0.0900  # among non-union examples
 
 # f_num matching (among union examples with is_union=True and known f_num)
-MAX_FNUM_ERROR_RATE = 0.0400
+MAX_FNUM_ERROR_RATE = 0.0150
 
 # Union name prediction (among union examples with is_union=True)
-MAX_UNION_NAME_ERROR_RATE = 0.0380
+MAX_UNION_NAME_ERROR_RATE = 0.0200
 
 # End-to-end (is_union correct AND f_num correct, excludes potentially resolvable)
-MAX_WRONG_MATCH_RATE = 0.0400
+MAX_WRONG_MATCH_RATE = 0.0150
 
 
 def _max_rate(baseline):
