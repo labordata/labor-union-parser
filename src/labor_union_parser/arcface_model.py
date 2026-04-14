@@ -157,7 +157,7 @@ class FastTextRoPEEncoder(nn.Module):
 
 
 # ---------------------------------------------------------------------------
-# Factored prototype classifier (inference only — no ArcFace margin)
+# Factored prototype classifier
 # ---------------------------------------------------------------------------
 
 
@@ -167,12 +167,16 @@ class FactoredPrototypeClassifier(nn.Module):
     Each f_num's prototype is the sum of field embeddings:
         prototype = W_union + W_desig_name + bloom(desig_num) + W_prefix + W_suffix + W_fnum
 
-    At inference, query embedding is scored against all prototypes via cosine
-    similarity, then aggregated to class-level logits via logsumexp.
+    Query embeddings are scored against all prototypes via cosine similarity,
+    then aggregated to class-level logits via numerically stable logsumexp.
+
+    Used by both training (with targets/margin) and inference (targets=None).
     """
 
-    def __init__(self, d_model, n_classes, field_sizes):
+    def __init__(self, d_model, n_classes, field_sizes, scale=30.0, margin=0.0):
         super().__init__()
+        self.scale = scale
+        self.margin = margin
         self.n_classes = n_classes
         self.W_union = nn.Embedding(field_sizes["union_name"] + 1, d_model)
         self.W_desig_name = nn.Embedding(field_sizes["desig_name"] + 1, d_model)
@@ -181,42 +185,66 @@ class FactoredPrototypeClassifier(nn.Module):
         self.bloom_embed = BloomNumberEmbedding(d_model)
         self.W_fnum = nn.Parameter(torch.zeros(n_classes, d_model))
 
-        # Buffers set after loading checkpoint
+        # Buffers — set from checkpoint or passed at construction
         self.register_buffer("field_map", torch.zeros(1, 4, dtype=torch.long))
         self.register_buffer(
             "desig_bloom", torch.zeros(1, NUM_BLOOM_HASHES, dtype=torch.long)
         )
         self.register_buffer("proto_to_class", torch.zeros(1, dtype=torch.long))
 
+        for emb in [self.W_union, self.W_desig_name, self.W_prefix, self.W_suffix]:
+            nn.init.normal_(emb.weight, std=0.01)
+
     def _prototypes(self):
-        u = self.W_union(self.field_map[:, 0])
-        dn = self.W_desig_name(self.field_map[:, 1])
-        pfx = self.W_prefix(self.field_map[:, 2])
-        sfx = self.W_suffix(self.field_map[:, 3])
-        dnum = self.bloom_embed(self.desig_bloom)
-        fnum_emb = self.W_fnum[self.proto_to_class]
-        return u + dn + dnum + pfx + sfx + fnum_emb
+        return (
+            self.W_union(self.field_map[:, 0])
+            + self.W_desig_name(self.field_map[:, 1])
+            + self.W_prefix(self.field_map[:, 2])
+            + self.W_suffix(self.field_map[:, 3])
+            + self.bloom_embed(self.desig_bloom)
+            + self.W_fnum[self.proto_to_class]
+        )
 
-    def forward(self, embeddings, scale=30.0):
-        """Score embeddings against all prototypes.
-
-        Returns (B, n_classes) class logits.
-        """
-        W = F.normalize(self._prototypes(), dim=1)
-        proto_logits = scale * F.linear(embeddings, W)
-
-        # Aggregate multi-prototype classes via numerically stable logsumexp
-        B = embeddings.shape[0]
+    def _aggregate_logits(self, proto_logits):
+        """Numerically stable logsumexp aggregation to class-level logits."""
+        B = proto_logits.shape[0]
         max_logit = proto_logits.max(dim=1, keepdim=True).values
         shifted = proto_logits - max_logit
-        exp_shifted = shifted.exp()
-        class_exp = torch.zeros(B, self.n_classes, device=embeddings.device)
+        class_exp = torch.zeros(B, self.n_classes, device=proto_logits.device)
         class_exp.scatter_add_(
-            1,
-            self.proto_to_class.unsqueeze(0).expand(B, -1),
-            exp_shifted,
+            1, self.proto_to_class.unsqueeze(0).expand(B, -1), shifted.exp()
         )
         return class_exp.log() + max_logit
+
+    def forward(self, embeddings, targets=None):
+        """Score embeddings against all prototypes.
+
+        Args:
+            embeddings: (B, d_model) L2-normalized query embeddings
+            targets: (B,) class indices, or None for inference.
+                     Entries with target=-100 are excluded from loss.
+
+        Returns:
+            logits: (B, n_classes) class logits
+            loss: scalar cross-entropy loss, or None if targets is None
+        """
+        W = F.normalize(self._prototypes(), dim=1)
+        logits = self._aggregate_logits(self.scale * F.linear(embeddings, W))
+
+        if targets is None:
+            return logits, None
+
+        valid = targets >= 0
+        if not valid.any():
+            return logits, torch.tensor(0.0, device=logits.device)
+
+        valid_logits, valid_targets = logits[valid], targets[valid]
+        if self.margin > 0:
+            theta = torch.acos((valid_logits / self.scale).clamp(-1 + 1e-7, 1 - 1e-7))
+            one_hot = F.one_hot(valid_targets, self.n_classes).float()
+            valid_logits = self.scale * torch.cos(theta + one_hot * self.margin)
+
+        return logits, F.cross_entropy(valid_logits, valid_targets)
 
 
 # ---------------------------------------------------------------------------
@@ -249,7 +277,9 @@ class ArcFaceModel(nn.Module):
         self.encoder = FastTextRoPEEncoder(
             d_model, n_heads, n_layers, n_buckets, vocab_size
         )
-        self.classifier = FactoredPrototypeClassifier(d_model, n_classes, field_sizes)
+        self.classifier = FactoredPrototypeClassifier(
+            d_model, n_classes, field_sizes, scale=scale
+        )
 
         # Shared union head — uses same W_union weights as prototypes
         self.union_scale = nn.Parameter(torch.tensor(union_scale))
@@ -273,7 +303,7 @@ class ArcFaceModel(nn.Module):
         embeddings = self.encode(
             token_ids, ngram_ids, ngram_counts, bloom_ids, is_num, lengths
         )
-        class_logits = self.classifier(embeddings, scale=self.scale)
+        class_logits, _ = self.classifier(embeddings)
 
         # Union head: shared W_union weights (skip padding at index 0)
         W_u = self.classifier.W_union.weight[1:]

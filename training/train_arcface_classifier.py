@@ -30,7 +30,7 @@ print = partial(print, flush=True)  # noqa: A001
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from labor_union_parser.arcface_model import (  # noqa: E402
-    BloomNumberEmbedding,
+    FactoredPrototypeClassifier,
     FastTextRoPEEncoder,
 )
 from labor_union_parser.tokenizer import (  # noqa: E402
@@ -119,70 +119,6 @@ def _build_field_tensors(valid_list, batch_size, device):
 # ---------------------------------------------------------------------------
 
 
-class MultiProtoArcFaceClassifier(nn.Module):
-    def __init__(
-        self,
-        d_model,
-        n_classes,
-        proto_to_class,
-        field_sizes,
-        fnum_field_map,
-        fnum_desig_bloom,
-        scale=30.0,
-        margin=0.0,
-    ):
-        super().__init__()
-        self.scale = scale
-        self.margin = margin
-        self.n_classes = n_classes
-        self.W_union = nn.Embedding(field_sizes["union_name"] + 1, d_model)
-        self.W_desig_name = nn.Embedding(field_sizes["desig_name"] + 1, d_model)
-        self.W_prefix = nn.Embedding(field_sizes["prefix"] + 1, d_model)
-        self.W_suffix = nn.Embedding(field_sizes["suffix"] + 1, d_model)
-        self.bloom_embed = BloomNumberEmbedding(d_model)
-        self.W_fnum = nn.Parameter(torch.randn(n_classes, d_model) * 0.01)
-        self.register_buffer("field_map", fnum_field_map)
-        self.register_buffer("desig_bloom", fnum_desig_bloom)
-        self.register_buffer("proto_to_class", proto_to_class)
-        for emb in [self.W_union, self.W_desig_name, self.W_prefix, self.W_suffix]:
-            nn.init.normal_(emb.weight, std=0.01)
-
-    def _prototypes(self):
-        return (
-            self.W_union(self.field_map[:, 0])
-            + self.W_desig_name(self.field_map[:, 1])
-            + self.W_prefix(self.field_map[:, 2])
-            + self.W_suffix(self.field_map[:, 3])
-            + self.bloom_embed(self.desig_bloom)
-            + self.W_fnum[self.proto_to_class]
-        )
-
-    def _aggregate_logits(self, proto_logits):
-        B = proto_logits.shape[0]
-        max_logit = proto_logits.max(dim=1, keepdim=True).values
-        shifted = proto_logits - max_logit
-        class_exp = torch.zeros(B, self.n_classes, device=proto_logits.device)
-        class_exp.scatter_add_(
-            1, self.proto_to_class.unsqueeze(0).expand(B, -1), shifted.exp()
-        )
-        return class_exp.log() + max_logit
-
-    def forward(self, embeddings, targets=None):
-        W = F.normalize(self._prototypes(), dim=1)
-        logits = self._aggregate_logits(self.scale * F.linear(embeddings, W))
-        if targets is None:
-            return logits, None
-        valid = targets >= 0
-        if not valid.any():
-            return logits, torch.tensor(0.0, device=logits.device)
-        valid_logits, valid_targets = logits[valid], targets[valid]
-        if self.margin > 0:
-            theta = torch.acos((valid_logits / self.scale).clamp(-1 + 1e-7, 1 - 1e-7))
-            one_hot = F.one_hot(valid_targets, self.n_classes).float()
-            valid_logits = self.scale * torch.cos(theta + one_hot * self.margin)
-        return logits, F.cross_entropy(valid_logits, valid_targets)
-
-
 class TrainingModel(nn.Module):
     """Full training model: encoder + ArcFace + union head + CRF tag head."""
 
@@ -191,16 +127,17 @@ class TrainingModel(nn.Module):
         self.encoder = FastTextRoPEEncoder(
             D_MODEL, N_HEADS, N_LAYERS, N_BUCKETS, vocab_size
         )
-        self.arcface = MultiProtoArcFaceClassifier(
+        self.arcface = FactoredPrototypeClassifier(
             D_MODEL,
             n_classes,
-            proto_to_class=factored_info["proto_to_class"],
-            field_sizes=factored_info["field_sizes"],
-            fnum_field_map=factored_info["field_map"],
-            fnum_desig_bloom=factored_info["desig_bloom"],
+            factored_info["field_sizes"],
             scale=ARCFACE_SCALE,
             margin=ARCFACE_MARGIN,
         )
+        # Set prototype buffers from factored_info
+        self.arcface.field_map = factored_info["field_map"]
+        self.arcface.desig_bloom = factored_info["desig_bloom"]
+        self.arcface.proto_to_class = factored_info["proto_to_class"]
         self.union_scale = nn.Parameter(torch.tensor(10.0))
         self.desig_scale = nn.Parameter(torch.tensor(10.0))
         self.tag_head = nn.Sequential(
