@@ -211,13 +211,13 @@ def _collate_batch(examples) -> Batch:
         bloom_ids[i, :L] = torch.tensor(ex["bloom_ids"][:L], dtype=torch.long)
         is_num[i, :L] = torch.tensor(ex["is_num_f"], dtype=torch.float)
         targets[i] = ex["target"]
-        union_tgt[i] = ex.get("union_target", -1)
-        desig_tgt[i] = ex.get("desig_name_target", -1)
-        prefix_tgt[i] = ex.get("prefix_target", -1)
-        suffix_tgt[i] = ex.get("suffix_target", -1)
-        crf_dnum_list.append(ex.get("valid_dnum", []))
-        crf_pfx_list.append(ex.get("valid_pfx", []))
-        crf_sfx_list.append(ex.get("valid_sfx", []))
+        union_tgt[i] = ex["union_target"]
+        desig_tgt[i] = ex["desig_name_target"]
+        prefix_tgt[i] = ex["prefix_target"]
+        suffix_tgt[i] = ex["suffix_target"]
+        crf_dnum_list.append(ex["valid_dnum"])
+        crf_pfx_list.append(ex["valid_pfx"])
+        crf_sfx_list.append(ex["valid_sfx"])
 
     device = torch.device("cpu")
     return Batch(
