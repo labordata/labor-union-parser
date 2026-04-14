@@ -366,45 +366,59 @@ class ArcFaceDataModule(L.LightningDataModule):
                         else fva.get(field, {}).get(val, -100)
                     )
 
+    def _record_to_fields_and_hashes(self, rec):
+        """Convert a record dict to (field_indices, bloom_hashes)."""
+        fields = [
+            self.field_vocabs[f].get(rec.get(f, ""), 0)
+            for f in ["union_name", "desig_name", "prefix", "suffix"]
+        ]
+        dnum = rec.get("desig_num", 0)
+        hashes = (
+            bloom_hash_ids(str(int(dnum)))
+            if dnum and dnum not in (-100, 0, None)
+            else [0] * NUM_BLOOM_HASHES
+        )
+        return fields, hashes
+
+    def _deduped_proto_rows(self, class_idx, records):
+        """Build deduplicated prototype rows for a class from its records."""
+        rows = []
+        seen = set()
+        for rec in records:
+            fields, hashes = self._record_to_fields_and_hashes(rec)
+            key = (tuple(fields), tuple(hashes))
+            if key not in seen:
+                seen.add(key)
+                rows.append((class_idx, fields, hashes))
+        return rows
+
     def _build_prototypes(self):
         proto_rows = []
+
+        # Training prototypes
         for i in range(self.n_train_classes):
             fn = self.idx_to_fnum_map[i]
             all_recs = self.fnum_all_records.get(fn, [])
-            if not all_recs:
-                rec = self.fnum_records.get(fn, {})
-                fields = [
-                    self.field_vocabs[f].get(rec.get(f, ""), 0)
-                    for f in ["union_name", "desig_name", "prefix", "suffix"]
-                ]
-                dnum = rec.get("desig_num", 0)
-                hashes = (
-                    bloom_hash_ids(str(int(dnum)))
-                    if dnum and dnum not in (-100, 0, None)
-                    else [0] * NUM_BLOOM_HASHES
-                )
-                proto_rows.append((i, fields, hashes))
-            else:
-                seen = set()
-                for un, dn_name, dnum, pfx, sfx in all_recs:
-                    fields = [0, 0, 0, 0]
-                    for col, (f, v) in enumerate(
+            if all_recs:
+                # Convert tuples back to dicts for the helper
+                recs = [
+                    dict(
                         zip(
-                            ["union_name", "desig_name", "prefix", "suffix"],
-                            [un, dn_name, pfx, sfx],
+                            [
+                                "union_name",
+                                "desig_name",
+                                "desig_num",
+                                "prefix",
+                                "suffix",
+                            ],
+                            rec_tuple,
                         )
-                    ):
-                        if v and v not in (-100, 0, None, ""):
-                            fields[col] = self.field_vocabs[f].get(v, 0)
-                    hashes = (
-                        bloom_hash_ids(str(int(dnum)))
-                        if dnum and dnum not in (-100, 0, None)
-                        else [0] * NUM_BLOOM_HASHES
                     )
-                    key = (tuple(fields), tuple(hashes))
-                    if key not in seen:
-                        seen.add(key)
-                        proto_rows.append((i, fields, hashes))
+                    for rec_tuple in all_recs
+                ]
+            else:
+                recs = [self.fnum_records.get(fn, {})]
+            proto_rows.extend(self._deduped_proto_rows(i, recs))
 
         print(f"Train prototypes: {len(proto_rows)}")
 
@@ -422,30 +436,13 @@ class ArcFaceDataModule(L.LightningDataModule):
             ci = len(self.fnum_to_idx)
             self.fnum_to_idx[fn] = ci
             self.idx_to_fnum_map[ci] = fn
-            seen = set()
-            for rec in gaz_records:
-                fields = [0, 0, 0, 0]
-                for col, f in enumerate(
-                    ["union_name", "desig_name", "prefix", "suffix"]
-                ):
-                    val = rec.get(f, "")
-                    if val and val not in (0, -100, None, ""):
-                        fields[col] = self.field_vocabs[f].get(val, 0)
-                dnum = rec.get("desig_num", 0)
-                hashes = (
-                    bloom_hash_ids(str(int(dnum)))
-                    if dnum and dnum not in (0, -100, None)
-                    else [0] * NUM_BLOOM_HASHES
-                )
-                key = (tuple(fields), tuple(hashes))
-                if key not in seen:
-                    seen.add(key)
-                    proto_rows.append((ci, fields, hashes))
+            proto_rows.extend(self._deduped_proto_rows(ci, gaz_records))
             n_oov += 1
 
         self.n_classes = len(self.fnum_to_idx)
         print(f"Frozen OOV: {n_oov}, Total classes: {self.n_classes}")
 
+        # Tensorize
         n_protos = len(proto_rows)
         field_map = torch.zeros(n_protos, 4, dtype=torch.long)
         desig_bloom_t = torch.zeros(n_protos, NUM_BLOOM_HASHES, dtype=torch.long)
