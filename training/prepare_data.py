@@ -297,7 +297,7 @@ def is_ambiguous(query, f_num, fnum_to_records, sig_to_fnums):
     return False
 
 
-def get_split(query: str, val_frac: float = 0.1, test_frac: float = 0.1) -> str:
+def get_split(query: str, val_frac: float = 0.05, test_frac: float = 0.05) -> str:
     """
     Deterministically assign a split based on query hash.
 
@@ -397,6 +397,7 @@ def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
         reader = csv.DictReader(f)
         for row in reader:
             text = row["text"]
+            source = row.get("source", "labeled")
             union_name = row.get("union_name", "").strip()
 
             # Use pre-assigned f_num
@@ -430,7 +431,7 @@ def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
                     {
                         "query": text,
                         "f_num": f_num,
-                        "source": "labeled",
+                        "source": source,
                         "union_name": gaz_union or union_name,
                         "records": records,
                     }
@@ -438,7 +439,10 @@ def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
             else:
                 # --- Row WITHOUT f_num ---
                 desig_num_str = row.get("desig_num", "").strip()
-                desig_num = int(float(desig_num_str)) if desig_num_str else 0
+                try:
+                    desig_num = int(float(desig_num_str)) if desig_num_str else 0
+                except ValueError:
+                    desig_num = 0
                 reason = row.get("reason_missing_fnum", "").strip()
 
                 if reason == "not a union":
@@ -447,7 +451,7 @@ def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
                         {
                             "query": text,
                             "f_num": -100,
-                            "source": "labeled",
+                            "source": source,
                             "union_name": "",
                             "reason_missing_fnum": reason,
                             "records": [],
@@ -470,7 +474,7 @@ def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
                         {
                             "query": text,
                             "f_num": -100,
-                            "source": "labeled",
+                            "source": source,
                             "union_name": "",
                             "reason_missing_fnum": reason,
                             "records": [synthetic_record],
@@ -492,7 +496,7 @@ def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
                         {
                             "query": text,
                             "f_num": -100,
-                            "source": "labeled",
+                            "source": source,
                             "union_name": union_name,
                             "reason_missing_fnum": reason,
                             "records": [synthetic_record],
@@ -504,104 +508,6 @@ def load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums):
         f"  {len(examples)} examples loaded"
         f" ({no_fnum_included} without f_num,"
         f" {unknown_union_included} unknown union)"
-    )
-    print(
-        f"  Skipped: {skipped_not_in_vocab} not in vocab,"
-        f" {skipped_ambiguous} ambiguous"
-    )
-
-    return examples
-
-
-def load_union_name_labels(fnum_set, fnum_to_records, sig_to_fnums, existing_texts):
-    """Load union_name_labels.csv as additional training examples.
-
-    Skips texts already present in labeled_data.  Entries with f_num go through
-    the same gazetteer lookup and filtering as labeled_data.  Entries without
-    f_num but with union_name get a synthetic record.
-    """
-    examples = []
-    skipped_dup = 0
-    skipped_not_in_vocab = 0
-    skipped_ambiguous = 0
-    no_fnum_included = 0
-
-    path = DATA_DIR / "union_name_labels.csv"
-    if not path.exists():
-        print("  No union_name_labels.csv found, skipping")
-        return examples
-
-    with open(path) as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            text = row["text"]
-
-            # Skip texts already in labeled_data
-            if text in existing_texts:
-                skipped_dup += 1
-                continue
-
-            union_name = row.get("union_name", "").strip()
-            fnum_str = row.get("f_num", "").strip()
-            desig_num_str = row.get("desig_num", "").strip()
-            try:
-                desig_num = int(float(desig_num_str)) if desig_num_str else 0
-            except ValueError:
-                desig_num = 0
-
-            if fnum_str:
-                try:
-                    f_num = int(float(fnum_str))
-                except ValueError:
-                    continue
-
-                if f_num not in fnum_set or f_num not in fnum_to_records:
-                    skipped_not_in_vocab += 1
-                    continue
-
-                if is_ambiguous(text, f_num, fnum_to_records, sig_to_fnums):
-                    skipped_ambiguous += 1
-                    continue
-
-                records = filter_records_by_query(text, fnum_to_records[f_num])
-
-                gaz_union = fnum_to_records[f_num][0].get("union_name", "")
-
-                examples.append(
-                    {
-                        "query": text,
-                        "f_num": f_num,
-                        "source": "union_name_labels",
-                        "union_name": gaz_union or union_name,
-                        "records": records,
-                    }
-                )
-            elif union_name:
-                # No f_num but has union_name — synthetic record
-                synthetic_record = {
-                    "union_name": union_name,
-                    "desig_name": -100,
-                    "desig_num": desig_num,
-                    "prefix": -100,
-                    "suffix": -100,
-                    "unit_id": -100,
-                    "f_num": -100,
-                }
-                examples.append(
-                    {
-                        "query": text,
-                        "f_num": -100,
-                        "source": "union_name_labels",
-                        "union_name": union_name,
-                        "records": [synthetic_record],
-                    }
-                )
-                no_fnum_included += 1
-
-    print(
-        f"  {len(examples)} examples loaded"
-        f" ({no_fnum_included} without f_num,"
-        f" {skipped_dup} duplicates skipped)"
     )
     print(
         f"  Skipped: {skipped_not_in_vocab} not in vocab,"
@@ -735,34 +641,20 @@ def main():
 
     # Load labeled data
     print("\nLoading labeled data...")
-    labeled = load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums)
-    labeled_texts = set(ex["query"] for ex in labeled)
+    examples = load_labeled_data(fnum_set, fnum_to_records, sig_to_fnums)
 
-    # Load union_name_labels (additional training data, skip duplicates)
-    print("\nLoading union_name_labels...")
-    union_name_examples = load_union_name_labels(
-        fnum_set, fnum_to_records, sig_to_fnums, labeled_texts
-    )
-
-    # Assign splits: labeled data gets train/val/test,
-    # union_name_labels is train only
+    # Assign splits
     print("\nAssigning splits...")
     split_counts = defaultdict(int)
 
-    for ex in labeled:
+    for ex in examples:
         ex["split"] = get_split(ex["query"])
         split_counts[ex["split"]] += 1
 
-    for ex in union_name_examples:
-        ex["split"] = "train"
-        split_counts["train"] += 1
-
-    # Combine
-    examples = labeled + union_name_examples
     print(f"\nTotal: {len(examples)} examples")
-    print(f"  Train: {split_counts['train']} (labeled + union_name_labels)")
-    print(f"  Val: {split_counts['val']} (labeled only)")
-    print(f"  Test: {split_counts['test']} (labeled only)")
+    print(f"  Train: {split_counts['train']}")
+    print(f"  Val: {split_counts['val']}")
+    print(f"  Test: {split_counts['test']}")
 
     # Add structural negatives
     print("\nAdding structural negatives...")
