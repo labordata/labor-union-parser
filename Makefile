@@ -59,17 +59,12 @@ data: $(DATA_DIR)/training_examples.json
 
 $(DATA_DIR)/training_examples.json : $(DATA_DIR)/gazetteer.json \
                                      $(DATA_DIR)/vocabularies.json \
-                                     $(DATA_DIR)/unaff_synthetic.csv \
                                      $(DATA_DIR)/labeled_data.csv
 	python training/prepare_data.py
 
 .SECONDARY: $(DATA_DIR)/vocabularies.json
 $(DATA_DIR)/vocabularies.json : $(DATA_DIR)/gazetteer.json
 	python training/generate_vocabularies.py
-
-.SECONDARY: $(DATA_DIR)/unaff_synthetic.csv
-$(DATA_DIR)/unaff_synthetic.csv : $(DATA_DIR)/opdr.db $(DATA_DIR)/acronym_to_fullname.csv
-	python training/generate_unaff_synthetic.py
 
 .SECONDARY: $(DATA_DIR)/gazetteer.json
 $(DATA_DIR)/gazetteer.json : $(DATA_DIR)/opdr.db $(DATA_DIR)/fnum_to_unit_identifier.csv
@@ -101,7 +96,6 @@ clean-training:
 .PHONY: clean
 clean: clean-training
 	-rm $(DATA_DIR)/vocabularies.json
-	-rm $(DATA_DIR)/unaff_synthetic.csv
 	-rm $(DATA_DIR)/training_examples.json
 	-rm $(DATA_DIR)/gazetteer.json
 	-rm $(DATA_DIR)/fnum_to_unit_identifier.csv

@@ -611,68 +611,6 @@ def load_union_name_labels(fnum_set, fnum_to_records, sig_to_fnums, existing_tex
     return examples
 
 
-def load_synthetic_data(fnum_set, fnum_to_records, sig_to_fnums):
-    """Load unaff_synthetic.csv using pre-assigned f_num values."""
-    examples = []
-
-    unaff_path = DATA_DIR / "unaff_synthetic.csv"
-    if not unaff_path.exists():
-        print("  No unaff_synthetic.csv found, skipping")
-        return examples
-
-    skipped_no_fnum = 0
-    skipped_not_in_vocab = 0
-    skipped_ambiguous = 0
-
-    with open(unaff_path) as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            text = row["text"]
-
-            fnum_str = row.get("f_num", "").strip()
-            if not fnum_str:
-                skipped_no_fnum += 1
-                continue
-
-            try:
-                f_num = int(float(fnum_str))
-            except ValueError:
-                skipped_no_fnum += 1
-                continue
-
-            if f_num not in fnum_set or f_num not in fnum_to_records:
-                skipped_not_in_vocab += 1
-                continue
-
-            if is_ambiguous(text, f_num, fnum_to_records, sig_to_fnums):
-                skipped_ambiguous += 1
-                continue
-
-            # Filter records to match numbers in query
-            records = filter_records_by_query(text, fnum_to_records[f_num])
-
-            gaz_union = fnum_to_records[f_num][0].get("union_name", "")
-
-            examples.append(
-                {
-                    "query": text,
-                    "f_num": f_num,
-                    "source": "synthetic",
-                    "union_name": gaz_union,
-                    "records": records,
-                }
-            )
-
-    print(f"  {len(examples)} examples loaded")
-    if skipped_no_fnum or skipped_not_in_vocab or skipped_ambiguous:
-        print(
-            f"  Skipped: {skipped_no_fnum} no f_num, {skipped_not_in_vocab} not in vocab,"
-            f" {skipped_ambiguous} ambiguous"
-        )
-
-    return examples
-
-
 UNIT_ID_CSV = Path(__file__).parent / "data" / "fnum_to_unit_identifier.csv"
 
 
@@ -806,12 +744,8 @@ def main():
         fnum_set, fnum_to_records, sig_to_fnums, labeled_texts
     )
 
-    # Load synthetic data
-    print("\nLoading synthetic data...")
-    synthetic = load_synthetic_data(fnum_set, fnum_to_records, sig_to_fnums)
-
     # Assign splits: labeled data gets train/val/test,
-    # union_name_labels and synthetic are train only
+    # union_name_labels is train only
     print("\nAssigning splits...")
     split_counts = defaultdict(int)
 
@@ -823,14 +757,10 @@ def main():
         ex["split"] = "train"
         split_counts["train"] += 1
 
-    for ex in synthetic:
-        ex["split"] = "train"
-        split_counts["train"] += 1
-
     # Combine
-    examples = labeled + union_name_examples + synthetic
+    examples = labeled + union_name_examples
     print(f"\nTotal: {len(examples)} examples")
-    print(f"  Train: {split_counts['train']} (labeled + union_name_labels + synthetic)")
+    print(f"  Train: {split_counts['train']} (labeled + union_name_labels)")
     print(f"  Val: {split_counts['val']} (labeled only)")
     print(f"  Test: {split_counts['test']} (labeled only)")
 

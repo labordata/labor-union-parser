@@ -443,7 +443,6 @@ class ArcFaceDataModule(L.LightningDataModule):
     def _load_data(self):
         with open(DATA_DIR / "training_examples.json") as f:
             raw = json.load(f)
-        raw = [ex for ex in raw if ex.get("source") != "synthetic"]
 
         data, skipped, n_nofnum = [], 0, 0
         for ex in raw:

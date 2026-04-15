@@ -44,9 +44,9 @@ result = extractor.extract("SEIU Local 1199")
 print(result)
 # {'f_num': 31847,
 #  'is_union': True,
-#  'match_score': 0.982312023639679,
+#  'match_score': 0.9221438765525818,
 #  'union_name': 'SERVICE EMPLOYEES',
-#  'union_score': 0.8276892304420471}
+#  'union_score': 0.9344345927238464}
 ```
 <!--[[[end]]]-->
 
@@ -86,19 +86,19 @@ results = extractor.extract_batch([
 ])
 # {'f_num': 31847,
 #  'is_union': True,
-#  'match_score': 0.9823121428489685,
+#  'match_score': 0.9221440553665161,
 #  'union_name': 'SERVICE EMPLOYEES',
-#  'union_score': 0.8276892900466919}
+#  'union_score': 0.9344345927238464}
 # {'f_num': 43508,
 #  'is_union': True,
-#  'match_score': 0.9988226294517517,
+#  'match_score': 0.9991376399993896,
 #  'union_name': 'TEAMSTERS',
-#  'union_score': 0.7318565249443054}
+#  'union_score': 0.8751131296157837}
 # {'f_num': 13030,
 #  'is_union': True,
-#  'match_score': 0.9968639612197876,
+#  'match_score': 0.9976988434791565,
 #  'union_name': 'AUTO WORKERS AFL-CIO',
-#  'union_score': 0.7855185270309448}
+#  'union_score': 0.8392398953437805}
 ```
 <!--[[[end]]]-->
 
@@ -151,7 +151,7 @@ labor-union-parser unions.csv -c union_name -o results.csv
 # Process from stdin
 echo "SEIU Local 1199" | labor-union-parser --no-header
 text,pred_is_union,pred_union_score,pred_union_name,pred_f_num,pred_match_score
-SEIU Local 1199,True,0.8277,SERVICE EMPLOYEES,31847,0.9823
+SEIU Local 1199,True,0.9344,SERVICE EMPLOYEES,31847,0.9221
 ```
 <!--[[[end]]]-->
 
@@ -325,11 +325,11 @@ scored against the full 44K-record gazetteer):
 
 | Metric | Score |
 |--------|-------|
-| Accuracy | 98.0% |
-| f_num accuracy (union examples) | 98.6% (7519/7627) |
+| Accuracy | 98.1% |
+| f_num accuracy (union examples) | 98.6% (7534/7640) |
 | f_num accuracy (in-vocab only) | 98.6% |
-| union_name accuracy | 98.0% (9180/9364) |
-| Wrong match (union, wrong f_num) | 108 |
-| False negatives (union missed) | 24 |
-| False positives (non-union matched) | 43 |
+| union_name accuracy | 98.2% (9215/9380) |
+| Wrong match (union, wrong f_num) | 106 |
+| False negatives (union missed) | 10 |
+| False positives (non-union matched) | 48 |
 <!--[[[end]]]-->
