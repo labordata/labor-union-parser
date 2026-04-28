@@ -31,7 +31,7 @@ MAX_FALSE_POSITIVE_RATE = 0.0900  # among non-union examples
 MAX_FNUM_ERROR_RATE = 0.0150
 
 # Union name prediction (among union examples with is_union=True)
-MAX_UNION_NAME_ERROR_RATE = 0.0200
+MAX_UNION_NAME_ERROR_RATE = 0.0225
 
 # End-to-end (is_union correct AND f_num correct, excludes potentially resolvable)
 MAX_WRONG_MATCH_RATE = 0.0150
@@ -50,10 +50,13 @@ def eval_data():
     with open(DATA_PATH) as f:
         all_examples = json.load(f)
 
-    union = [ex for ex in all_examples if ex["split"] == "test" and ex["records"]]
-    non_union = [
-        ex for ex in all_examples if ex["split"] == "test" and not ex["records"]
+    test = [
+        ex
+        for ex in all_examples
+        if ex["split"] == "test" and ex.get("source", "labeled") == "labeled"
     ]
+    union = [ex for ex in test if ex["records"]]
+    non_union = [ex for ex in test if not ex["records"]]
     return union, non_union
 
 

@@ -31,10 +31,13 @@ def _load_test_data():
     with open(DATA_DIR / "training_examples.json") as f:
         all_examples = json.load(f)
 
-    union = [ex for ex in all_examples if ex["split"] == "test" and _is_union(ex)]
-    non_union = [
-        ex for ex in all_examples if ex["split"] == "test" and not _is_union(ex)
+    test = [
+        ex
+        for ex in all_examples
+        if ex["split"] == "test" and ex.get("source", "labeled") == "labeled"
     ]
+    union = [ex for ex in test if _is_union(ex)]
+    non_union = [ex for ex in test if not _is_union(ex)]
     return union, non_union
 
 
@@ -206,7 +209,7 @@ def main():
                     "true_fnum",
                     "pred_fnum",
                     "is_union",
-                    "union_score",
+                    "is_union_score",
                     "match_score",
                     "pred_union_name",
                 ],
@@ -222,7 +225,7 @@ def main():
                         "true_fnum": true_fnum,
                         "pred_fnum": result["f_num"],
                         "is_union": result["is_union"],
-                        "union_score": f"{result['union_score']:.4f}",
+                        "is_union_score": f"{result['is_union_score']:.4f}",
                         "match_score": f"{result['match_score']:.4f}",
                         "pred_union_name": result["union_name"],
                     }

@@ -140,14 +140,12 @@ for line in result.stdout.strip().splitlines():
     cog.outl(line)
 cog.outl("```")
 ]]]-->
-```console
+```bash
 # Process CSV file
 labor-union-parser unions.csv -c union_name -o results.csv
 
 # Process from stdin
 echo "SEIU Local 1199" | labor-union-parser --no-header
-text,pred_is_union,pred_is_union_score,pred_union_name,pred_union_name_score,pred_f_num,pred_f_num_score
-SEIU Local 1199,True,0.9269,SERVICE EMPLOYEES,0.9973,31847,0.9501
 ```
 <!--[[[end]]]-->
 
@@ -274,16 +272,16 @@ cog.outl(f"| Wrong match (union, wrong f_num) | {m['wrong_matches']} |")
 cog.outl(f"| False negatives (union missed) | {m['false_negatives']} |")
 cog.outl(f"| False positives (non-union matched) | {m['false_positives']} |")
 ]]]-->
-End-to-end on held-out test data (7,058 examples
+End-to-end on held-out test data (4,437 examples
 scored against the full 44K-record gazetteer):
 
 | Metric | Score |
 |--------|-------|
-| Accuracy | 96.0% |
-| f_num accuracy (union examples) | 96.2% (5741/5970) |
-| f_num accuracy (in-vocab only) | 96.2% |
-| union_name accuracy | 97.3% (7172/7371) |
-| Wrong match (union, wrong f_num) | 229 |
-| False negatives (union missed) | 29 |
+| Accuracy | 97.8% |
+| f_num accuracy (union examples) | 98.3% (3804/3868) |
+| f_num accuracy (in-vocab only) | 98.3% |
+| union_name accuracy | 97.8% (4665/4771) |
+| Wrong match (union, wrong f_num) | 64 |
+| False negatives (union missed) | 8 |
 | False positives (non-union matched) | 27 |
 <!--[[[end]]]-->
