@@ -4,10 +4,11 @@ Match labor union name text to [Office of Labor-Management Standards filing numb
 
 Given an input like `"SEIU Local 1199"`, the parser returns:
 - `is_union`: True
-- `union_score`: 0.992
+- `is_union_score`: 0.992
 - `union_name`: SERVICE EMPLOYEES
+- `union_name_score`: 0.984
 - `f_num`: 31847
-- `match_score`: 0.956
+- `f_num_score`: 0.956
 
 
 ## Installation
@@ -43,10 +44,11 @@ extractor = Extractor()
 result = extractor.extract("SEIU Local 1199")
 print(result)
 # {'f_num': 31847,
+#  'f_num_score': 0.9500725865364075,
 #  'is_union': True,
-#  'match_score': 0.9221438765525818,
+#  'is_union_score': 0.9268560409545898,
 #  'union_name': 'SERVICE EMPLOYEES',
-#  'union_score': 0.9344345927238464}
+#  'union_name_score': 0.9972871541976929}
 ```
 <!--[[[end]]]-->
 
@@ -85,20 +87,23 @@ results = extractor.extract_batch([
     "UAW Local 600",
 ])
 # {'f_num': 31847,
+#  'f_num_score': 0.950072705745697,
 #  'is_union': True,
-#  'match_score': 0.9221440553665161,
+#  'is_union_score': 0.9268560409545898,
 #  'union_name': 'SERVICE EMPLOYEES',
-#  'union_score': 0.9344345927238464}
+#  'union_name_score': 0.9972871541976929}
 # {'f_num': 43508,
+#  'f_num_score': 0.9926707744598389,
 #  'is_union': True,
-#  'match_score': 0.9991376399993896,
+#  'is_union_score': 0.9246779680252075,
 #  'union_name': 'TEAMSTERS',
-#  'union_score': 0.8751131296157837}
+#  'union_name_score': 0.9981544613838196}
 # {'f_num': 13030,
+#  'f_num_score': 0.993687093257904,
 #  'is_union': True,
-#  'match_score': 0.9976988434791565,
+#  'is_union_score': 0.8813596367835999,
 #  'union_name': 'AUTO WORKERS AFL-CIO',
-#  'union_score': 0.8392398953437805}
+#  'union_name_score': 0.99698406457901}
 ```
 <!--[[[end]]]-->
 
@@ -150,8 +155,8 @@ labor-union-parser unions.csv -c union_name -o results.csv
 
 # Process from stdin
 echo "SEIU Local 1199" | labor-union-parser --no-header
-text,pred_is_union,pred_union_score,pred_union_name,pred_f_num,pred_match_score
-SEIU Local 1199,True,0.9344,SERVICE EMPLOYEES,31847,0.9221
+text,pred_is_union,pred_is_union_score,pred_union_name,pred_union_name_score,pred_f_num,pred_f_num_score
+SEIU Local 1199,True,0.9269,SERVICE EMPLOYEES,0.9973,31847,0.9501
 ```
 <!--[[[end]]]-->
 
@@ -160,10 +165,11 @@ SEIU Local 1199,True,0.9344,SERVICE EMPLOYEES,31847,0.9221
 | Field | Description |
 |-------|-------------|
 | `is_union` | Whether the text is detected as a union name |
-| `union_score` | Calibrated probability of being a union (0-1, Platt-scaled) |
+| `is_union_score` | Calibrated probability of being a union (0-1, Platt-scaled) |
 | `union_name` | Predicted parent union name from the shared classification head |
+| `union_name_score` | Softmax probability of the predicted `union_name` (0-1) |
 | `f_num` | OLMS filing number of the best-matching gazetteer record |
-| `match_score` | Softmax probability of best gazetteer match (0-1) |
+| `f_num_score` | Softmax probability of best gazetteer match (0-1) |
 
 ## Training
 
@@ -208,7 +214,7 @@ Input: "SEIU Local 1199"
 │  → Cosine similarity to learned union prototype   │
 │  → Platt scaling: sigmoid(a·sim + b)              │
 │                                                   │
-│  union_score = 0.99 → is_union = True             │
+│  is_union_score = 0.99 → is_union = True          │
 └───────────────────────────────────────────────────┘
               │
               ▼ (always runs)
@@ -228,7 +234,7 @@ Input: "SEIU Local 1199"
               │
               ▼
 Output: {is_union: True, union_name: "SERVICE EMPLOYEES",
-         f_num: 31847, match_score: 0.96, ...}
+         f_num: 31847, f_num_score: 0.96, ...}
 ```
 
 ### Stage 1: Union Detection
@@ -320,16 +326,16 @@ cog.outl(f"| Wrong match (union, wrong f_num) | {m['wrong_matches']} |")
 cog.outl(f"| False negatives (union missed) | {m['false_negatives']} |")
 cog.outl(f"| False positives (non-union matched) | {m['false_positives']} |")
 ]]]-->
-End-to-end on held-out test data (8,691 examples
+End-to-end on held-out test data (7,058 examples
 scored against the full 44K-record gazetteer):
 
 | Metric | Score |
 |--------|-------|
-| Accuracy | 98.1% |
-| f_num accuracy (union examples) | 98.6% (7534/7640) |
-| f_num accuracy (in-vocab only) | 98.6% |
-| union_name accuracy | 98.2% (9215/9380) |
-| Wrong match (union, wrong f_num) | 106 |
-| False negatives (union missed) | 10 |
-| False positives (non-union matched) | 48 |
+| Accuracy | 96.0% |
+| f_num accuracy (union examples) | 96.2% (5741/5970) |
+| f_num accuracy (in-vocab only) | 96.2% |
+| union_name accuracy | 97.3% (7172/7371) |
+| Wrong match (union, wrong f_num) | 229 |
+| False negatives (union missed) | 29 |
+| False positives (non-union matched) | 27 |
 <!--[[[end]]]-->
