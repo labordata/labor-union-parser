@@ -2,15 +2,6 @@
 
 Match labor union name text to [Office of Labor-Management Standards filing numbers](https://olmsapps.dol.gov/olpdr/).
 
-Given an input like `"SEIU Local 1199"`, the parser returns:
-- `is_union`: True
-- `is_union_score`: 0.992
-- `union_name`: SERVICE EMPLOYEES
-- `union_name_score`: 0.984
-- `f_num`: 31847
-- `f_num_score`: 0.956
-
-
 ## Installation
 
 ```console
