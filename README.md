@@ -228,34 +228,6 @@ Output: {is_union: True, union_name: "SERVICE EMPLOYEES",
          f_num: 31847, f_num_score: 0.96, ...}
 ```
 
-### Stage 1: Union Detection
-
-Contrastive learning to distinguish union names from non-union text.
-Uses the same FastText+RoPE encoder architecture as Stage 2 (2 layers
-instead of 3), trained with ArcFace angular margin against a learned
-union prototype.
-
-- **Encoder**: FastText + Bloom + RoPE Transformer (2 layers, 128-dim)
-- **Pooling**: Masked mean pool → linear projection → L2 normalize (64-dim)
-- **Training**: ArcFace contrastive loss with 20K F7 employer names as hard negatives
-- **Calibration**: Platt scaling (sigmoid) for calibrated probability output
-- **Inference**: Cosine similarity to learned prototype → Platt-scaled probability
-
-### Stage 2: Factored ArcFace Classifier
-
-A single forward pass through the encoder produces a query embedding.
-This is scored against factored prototypes — one per gazetteer record —
-via cosine similarity. No pairwise comparisons needed.
-
-**Encoder:**
-- **FastText embedding**: Vocabulary lookup + hashed character 3-6 gram average.
-  Typo-robust: similar spellings share n-gram hashes.
-- **Bloom number embedding**: Numbers hashed to 3 indices in a 4096-entry
-  table, summed. Treats numbers as opaque identifiers.
-- **RoPE Transformer**: 3 layers, 4 heads, 128-dim. Position-aware
-  attention helps distinguish "district 10 local 66" from "district 66 local 10".
-- **Pooling**: Masked mean pool → L2 normalize → 128-dim query embedding.
-
 **Factored Prototypes:**
 
 Each f_num's prototype is the sum of learned field embeddings:
@@ -276,21 +248,6 @@ these are included as frozen distractors in the ArcFace softmax,
 teaching the model to distinguish trained classes from similar
 zero-shot prototypes. W_fnum is L2-regularized to keep trained
 prototypes close to their zero-shot versions.
-
-**Union Head:**
-
-An auxiliary classification head shares the `W_union` embedding weights
-with the prototypes. During training, a disagree penalty ensures the
-f_num predictions are consistent with the union head's prediction.
-At inference, the union head provides the `union_name` output.
-
-**CRF Tag Head (training only):**
-
-A per-token CRF labels numbers as desig_num, prefix, or suffix using
-constrained marginalization — we know the field values from the gazetteer
-but not which tokens they correspond to, so the loss marginalizes over
-all valid alignments (à la CTC). This teaches the encoder to represent
-number roles without requiring ground truth token labels.
 
 ### Performance
 
