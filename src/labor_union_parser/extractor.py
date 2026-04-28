@@ -65,10 +65,11 @@ class Extractor:
 
     Output dict keys:
         is_union: bool — detected as union text
-        union_score: float — calibrated probability of being a union (0-1)
+        is_union_score: float — calibrated probability of being a union (0-1)
         union_name: str — predicted parent union name from shared head
+        union_name_score: float — softmax probability of predicted union_name (0-1)
         f_num: int — OLMS filing number of best-matching gazetteer record
-        match_score: float — softmax probability of best match (0-1)
+        f_num_score: float — softmax probability of best f_num match (0-1)
     """
 
     def __init__(
@@ -172,6 +173,8 @@ class Extractor:
         for i, (tokens, is_num, ng_ids, ng_counts, bl_ids) in enumerate(batch_features):
             L = len(tokens)
             lengths[i] = L
+            if L == 0:
+                continue
             token_ids[i, :L] = torch.tensor(
                 [vocab.get(tok, 1) for tok in tokens], dtype=torch.long
             )
@@ -230,7 +233,8 @@ class Extractor:
         top_probs, top_indices = class_probs.max(dim=1)
 
         union_head_probs = F.softmax(union_logits / self.union_temperature, dim=1)
-        union_preds = union_head_probs.argmax(dim=1).cpu().tolist()
+        union_top_probs, union_preds = union_head_probs.max(dim=1)
+        union_preds = union_preds.cpu().tolist()
 
         results = []
         for i in range(len(texts)):
@@ -238,10 +242,11 @@ class Extractor:
             results.append(
                 {
                     "is_union": union_scores_list[i] >= self.union_threshold,
-                    "union_score": union_scores_list[i],
+                    "is_union_score": union_scores_list[i],
                     "union_name": self.union_names[union_preds[i]],
+                    "union_name_score": union_top_probs[i].item(),
                     "f_num": self.idx_to_fnum[class_idx],
-                    "match_score": top_probs[i].item(),
+                    "f_num_score": top_probs[i].item(),
                 }
             )
 

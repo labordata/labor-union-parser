@@ -137,10 +137,11 @@ class TestOutputFields:
         expected_fields = [
             "text",
             "pred_is_union",
-            "pred_union_score",
+            "pred_is_union_score",
             "pred_union_name",
+            "pred_union_name_score",
             "pred_f_num",
-            "pred_match_score",
+            "pred_f_num_score",
         ]
         for field in expected_fields:
             assert field in row, f"Missing field: {field}"
@@ -150,7 +151,7 @@ class TestOutputFields:
 
         reader = csv.DictReader(io.StringIO(result.output))
         row = next(reader)
-        score = float(row["pred_union_score"])
+        score = float(row["pred_is_union_score"])
         assert 0.0 <= score <= 1.0
 
     def test_match_score_present_for_union(self):
@@ -159,7 +160,7 @@ class TestOutputFields:
         reader = csv.DictReader(io.StringIO(result.output))
         row = next(reader)
         assert row["pred_f_num"] != ""
-        assert row["pred_match_score"] != ""
+        assert row["pred_f_num_score"] != ""
 
 
 class TestPreservesInputColumns:

@@ -11,10 +11,11 @@ from .extractor import Extractor
 
 PRED_FIELDS = [
     "pred_is_union",
-    "pred_union_score",
+    "pred_is_union_score",
     "pred_union_name",
+    "pred_union_name_score",
     "pred_f_num",
-    "pred_match_score",
+    "pred_f_num_score",
 ]
 
 
@@ -76,10 +77,11 @@ def build_pred_row(result):
     """Build prediction fields from extraction result."""
     return {
         "pred_is_union": result["is_union"],
-        "pred_union_score": f"{result['union_score']:.4f}",
+        "pred_is_union_score": f"{result['is_union_score']:.4f}",
         "pred_union_name": result["union_name"],
+        "pred_union_name_score": f"{result['union_name_score']:.4f}",
         "pred_f_num": result["f_num"],
-        "pred_match_score": f"{result['match_score']:.4f}",
+        "pred_f_num_score": f"{result['f_num_score']:.4f}",
     }
 
 
@@ -116,8 +118,8 @@ def main(input_file, column, output, batch_size, no_header):
     Extract union fields from union names in a CSV file.
 
     Reads CSV from INPUT_FILE (or stdin if not specified) and appends columns:
-    pred_is_union, pred_union_score, pred_union_name, pred_f_num,
-    pred_match_score
+    pred_is_union, pred_is_union_score, pred_union_name, pred_union_name_score,
+    pred_f_num, pred_f_num_score
 
     The pred_union_name column is the model's predicted parent union name.
     The pred_f_num column is the OLMS filing number of the best-matching
