@@ -108,6 +108,19 @@ def compute_test_metrics():
         if result["union_name"] == true_union:
             union_correct += 1
 
+    # --- is_union accuracy (union detection on all scored examples) ---
+    is_union_correct = is_union_total = 0
+    for ex, result in zip(union_examples, union_results):
+        if ex.get("reason_missing_fnum") == "potentially resolvable":
+            continue
+        is_union_total += 1
+        if result["is_union"]:
+            is_union_correct += 1
+    for ex, result in zip(non_union_examples, non_union_results):
+        is_union_total += 1
+        if not result["is_union"]:
+            is_union_correct += 1
+
     # --- Scoring ---
     n_potentially_resolvable = sum(
         1
@@ -121,6 +134,11 @@ def compute_test_metrics():
         "wrong_matches": error_counts["wrong_match"],
         "false_negatives": error_counts["false_negative"],
         "false_positives": error_counts["false_positive"],
+        "is_union_accuracy": (
+            is_union_correct / is_union_total if is_union_total else 0
+        ),
+        "is_union_correct": is_union_correct,
+        "is_union_total": is_union_total,
         "fnum_accuracy": fnum_correct / fnum_total if fnum_total else 0,
         "fnum_correct": fnum_correct,
         "fnum_total": fnum_total,

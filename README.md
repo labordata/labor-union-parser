@@ -213,7 +213,7 @@ Input: "SEIU Local 1199"
 │  FastText + Bloom + RoPE Transformer (3 layers)   │
 │  → Mean pool → L2 normalize                       │
 │                                                   │
-│  Score against ~35K factored prototypes:           │
+│  Score against ~38K factored prototypes:          │
 │  prototype = W_union + W_desig + bloom(num)       │
 │            + W_prefix + W_suffix + W_fnum         │
 │  (~17K trained + ~18K zero-shot from gazetteer)   │
@@ -237,8 +237,9 @@ prototype = W_union[u] + W_desig_name[d] + bloom(desig_num)
 
 This additive structure means the model learns separate representations
 for each field. At inference, scoring is a single matrix multiply
-against ~35K pre-computed prototype vectors (~17K trained classes +
-~18K zero-shot from gazetteer with `W_fnum = 0`).
+against ~38K pre-computed prototype vectors covering ~35K f_nums
+(~17K trained classes + ~18K zero-shot from gazetteer with `W_fnum = 0`;
+some f_nums have multiple record variants).
 
 **Zero-shot prototypes:** For gazetteer f_nums without training data,
 prototypes are built from field embeddings alone. During training,
@@ -260,11 +261,12 @@ total_correct = m['n_scored'] - total_errors
 accuracy = total_correct / m['n_scored']
 
 cog.outl(f"End-to-end on held-out test data ({m['n_scored']:,} examples")
-cog.outl("scored against the full 44K-record gazetteer):")
+cog.outl("scored against the full ~35K-f_num gazetteer):")
 cog.outl("")
 cog.outl("| Metric | Score |")
 cog.outl("|--------|-------|")
 cog.outl(f"| Accuracy | {accuracy:.1%} |")
+cog.outl(f"| is_union accuracy | {m['is_union_accuracy']:.1%} ({m['is_union_correct']}/{m['is_union_total']}) |")
 cog.outl(f"| f_num accuracy (union examples) | {m['fnum_accuracy']:.1%} ({m['fnum_correct']}/{m['fnum_total']}) |")
 cog.outl(f"| f_num accuracy (in-vocab only) | {m['fnum_invocab_accuracy']:.1%} |")
 cog.outl(f"| union_name accuracy | {m['union_accuracy']:.1%} ({m['union_correct']}/{m['union_total']}) |")
@@ -273,11 +275,12 @@ cog.outl(f"| False negatives (union missed) | {m['false_negatives']} |")
 cog.outl(f"| False positives (non-union matched) | {m['false_positives']} |")
 ]]]-->
 End-to-end on held-out test data (4,437 examples
-scored against the full 44K-record gazetteer):
+scored against the full ~35K-f_num gazetteer):
 
 | Metric | Score |
 |--------|-------|
 | Accuracy | 97.8% |
+| is_union accuracy | 99.2% (4402/4437) |
 | f_num accuracy (union examples) | 98.3% (3804/3868) |
 | f_num accuracy (in-vocab only) | 98.3% |
 | union_name accuracy | 97.8% (4665/4771) |
